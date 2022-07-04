@@ -1,0 +1,5 @@
+pycountry
+pandas
+geopandas
+tqdm
+folium==0.12.1.post1
