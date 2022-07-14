@@ -46,7 +46,7 @@ def create_multi_line_plot(data: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def create_choropleth_plot(data: pd.DataFrame) -> go.Figure:
+def create_choropleth_plot(data: pd.DataFrame, facet: str = None) -> go.Figure:
     """Creates a choropleth plot with timeline
 
     Args:
@@ -61,11 +61,12 @@ def create_choropleth_plot(data: pd.DataFrame) -> go.Figure:
         locations="geo",
         color="value",
         scope="europe",
-        range_color=(data["value"].min(), data["value"].max()),
+        # range_color=(data["value"].min(), data["value"].max()),
+        width=1000,
         animation_frame="year",
         basemap_visible=True,
-        template=theme
-        # facet_col="type",
+        template=theme,
+        facet_col=facet,
     )
 
     fig.update_geos(resolution=50)
@@ -88,6 +89,7 @@ def create_choropleth_plot(data: pd.DataFrame) -> go.Figure:
             "colorbar": {
                 "x": 1.2,
             },
+            "colorscale": "Viridis",
         },
     )
 
@@ -136,12 +138,12 @@ def create_two_line_plot(
         go.Scatter(
             x=dataset_2.columns[column_index_2:],
             y=dataset_2.iloc[row_index_2, column_index_2:],
-            name=selected_unit_2 + " (right ax",
+            name=selected_unit_2 + " (right ax)",
             mode="lines",
         ),
         secondary_y=True,
     )
 
-    fig.update_layout(transition_duration=500, template=theme)
+    fig.update_layout(transition_duration=500, template=theme, width=1000)
 
     return fig

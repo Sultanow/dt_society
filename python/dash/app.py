@@ -166,7 +166,7 @@ app.layout = html.Div(
                 html.Div(
                     [],
                     id="country-comparison-div",
-                    style={"width": "43%", "display": "inline-block"},
+                    style={"width": "80%", "display": "inline-block"},
                 ),
             ],
             id="compare-div",
@@ -345,7 +345,6 @@ def update_line_plot(
     Input("category-dropdown-2", "value"),
     Input("columns-dropdown-2", "value"),
     Input("dataset-2", "data"),
-    Input("data-selector", "value"),
 )
 def update_choropleth(
     selected_unit,
@@ -355,29 +354,42 @@ def update_choropleth(
     selected_unit_2,
     category_column_2,
     dataframe_2,
-    dataset_selection,
 ):
 
     if dataframe and selected_unit and category_column != "none":
 
-        # print(dataset_selection)
-        # print(dataframe_2)
-
-        datasets = {
-            "Dataset 1": [dataframe, selected_unit, category_column],
-            "Dataset 2": [dataframe_2, selected_unit_2, category_column_2],
-        }
-
-        df = pd.read_json(datasets[dataset_selection][0])
+        df = pd.read_json(dataframe)
 
         filtered_df = DigitalTwinTimeSeries(df=df)
-        filtered_df = filtered_df.melt_data(
-            category_column=datasets[dataset_selection][2]
-        )
+        filtered_df = filtered_df.melt_data(category_column=category_column)
 
-        filtered_df = filtered_df[datasets[dataset_selection][1]]
+        filtered_df = filtered_df[selected_unit]
 
-        fig = create_choropleth_plot(filtered_df)
+        if dataframe_2:
+
+            df_2 = pd.read_json(dataframe_2)
+
+            filtered_df_2 = DigitalTwinTimeSeries(df=df_2)
+            filtered_df_2 = filtered_df_2.melt_data(category_column=category_column_2)
+            filtered_df_2 = filtered_df_2[selected_unit_2]
+
+            filtered_df["category"] = selected_unit
+            filtered_df_2["category"] = selected_unit_2
+
+            years_df, years_df_2 = tuple(
+                df["year"].unique() for df in [filtered_df, filtered_df_2]
+            )
+
+            column_intersection = list(set(years_df).intersection(years_df_2))
+
+            filtered_df = pd.concat([filtered_df, filtered_df_2])
+
+            filtered_df = filtered_df[filtered_df["year"].isin(column_intersection)]
+
+            fig = create_choropleth_plot(filtered_df, facet="category")
+        else:
+
+            fig = create_choropleth_plot(filtered_df)
 
         if children:
             children.clear()
