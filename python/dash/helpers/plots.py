@@ -126,7 +126,7 @@ def create_two_line_plot(
         go.Scatter(
             x=dataset_1.columns[column_index_1:],
             y=dataset_1.iloc[row_index_1, column_index_1:],
-            name=selected_unit_1,
+            name=selected_unit_1 + " (left ax)",
             mode="lines",
         ),
         secondary_y=False,
@@ -136,7 +136,7 @@ def create_two_line_plot(
         go.Scatter(
             x=dataset_2.columns[column_index_2:],
             y=dataset_2.iloc[row_index_2, column_index_2:],
-            name=selected_unit_2,
+            name=selected_unit_2 + " (right ax",
             mode="lines",
         ),
         secondary_y=True,

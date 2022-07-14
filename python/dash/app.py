@@ -45,13 +45,21 @@ app.layout = html.Div(
                             ["none"],
                             "none",
                             id="columns-dropdown",
-                            style={"width": "150px", "backgroundColor": "#506783"},
+                            style={
+                                "width": "150px",
+                                "backgroundColor": "#506783",
+                                "margin-top": "10px",
+                            },
                         ),
                         dcc.Dropdown(
                             ["none"],
                             "none",
                             id="category-dropdown",
-                            style={"width": "150px", "backgroundColor": "#506783"},
+                            style={
+                                "width": "150px",
+                                "backgroundColor": "#506783",
+                                "margin-top": "10px",
+                            },
                         ),
                         dcc.Store(id="dataset"),
                     ],
@@ -83,17 +91,41 @@ app.layout = html.Div(
                             ["none"],
                             "none",
                             id="columns-dropdown-2",
-                            style={"width": "150px", "backgroundColor": "#506783"},
+                            style={
+                                "width": "150px",
+                                "backgroundColor": "#506783",
+                                "margin-top": "10px",
+                            },
                         ),
                         dcc.Dropdown(
                             ["none"],
                             "none",
                             id="category-dropdown-2",
-                            style={"width": "150px", "backgroundColor": "#506783"},
+                            style={
+                                "width": "150px",
+                                "backgroundColor": "#506783",
+                                "margin-top": "10px",
+                            },
                         ),
                         dcc.Store(id="dataset-2"),
                     ],
-                    style={"width": "20%", "display": "inline-block"},
+                    id="second-file-upload",
+                    style={
+                        "width": "20%",
+                        "display": "none",
+                    },
+                ),
+                html.Div(
+                    [
+                        dcc.RadioItems(
+                            ["Dataset 1", "Dataset 2"],
+                            "Dataset 1",
+                            id="data-selector",
+                            inline=False,
+                            style={"display": "none"},
+                        )
+                    ],
+                    style={"padding-top": "20px"},
                 ),
             ],
         ),
@@ -120,12 +152,16 @@ app.layout = html.Div(
         ),
         html.Div(
             [
-                "Compare indicators",
+                "Select a country",
                 dcc.Dropdown(
                     ["none"],
                     "none",
                     id="country-dropdown",
-                    style={"width": "150px", "backgroundColor": "#506783"},
+                    style={
+                        "width": "150px",
+                        "backgroundColor": "#506783",
+                        "margin-top": "10px",
+                    },
                 ),
                 html.Div(
                     [],
@@ -133,7 +169,8 @@ app.layout = html.Div(
                     style={"width": "43%", "display": "inline-block"},
                 ),
             ],
-            style={"backgroundColor": "white"},
+            id="compare-div",
+            style={"backgroundColor": "white", "display": "none"},
         ),
     ],
     style={
@@ -150,6 +187,7 @@ app.layout = html.Div(
     Output("dataset", "data"),
     Output("table-upload", "children"),
     Output("columns-dropdown", "value"),
+    Output("second-file-upload", "style"),
     Input("table-upload", "contents"),
     Input("table-upload", "filename"),
     State("table-upload", "children"),
@@ -160,13 +198,13 @@ def preprocess_dataset(file, filename, children):
 
         children["props"]["children"] = html.Div([filename])
 
-        print(filtered_cols)
-
         if not filtered_cols:
 
             filtered_cols = ["none"]
 
-        return filtered_cols, df, children, filtered_cols[0]
+        show_second_file_upload = {"display": "inline-block", "width": "20%"}
+
+        return filtered_cols, df, children, filtered_cols[0], show_second_file_upload
 
     else:
         raise exceptions.PreventUpdate
@@ -179,6 +217,8 @@ def preprocess_dataset(file, filename, children):
     Output("columns-dropdown-2", "value"),
     Output("country-dropdown", "options"),
     Output("country-dropdown", "value"),
+    Output("data-selector", "style"),
+    Output("compare-div", "style"),
     Input("table-upload-2", "contents"),
     Input("table-upload-2", "filename"),
     State("table-upload-2", "children"),
@@ -193,6 +233,9 @@ def preprocess_second_dataset(file, filename, children, data):
 
         children["props"]["children"] = html.Div([filename])
 
+        radio_visibility = {"display": "block"}
+        show_compare_dropdown = {"display": "block"}
+
         return (
             filtered_cols,
             df_2,
@@ -200,6 +243,8 @@ def preprocess_second_dataset(file, filename, children, data):
             filtered_cols[0],
             countries,
             countries[0],
+            radio_visibility,
+            show_compare_dropdown,
         )
 
     else:
@@ -245,6 +290,7 @@ def update_second_category_dropdown(selected_category, data):
     Input("columns-dropdown-2", "value"),
     Input("dataset-2", "data"),
     State("line-div", "children"),
+    Input("data-selector", "value"),
 )
 def update_line_plot(
     selected_unit,
@@ -254,10 +300,20 @@ def update_line_plot(
     category_column_2,
     dataframe_2,
     children,
+    dataset_selection,
 ):
+
     if dataframe and selected_unit and category_column != "none":
-        df = pd.read_json(dataframe)
-        filtered_df = df[df[category_column] == selected_unit]
+
+        datasets = {
+            "Dataset 1": [dataframe, selected_unit, category_column],
+            "Dataset 2": [dataframe_2, selected_unit_2, category_column_2],
+        }
+
+        df = pd.read_json(datasets[dataset_selection][0])
+        filtered_df = df[
+            df[datasets[dataset_selection][2]] == datasets[dataset_selection][1]
+        ]
 
         fig = create_multi_line_plot(filtered_df)
 
@@ -286,16 +342,40 @@ def update_line_plot(
     Input("columns-dropdown", "value"),
     Input("dataset", "data"),
     State("map-div", "children"),
+    Input("category-dropdown-2", "value"),
+    Input("columns-dropdown-2", "value"),
+    Input("dataset-2", "data"),
+    Input("data-selector", "value"),
 )
-def update_choropleth(selected_unit, category_column, dataframe, children):
+def update_choropleth(
+    selected_unit,
+    category_column,
+    dataframe,
+    children,
+    selected_unit_2,
+    category_column_2,
+    dataframe_2,
+    dataset_selection,
+):
 
     if dataframe and selected_unit and category_column != "none":
-        df = pd.read_json(dataframe)
+
+        # print(dataset_selection)
+        # print(dataframe_2)
+
+        datasets = {
+            "Dataset 1": [dataframe, selected_unit, category_column],
+            "Dataset 2": [dataframe_2, selected_unit_2, category_column_2],
+        }
+
+        df = pd.read_json(datasets[dataset_selection][0])
 
         filtered_df = DigitalTwinTimeSeries(df=df)
-        filtered_df = filtered_df.melt_data(category_column=category_column)
+        filtered_df = filtered_df.melt_data(
+            category_column=datasets[dataset_selection][2]
+        )
 
-        filtered_df = filtered_df[selected_unit]
+        filtered_df = filtered_df[datasets[dataset_selection][1]]
 
         fig = create_choropleth_plot(filtered_df)
 
