@@ -21,7 +21,41 @@ app.config.suppress_callback_exceptions = True
 app.layout = html.Div(
     [
         html.Div(
+            [html.H1("Digital Twin of Society")],
+            style={
+                "textAlign": "center",
+                "padding-top": "10px",
+                "padding-bottom": "10px",
+                "backgroundColor": "#232323",
+                "color": "#f2f2f2",
+            },
+        ),
+        html.Div(
             [
+                html.Div(
+                    html.Div(
+                        [
+                            html.Div(
+                                "Files",
+                                style={
+                                    "padding-top": "10px",
+                                    "padding-left": "10px",
+                                    "padding-bottom": "10px",
+                                    "backgroundColor": "#111111",
+                                    "font-weight": "bold",
+                                    "textAlign": "center",
+                                },
+                            ),
+                            html.Hr(
+                                style={
+                                    "padding": "0px",
+                                    "margin": "0px",
+                                    "color": "#f2f2f2",
+                                }
+                            ),
+                        ]
+                    )
+                ),
                 html.Div(
                     [
                         dcc.Upload(
@@ -30,8 +64,8 @@ app.layout = html.Div(
                                 ["Drag and Drop or ", html.A("Select Files")]
                             ),
                             style={
-                                "width": "50%",
-                                "height": "60px",
+                                # "width": "70%",
+                                # "height": "60px",
                                 "lineHeight": "60px",
                                 "borderWidth": "1px",
                                 "borderStyle": "dashed",
@@ -39,32 +73,45 @@ app.layout = html.Div(
                                 "textAlign": "center",
                                 "margin": "10px",
                                 "font-size": "12px",
+                                "padding": "5px",
+                            },
+                        ),
+                        html.Div(
+                            "Available Columns",
+                            style={
+                                "margin-top": "15px",
+                                "textAlign": "center",
+                                "font-weight": "bold",
+                                "margin-left": "5px",
                             },
                         ),
                         dcc.Dropdown(
                             ["none"],
-                            "none",
+                            placeholder="No values found",
+                            clearable=False,
                             id="columns-dropdown",
                             style={
-                                "width": "150px",
-                                "backgroundColor": "#506783",
-                                "margin-top": "10px",
+                                "margin-top": "5px",
+                                "margin-left": "5px",
+                                "border-color": "#5c6cfa",
+                                "background-color": "#111111",
                             },
                         ),
                         dcc.Dropdown(
                             ["none"],
-                            "none",
+                            placeholder="No values found",
+                            clearable=False,
                             id="category-dropdown",
                             style={
-                                "width": "150px",
-                                "backgroundColor": "#506783",
-                                "margin-top": "10px",
+                                "margin-top": "5px",
+                                "margin-left": "5px",
+                                "border-color": "#5c6cfa",
+                                "background-color": "#111111",
                             },
                         ),
                         dcc.Store(id="dataset"),
                     ],
                     style={
-                        "width": "20%",
                         "display": "inline-block",
                     },
                 ),
@@ -76,8 +123,6 @@ app.layout = html.Div(
                                 ["Drag and Drop or ", html.A("Select second file")]
                             ),
                             style={
-                                "width": "60%",
-                                "height": "60px",
                                 "lineHeight": "60px",
                                 "borderWidth": "1px",
                                 "borderStyle": "dashed",
@@ -85,34 +130,48 @@ app.layout = html.Div(
                                 "textAlign": "center",
                                 "margin": "10px",
                                 "font-size": "12px",
+                                "padding": "5px",
+                            },
+                        ),
+                        html.Div(
+                            "Available Columns",
+                            style={
+                                "margin-top": "15px",
+                                "textAlign": "center",
+                                "font-weight": "bold",
+                                "margin-left": "5px",
                             },
                         ),
                         dcc.Dropdown(
                             ["none"],
-                            "none",
+                            placeholder="No values found",
+                            clearable=False,
                             id="columns-dropdown-2",
                             style={
-                                "width": "150px",
-                                "backgroundColor": "#506783",
-                                "margin-top": "10px",
+                                "margin-top": "5px",
+                                "margin-left": "5px",
+                                "border-color": "#5c6cfa",
+                                "background-color": "#111111",
                             },
                         ),
                         dcc.Dropdown(
                             ["none"],
-                            "none",
+                            placeholder="No values found",
+                            clearable=False,
                             id="category-dropdown-2",
                             style={
-                                "width": "150px",
-                                "backgroundColor": "#506783",
-                                "margin-top": "10px",
+                                "margin-top": "5px",
+                                "margin-left": "5px",
+                                "border-color": "#5c6cfa",
+                                "background-color": "#111111",
                             },
                         ),
                         dcc.Store(id="dataset-2"),
                     ],
                     id="second-file-upload",
                     style={
-                        "width": "20%",
-                        "display": "none",
+                        "display": "inline-block",
+                        "margin-left": "20px",
                     },
                 ),
                 html.Div(
@@ -122,64 +181,156 @@ app.layout = html.Div(
                             "Dataset 1",
                             id="data-selector",
                             inline=False,
-                            style={"display": "none"},
+                            style={"display": "inline-block"},
                         )
                     ],
-                    style={"padding-top": "20px"},
+                    style={
+                        "margin-top": "20px",
+                        "margin-bottom": "10px",
+                        "margin-left": "10px",
+                    },
                 ),
             ],
+            # style={"box-shadow": "2px 2px 2px lightgrey"},
+            # style={"margin-bottom": "100px"},
+        ),
+        html.Div(
+            [
+                html.Div(style={"backgroundColor": "#232323", "padding": "10px"}),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            "Timeline",
+                                            style={
+                                                "padding-top": "10px",
+                                                "padding-left": "10px",
+                                                "padding-bottom": "10px",
+                                                "backgroundColor": "#111111",
+                                                "font-weight": "bold",
+                                                "textAlign": "center",
+                                            },
+                                        ),
+                                        html.Hr(
+                                            style={
+                                                "padding": "0px",
+                                                "margin": "0px",
+                                                "color": "#f2f2f2",
+                                            }
+                                        ),
+                                    ]
+                                ),
+                            ],
+                            style={"backgroundColor": "#111111"},
+                        ),
+                        html.Div(
+                            [],
+                            id="line-div",
+                        ),
+                    ],
+                    style={"display": "inline-block", "width": "40%"},
+                ),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                html.Div(
+                                    "Countries",
+                                    style={
+                                        "padding-top": "10px",
+                                        "padding-left": "10px",
+                                        "padding-bottom": "10px",
+                                        "backgroundColor": "#111111",
+                                        "font-weight": "bold",
+                                        "textAlign": "center",
+                                    },
+                                ),
+                                html.Hr(style={"padding": "0px", "margin": "0px"}),
+                            ]
+                        ),
+                        html.Div(
+                            [],
+                            id="map-div",
+                        ),
+                    ],
+                    style={
+                        "display": "inline-block",
+                        "width": "59%",
+                        "margin-left": "10px",
+                    },
+                ),
+            ],
+            style={"backgroundColor": "#232323"},
         ),
         html.Div(
             [
                 html.Div(
-                    [],
-                    id="line-div",
                     style={
-                        "width": "40%",
-                        "display": "inline-block",
-                    },
+                        "backgroundColor": "#232323",
+                        "display": "block",
+                        "padding": "10px",
+                    }
                 ),
                 html.Div(
-                    [],
-                    id="map-div",
-                    style={
-                        "height": "10%",
-                        "width": "40%",
-                        "display": "inline-block",
-                    },
-                ),
-            ],
-        ),
-        html.Div(
-            [
-                "Select a country",
-                dcc.Dropdown(
-                    ["none"],
-                    "none",
-                    id="country-dropdown",
-                    style={
-                        "width": "150px",
-                        "backgroundColor": "#506783",
-                        "margin-top": "10px",
-                    },
+                    [
+                        html.Div(
+                            "Country comparison",
+                            style={
+                                "padding-top": "10px",
+                                "padding-left": "10px",
+                                "padding-bottom": "10px",
+                                "backgroundColor": "#111111",
+                                "font-weight": "bold",
+                                "textAlign": "center",
+                            },
+                        ),
+                        html.Hr(
+                            style={
+                                "padding": "0px",
+                                "margin": "0px",
+                                "color": "#f2f2f2",
+                            }
+                        ),
+                    ]
                 ),
                 html.Div(
-                    [],
-                    id="country-comparison-div",
-                    style={"width": "80%", "display": "inline-block"},
+                    [
+                        dcc.Dropdown(
+                            ["none"],
+                            placeholder="No values found",
+                            clearable=False,
+                            id="country-dropdown",
+                            style={
+                                "width": "150px",
+                                "margin-top": "10px",
+                                "margin-left": "5px",
+                                "border-color": "#5c6cfa",
+                                "background-color": "#111111",
+                            },
+                        ),
+                    ]
+                ),
+                html.Div(
+                    html.Div(
+                        [],
+                        id="country-comparison-div",
+                        style={"display": "inline-block", "width": "100%"},
+                    ),
                 ),
             ],
             id="compare-div",
-            style={"backgroundColor": "white", "display": "none"},
+            # style={"display": "none"},
         ),
     ],
     style={
         "fontFamily": "helvetica",
-        "backgroundColor": "white",
-        "color": "black",
+        "backgroundColor": "#111111",
+        "color": "#f2f2f2",
     },
 )
-# pltoly black = #111111
 
 
 @app.callback(
@@ -202,7 +353,7 @@ def preprocess_dataset(file, filename, children):
 
             filtered_cols = ["none"]
 
-        show_second_file_upload = {"display": "inline-block", "width": "20%"}
+        show_second_file_upload = {"display": "inline-block"}
 
         return filtered_cols, df, children, filtered_cols[0], show_second_file_upload
 

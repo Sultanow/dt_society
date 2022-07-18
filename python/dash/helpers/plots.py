@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
 
-theme = "plotly_white"
+theme = "plotly_dark"
 
 
 def create_multi_line_plot(data: pd.DataFrame) -> go.Figure:
@@ -61,15 +61,13 @@ def create_choropleth_plot(data: pd.DataFrame, facet: str = None) -> go.Figure:
         locations="geo",
         color="value",
         scope="europe",
-        # range_color=(data["value"].min(), data["value"].max()),
-        width=1000,
         animation_frame="year",
         basemap_visible=True,
         template=theme,
         facet_col=facet,
     )
 
-    fig.update_geos(resolution=50)
+    fig.update_geos(resolution=50, fitbounds="locations")
     fig.update_layout(margin={"r": 60, "t": 60, "l": 50, "b": 10})
 
     for i, t in enumerate(fig.data):
@@ -144,6 +142,6 @@ def create_two_line_plot(
         secondary_y=True,
     )
 
-    fig.update_layout(transition_duration=500, template=theme, width=1000)
+    fig.update_layout(transition_duration=500, template=theme)
 
     return fig
