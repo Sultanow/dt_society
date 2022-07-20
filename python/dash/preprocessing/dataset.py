@@ -7,7 +7,13 @@ import gzip
 
 
 class DigitalTwinTimeSeries:
-    def __init__(self, path: str = None, to_iso3: bool = True, df: pd.DataFrame = None):
+    def __init__(
+        self,
+        path: str = None,
+        to_iso3: bool = True,
+        df: pd.DataFrame = None,
+        country_codes: bool = True,
+    ):
         """
         Preprocesses and stores geographical year-based data
         Expected format: [meta, country_code, (N year columns)..]
@@ -16,6 +22,7 @@ class DigitalTwinTimeSeries:
             path (str): Path to dataset (can also be URL)
             to_iso3 (bool, optional): Converts country codes to ISO-3 if necessary. Defaults to True.
         """
+        self.country_codes = country_codes
         self.data = self._preprocess(path) if df is None else df
         self.to_iso3 = to_iso3
 
@@ -52,7 +59,8 @@ class DigitalTwinTimeSeries:
             .astype(np.float32)
         )
 
-        data = self._format_country_codes(data)
+        if self.country_codes:
+            data = self._format_country_codes(data)
 
         data = self._drop_redundant_columns(data)
 
@@ -142,7 +150,7 @@ class DigitalTwinTimeSeries:
             )
             data_slice_melted["geo"] = data_slice_melted["geo"].astype(str)
             data_slice_melted["value"] = data_slice_melted["value"].astype(np.float32)
-            data_slice_melted["year"] = data_slice_melted["year"].astype(int)
+            data_slice_melted["year"] = data_slice_melted["year"].astype(str)
 
             melted_datasets[category] = data_slice_melted
 
