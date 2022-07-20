@@ -81,7 +81,6 @@ def create_choropleth_plot(data: pd.DataFrame, facet: str = None) -> go.Figure:
             "colorbar": {
                 "x": -0.2,
             },
-            "colorscale": "Viridis",
         },
         coloraxis2={
             "colorbar": {
