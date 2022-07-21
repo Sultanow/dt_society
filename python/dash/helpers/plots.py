@@ -141,6 +141,8 @@ def create_two_line_plot(
         secondary_y=True,
     )
 
-    fig.update_layout(transition_duration=500, template=theme)
+    fig.update_layout(
+        transition_duration=500, template=theme, margin={"t": 20, "b": 20}
+    )
 
     return fig

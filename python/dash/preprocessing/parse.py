@@ -12,7 +12,9 @@ import io
 from .dataset import DigitalTwinTimeSeries
 
 
-def parse_dataset(contents: str, get_countries: bool = False) -> Tuple[str, list]:
+def parse_dataset(
+    contents: str, get_countries: bool = False, geo_col: str = None
+) -> Tuple[str, list]:
     """Parses a dataset and converts it into dataframe
 
     Args:
@@ -36,8 +38,9 @@ def parse_dataset(contents: str, get_countries: bool = False) -> Tuple[str, list
     columns = df.data.columns.to_list()
     filtered_columns = [colum for colum in columns if years_excluded_re.match(colum)]
 
-    if "geo" in filtered_columns:
-        filtered_columns.remove("geo")
+    if geo_col is not None:
+        if geo_col in filtered_columns:
+            filtered_columns.remove(geo_col)
 
     df_json = df.data.to_json()
 

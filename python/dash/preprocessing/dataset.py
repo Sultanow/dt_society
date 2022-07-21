@@ -13,6 +13,7 @@ class DigitalTwinTimeSeries:
         to_iso3: bool = True,
         df: pd.DataFrame = None,
         country_codes: bool = True,
+        geo_col: str = "geo",
     ):
         """
         Preprocesses and stores geographical year-based data
@@ -22,6 +23,7 @@ class DigitalTwinTimeSeries:
             path (str): Path to dataset (can also be URL)
             to_iso3 (bool, optional): Converts country codes to ISO-3 if necessary. Defaults to True.
         """
+        self.geo_col = geo_col
         self.country_codes = country_codes
         self.data = self._preprocess(path) if df is None else df
         self.to_iso3 = to_iso3
@@ -85,20 +87,20 @@ class DigitalTwinTimeSeries:
 
             return country.alpha_3
 
-        assert "geo" in data.columns, "No 'geo' column found in dataset."
+        assert self.geo_col in data.columns, "No 'geo' column found in dataset."
 
         # EA = Eurasian Patent Organization
         invalid_country_codes = ["EA", "XK"]
         old_iso2_codes = {"UK": "GB", "EL": "GR"}
 
         for key in old_iso2_codes:
-            data.loc[data["geo"] == key, "geo"] = old_iso2_codes[key]
+            data.loc[data[self.geo_col] == key, self.geo_col] = old_iso2_codes[key]
 
         # Drop invalid country codes
-        data = data.drop(data[data.geo.str.len() > 2].index)
-        data = data.drop(data[data["geo"].isin(invalid_country_codes)].index)
+        data = data.drop(data[data[self.geo_col].str.len() > 2].index)
+        data = data.drop(data[data[self.geo_col].isin(invalid_country_codes)].index)
 
-        data["geo"] = data["geo"].apply(iso2_to_iso3)
+        data[self.geo_col] = data[self.geo_col].apply(iso2_to_iso3)
 
         return data
 
