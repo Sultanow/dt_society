@@ -288,7 +288,6 @@ app.layout = html.Div(
                         html.Div(
                             [
                                 dash_table.DataTable(
-                                    df.head(n=7).to_dict("records"),
                                     id="data-table",
                                     style_data={
                                         "backgroundColor": "#232323",
@@ -553,15 +552,40 @@ app.layout = html.Div(
                         html.Div(
                             [
                                 html.Div(
-                                    "Countries",
-                                    style={
-                                        "padding-top": "10px",
-                                        "padding-left": "10px",
-                                        "padding-bottom": "10px",
-                                        "backgroundColor": "#111111",
-                                        "font-weight": "bold",
-                                        "textAlign": "center",
-                                    },
+                                    [
+                                        dcc.Dropdown(
+                                            options=["1111", "1111"],
+                                            placeholder="Select year",
+                                            clearable=False,
+                                            id="year-dropdown-map",
+                                            style={
+                                                "width": "110px",
+                                                # "display": "flex",
+                                                "font-size": "14px",
+                                                "border-top": "0px",
+                                                "border-left": "0px",
+                                                "border-right": "0px",
+                                                "backgroundColor": "#111111",
+                                                "border-color": "#5c6cfa",
+                                                "border-radius": "0px",
+                                                "padding": "0",
+                                                # "textAlign": "center",
+                                            },
+                                        ),
+                                        html.Div(
+                                            "Countries",
+                                            style={
+                                                "padding-top": "10px",
+                                                "padding-left": "10px",
+                                                "padding-bottom": "10px",
+                                                "backgroundColor": "#111111",
+                                                "font-weight": "bold",
+                                                "textAlign": "center",
+                                                "width": "92%",
+                                            },
+                                        ),
+                                    ],
+                                    style={"display": "flex"},
                                 ),
                                 html.Hr(
                                     style={
@@ -777,6 +801,8 @@ def update_second_category_dropdown(selected_category, data):
     Output("year-dropdown-stats", "value"),
     Output("country-dropdown-stats", "options"),
     Output("country-dropdown-stats", "value"),
+    Output("year-dropdown-map", "options"),
+    Output("year-dropdown-map", "value"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("data-selector", "value"),
@@ -798,7 +824,14 @@ def update_year_dropdown_stats(data, data_2, data_selector):
             column for column in df.columns.to_list() if year_re.match(column)
         ]
 
-        return year_columns, year_columns[0], df["geo"].unique(), df["geo"].unique()[0]
+        return (
+            year_columns,
+            year_columns[0],
+            df["geo"].unique(),
+            df["geo"].unique()[0],
+            year_columns,
+            year_columns[0],
+        )
     else:
         raise exceptions.PreventUpdate
 
@@ -1018,6 +1051,8 @@ def update_line_plot(
     Input("dataset-2", "data"),
     Input("geo-dropdown-2", "value"),
     Input("geo-dropdown-1", "value"),
+    Input("year-dropdown-map", "value"),
+    Input("data-selector", "value"),
 )
 def update_choropleth(
     selected_unit,
@@ -1029,42 +1064,29 @@ def update_choropleth(
     dataframe_2,
     geo_dropdown_2,
     geo_dropdown_1,
+    year_dropdown_map,
+    selected_data,
 ):
 
     if dataframe and selected_unit and category_column != "none" and geo_dropdown_1:
 
-        df = pd.read_json(dataframe)
+        datasets = {
+            "Dataset 1": [dataframe, selected_unit, category_column],
+            "Dataset 2": [
+                dataframe_2,
+                selected_unit_2,
+                category_column_2,
+            ],
+        }
+
+        df = pd.read_json(datasets[selected_data][0])
 
         filtered_df = DigitalTwinTimeSeries(df=df)
-        filtered_df = filtered_df.melt_data(category_column=category_column)
+        filtered_df = filtered_df.melt_data(category_column=datasets[selected_data][2])
 
-        filtered_df = filtered_df[selected_unit]
+        filtered_df = filtered_df[datasets[selected_data][1]]
 
-        if dataframe_2 and geo_dropdown_2:
-
-            df_2 = pd.read_json(dataframe_2)
-
-            filtered_df_2 = DigitalTwinTimeSeries(df=df_2)
-            filtered_df_2 = filtered_df_2.melt_data(category_column=category_column_2)
-            filtered_df_2 = filtered_df_2[selected_unit_2]
-
-            filtered_df["category"] = selected_unit
-            filtered_df_2["category"] = selected_unit_2
-
-            years_df, years_df_2 = tuple(
-                df["year"].unique() for df in [filtered_df, filtered_df_2]
-            )
-
-            column_intersection = list(set(years_df).intersection(years_df_2))
-
-            filtered_df = pd.concat([filtered_df, filtered_df_2])
-
-            filtered_df = filtered_df[filtered_df["year"].isin(column_intersection)]
-
-            fig = create_choropleth_plot(filtered_df, facet="category")
-        else:
-
-            fig = create_choropleth_plot(filtered_df)
+        fig = create_choropleth_plot(filtered_df, year=year_dropdown_map)
 
         if children:
             children.clear()
@@ -1087,6 +1109,8 @@ def update_choropleth(
     Input("country-dropdown", "value"),
     Input("dataset-2", "data"),
     State("max_country-comparison-div", "children"),
+    Input("geo-dropdown-2", "value"),
+    Input("geo-dropdown-1", "value"),
 )
 def update_max_country_compare(
     selected_unit,
@@ -1097,6 +1121,8 @@ def update_max_country_compare(
     selected_max_country,
     dataframe_2,
     children,
+    geo_dropdown_2,
+    geo_dropdown_1,
 ):
 
     if (
@@ -1105,6 +1131,8 @@ def update_max_country_compare(
         and selected_unit
         and dataframe
         and dataframe_2
+        and geo_dropdown_1
+        and geo_dropdown_2
     ):
         df = pd.read_json(dataframe)
         df_2 = pd.read_json(dataframe_2)

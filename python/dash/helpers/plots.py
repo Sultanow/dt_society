@@ -3,6 +3,9 @@ import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
 
+from urllib.request import urlopen
+import json
+
 theme = "plotly_dark"
 
 
@@ -46,7 +49,9 @@ def create_multi_line_plot(data: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def create_choropleth_plot(data: pd.DataFrame, facet: str = None) -> go.Figure:
+def create_choropleth_plot(
+    data: pd.DataFrame, facet: str = None, year: str = None
+) -> go.Figure:
     """Creates a choropleth plot with timeline
 
     Args:
@@ -55,39 +60,28 @@ def create_choropleth_plot(data: pd.DataFrame, facet: str = None) -> go.Figure:
     Returns:
         go.Figure: Choropleth plot
     """
+    with urlopen(
+        "https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSON/europe.geojson"
+    ) as response:
+        counties = json.load(response)
 
-    fig = px.choropleth(
-        data,
+    fig = px.choropleth_mapbox(
+        data[data["year"] == year],
         locations="geo",
+        featureidkey="properties.ISO3",
         color="value",
-        scope="europe",
-        animation_frame="year",
-        basemap_visible=True,
-        template=theme,
-        facet_col=facet,
+        geojson=counties,
+        zoom=2.5,
+        center={"lat": 56.5, "lon": 11},
+        mapbox_style="carto-positron",
+        opacity=0.5,
+        color_continuous_scale="Magma",  # Inferno
     )
 
-    fig.update_geos(resolution=50, fitbounds="locations")
-    fig.update_layout(margin={"r": 60, "t": 60, "l": 50, "b": 10})
-
-    for i, t in enumerate(fig.data):
-        t.update(coloraxis=f"coloraxis{i+1}")
-    for fr in fig.frames:
-        for i, t in enumerate(fr.data):
-            t.update(coloraxis=f"coloraxis{i+1}")
-
     fig.update_layout(
-        coloraxis={
-            "colorbar": {
-                "x": -0.2,
-            },
-        },
-        coloraxis2={
-            "colorbar": {
-                "x": 1.2,
-            },
-            "colorscale": "Viridis",
-        },
+        margin={"r": 0, "t": 0, "l": 0, "b": 0},
+        paper_bgcolor="#111111",
+        font_color="#f2f2f2",
     )
 
     return fig
@@ -142,7 +136,7 @@ def create_two_line_plot(
     )
 
     fig.update_layout(
-        transition_duration=500, template=theme, margin={"t": 20, "b": 20}
+        transition_duration=500, template=theme, margin={"t": 20, "b": 20}, height=300
     )
 
     return fig
