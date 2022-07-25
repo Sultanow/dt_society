@@ -1,9 +1,8 @@
+import json
 from dash import Dash, dcc, html, Input, Output, exceptions, State, dash_table
 import numpy as np
 import pandas as pd
 import re
-
-from sklearn import datasets
 
 from preprocessing.dataset import DigitalTwinTimeSeries
 from preprocessing.parse import parse_dataset
@@ -698,11 +697,24 @@ app.layout = html.Div(
     Input("table-upload", "filename"),
     State("table-upload", "children"),
 )
-def preprocess_dataset(file, filename, children):
+def preprocess_dataset(file: str, filename: str, upload_children: list) -> tuple:
+    """Processes file upload
+
+    Args:
+        file (str): _description_
+        filename (str): _description_
+        children (list): _description_
+
+    Raises:
+        exceptions.PreventUpdate: _description_
+
+    Returns:
+        _type_: _description_
+    """
     if file is not None:
         df, filtered_cols = parse_dataset(file)
 
-        children["props"]["children"] = html.Div([filename])
+        upload_children["props"]["children"] = html.Div([filename])
 
         if not filtered_cols:
 
@@ -713,7 +725,7 @@ def preprocess_dataset(file, filename, children):
         return (
             filtered_cols,
             df,
-            children,
+            upload_children,
             filtered_cols[0],
             show_second_file_upload,
             filtered_cols,
@@ -738,14 +750,30 @@ def preprocess_dataset(file, filename, children):
     State("table-upload-2", "children"),
     Input("dataset", "data"),
 )
-def preprocess_second_dataset(file, filename, children, data):
+def preprocess_second_dataset(
+    file: str, filename: str, upload_children: list, data: str
+):
+    """Processes additional dataset
+
+    Args:
+        file (str): _description_
+        filename (str): _description_
+        children (list): _description_
+        data (str): _description_
+
+    Raises:
+        exceptions.PreventUpdate: _description_
+
+    Returns:
+        _type_: _description_
+    """
     if file is not None:
         df_2, filtered_cols, countries = parse_dataset(file, get_countries=True)
 
         countries_df_1 = pd.read_json(data)["geo"].unique().tolist()
         countries = [c for c in countries_df_1 if c in set(countries)]
 
-        children["props"]["children"] = html.Div([filename])
+        upload_children["props"]["children"] = html.Div([filename])
 
         radio_visibility = {"display": "block"}
         show_compare_dropdown = {"display": "block"}
@@ -753,7 +781,7 @@ def preprocess_second_dataset(file, filename, children, data):
         return (
             filtered_cols,
             df_2,
-            children,
+            upload_children,
             filtered_cols[0],
             countries,
             countries[0],
@@ -772,10 +800,22 @@ def preprocess_second_dataset(file, filename, children, data):
     Input("columns-dropdown", "value"),
     Input("dataset", "data"),
 )
-def update_category_dropdown(selected_category, data):
-    if data and selected_category != "none":
-        categories = get_selected_category_column(data, selected_category)
-        return categories, categories[0]
+def update_sub_category_dropdown(selected_column: str, dataset: str) -> tuple:
+    """Updates the sub category dropdown based on the selected column
+
+    Args:
+        selected_column (str): current column selected in the dropdown
+        data (str): Dataset
+
+    Raises:
+        exceptions.PreventUpdate: if no data is available and no column selected
+
+    Returns:
+        tuple: sub categories and autoselect first sub category
+    """
+    if dataset and selected_column != "none":
+        sub_categories = get_selected_category_column(dataset, selected_column)
+        return sub_categories, sub_categories[0]
 
     else:
         raise exceptions.PreventUpdate
@@ -787,10 +827,23 @@ def update_category_dropdown(selected_category, data):
     Input("columns-dropdown-2", "value"),
     Input("dataset-2", "data"),
 )
-def update_second_category_dropdown(selected_category, data):
-    if data and selected_category != "none":
-        categories = get_selected_category_column(data, selected_category)
-        return categories, categories[0]
+def update_second_sub_category_dropdown(selected_column: str, dataset: str) -> tuple:
+    """Updates the second sub category dropdown based on the selected column
+    in the second dataset
+
+    Args:
+        selected_column (str): current column selected in the dropdown
+        data (str): Dataset
+
+    Raises:
+        exceptions.PreventUpdate: if no data is available and no column selected
+
+    Returns:
+        tuple: sub categories and autoselect first sub category
+    """
+    if dataset and selected_column != "none":
+        sub_categories = get_selected_category_column(dataset, selected_column)
+        return sub_categories, sub_categories[0]
 
     else:
         raise exceptions.PreventUpdate
@@ -806,17 +859,40 @@ def update_second_category_dropdown(selected_category, data):
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("data-selector", "value"),
+    Input("geo-dropdown-1", "value"),
+    Input("geo-dropdown-2", "value"),
 )
-def update_year_dropdown_stats(data, data_2, data_selector):
+def update_year_dropdown_stats(
+    dataset: str,
+    dataset_2: str,
+    selected_dataset: str,
+    geo_dropdown_1: str,
+    geo_dropdown_2: str,
+) -> tuple:
+    """Fills dropdown in stats section with available years in the selected dataset
 
-    if (data or data_2) and data_selector:
+    Args:
+        data (str): First dataset (JSON)
+        data_2 (str): Second dataset (JSON)
+        selected_dataset (str): value of the selected dataset
+
+    Raises:
+        exceptions.PreventUpdate: prevents update if no dataset is available and no dataset is selected
+
+    Returns:
+        tuple: available years, first year value, available countries, first country value, available years, first year value
+    """
+
+    if (
+        (dataset and geo_dropdown_1) or (dataset_2 and geo_dropdown_2)
+    ) and selected_dataset:
 
         datasets = {
-            "Dataset 1": data,
-            "Dataset 2": data_2,
+            "Dataset 1": [dataset, geo_dropdown_1],
+            "Dataset 2": [dataset_2, geo_dropdown_2],
         }
 
-        df = pd.read_json(datasets[data_selector])
+        df = pd.read_json(datasets[selected_dataset][0])
 
         year_re = re.compile("[1-2][0-9]{3}")
 
@@ -827,8 +903,8 @@ def update_year_dropdown_stats(data, data_2, data_selector):
         return (
             year_columns,
             year_columns[0],
-            df["geo"].unique(),
-            df["geo"].unique()[0],
+            df[datasets[selected_dataset][1]].unique(),
+            df[datasets[selected_dataset][1]].unique()[0],
             year_columns,
             year_columns[0],
         )
@@ -842,13 +918,28 @@ def update_year_dropdown_stats(data, data_2, data_selector):
     Input("dataset-2", "data"),
     Input("data-selector", "value"),
 )
-def update_table_content(dataset_1, dataset_2, data_selector):
+def update_table_content(
+    dataset_1: str, dataset_2: str, selected_dataset: str
+) -> pd.DataFrame:
+    """Fills table section with data from the selected dataset
+
+    Args:
+        dataset_1 (str): First dataset
+        dataset_2 (str): Second dataset
+        selected_dataset (str): value of selectd dataset
+
+    Raises:
+        exceptions.PreventUpdate: update prevented if no dataset is available
+
+    Returns:
+        pd.DataFrame: Dataframe of selected dataset
+    """
     if dataset_1 or dataset_2:
         datasets = {"Dataset 1": dataset_1, "Dataset 2": dataset_2}
 
-        df_json = pd.read_json(datasets[data_selector]).round(2).to_dict("records")
+        df = pd.read_json(datasets[selected_dataset]).round(2).to_dict("records")
 
-        return df_json
+        return df
     else:
         raise exceptions.PreventUpdate
 
@@ -875,53 +966,84 @@ def update_table_content(dataset_1, dataset_2, data_selector):
     Input("columns-dropdown-2", "value"),
 )
 def update_stats(
-    dataset_selection,
-    avg_stat,
-    max_stat,
-    min_stat,
-    growth_stat,
-    year_dropdown_stats,
-    country_dropdown_stats,
-    geo_dropdown_1,
-    geo_dropdown_2,
-    dataframe,
-    dataframe_2,
-    selected_unit,
-    category_column,
-    selected_unit_2,
-    category_column_2,
-):
+    selected_dataset: str,
+    avg_stat_children: list,
+    max_stat_children: list,
+    min_stat_children: list,
+    growth_stat_children: list,
+    year_dropdown_stats: str,
+    country_dropdown_stats: str,
+    geo_dropdown_1: str,
+    geo_dropdown_2: str,
+    dataset: str,
+    dataset_2: str,
+    selected_column: str,
+    selected_subcategory: str,
+    selected_column_2: str,
+    selected_sub_category_2: str,
+) -> tuple:
+    """Compute and display mean, max, min and growth value (per country) for selected dataset
+
+    Args:
+        selected_dataset (str): selected dataset
+        avg_stat_children (list): container which display mean stat
+        max_stat_children (list): container which displays max stat
+        min_stat_children (list): container which displays min stat
+        growth_stat_children (list): container which display growth stat per country
+        year_dropdown_stats (str): year selector dropdown in stats section
+        country_dropdown_stats (str): country selector in growth rate container
+        geo_dropdown_1 (str): "geo" colum selector for first dataset
+        geo_dropdown_2 (str): "geo" colum selector for second dataset
+        dataset (str): first dataset
+        dataset_2 (str): second dataset
+        selected_column (str): selected column in first dataset
+        selected_subcategory (str): selected subcategory in first dataset
+        selected_column_2 (str): selected column in second dataset
+        selected_sub_category_2 (str): selected subcategory in second dataset
+
+    Raises:
+        exceptions.PreventUpdate: prevents update when dataset, column selection, subcategory selection and "geo" column selection are empty
+
+    Returns:
+        tuple: mean stat container, max stat container, min stat container, growth stat container
+    """
+
     if (
-        dataframe
-        and selected_unit
-        and category_column != "none"
+        dataset
+        and selected_column
+        and selected_subcategory != "none"
         and (geo_dropdown_1 or geo_dropdown_2)
     ):
         datasets = {
-            "Dataset 1": [dataframe, selected_unit, category_column, geo_dropdown_1],
+            "Dataset 1": [
+                dataset,
+                selected_column,
+                selected_subcategory,
+                geo_dropdown_1,
+            ],
             "Dataset 2": [
-                dataframe_2,
-                selected_unit_2,
-                category_column_2,
+                dataset_2,
+                selected_column_2,
+                selected_sub_category_2,
                 geo_dropdown_2,
             ],
         }
 
-        df = pd.read_json(datasets[dataset_selection][0])
+        df = pd.read_json(datasets[selected_dataset][0])
         filtered_df = df[
-            df[datasets[dataset_selection][2]] == datasets[dataset_selection][1]
+            df[datasets[selected_dataset][2]] == datasets[selected_dataset][1]
         ]
 
         year_column_i = filtered_df.columns.get_loc(year_dropdown_stats)
 
-        avg_stat.clear()
+        avg_stat_children.clear()
 
-        avg_stat.append(
+        avg_stat_children.append(
             "Mean \n" + str(round(filtered_df.iloc[:, year_column_i].mean(axis=0), 2))
         )
 
-        max_val_max_country = filtered_df.iloc[:, year_column_i].max()
-        i_max = np.where(filtered_df.iloc[:, year_column_i] == max_val_max_country)[0]
+        max_val_country = filtered_df.iloc[:, year_column_i].max()
+        i_max = np.where(filtered_df.iloc[:, year_column_i] == max_val_country)[0]
 
         max_country = str(filtered_df.iloc[i_max, 1].values[0])
 
@@ -935,8 +1057,9 @@ def update_stats(
         min_country = str(filtered_df.iloc[i_min, 1].values[0])
 
         i_country = np.where(
-            filtered_df[datasets[dataset_selection][3]] == country_dropdown_stats
+            filtered_df[datasets[selected_dataset][3]] == country_dropdown_stats
         )[0]
+
         growth_rate = (
             (
                 filtered_df.iloc[i_country, -1]
@@ -950,24 +1073,29 @@ def update_stats(
         else:
             growth_rate = str(round(growth_rate.values[0], 2)) + "%"
 
-        max_stat.clear()
-        max_stat.append(
+        max_stat_children.clear()
+        max_stat_children.append(
             "max:\n"
             + str(round(filtered_df.iloc[i_max, year_column_i].values[0], 2))
             + " - "
             + max_country
         )
-        min_stat.clear()
-        min_stat.append(
+        min_stat_children.clear()
+        min_stat_children.append(
             "min: \n"
             + str(round(filtered_df.iloc[i_min, year_column_i].values[0], 2))
             + " - "
             + min_country
         )
-        growth_stat.clear()
-        growth_stat.append("Growth rate:\n" + growth_rate)
+        growth_stat_children.clear()
+        growth_stat_children.append("Growth rate:\n" + growth_rate)
 
-        return avg_stat, max_stat, min_stat, growth_stat
+        return (
+            avg_stat_children,
+            max_stat_children,
+            min_stat_children,
+            growth_stat_children,
+        )
     else:
         raise exceptions.PreventUpdate
 
@@ -986,55 +1114,77 @@ def update_stats(
     Input("geo-dropdown-2", "value"),
 )
 def update_line_plot(
-    selected_unit,
-    category_column,
-    dataframe,
-    selected_unit_2,
-    category_column_2,
-    dataframe_2,
-    children,
-    dataset_selection,
-    geo_dropdown_1,
-    geo_dropdown_2,
-):
+    selected_sub_category: str,
+    selected_column: str,
+    dataset: str,
+    selected_sub_category_2: str,
+    selected_column_2: str,
+    dataset_2: str,
+    timeline_children: list,
+    selected_dataset: str,
+    geo_dropdown_1: str,
+    geo_dropdown_2: str,
+) -> list:
+    """Draws a line plot with the selected data specified in the dropdowns
+
+    Args:
+        selected_sub_category (str): first selected sub-category
+        selected_column (str): first selected column
+        dataset (str): first dataset
+        selected_sub_category_2 (str): second selected sub-category
+        selected_column_2 (str): second selected column
+        dataset_2 (str): second dataset
+        timeline_children (list): container for timeline section
+        selected_dataset (str): value of selected dataset
+        geo_dropdown_1 (str): "geo" column selector for first dataset
+        geo_dropdown_2 (str): "geo" column selector for second datset
+
+    Raises:
+        exceptions.PreventUpdate: _description_
+
+    Returns:
+        list: container with line plot
+    """
 
     if (
-        dataframe
-        and selected_unit
-        and category_column != "none"
+        dataset
+        and selected_sub_category
+        and selected_column != "none"
         and (geo_dropdown_1 or geo_dropdown_2)
     ):
 
         datasets = {
-            "Dataset 1": [dataframe, selected_unit, category_column],
-            "Dataset 2": [
-                dataframe_2,
-                selected_unit_2,
-                category_column_2,
-            ],
+            "Dataset 1": (dataset, selected_sub_category, selected_column),
+            "Dataset 2": (
+                dataset_2,
+                selected_sub_category_2,
+                selected_column_2,
+            ),
         }
 
-        df = pd.read_json(datasets[dataset_selection][0])
+        df = pd.read_json(datasets[selected_dataset][0])
         filtered_df = df[
-            df[datasets[dataset_selection][2]] == datasets[dataset_selection][1]
+            df[datasets[selected_dataset][2]] == datasets[selected_dataset][1]
         ]
 
         fig = create_multi_line_plot(filtered_df)
 
-        children.clear()
+        timeline_children.clear()
 
-        children.append(dcc.Graph(figure=fig))
+        timeline_children.append(dcc.Graph(figure=fig))
 
-        return children
-    elif dataframe and category_column == "none":
-        df = pd.read_json(dataframe)
+        return timeline_children
+
+    elif dataset and selected_column == "none":
+
+        df = pd.read_json(dataset)
         fig = create_multi_line_plot(df)
 
-        children.clear()
+        timeline_children.clear()
 
-        children.append(dcc.Graph(figure=fig))
+        timeline_children.append(dcc.Graph(figure=fig))
 
-        return children
+        return timeline_children
 
     else:
         raise exceptions.PreventUpdate
@@ -1055,45 +1205,78 @@ def update_line_plot(
     Input("data-selector", "value"),
 )
 def update_choropleth(
-    selected_unit,
-    category_column,
-    dataframe,
-    children,
-    selected_unit_2,
-    category_column_2,
-    dataframe_2,
-    geo_dropdown_2,
-    geo_dropdown_1,
-    year_dropdown_map,
-    selected_data,
-):
+    selected_sub_category: str,
+    selected_column: str,
+    dataset: str,
+    map_children: list,
+    selected_sub_category_2: str,
+    selected_column_2: str,
+    dataset_2: str,
+    geo_dropdown_2: str,
+    geo_dropdown_1: str,
+    selected_year_map: str,
+    selected_dataset: str,
+) -> list:
+    """Displays choropleth mapbox in countries section
 
-    if dataframe and selected_unit and category_column != "none" and geo_dropdown_1:
+    Args:
+        selected_sub_category (str): selected sub-category in first dataset
+        selected_column (str): selected column in first dataset
+        dataset (str): first dataset
+        map_children (list): container that holds the mapbox
+        selected_sub_category_2 (str): selected sub-category in second dataset
+        selected_column_2 (str): selected column in second dataset
+        dataset_2 (str): second dataset
+        geo_dropdown_2 (str): first "geo" dropdown selection
+        geo_dropdown_1 (str): second "geo" dropdown selection
+        selected_year_map (str): selected year in countries section
+        selected_dataset (str): value of selected dataset
+
+    Raises:
+        exceptions.PreventUpdate: update prevented unless atleast one dataset is uploaded
+
+    Returns:
+        list: container with choropleth mapbox
+    """
+
+    if (
+        dataset
+        and selected_sub_category
+        and selected_column != "none"
+        and geo_dropdown_1
+    ) or (
+        dataset_2
+        and selected_sub_category_2
+        and selected_column_2 != "none"
+        and geo_dropdown_2
+    ):
 
         datasets = {
-            "Dataset 1": [dataframe, selected_unit, category_column],
-            "Dataset 2": [
-                dataframe_2,
-                selected_unit_2,
-                category_column_2,
-            ],
+            "Dataset 1": (dataset, selected_sub_category, selected_column),
+            "Dataset 2": (
+                dataset_2,
+                selected_sub_category_2,
+                selected_column_2,
+            ),
         }
 
-        df = pd.read_json(datasets[selected_data][0])
+        df = pd.read_json(datasets[selected_dataset][0])
 
         filtered_df = DigitalTwinTimeSeries(df=df)
-        filtered_df = filtered_df.melt_data(category_column=datasets[selected_data][2])
+        filtered_df = filtered_df.melt_data(
+            category_column=datasets[selected_dataset][2]
+        )
 
-        filtered_df = filtered_df[datasets[selected_data][1]]
+        filtered_df = filtered_df[datasets[selected_dataset][1]]
 
-        fig = create_choropleth_plot(filtered_df, year=year_dropdown_map)
+        fig = create_choropleth_plot(filtered_df, year=selected_year_map)
 
-        if children:
-            children.clear()
+        if map_children:
+            map_children.clear()
 
-        children.append(dcc.Graph(figure=fig))
+        map_children.append(dcc.Graph(figure=fig))
 
-        return children
+        return map_children
 
     else:
         raise exceptions.PreventUpdate
@@ -1113,60 +1296,89 @@ def update_choropleth(
     Input("geo-dropdown-1", "value"),
 )
 def update_max_country_compare(
-    selected_unit,
-    category_column,
-    dataframe,
-    selected_unit_2,
-    category_column_2,
-    selected_max_country,
-    dataframe_2,
-    children,
-    geo_dropdown_2,
-    geo_dropdown_1,
-):
+    selected_sub_category: str,
+    selected_column: str,
+    dataset: str,
+    selected_sub_category_2: str,
+    selected_column_2: str,
+    selected_country: str,
+    dataset_2: str,
+    comparison_children: str,
+    geo_dropdown_2: str,
+    geo_dropdown_1: str,
+) -> list:
+    """Creates a line plot with two subplots (one for each dataset respectively)
+
+    Args:
+        selected_sub_category (str): selected sub-category in first dataset
+        selected_column (str): selected column in first dataset
+        dataset (str): first dataset
+        selected_sub_category_2 (str): selected sub-category in second dataset
+        selected_column_2 (str): selected column in second dataset
+        selected_country (str): selected country in comparison section
+        dataset_2 (str): second dataset
+        comparison_children (str): container that holds the line plot
+        geo_dropdown_2 (str): value of "geo" of first dataset
+        geo_dropdown_1 (str): value of "geo" in second dataset
+
+    Raises:
+        exceptions.PreventUpdate: update prevented until two datasets are loaded
+
+    Returns:
+        list: container with line plots
+    """
 
     if (
-        selected_max_country
-        and selected_unit_2
-        and selected_unit
-        and dataframe
-        and dataframe_2
+        selected_country
+        and selected_sub_category_2
+        and selected_sub_category
+        and dataset
+        and dataset_2
         and geo_dropdown_1
         and geo_dropdown_2
     ):
-        df = pd.read_json(dataframe)
-        df_2 = pd.read_json(dataframe_2)
+        df = pd.read_json(dataset)
+        df_2 = pd.read_json(dataset_2)
 
-        filtered_df = df[df[category_column] == selected_unit].reset_index(drop=True)
-        filtered_df_2 = df_2[df_2[category_column_2] == selected_unit_2].reset_index(
-            drop=True
+        filtered_dfs = []
+        rows = []
+        selected_values = (
+            (selected_column, selected_sub_category, geo_dropdown_1),
+            (selected_column_2, selected_sub_category_2, geo_dropdown_2),
         )
+
+        for i, df in enumerate((df, df_2)):
+            filtered_df = df[
+                df[selected_values[i][0]] == selected_values[i][1]
+            ].reset_index(drop=True)
+
+            row = filtered_df[
+                filtered_df[selected_values[i][2]] == selected_country
+            ].index[0]
+
+            filtered_dfs.append(filtered_df)
+            rows.append(row)
 
         i_1, i_2 = find_column_intersection_indeces(
-            (filtered_df.columns.tolist(), filtered_df_2.columns.tolist())
-        )
-
-        row_1, row_2 = map(
-            lambda x: x[x["geo"] == selected_max_country].index[0],
-            [filtered_df, filtered_df_2],
+            (filtered_dfs[0].columns.tolist(), filtered_dfs[1].columns.tolist())
         )
 
         fig = create_two_line_plot(
-            filtered_df,
-            filtered_df_2,
-            row_1,
-            row_2,
+            filtered_dfs[0],
+            filtered_dfs[1],
+            rows[0],
+            rows[1],
             i_1,
             i_2,
-            selected_unit,
-            selected_unit_2,
+            selected_sub_category,
+            selected_sub_category_2,
         )
 
-        children.clear()
+        comparison_children.clear()
 
-        children.append(dcc.Graph(figure=fig))
+        comparison_children.append(dcc.Graph(figure=fig))
 
-        return children
+        return comparison_children
     else:
         raise exceptions.PreventUpdate
 

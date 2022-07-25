@@ -1,3 +1,4 @@
+from matplotlib.pyplot import margins
 import plotly.graph_objects as go
 import pandas as pd
 import plotly.express as px
@@ -39,9 +40,7 @@ def create_multi_line_plot(data: pd.DataFrame) -> go.Figure:
         )
 
     fig.update_layout(
-        xaxis_title="Year",
-        legend_title="Countries",
-        template=theme,
+        xaxis_title="Year", legend_title="Countries", template=theme, margin={"t": 30}
     )
 
     fig.update_layout(transition_duration=500)
