@@ -13,7 +13,10 @@ from .dataset import DigitalTwinTimeSeries
 
 
 def parse_dataset(
-    contents: str, get_countries: bool = False, geo_col: str = None
+    contents: str,
+    get_countries: bool = False,
+    geo_col: str = None,
+    upload_file: bool = True,
 ) -> Tuple[str, list]:
     """Parses a dataset and converts it into dataframe
 
@@ -24,15 +27,18 @@ def parse_dataset(
     Returns:
         Tuple[str, list]: tuple of converted dataset and available indicator columns
     """
-    _, content_string = contents.split(",")
+    if upload_file:
+        try:
+            _, content_string = contents.split(",")
 
-    decoded = base64.b64decode(content_string)
+            decoded = base64.b64decode(content_string)
 
-    try:
-        df = DigitalTwinTimeSeries(io.StringIO(decoded.decode("utf-8")))
-    except Exception as e:
-        print(e)
-        return html.Div(["There was an error processing this file."])
+            df = DigitalTwinTimeSeries(io.StringIO(decoded.decode("utf-8")))
+        except Exception as e:
+            print(e)
+            return html.Div(["There was an error processing this file."])
+    else:
+        df = DigitalTwinTimeSeries(contents)
 
     years_excluded_re = re.compile("[^1-2][^0-9]*")
     columns = df.data.columns.to_list()

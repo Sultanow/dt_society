@@ -1,5 +1,16 @@
 import json
-from dash import Dash, dcc, html, Input, Output, exceptions, State, dash_table
+from dash import (
+    no_update,
+    Dash,
+    dcc,
+    html,
+    Input,
+    Output,
+    exceptions,
+    State,
+    dash_table,
+    callback_context,
+)
 import numpy as np
 import pandas as pd
 import re
@@ -17,7 +28,13 @@ from helpers.plots import (
     create_two_line_plot,
 )
 
-app = Dash(__name__)
+external_stylesheets = [
+    {
+        "href": "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,-25",
+        "rel": "stylesheet",
+    }
+]
+app = Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.config.suppress_callback_exceptions = True
 
@@ -44,15 +61,48 @@ app.layout = html.Div(
                         html.Div(
                             [
                                 html.Div(
-                                    "Files",
-                                    style={
-                                        "padding-top": "10px",
-                                        "padding-left": "10px",
-                                        "padding-bottom": "10px",
-                                        "backgroundColor": "#111111",
-                                        "font-weight": "bold",
-                                        "textAlign": "center",
-                                    },
+                                    [
+                                        html.Div(
+                                            "Files",
+                                            style={
+                                                "padding-top": "10px",
+                                                "padding-left": "10px",
+                                                "padding-bottom": "10px",
+                                                "backgroundColor": "#111111",
+                                                "font-weight": "bold",
+                                                "textAlign": "center",
+                                                "display": "flex",
+                                                "margin-left": "200px",
+                                            },
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.Span(
+                                                    "help",
+                                                    className="material-symbols-outlined",
+                                                ),
+                                                html.Span(
+                                                    "Supported column formats:\n [feature, country, (n timestamps..)],\n [timestamp, country, (n_features...)]",
+                                                    className="tooltiptext",
+                                                    style={
+                                                        "font-size": "10px",
+                                                        "font-weight": "normal",
+                                                        "white-space": "pre-line",
+                                                    },
+                                                ),
+                                            ],
+                                            className="tooltip",
+                                            style={
+                                                "font-weight": "bold",
+                                                "textAlign": "center",
+                                                "display": "flex",
+                                                "margin-right": "0",
+                                                "margin-left": "auto",
+                                                "padding-top": "7px",
+                                            },
+                                        ),
+                                    ],
+                                    style={"display": "flex"},
                                 ),
                                 html.Hr(
                                     style={
@@ -66,6 +116,10 @@ app.layout = html.Div(
                         ),
                         html.Div(
                             [
+                                dcc.ConfirmDialog(
+                                    id="dataset-1-fail",
+                                    message="There was an error processing your data. Please make sure it comes in one of the supported formats.",
+                                ),
                                 dcc.Upload(
                                     id="table-upload",
                                     children=html.Div(
@@ -151,6 +205,10 @@ app.layout = html.Div(
                         ),
                         html.Div(
                             [
+                                dcc.ConfirmDialog(
+                                    id="dataset-2-fail",
+                                    message="There was an error while processing your data. Please make sure it comes in one of the supported formats.",
+                                ),
                                 dcc.Upload(
                                     id="table-upload-2",
                                     children=html.Div(
@@ -238,12 +296,29 @@ app.layout = html.Div(
                                     "Toggle displayed data",
                                     style={"margin": "10px", "font-weight": "bold"},
                                 ),
-                                dcc.RadioItems(
-                                    ["Dataset 1", "Dataset 2"],
-                                    "Dataset 1",
-                                    id="data-selector",
-                                    inline=False,
-                                    style={"display": "inline-block"},
+                                html.Div(
+                                    [
+                                        dcc.RadioItems(
+                                            ["Dataset 1", "Dataset 2"],
+                                            "Dataset 1",
+                                            id="data-selector",
+                                            inline=False,
+                                            style={"display": "flex"},
+                                        ),
+                                        html.Button(
+                                            "Demo",
+                                            id="demo-button",
+                                            n_clicks=0,
+                                            style={
+                                                "margin-right": "5px",
+                                                "float": "right",
+                                                "display": "flex",
+                                                "margin-left": "auto",
+                                                "border-color": "#5c6cfa",
+                                            },
+                                        ),
+                                    ],
+                                    style={"display": "flex", "margin-top": "15px"},
                                 ),
                             ],
                             style={
@@ -256,8 +331,7 @@ app.layout = html.Div(
                     style={
                         "backgroundColor": "#111111",
                         "width": "30%",
-                    }
-                    # style={"box-shadow": "2px 2px 2px lightgrey"},
+                    },
                 ),
                 html.Div(
                     [
@@ -316,7 +390,7 @@ app.layout = html.Div(
             ],
             style={
                 "backgroundColor": "#232323",
-                "height": "385px",
+                "height": "400px",
                 "display": "flex",
             },
         ),
@@ -335,17 +409,17 @@ app.layout = html.Div(
                                             clearable=False,
                                             id="year-dropdown-stats",
                                             style={
-                                                "width": "100px",
+                                                "width": "110px",
                                                 # "display": "flex",
                                                 "font-size": "14px",
                                                 "border-top": "0px",
                                                 "border-left": "0px",
                                                 "border-right": "0px",
+                                                "border-bottom": "0px",
                                                 "backgroundColor": "#111111",
                                                 "border-color": "#5c6cfa",
                                                 "border-radius": "0px",
                                                 "padding": "0",
-                                                "textAlign": "center",
                                             },
                                         ),
                                         html.Div(
@@ -358,6 +432,33 @@ app.layout = html.Div(
                                                 "font-weight": "bold",
                                                 "textAlign": "center",
                                                 "width": "92%",
+                                            },
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.Span(
+                                                    "help",
+                                                    className="material-symbols-outlined",
+                                                ),
+                                                html.Span(
+                                                    "The statistics shown in this section are computed from the selected timestamp until the last time stamp. \n (eg. 2017-2021)",
+                                                    className="tooltiptext",
+                                                    style={
+                                                        "font-size": "10px",
+                                                        "font-weight": "normal",
+                                                        "white-space": "pre-line",
+                                                    },
+                                                ),
+                                            ],
+                                            className="tooltip",
+                                            style={
+                                                "font-weight": "bold",
+                                                "textAlign": "center",
+                                                "display": "flex",
+                                                "margin-right": "10px",
+                                                "margin-left": "auto",
+                                                "padding-top": "7px",
+                                                "backgroundColor": "#111111",
                                             },
                                         ),
                                     ],
@@ -564,6 +665,7 @@ app.layout = html.Div(
                                                 "border-top": "0px",
                                                 "border-left": "0px",
                                                 "border-right": "0px",
+                                                "border-bottom": "0px",
                                                 "backgroundColor": "#111111",
                                                 "border-color": "#5c6cfa",
                                                 "border-radius": "0px",
@@ -605,6 +707,7 @@ app.layout = html.Div(
                         "display": "inline-block",
                         "width": "59.3%",
                         "margin-left": "10px",
+                        "padding-top": "15px",
                     },
                 ),
             ],
@@ -629,12 +732,13 @@ app.layout = html.Div(
                                     clearable=False,
                                     id="country-dropdown",
                                     style={
-                                        "width": "150px",
+                                        "width": "110px",
                                         "border-color": "#5c6cfa",
                                         "background-color": "#111111",
                                         "border-top": "0px",
                                         "border-left": "0px",
                                         "border-right": "0px",
+                                        "border-bottom": "0px",
                                         "border-radius": "0px",
                                         "textAlign": "center",
                                     },
@@ -693,11 +797,19 @@ app.layout = html.Div(
     Output("columns-dropdown", "value"),
     Output("second-file-upload", "style"),
     Output("geo-dropdown-1", "options"),
+    Output("dataset-1-fail", "displayed"),
+    Output("table-upload", "contents"),
     Input("table-upload", "contents"),
     Input("table-upload", "filename"),
     State("table-upload", "children"),
+    Input("demo-button", "n_clicks"),
 )
-def preprocess_dataset(file: str, filename: str, upload_children: list) -> tuple:
+def preprocess_dataset(
+    file: str,
+    filename: str,
+    upload_children: list,
+    demo_button_clicks: int,
+) -> tuple:
     """Processes file upload
 
     Args:
@@ -711,8 +823,27 @@ def preprocess_dataset(file: str, filename: str, upload_children: list) -> tuple
     Returns:
         _type_: _description_
     """
-    if file is not None:
-        df, filtered_cols = parse_dataset(file)
+    changed_items = [p["prop_id"] for p in callback_context.triggered][0]
+
+    if file is not None or "demo-button" in changed_items:
+        if file:
+            try:
+                df, filtered_cols = parse_dataset(file)
+            except Exception as e:
+                return (
+                    no_update,
+                    None,
+                    no_update,
+                    no_update,
+                    no_update,
+                    no_update,
+                    True,
+                    None,
+                )
+        elif "demo-button" in changed_items:
+            filename = "arbeitslosenquote_eu.tsv"
+            df_url = "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/tipsun20.tsv.gz"
+            df, filtered_cols = parse_dataset(df_url, upload_file=False)
 
         upload_children["props"]["children"] = html.Div([filename])
 
@@ -729,6 +860,8 @@ def preprocess_dataset(file: str, filename: str, upload_children: list) -> tuple
             filtered_cols[0],
             show_second_file_upload,
             filtered_cols,
+            False,
+            None,
         )
 
     else:
@@ -745,14 +878,17 @@ def preprocess_dataset(file: str, filename: str, upload_children: list) -> tuple
     Output("data-selector", "style"),
     Output("compare-div", "style"),
     Output("geo-dropdown-2", "options"),
+    Output("dataset-2-fail", "displayed"),
+    Output("table-upload-2", "contents"),
     Input("table-upload-2", "contents"),
     Input("table-upload-2", "filename"),
     State("table-upload-2", "children"),
     Input("dataset", "data"),
+    Input("demo-button", "n_clicks"),
 )
 def preprocess_second_dataset(
-    file: str, filename: str, upload_children: list, data: str
-):
+    file: str, filename: str, upload_children: list, data: str, demo_button_clicks: int
+) -> tuple:
     """Processes additional dataset
 
     Args:
@@ -767,8 +903,33 @@ def preprocess_second_dataset(
     Returns:
         _type_: _description_
     """
-    if file is not None:
-        df_2, filtered_cols, countries = parse_dataset(file, get_countries=True)
+
+    changed_items = [p["prop_id"] for p in callback_context.triggered][0]
+
+    if file is not None or "demo-button" in changed_items:
+        if file:
+            try:
+                df_2, filtered_cols, countries = parse_dataset(file, get_countries=True)
+            except Exception as e:
+                return (
+                    no_update,
+                    None,
+                    no_update,
+                    no_update,
+                    no_update,
+                    no_update,
+                    no_update,
+                    no_update,
+                    no_update,
+                    True,
+                    None,
+                )
+        elif "demo-button" in changed_items:
+            filename = "bip_europa.tsv"
+            df_url = "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/tec00001.tsv.gz"
+            df_2, filtered_cols, countries = parse_dataset(
+                df_url, upload_file=False, get_countries=True
+            )
 
         countries_df_1 = pd.read_json(data)["geo"].unique().tolist()
         countries = [c for c in countries_df_1 if c in set(countries)]
@@ -788,6 +949,8 @@ def preprocess_second_dataset(
             radio_visibility,
             show_compare_dropdown,
             filtered_cols,
+            False,
+            None,
         )
 
     else:
@@ -934,7 +1097,10 @@ def update_table_content(
     Returns:
         pd.DataFrame: Dataframe of selected dataset
     """
-    if dataset_1 or dataset_2:
+
+    if (dataset_1 and selected_dataset == "Dataset 1") or (
+        dataset_2 and selected_dataset == "Dataset 2"
+    ):
         datasets = {"Dataset 1": dataset_1, "Dataset 2": dataset_2}
 
         df = pd.read_json(datasets[selected_dataset]).round(2).to_dict("records")

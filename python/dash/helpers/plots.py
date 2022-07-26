@@ -78,7 +78,7 @@ def create_choropleth_plot(
     )
 
     fig.update_layout(
-        margin={"r": 0, "t": 0, "l": 0, "b": 0},
+        margin={"r": 0, "t": 1, "l": 0, "b": 0},
         paper_bgcolor="#111111",
         font_color="#f2f2f2",
     )
