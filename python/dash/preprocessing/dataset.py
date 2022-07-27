@@ -46,7 +46,6 @@ class DigitalTwinTimeSeries:
         data = pd.read_csv(path, encoding="ISO-8859–1", sep=self.sep)
 
         columns = data.columns.tolist()
-        # print(columns)
 
         fused_cols_i = None
         unnamed_cols_i = []
@@ -57,11 +56,8 @@ class DigitalTwinTimeSeries:
                 fused_cols_i = columns.index(col)
                 # Create seperate columns for each sub column
                 meta_column = data.columns[fused_cols_i].split(",")
-                # meta_column[-1] = meta_column[-1].split("\\")[0]
                 n_meta_columns = len(meta_column)
 
-                # print(n_meta_columns)
-                # print(meta_column)
                 data[meta_column] = data.iloc[:, fused_cols_i].str.split(
                     ",", expand=True
                 )
@@ -115,8 +111,6 @@ class DigitalTwinTimeSeries:
 
             return country.alpha_3
 
-        # print(self.geo_col)
-        # print(data.columns)
         assert self.geo_col in data.columns, "No 'geo' column found in dataset."
 
         # EA = Eurasian Patent Organization
