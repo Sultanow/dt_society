@@ -10,7 +10,7 @@ import json
 theme = "plotly_dark"
 
 
-def create_multi_line_plot(data: pd.DataFrame) -> go.Figure:
+def create_multi_line_plot(data: pd.DataFrame, geo_col) -> go.Figure:
     """Creates a line plot with a line for each country
 
     Args:
@@ -21,7 +21,7 @@ def create_multi_line_plot(data: pd.DataFrame) -> go.Figure:
     """
     fig = go.Figure()
 
-    for i, country in enumerate(data["geo"]):
+    for i, country in enumerate(data[geo_col]):
         visibility = None
 
         if country == "DEU":
@@ -66,7 +66,7 @@ def create_choropleth_plot(
 
     fig = px.choropleth_mapbox(
         data[data["year"] == year],
-        locations="geo",
+        locations="geo\\time",
         featureidkey="properties.ISO3",
         color="value",
         geojson=counties,

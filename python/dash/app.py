@@ -1,4 +1,7 @@
+import gzip
 import json
+import base64
+import urllib
 from dash import (
     no_update,
     Dash,
@@ -14,9 +17,10 @@ from dash import (
 import numpy as np
 import pandas as pd
 import re
+import requests
 
 from preprocessing.dataset import DigitalTwinTimeSeries
-from preprocessing.parse import parse_dataset
+from preprocessing.parse import parse_dataset, get_available_columns
 
 from helpers.layout import (
     get_selected_category_column,
@@ -148,18 +152,35 @@ app.layout = html.Div(
                                     "Select geo column",
                                     style={"margin-left": "5px", "textAlign": "center"},
                                 ),
-                                dcc.Dropdown(
-                                    ["none"],
-                                    placeholder="No values found",
-                                    clearable=False,
-                                    id="geo-dropdown-1",
-                                    style={
-                                        "margin-top": "5px",
-                                        "margin-left": "5px",
-                                        "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
-                                        "width": "90%",
-                                    },
+                                html.Div(
+                                    [
+                                        dcc.Dropdown(
+                                            ["none"],
+                                            placeholder="No values found",
+                                            clearable=False,
+                                            id="geo-dropdown-1",
+                                            style={
+                                                "margin-top": "5px",
+                                                "margin-left": "5px",
+                                                "border-color": "#5c6cfa",
+                                                "background-color": "#111111",
+                                                "width": "90%",
+                                            },
+                                        ),
+                                        dcc.Dropdown(
+                                            [",", ";", "\\t", "space"],
+                                            placeholder="Delimiter",
+                                            id="delimiter-dropdown-1",
+                                            style={
+                                                "margin-top": "5px",
+                                                "margin-left": "0px",
+                                                "border-color": "#5c6cfa",
+                                                "background-color": "#111111",
+                                                # "width": "5px",
+                                            },
+                                        ),
+                                    ],
+                                    style={"display": "flex"},
                                 ),
                                 html.Div(
                                     "Available Columns",
@@ -233,18 +254,35 @@ app.layout = html.Div(
                                 html.Div(
                                     "Select geo column", style={"textAlign": "center"}
                                 ),
-                                dcc.Dropdown(
-                                    ["none"],
-                                    placeholder="No values found",
-                                    clearable=False,
-                                    id="geo-dropdown-2",
-                                    style={
-                                        "margin-top": "5px",
-                                        "margin-left": "5px",
-                                        "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
-                                        "width": "90%",
-                                    },
+                                html.Div(
+                                    [
+                                        dcc.Dropdown(
+                                            ["none"],
+                                            placeholder="No values found",
+                                            clearable=False,
+                                            id="geo-dropdown-2",
+                                            style={
+                                                "margin-top": "5px",
+                                                "margin-left": "5px",
+                                                "border-color": "#5c6cfa",
+                                                "background-color": "#111111",
+                                                "width": "85%",
+                                            },
+                                        ),
+                                        dcc.Dropdown(
+                                            [",", ";", "\\t", "space"],
+                                            placeholder="Delimiter",
+                                            id="delimiter-dropdown-2",
+                                            style={
+                                                "margin-top": "5px",
+                                                "margin-left": "0px",
+                                                "border-color": "#5c6cfa",
+                                                "background-color": "#111111",
+                                                # "width": "5px",
+                                            },
+                                        ),
+                                    ],
+                                    style={"display": "flex"},
                                 ),
                                 html.Div(
                                     "Available Columns",
@@ -803,12 +841,16 @@ app.layout = html.Div(
     Input("table-upload", "filename"),
     State("table-upload", "children"),
     Input("demo-button", "n_clicks"),
+    Input("geo-dropdown-1", "value"),
+    Input("delimiter-dropdown-1", "value"),
 )
 def preprocess_dataset(
     file: str,
     filename: str,
     upload_children: list,
     demo_button_clicks: int,
+    geo_dropdown_1: str,
+    delimiter_dropdown_1: str,
 ) -> tuple:
     """Processes file upload
 
@@ -825,11 +867,19 @@ def preprocess_dataset(
     """
     changed_items = [p["prop_id"] for p in callback_context.triggered][0]
 
-    if file is not None or "demo-button" in changed_items:
+    if (
+        (file is not None or "demo-button" in changed_items)
+        and geo_dropdown_1 is not None
+        and delimiter_dropdown_1
+    ):
         if file:
             try:
-                df, filtered_cols = parse_dataset(file)
+                content = file.split(",")
+                df, filtered_cols = parse_dataset(
+                    content[-1], separator=delimiter_dropdown_1, geo_col=geo_dropdown_1
+                )
             except Exception as e:
+                print(e)
                 return (
                     no_update,
                     None,
@@ -843,9 +893,11 @@ def preprocess_dataset(
         elif "demo-button" in changed_items:
             filename = "arbeitslosenquote_eu.tsv"
             df_url = "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/tipsun20.tsv.gz"
-            df, filtered_cols = parse_dataset(df_url, upload_file=False)
 
-        upload_children["props"]["children"] = html.Div([filename])
+            df, filtered_cols = parse_dataset(df_url, upload_file=False, separator="\t")
+
+        if "table-upload" in changed_items or "demo-button" in changed_items:
+            upload_children["props"]["children"] = html.Div([filename])
 
         if not filtered_cols:
 
@@ -862,6 +914,35 @@ def preprocess_dataset(
             filtered_cols,
             False,
             None,
+        )
+    elif (
+        (file is not None or "demo-button" in changed_items)
+        and geo_dropdown_1 is None
+        and delimiter_dropdown_1
+    ):
+        if file:
+            columns = get_available_columns(file, separator=delimiter_dropdown_1)
+        elif "demo-button" in changed_items:
+            filename = "arbeitslosenquote_eu.tsv"
+            df_url = "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/tipsun20.tsv.gz"
+
+            content = urllib.request.urlopen(df_url).read()
+            content = gzip.decompress(content)
+
+            columns = get_available_columns(content, upload_file=False, separator="\t")
+            file = base64.b64encode(content).decode("utf-8")
+
+        upload_children["props"]["children"] = html.Div([filename])
+
+        return (
+            no_update,
+            None,
+            upload_children,
+            no_update,
+            no_update,
+            columns,
+            False,
+            file,
         )
 
     else:
@@ -885,9 +966,17 @@ def preprocess_dataset(
     State("table-upload-2", "children"),
     Input("dataset", "data"),
     Input("demo-button", "n_clicks"),
+    Input("geo-dropdown-2", "value"),
+    Input("delimiter-dropdown-2", "value"),
 )
 def preprocess_second_dataset(
-    file: str, filename: str, upload_children: list, data: str, demo_button_clicks: int
+    file: str,
+    filename: str,
+    upload_children: list,
+    data: str,
+    demo_button_clicks: int,
+    geo_dropdown_2: str,
+    delimiter_dropdown_2: str,
 ) -> tuple:
     """Processes additional dataset
 
@@ -906,10 +995,20 @@ def preprocess_second_dataset(
 
     changed_items = [p["prop_id"] for p in callback_context.triggered][0]
 
-    if file is not None or "demo-button" in changed_items:
+    if (
+        (file is not None or "demo-button" in changed_items)
+        and geo_dropdown_2 is not None
+        and delimiter_dropdown_2
+    ):
         if file:
             try:
-                df_2, filtered_cols, countries = parse_dataset(file, get_countries=True)
+                content = file.split(",")
+                df_2, filtered_cols, countries = parse_dataset(
+                    content[-1],
+                    get_countries=True,
+                    geo_col=geo_dropdown_2,
+                    separator=delimiter_dropdown_2,
+                )
             except Exception as e:
                 return (
                     no_update,
@@ -931,10 +1030,11 @@ def preprocess_second_dataset(
                 df_url, upload_file=False, get_countries=True
             )
 
-        countries_df_1 = pd.read_json(data)["geo"].unique().tolist()
+        countries_df_1 = pd.read_json(data)["geo\\time"].unique().tolist()
         countries = [c for c in countries_df_1 if c in set(countries)]
 
-        upload_children["props"]["children"] = html.Div([filename])
+        if "table-upload" in changed_items or "demo-button" in changed_items:
+            upload_children["props"]["children"] = html.Div([filename])
 
         radio_visibility = {"display": "block"}
         show_compare_dropdown = {"display": "block"}
@@ -951,6 +1051,39 @@ def preprocess_second_dataset(
             filtered_cols,
             False,
             None,
+        )
+    elif (
+        (file is not None or "demo-button" in changed_items)
+        and geo_dropdown_2 is None
+        and not data
+        and delimiter_dropdown_2
+    ):
+        if file:
+            columns = get_available_columns(file, separator=delimiter_dropdown_2)
+        elif "demo-button" in changed_items:
+            filename = "bip_europa.tsv"
+            df_url = "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/tec00001.tsv.gz"
+
+            content = urllib.request.urlopen(df_url).read()
+            content = gzip.decompress(content)
+
+            columns = get_available_columns(content, upload_file=False, separator="\t")
+            file = base64.b64encode(content).decode("utf-8")
+
+        upload_children["props"]["children"] = html.Div([filename])
+
+        return (
+            no_update,
+            None,
+            upload_children,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            columns,
+            False,
+            file,
         )
 
     else:
@@ -1320,11 +1453,17 @@ def update_line_plot(
     ):
 
         datasets = {
-            "Dataset 1": (dataset, selected_sub_category, selected_column),
+            "Dataset 1": (
+                dataset,
+                selected_sub_category,
+                selected_column,
+                geo_dropdown_1,
+            ),
             "Dataset 2": (
                 dataset_2,
                 selected_sub_category_2,
                 selected_column_2,
+                geo_dropdown_2,
             ),
         }
 
@@ -1333,7 +1472,7 @@ def update_line_plot(
             df[datasets[selected_dataset][2]] == datasets[selected_dataset][1]
         ]
 
-        fig = create_multi_line_plot(filtered_df)
+        fig = create_multi_line_plot(filtered_df, geo_col=datasets[selected_dataset][3])
 
         timeline_children.clear()
 
@@ -1418,17 +1557,25 @@ def update_choropleth(
     ):
 
         datasets = {
-            "Dataset 1": (dataset, selected_sub_category, selected_column),
+            "Dataset 1": (
+                dataset,
+                selected_sub_category,
+                selected_column,
+                geo_dropdown_1,
+            ),
             "Dataset 2": (
                 dataset_2,
                 selected_sub_category_2,
                 selected_column_2,
+                geo_dropdown_2,
             ),
         }
 
         df = pd.read_json(datasets[selected_dataset][0])
 
-        filtered_df = DigitalTwinTimeSeries(df=df)
+        filtered_df = DigitalTwinTimeSeries(
+            df=df, geo_col=datasets[selected_dataset][3]
+        )
         filtered_df = filtered_df.melt_data(
             category_column=datasets[selected_dataset][2]
         )
