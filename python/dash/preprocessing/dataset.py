@@ -10,23 +10,28 @@ class DigitalTwinTimeSeries:
     def __init__(
         self,
         path: str = None,
+        sep: str = "\t",
         to_iso3: bool = True,
         df: pd.DataFrame = None,
         country_codes: bool = True,
         geo_col: str = "geo",
     ):
         """
-        Preprocesses and stores geographical year-based data
-        Expected format: [meta, country_code, (N year columns)..]
+        Preprocesses and stores time series data
 
         Args:
-            path (str): Path to dataset (can also be URL)
-            to_iso3 (bool, optional): Converts country codes to ISO-3 if necessary. Defaults to True.
+            path (str): path or URL to dataset
+            sep (str): seperator value in dataset
+            to_iso3 (bool, optional): converts country codes to Alpha-3. Defaults to True.
+            df (pd.DataFrame, optional): Processed pandas dataframe. Defaults to None.
+            country_codes (bool, optional): _description_. Defaults to True.
+            geo_col (str, optional): name of the column containing geographical information. Defaults to "geo".
         """
         self.geo_col = geo_col
         self.country_codes = country_codes
-        self.data = self._preprocess(path) if df is None else df
+        self.sep = sep
         self.to_iso3 = to_iso3
+        self.data = self._preprocess(path) if df is None else df
 
     def _preprocess(self, path: str) -> pd.DataFrame:
         """Preprocesses dataframe into required format
@@ -37,29 +42,52 @@ class DigitalTwinTimeSeries:
         Returns:
             pd.DataFrame: Reshaped preprocessed dataset
         """
-        data = pd.read_table(path, encoding="ISO-8859–1")
 
-        # Create seperate columns for meta column
-        meta_column = data.columns[0].split(",")
-        meta_column[-1] = meta_column[-1].split("\\")[0]
-        n_meta_columns = len(meta_column)
-        data[meta_column] = data.iloc[:, 0].str.split(",", expand=True)
-        data = data.drop(data.columns[0], axis=1)
+        data = pd.read_csv(path, encoding="ISO-8859–1", sep=self.sep)
 
-        # Reorder meta columns
-        data = data[
-            data.columns[-n_meta_columns:].tolist()
-            + data.columns[:-n_meta_columns].tolist()
-        ]
+        columns = data.columns.tolist()
+        # print(columns)
 
-        # Clean numerical values
-        numerical_columns_i = n_meta_columns
-        data.iloc[:, numerical_columns_i:] = (
-            data.iloc[:, numerical_columns_i:]
-            .replace("[a-zA-Z: ]", "", regex=True)
-            .replace("", 0, regex=True)
-            .astype(np.float32)
-        )
+        fused_cols_i = None
+        unnamed_cols_i = []
+
+        for col in columns:
+            # Check for columns with multiple sub values
+            if "," in col:
+                fused_cols_i = columns.index(col)
+                # Create seperate columns for each sub column
+                meta_column = data.columns[fused_cols_i].split(",")
+                # meta_column[-1] = meta_column[-1].split("\\")[0]
+                n_meta_columns = len(meta_column)
+
+                # print(n_meta_columns)
+                # print(meta_column)
+                data[meta_column] = data.iloc[:, fused_cols_i].str.split(
+                    ",", expand=True
+                )
+                data = data.drop(data.columns[fused_cols_i], axis=1)
+
+                # Restore original column order
+                data = data[
+                    data.columns[-n_meta_columns:].tolist()
+                    + data.columns[:-n_meta_columns].tolist()
+                ]
+            # Unnamed columns in csv files are automatically named Unnamed:X by pandas -> to be dropped
+            elif "Unnamed" in col:
+                unnamed_cols_i.append(columns.index(col))
+
+        if fused_cols_i is not None:
+            # Clean numerical values
+            numerical_columns_i = n_meta_columns
+            data.iloc[:, numerical_columns_i:] = (
+                data.iloc[:, numerical_columns_i:]
+                .replace("[a-zA-Z: ]", "", regex=True)
+                .replace("", 0, regex=True)
+                .astype(np.float32)
+            )
+
+        if unnamed_cols_i:
+            data = data.drop(data.columns[unnamed_cols_i], axis=1)
 
         if self.country_codes:
             data = self._format_country_codes(data)
@@ -87,6 +115,8 @@ class DigitalTwinTimeSeries:
 
             return country.alpha_3
 
+        # print(self.geo_col)
+        # print(data.columns)
         assert self.geo_col in data.columns, "No 'geo' column found in dataset."
 
         # EA = Eurasian Patent Organization
@@ -146,11 +176,13 @@ class DigitalTwinTimeSeries:
             data_slice = self.data[self.data[category_column] == category]
 
             data_slice_melted = data_slice.melt(
-                id_vars="geo",
+                id_vars=self.geo_col,
                 value_vars=self.data.columns[first_year_i:],
                 var_name="year",
             )
-            data_slice_melted["geo"] = data_slice_melted["geo"].astype(str)
+            data_slice_melted[self.geo_col] = data_slice_melted[self.geo_col].astype(
+                str
+            )
             data_slice_melted["value"] = data_slice_melted["value"].astype(np.float32)
             data_slice_melted["year"] = data_slice_melted["year"].astype(str)
 
