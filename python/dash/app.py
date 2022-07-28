@@ -168,7 +168,7 @@ app.layout = html.Div(
                                             },
                                         ),
                                         dcc.Dropdown(
-                                            [",", ";", "\\t", "space"],
+                                            [",", ";", "\t", "space"],
                                             placeholder="Delimiter",
                                             id="delimiter-dropdown-1",
                                             style={
@@ -270,7 +270,7 @@ app.layout = html.Div(
                                             },
                                         ),
                                         dcc.Dropdown(
-                                            [",", ";", "\\t", "space"],
+                                            [",", ";", "\t", "space"],
                                             placeholder="Delimiter",
                                             id="delimiter-dropdown-2",
                                             style={
@@ -1010,6 +1010,7 @@ def preprocess_second_dataset(
                     separator=delimiter_dropdown_2,
                 )
             except Exception as e:
+                print(e)
                 return (
                     no_update,
                     None,
