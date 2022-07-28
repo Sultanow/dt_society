@@ -1,4 +1,4 @@
-name: /Users/joshuasantana/Documents/dt_society/env
+name: dt_society
 channels:
   - conda-forge
   - defaults
@@ -236,4 +236,4 @@ dependencies:
     - debugpy==1.6.2
     - gdal==3.5.1
     - jupyter-core==4.11.1
-prefix: /Users/joshuasantana/Documents/dt_society/env
+prefix: dt_society
