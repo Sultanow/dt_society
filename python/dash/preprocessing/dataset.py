@@ -13,7 +13,6 @@ class DigitalTwinTimeSeries:
         sep: str = "\t",
         to_iso3: bool = True,
         df: pd.DataFrame = None,
-        country_codes: bool = True,
         geo_col: str = "geo",
     ):
         """
@@ -28,7 +27,6 @@ class DigitalTwinTimeSeries:
             geo_col (str, optional): name of the column containing geographical information. Defaults to "geo".
         """
         self.geo_col = geo_col
-        self.country_codes = country_codes
         self.sep = sep
         self.to_iso3 = to_iso3
         self.data = self._preprocess(path) if df is None else df
@@ -85,7 +83,7 @@ class DigitalTwinTimeSeries:
         if unnamed_cols_i:
             data = data.drop(data.columns[unnamed_cols_i], axis=1)
 
-        if self.country_codes:
+        if self.geo_col != "None":
             data = self._format_country_codes(data)
 
         data = self._drop_redundant_columns(data)
@@ -113,18 +111,19 @@ class DigitalTwinTimeSeries:
 
         assert self.geo_col in data.columns, "No 'geo' column found in dataset."
 
-        # EA = Eurasian Patent Organization
-        invalid_country_codes = ["EA", "XK"]
-        old_iso2_codes = {"UK": "GB", "EL": "GR"}
+        if not (data[self.geo_col].str.len() > 9).any():
+            # EA = Eurasian Patent Organization
+            invalid_country_codes = ["EA", "XK"]
+            old_iso2_codes = {"UK": "GB", "EL": "GR"}
 
-        for key in old_iso2_codes:
-            data.loc[data[self.geo_col] == key, self.geo_col] = old_iso2_codes[key]
+            for key in old_iso2_codes:
+                data.loc[data[self.geo_col] == key, self.geo_col] = old_iso2_codes[key]
 
-        # Drop invalid country codes
-        data = data.drop(data[data[self.geo_col].str.len() > 2].index)
-        data = data.drop(data[data[self.geo_col].isin(invalid_country_codes)].index)
+            # Drop invalid country codes
+            data = data.drop(data[data[self.geo_col].str.len() > 2].index)
+            data = data.drop(data[data[self.geo_col].isin(invalid_country_codes)].index)
 
-        data[self.geo_col] = data[self.geo_col].apply(iso2_to_iso3)
+            data[self.geo_col] = data[self.geo_col].apply(iso2_to_iso3)
 
         return data
 
@@ -183,3 +182,16 @@ class DigitalTwinTimeSeries:
             melted_datasets[category] = data_slice_melted
 
         return melted_datasets
+
+    def reshape_wide_to_long(self, value_id_column):
+        reshaped_data = (
+            self.data.set_index([self.geo_col, value_id_column])
+            .rename_axis(["Time"], axis=1)
+            .stack()
+            .unstack(value_id_column)
+            .reset_index()
+        )
+
+        reshaped_data["Time"] = reshaped_data["Time"].str.strip()
+
+        return reshaped_data

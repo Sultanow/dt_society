@@ -10,7 +10,9 @@ import json
 theme = "plotly_dark"
 
 
-def create_multi_line_plot(data: pd.DataFrame, geo_col) -> go.Figure:
+def create_multi_line_plot(
+    data: pd.DataFrame, geo_col, time_column, feature_column
+) -> go.Figure:
     """Creates a line plot with a line for each country
 
     Args:
@@ -20,36 +22,52 @@ def create_multi_line_plot(data: pd.DataFrame, geo_col) -> go.Figure:
         go.Figure: line plot
     """
     fig = go.Figure()
+    if geo_col != "None":
+        for country in data[geo_col].unique().tolist():
 
-    for i, country in enumerate(data[geo_col]):
-        visibility = None
-
-        if country == "DEU":
+            filtered_df = data[data[geo_col] == country]
             visibility = None
-        else:
-            visibility = "legendonly"
 
-        fig.add_trace(
-            go.Scatter(
-                x=data.columns[2:],
-                y=data.iloc[i, 2:],
-                name=country,
-                visible=visibility,
-                mode="lines",
+            if country == "DEU":
+                visibility = None
+            else:
+                visibility = "legendonly"
+
+            fig.add_trace(
+                go.Scatter(
+                    x=filtered_df[time_column],
+                    y=filtered_df[feature_column],
+                    name=country,
+                    visible=visibility,
+                    mode="lines",
+                )
             )
+
+        fig.update_layout(
+            legend_title="Countries",
         )
 
-    fig.update_layout(
-        xaxis_title="Year", legend_title="Countries", template=theme, margin={"t": 30}
-    )
+    else:
+        fig = px.line(x=data[time_column], y=data[feature_column])
 
     fig.update_layout(transition_duration=500)
+
+    fig.update_layout(
+        xaxis_title=time_column,
+        yaxis_title=feature_column,
+        template=theme,
+        margin={"t": 30},
+    )
 
     return fig
 
 
 def create_choropleth_plot(
-    data: pd.DataFrame, facet: str = None, year: str = None
+    data: pd.DataFrame,
+    geo_column: str,
+    feature_column: str,
+    facet: str = None,
+    year: str = None,
 ) -> go.Figure:
     """Creates a choropleth plot with timeline
 
@@ -62,14 +80,14 @@ def create_choropleth_plot(
     with urlopen(
         "https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSON/europe.geojson"
     ) as response:
-        counties = json.load(response)
+        countries = json.load(response)
 
     fig = px.choropleth_mapbox(
-        data[data["year"] == year],
-        locations="geo\\time",
+        data,
+        locations=geo_column,
         featureidkey="properties.ISO3",
-        color="value",
-        geojson=counties,
+        color=feature_column,
+        geojson=countries,
         zoom=2.5,
         center={"lat": 56.5, "lon": 11},
         mapbox_style="carto-positron",
@@ -87,14 +105,7 @@ def create_choropleth_plot(
 
 
 def create_two_line_plot(
-    dataset_1: pd.DataFrame,
-    dataset_2: pd.DataFrame,
-    row_index_1: int,
-    row_index_2: int,
-    column_index_1: int,
-    column_index_2: int,
-    selected_unit_1: str,
-    selected_unit_2: str,
+    datasets: tuple, feature_columns: tuple, time_columns: tuple
 ) -> go.Figure:
     """Creates a line plot with two lines, where the second line belongs to an additional subplot
 
@@ -114,28 +125,25 @@ def create_two_line_plot(
 
     fig = go.Figure(make_subplots(specs=[[{"secondary_y": True}]]))
 
-    fig.add_trace(
-        go.Scatter(
-            x=dataset_1.columns[column_index_1:],
-            y=dataset_1.iloc[row_index_1, column_index_1:],
-            name=selected_unit_1 + " (left ax)",
-            mode="lines",
-        ),
-        secondary_y=False,
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=dataset_2.columns[column_index_2:],
-            y=dataset_2.iloc[row_index_2, column_index_2:],
-            name=selected_unit_2 + " (right ax)",
-            mode="lines",
-        ),
-        secondary_y=True,
-    )
+    for i, df in enumerate(datasets):
+        secondary_y = True if i % 2 else False
+        fig.add_trace(
+            go.Scatter(
+                x=df[time_columns[i]],
+                y=df[feature_columns[i]],
+                name=feature_columns[i] + "",
+                mode="lines",
+            ),
+            secondary_y=secondary_y,
+        )
 
     fig.update_layout(
-        transition_duration=500, template=theme, margin={"t": 20, "b": 20}, height=300
+        transition_duration=500,
+        template=theme,
+        margin={"t": 20, "b": 20},
+        height=300,
+        yaxis1_title=feature_columns[0],
+        yaxis2_title=feature_columns[1],
     )
 
     return fig

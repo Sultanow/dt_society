@@ -47,10 +47,6 @@ def parse_dataset(
     columns = df.data.columns.to_list()
     filtered_columns = [colum for colum in columns if years_excluded_re.match(colum)]
 
-    # if geo_col is not None:
-    #    if geo_col in filtered_columns:
-    #        filtered_columns.remove(geo_col)
-
     df_json = df.data.to_json()
 
     if get_countries:

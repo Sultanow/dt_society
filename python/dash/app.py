@@ -2,6 +2,7 @@ import gzip
 import json
 import base64
 import urllib
+import dash_daq as daq
 from dash import (
     no_update,
     Dash,
@@ -124,33 +125,51 @@ app.layout = html.Div(
                                     id="dataset-1-fail",
                                     message="There was an error processing your data. Please make sure it comes in one of the supported formats.",
                                 ),
-                                dcc.Upload(
-                                    id="table-upload",
-                                    children=html.Div(
-                                        [
-                                            "Drag and Drop or ",
-                                            html.A("Select Files"),
-                                        ]
-                                    ),
-                                    style={
-                                        # "width": "70%",
-                                        # "height": "60px",
-                                        "lineHeight": "60px",
-                                        "borderWidth": "1px",
-                                        "borderStyle": "dashed",
-                                        "borderRadius": "5px",
-                                        "textAlign": "center",
-                                        "margin": "10px",
-                                        "font-size": "12px",
-                                        "padding": "5px",
-                                        "width": "85%",
-                                        "min-width": "170px",
-                                        "max-width": "200px",
-                                    },
+                                html.Div(
+                                    [
+                                        dcc.Upload(
+                                            id="table-upload",
+                                            children=html.Div(
+                                                [
+                                                    "Drag and Drop or ",
+                                                    html.A("Select Files"),
+                                                ]
+                                            ),
+                                            style={
+                                                # "width": "70%",
+                                                # "height": "60px",
+                                                "lineHeight": "60px",
+                                                "borderWidth": "1px",
+                                                "borderStyle": "dashed",
+                                                "borderRadius": "5px",
+                                                "textAlign": "center",
+                                                "margin": "10px",
+                                                "font-size": "12px",
+                                                "padding": "5px",
+                                                "width": "85%",
+                                                "min-width": "170px",
+                                                "max-width": "200px",
+                                            },
+                                        ),
+                                        dcc.Dropdown(
+                                            [",", ";", "\\t", "space"],
+                                            placeholder="Sep",
+                                            id="delimiter-dropdown-1",
+                                            clearable=False,
+                                            style={
+                                                "margin-top": "5px",
+                                                "margin-left": "0px",
+                                                "border-color": "#5c6cfa",
+                                                "background-color": "#111111",
+                                                "font-size": "10px",
+                                            },
+                                        ),
+                                    ],
+                                    style={"display": "flex"},
                                 ),
                                 html.Div(
                                     "Select geo column",
-                                    style={"margin-left": "5px", "textAlign": "center"},
+                                    style={"margin-left": "20px"},
                                 ),
                                 html.Div(
                                     [
@@ -164,64 +183,76 @@ app.layout = html.Div(
                                                 "margin-left": "5px",
                                                 "border-color": "#5c6cfa",
                                                 "background-color": "#111111",
-                                                "width": "90%",
-                                            },
-                                        ),
-                                        dcc.Dropdown(
-                                            [",", ";", "\t", "space"],
-                                            placeholder="Delimiter",
-                                            id="delimiter-dropdown-1",
-                                            style={
-                                                "margin-top": "5px",
-                                                "margin-left": "0px",
-                                                "border-color": "#5c6cfa",
-                                                "background-color": "#111111",
-                                                # "width": "5px",
+                                                "width": "80%",
                                             },
                                         ),
                                     ],
                                     style={"display": "flex"},
                                 ),
                                 html.Div(
-                                    "Available Columns",
+                                    [
+                                        html.Div(
+                                            "Reshape",
+                                            style={
+                                                "margin-top": "15px",
+                                                "font-weight": "bold",
+                                                "margin-left": "20px",
+                                            },
+                                        ),
+                                        daq.BooleanSwitch(
+                                            id="reshape-switch-1",
+                                            style={"margin-top": "10px"},
+                                        ),
+                                    ],
+                                    style={"display": "flex"},
+                                ),
+                                html.Div(
+                                    "Select time column",
                                     style={
                                         "margin-top": "15px",
-                                        "textAlign": "center",
                                         "font-weight": "bold",
-                                        "margin-left": "5px",
+                                        "margin-left": "20px",
                                     },
                                 ),
                                 dcc.Dropdown(
                                     ["none"],
                                     placeholder="No values found",
                                     clearable=False,
-                                    id="columns-dropdown",
+                                    id="time-dropdown-1",
                                     style={
                                         "margin-top": "5px",
                                         "margin-left": "5px",
                                         "border-color": "#5c6cfa",
                                         "background-color": "#111111",
-                                        "width": "90%",
+                                        "width": "80%",
+                                    },
+                                ),
+                                html.Div(
+                                    "Select feature",
+                                    style={
+                                        "margin-top": "15px",
+                                        "font-weight": "bold",
+                                        "margin-left": "20px",
                                     },
                                 ),
                                 dcc.Dropdown(
                                     ["none"],
                                     placeholder="No values found",
                                     clearable=False,
-                                    id="category-dropdown",
+                                    id="feature-dropdown-1",
                                     style={
                                         "margin-top": "5px",
                                         "margin-left": "5px",
                                         "border-color": "#5c6cfa",
                                         "background-color": "#111111",
-                                        "width": "90%",
+                                        "width": "80%",
                                     },
                                 ),
                                 dcc.Store(id="dataset"),
                             ],
                             style={
                                 "display": "inline-block",
-                                "min-width": "180",
+                                "min-width": "170px",
                             },
                         ),
                         html.Div(
@@ -230,29 +261,47 @@ app.layout = html.Div(
                                     id="dataset-2-fail",
                                     message="There was an error while processing your data. Please make sure it comes in one of the supported formats.",
                                 ),
-                                dcc.Upload(
-                                    id="table-upload-2",
-                                    children=html.Div(
-                                        [
-                                            "Drag and Drop or ",
-                                            html.A("Select second file"),
-                                        ]
-                                    ),
-                                    style={
-                                        "lineHeight": "60px",
-                                        "borderWidth": "1px",
-                                        "borderStyle": "dashed",
-                                        "borderRadius": "5px",
-                                        "textAlign": "center",
-                                        "margin": "10px",
-                                        "font-size": "12px",
-                                        "padding": "5px",
-                                        "width": "85%",
-                                        "min-width": "200px",
-                                    },
+                                html.Div(
+                                    [
+                                        dcc.Upload(
+                                            id="table-upload-2",
+                                            children=html.Div(
+                                                [
+                                                    "Drag and Drop or ",
+                                                    html.A("Select second file"),
+                                                ]
+                                            ),
+                                            style={
+                                                "lineHeight": "60px",
+                                                "borderWidth": "1px",
+                                                "borderStyle": "dashed",
+                                                "borderRadius": "5px",
+                                                "textAlign": "center",
+                                                "margin": "10px",
+                                                "font-size": "12px",
+                                                "padding": "5px",
+                                                "width": "85%",
+                                                "min-width": "200px",
+                                            },
+                                        ),
+                                        dcc.Dropdown(
+                                            [",", ";", "\\t", "space"],
+                                            placeholder="Sep",
+                                            id="delimiter-dropdown-2",
+                                            clearable=False,
+                                            style={
+                                                "margin-top": "5px",
+                                                "margin-left": "0px",
+                                                "border-color": "#5c6cfa",
+                                                "background-color": "#111111",
+                                                "font-size": "10px",
+                                            },
+                                        ),
+                                    ],
+                                    style={"display": "flex"},
                                 ),
                                 html.Div(
-                                    "Select geo column", style={"textAlign": "center"}
+                                    "Select geo column", style={"margin-left": "20px"}
                                 ),
                                 html.Div(
                                     [
@@ -266,57 +315,69 @@ app.layout = html.Div(
                                                 "margin-left": "5px",
                                                 "border-color": "#5c6cfa",
                                                 "background-color": "#111111",
-                                                "width": "85%",
-                                            },
-                                        ),
-                                        dcc.Dropdown(
-                                            [",", ";", "\t", "space"],
-                                            placeholder="Delimiter",
-                                            id="delimiter-dropdown-2",
-                                            style={
-                                                "margin-top": "5px",
-                                                "margin-left": "0px",
-                                                "border-color": "#5c6cfa",
-                                                "background-color": "#111111",
-                                                # "width": "5px",
+                                                "width": "80%",
                                             },
                                         ),
                                     ],
                                     style={"display": "flex"},
                                 ),
                                 html.Div(
-                                    "Available Columns",
+                                    [
+                                        html.Div(
+                                            "Reshape",
+                                            style={
+                                                "margin-top": "15px",
+                                                "font-weight": "bold",
+                                                "margin-left": "20px",
+                                            },
+                                        ),
+                                        daq.BooleanSwitch(
+                                            id="reshape-switch-2",
+                                            style={"margin-top": "10px"},
+                                        ),
+                                    ],
+                                    style={"display": "flex"},
+                                ),
+                                html.Div(
+                                    "Set time column",
                                     style={
                                         "margin-top": "15px",
-                                        "textAlign": "center",
                                         "font-weight": "bold",
-                                        "margin-left": "5px",
+                                        "margin-left": "20px",
                                     },
                                 ),
                                 dcc.Dropdown(
                                     ["none"],
                                     placeholder="No values found",
                                     clearable=False,
-                                    id="columns-dropdown-2",
+                                    id="time-dropdown-2",
                                     style={
                                         "margin-top": "5px",
                                         "margin-left": "5px",
                                         "border-color": "#5c6cfa",
                                         "background-color": "#111111",
-                                        "width": "90%",
+                                        "width": "80%",
+                                    },
+                                ),
+                                html.Div(
+                                    "Select feature",
+                                    style={
+                                        "margin-top": "15px",
+                                        "font-weight": "bold",
+                                        "margin-left": "20px",
                                     },
                                 ),
                                 dcc.Dropdown(
                                     ["none"],
                                     placeholder="No values found",
                                     clearable=False,
-                                    id="category-dropdown-2",
+                                    id="feature-dropdown-2",
                                     style={
                                         "margin-top": "5px",
                                         "margin-left": "5px",
                                         "border-color": "#5c6cfa",
                                         "background-color": "#111111",
-                                        "width": "90%",
+                                        "width": "80%",
                                     },
                                 ),
                                 dcc.Store(id="dataset-2"),
@@ -331,24 +392,31 @@ app.layout = html.Div(
                         html.Div(
                             [
                                 html.Div(
-                                    "Toggle displayed data",
-                                    style={"margin": "10px", "font-weight": "bold"},
-                                ),
-                                html.Div(
                                     [
-                                        dcc.RadioItems(
-                                            ["Dataset 1", "Dataset 2"],
-                                            "Dataset 1",
-                                            id="data-selector",
-                                            inline=False,
-                                            style={"display": "flex"},
+                                        html.Div(
+                                            [
+                                                html.Div(
+                                                    "Toggle displayed data",
+                                                    style={
+                                                        "margin": "10px",
+                                                        "font-weight": "bold",
+                                                    },
+                                                ),
+                                                dcc.RadioItems(
+                                                    ["Dataset 1", "Dataset 2"],
+                                                    "Dataset 1",
+                                                    id="data-selector",
+                                                    inline=False,
+                                                    style={"display": "flex"},
+                                                ),
+                                            ]
                                         ),
                                         html.Button(
                                             "Demo",
                                             id="demo-button",
                                             n_clicks=0,
                                             style={
-                                                "margin-right": "5px",
+                                                "margin-right": "20px",
                                                 "float": "right",
                                                 "display": "flex",
                                                 "margin-left": "auto",
@@ -362,13 +430,13 @@ app.layout = html.Div(
                             style={
                                 "margin-top": "20px",
                                 "margin-bottom": "10px",
-                                "margin-left": "10px",
+                                # "margin-left": "10px",
                             },
                         ),
                     ],
                     style={
                         "backgroundColor": "#111111",
-                        "width": "30%",
+                        "width": "39%",
                     },
                 ),
                 html.Div(
@@ -421,14 +489,14 @@ app.layout = html.Div(
                     style={
                         "backroundColor": "#ffffff",
                         "margin-left": "10px",
-                        "width": "65%",
+                        "width": "60%",
                         "max-height": "318px",
                     },
                 ),
             ],
             style={
                 "backgroundColor": "#232323",
-                "height": "400px",
+                "height": "440px",
                 "display": "flex",
             },
         ),
@@ -829,10 +897,10 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output("columns-dropdown", "options"),
+    Output("time-dropdown-1", "options"),
     Output("dataset", "data"),
     Output("table-upload", "children"),
-    Output("columns-dropdown", "value"),
+    Output("time-dropdown-1", "value"),
     Output("second-file-upload", "style"),
     Output("geo-dropdown-1", "options"),
     Output("dataset-1-fail", "displayed"),
@@ -843,6 +911,8 @@ app.layout = html.Div(
     Input("demo-button", "n_clicks"),
     Input("geo-dropdown-1", "value"),
     Input("delimiter-dropdown-1", "value"),
+    Input("reshape-switch-1", "on"),
+    Input("dataset", "data"),
 )
 def preprocess_dataset(
     file: str,
@@ -851,6 +921,8 @@ def preprocess_dataset(
     demo_button_clicks: int,
     geo_dropdown_1: str,
     delimiter_dropdown_1: str,
+    reshape_switch_status: bool,
+    data: str,
 ) -> tuple:
     """Processes file upload
 
@@ -867,6 +939,9 @@ def preprocess_dataset(
     """
     changed_items = [p["prop_id"] for p in callback_context.triggered][0]
 
+    if delimiter_dropdown_1 == "\\t":
+        delimiter_dropdown_1 = "\t"
+
     if (
         (file is not None or "demo-button" in changed_items)
         and geo_dropdown_1 is not None
@@ -876,7 +951,9 @@ def preprocess_dataset(
             try:
                 content = file.split(",")
                 df, filtered_cols = parse_dataset(
-                    content[-1], separator=delimiter_dropdown_1, geo_col=geo_dropdown_1
+                    content[-1],
+                    separator=delimiter_dropdown_1,
+                    geo_col=geo_dropdown_1,
                 )
             except Exception as e:
                 print(e)
@@ -902,6 +979,8 @@ def preprocess_dataset(
         if not filtered_cols:
 
             filtered_cols = ["none"]
+        else:
+            filtered_cols.insert(0, "None")
 
         show_second_file_upload = {"display": "inline-block"}
 
@@ -909,7 +988,7 @@ def preprocess_dataset(
             filtered_cols,
             df,
             upload_children,
-            filtered_cols[0],
+            no_update,
             show_second_file_upload,
             filtered_cols,
             False,
@@ -922,6 +1001,7 @@ def preprocess_dataset(
     ):
         if file:
             columns = get_available_columns(file, separator=delimiter_dropdown_1)
+            columns.insert(0, "None")
         elif "demo-button" in changed_items:
             filename = "arbeitslosenquote_eu.tsv"
             df_url = "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/tipsun20.tsv.gz"
@@ -944,16 +1024,31 @@ def preprocess_dataset(
             False,
             file,
         )
+    elif data and reshape_switch_status:
+        df = pd.read_json(data)
+        df = DigitalTwinTimeSeries(df=df, geo_col=geo_dropdown_1)
+        df = df.reshape_wide_to_long("age")
+
+        return (
+            df.columns.to_list(),
+            df.to_json(),
+            no_update,
+            no_update,
+            no_update,
+            df.columns.to_list(),
+            False,
+            None,
+        )
 
     else:
         raise exceptions.PreventUpdate
 
 
 @app.callback(
-    Output("columns-dropdown-2", "options"),
+    Output("time-dropdown-2", "options"),
     Output("dataset-2", "data"),
     Output("table-upload-2", "children"),
-    Output("columns-dropdown-2", "value"),
+    Output("time-dropdown-2", "value"),
     Output("country-dropdown", "options"),
     Output("country-dropdown", "value"),
     Output("data-selector", "style"),
@@ -968,6 +1063,9 @@ def preprocess_dataset(
     Input("demo-button", "n_clicks"),
     Input("geo-dropdown-2", "value"),
     Input("delimiter-dropdown-2", "value"),
+    Input("reshape-switch-2", "on"),
+    Input("dataset-2", "data"),
+    Input("geo-dropdown-1", "value"),
 )
 def preprocess_second_dataset(
     file: str,
@@ -977,6 +1075,9 @@ def preprocess_second_dataset(
     demo_button_clicks: int,
     geo_dropdown_2: str,
     delimiter_dropdown_2: str,
+    reshape_switch_status_2: bool,
+    data_2: str,
+    geo_dropdown_1: str,
 ) -> tuple:
     """Processes additional dataset
 
@@ -994,12 +1095,15 @@ def preprocess_second_dataset(
     """
 
     changed_items = [p["prop_id"] for p in callback_context.triggered][0]
+    if delimiter_dropdown_2 == "\\t":
+        delimiter_dropdown_2 = "\t"
 
     if (
         (file is not None or "demo-button" in changed_items)
         and geo_dropdown_2 is not None
         and delimiter_dropdown_2
     ):
+
         if file:
             try:
                 content = file.split(",")
@@ -1031,8 +1135,12 @@ def preprocess_second_dataset(
                 df_url, upload_file=False, get_countries=True
             )
 
-        countries_df_1 = pd.read_json(data)["geo\\time"].unique().tolist()
-        countries = [c for c in countries_df_1 if c in set(countries)]
+        if geo_dropdown_1 != "None":
+            countries_df_1 = pd.read_json(data)[geo_dropdown_1].unique().tolist()
+            countries = [c for c in countries_df_1 if c in set(countries)]
+
+        else:
+            countries = ["None"]
 
         if "table-upload" in changed_items or "demo-button" in changed_items:
             upload_children["props"]["children"] = html.Div([filename])
@@ -1044,7 +1152,7 @@ def preprocess_second_dataset(
             filtered_cols,
             df_2,
             upload_children,
-            filtered_cols[0],
+            no_update,
             countries,
             countries[0],
             radio_visibility,
@@ -1055,10 +1163,13 @@ def preprocess_second_dataset(
         )
     elif (
         (file is not None or "demo-button" in changed_items)
+        and not data_2
         and geo_dropdown_2 is None
-        and not data
         and delimiter_dropdown_2
+        and "geo-dropdown-1" not in changed_items
+        and "dataset" not in changed_items
     ):
+
         if file:
             columns = get_available_columns(file, separator=delimiter_dropdown_2)
         elif "demo-button" in changed_items:
@@ -1086,18 +1197,39 @@ def preprocess_second_dataset(
             False,
             file,
         )
+    elif data_2 and reshape_switch_status_2:
+        df = pd.read_json(data_2)
+        df = DigitalTwinTimeSeries(df=df, geo_col=geo_dropdown_2)
+        df = df.reshape_wide_to_long("unit")
+
+        return (
+            df.columns.to_list(),
+            df.to_json(),
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            df.columns.to_list(),
+            False,
+            None,
+        )
 
     else:
         raise exceptions.PreventUpdate
 
 
 @app.callback(
-    Output("category-dropdown", "options"),
-    Output("category-dropdown", "value"),
-    Input("columns-dropdown", "value"),
+    Output("feature-dropdown-1", "options"),
+    Output("feature-dropdown-1", "value"),
+    Input("time-dropdown-1", "value"),
     Input("dataset", "data"),
+    Input("geo-dropdown-1", "value"),
 )
-def update_sub_category_dropdown(selected_column: str, dataset: str) -> tuple:
+def update_sub_category_dropdown(
+    time_dropdown_1: str, dataset: str, geo_dropdown_1: str
+) -> tuple:
     """Updates the sub category dropdown based on the selected column
 
     Args:
@@ -1110,21 +1242,27 @@ def update_sub_category_dropdown(selected_column: str, dataset: str) -> tuple:
     Returns:
         tuple: sub categories and autoselect first sub category
     """
-    if dataset and selected_column != "none":
-        sub_categories = get_selected_category_column(dataset, selected_column)
-        return sub_categories, sub_categories[0]
+    if dataset and time_dropdown_1:
+        df = pd.read_json(dataset)
+        # if geo_dropdown_1 != "None":
+        #    df = df.drop(columns=[time_dropdown_1, geo_dropdown_1])
+
+        return df.columns.to_list(), no_update
 
     else:
         raise exceptions.PreventUpdate
 
 
 @app.callback(
-    Output("category-dropdown-2", "options"),
-    Output("category-dropdown-2", "value"),
-    Input("columns-dropdown-2", "value"),
+    Output("feature-dropdown-2", "options"),
+    Output("feature-dropdown-2", "value"),
+    Input("time-dropdown-2", "value"),
     Input("dataset-2", "data"),
+    Input("geo-dropdown-2", "value"),
 )
-def update_second_sub_category_dropdown(selected_column: str, dataset: str) -> tuple:
+def update_second_sub_category_dropdown(
+    time_dropdown_2: str, dataset: str, geo_dropdown_2: str
+) -> tuple:
     """Updates the second sub category dropdown based on the selected column
     in the second dataset
 
@@ -1138,9 +1276,10 @@ def update_second_sub_category_dropdown(selected_column: str, dataset: str) -> t
     Returns:
         tuple: sub categories and autoselect first sub category
     """
-    if dataset and selected_column != "none":
-        sub_categories = get_selected_category_column(dataset, selected_column)
-        return sub_categories, sub_categories[0]
+    if dataset and time_dropdown_2:
+        df = pd.read_json(dataset)
+        df = df.drop(columns=[time_dropdown_2, geo_dropdown_2])
+        return df.columns.to_list(), no_update
 
     else:
         raise exceptions.PreventUpdate
@@ -1158,6 +1297,8 @@ def update_second_sub_category_dropdown(selected_column: str, dataset: str) -> t
     Input("data-selector", "value"),
     Input("geo-dropdown-1", "value"),
     Input("geo-dropdown-2", "value"),
+    Input("time-dropdown-1", "value"),
+    Input("time-dropdown-2", "value"),
 )
 def update_year_dropdown_stats(
     dataset: str,
@@ -1165,6 +1306,8 @@ def update_year_dropdown_stats(
     selected_dataset: str,
     geo_dropdown_1: str,
     geo_dropdown_2: str,
+    time_dropdown_1: str,
+    time_dropdown_2: str,
 ) -> tuple:
     """Fills dropdown in stats section with available years in the selected dataset
 
@@ -1181,29 +1324,34 @@ def update_year_dropdown_stats(
     """
 
     if (
-        (dataset and geo_dropdown_1) or (dataset_2 and geo_dropdown_2)
-    ) and selected_dataset:
+        dataset
+        and geo_dropdown_1
+        and time_dropdown_1
+        and selected_dataset == "Dataset 1"
+    ) or (
+        dataset_2
+        and geo_dropdown_2
+        and time_dropdown_2
+        and selected_dataset == "Dataset 2"
+    ):
 
         datasets = {
-            "Dataset 1": [dataset, geo_dropdown_1],
-            "Dataset 2": [dataset_2, geo_dropdown_2],
+            "Dataset 1": (dataset, geo_dropdown_1, time_dropdown_1),
+            "Dataset 2": (dataset_2, geo_dropdown_2, time_dropdown_2),
         }
+
+        time_column = datasets[selected_dataset][2]
+        geo_column = datasets[selected_dataset][1]
 
         df = pd.read_json(datasets[selected_dataset][0])
 
-        year_re = re.compile("[1-2][0-9]{3}")
-
-        year_columns = [
-            column for column in df.columns.to_list() if year_re.match(column)
-        ]
-
         return (
-            year_columns,
-            year_columns[0],
-            df[datasets[selected_dataset][1]].unique(),
-            df[datasets[selected_dataset][1]].unique()[0],
-            year_columns,
-            year_columns[0],
+            df[time_column].unique(),
+            df[time_column].unique()[0],
+            df[geo_column].unique(),
+            df[geo_column].unique()[0],
+            df[time_column].unique(),
+            df[time_column].unique()[0],
         )
     else:
         raise exceptions.PreventUpdate
@@ -1260,10 +1408,10 @@ def update_table_content(
     Input("geo-dropdown-2", "value"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
-    Input("category-dropdown", "value"),
-    Input("columns-dropdown", "value"),
-    Input("category-dropdown-2", "value"),
-    Input("columns-dropdown-2", "value"),
+    Input("feature-dropdown-1", "value"),
+    Input("time-dropdown-1", "value"),
+    Input("feature-dropdown-2", "value"),
+    Input("time-dropdown-2", "value"),
 )
 def update_stats(
     selected_dataset: str,
@@ -1277,10 +1425,10 @@ def update_stats(
     geo_dropdown_2: str,
     dataset: str,
     dataset_2: str,
-    selected_column: str,
-    selected_subcategory: str,
-    selected_column_2: str,
-    selected_sub_category_2: str,
+    feature_dropdown_1: str,
+    time_dropdown_1: str,
+    feature_dropdown_2: str,
+    time_dropdown_2: str,
 ) -> tuple:
     """Compute and display mean, max, min and growth value (per country) for selected dataset
 
@@ -1310,85 +1458,83 @@ def update_stats(
 
     if (
         dataset
-        and selected_column
-        and selected_subcategory != "none"
-        and (geo_dropdown_1 or geo_dropdown_2)
+        and feature_dropdown_1
+        and time_dropdown_1
+        and geo_dropdown_1
+        and selected_dataset == "Dataset 1"
+    ) or (
+        dataset_2
+        and feature_dropdown_2
+        and time_dropdown_2
+        and geo_dropdown_2
+        and selected_dataset == "Dataset 2"
     ):
         datasets = {
             "Dataset 1": [
                 dataset,
-                selected_column,
-                selected_subcategory,
+                feature_dropdown_1,
+                time_dropdown_1,
                 geo_dropdown_1,
             ],
             "Dataset 2": [
                 dataset_2,
-                selected_column_2,
-                selected_sub_category_2,
+                feature_dropdown_2,
+                time_dropdown_2,
                 geo_dropdown_2,
             ],
         }
 
         df = pd.read_json(datasets[selected_dataset][0])
-        filtered_df = df[
-            df[datasets[selected_dataset][2]] == datasets[selected_dataset][1]
-        ]
 
-        year_column_i = filtered_df.columns.get_loc(year_dropdown_stats)
+        time_column = datasets[selected_dataset][2]
+        year = year_dropdown_stats
+        geo_column = datasets[selected_dataset][3]
+        feature_column = datasets[selected_dataset][1]
+
+        filtered_df = df[df[time_column] == year][[geo_column, feature_column]]
+
+        filtered_df_by_country = df[
+            (df[geo_column] == country_dropdown_stats)
+            & (df[time_column] >= year_dropdown_stats)
+        ]
 
         avg_stat_children.clear()
 
         avg_stat_children.append(
-            "Mean \n" + str(round(filtered_df.iloc[:, year_column_i].mean(axis=0), 2))
+            "Mean \n"
+            + str(round(filtered_df[datasets[selected_dataset][1]].mean(axis=0), 2))
         )
 
-        max_val_country = filtered_df.iloc[:, year_column_i].max()
-        i_max = np.where(filtered_df.iloc[:, year_column_i] == max_val_country)[0]
+        start_value = filtered_df_by_country[feature_column].values[0]
+        end_value = filtered_df_by_country[feature_column].values[-1]
 
-        max_country = str(filtered_df.iloc[i_max, 1].values[0])
-
-        min_val_country = (
-            filtered_df[filtered_df.iloc[:, year_column_i] >= 0.01]
-            .iloc[:, year_column_i]
-            .min()
-        )
-        i_min = np.where(filtered_df.iloc[:, year_column_i] == min_val_country)[0]
-
-        min_country = str(filtered_df.iloc[i_min, 1].values[0])
-
-        i_country = np.where(
-            filtered_df[datasets[selected_dataset][3]] == country_dropdown_stats
-        )[0]
-
-        growth_rate = (
-            (
-                filtered_df.iloc[i_country, -1]
-                - filtered_df.iloc[i_country, year_column_i]
-            )
-            / filtered_df.iloc[i_country, year_column_i]
-        ) * 100
-
-        if np.isinf(growth_rate.values[0]):
-            growth_rate = "Data incomplete"
-        else:
-            growth_rate = str(round(growth_rate.values[0], 2)) + "%"
+        growth_rate = ((end_value - start_value) / end_value) * 100
 
         max_stat_children.clear()
+
+        max_country = filtered_df.loc[
+            filtered_df[datasets[selected_dataset][1]].idxmax()
+        ][datasets[selected_dataset][3]]
+
         max_stat_children.append(
             "max:\n"
-            + str(round(filtered_df.iloc[i_max, year_column_i].values[0], 2))
+            + str(round(filtered_df[datasets[selected_dataset][1]].max(), 2))
             + " - "
             + max_country
         )
         min_stat_children.clear()
+
+        min_country = filtered_df.loc[
+            filtered_df[datasets[selected_dataset][1]].idxmin()
+        ][datasets[selected_dataset][3]]
         min_stat_children.append(
             "min: \n"
-            + str(round(filtered_df.iloc[i_min, year_column_i].values[0], 2))
+            + str(round(filtered_df[datasets[selected_dataset][1]].min(), 2))
             + " - "
             + min_country
         )
         growth_stat_children.clear()
-        growth_stat_children.append("Growth rate:\n" + growth_rate)
+        growth_stat_children.append("Growth rate:\n" + str(round(growth_rate, 2)))
 
         return (
             avg_stat_children,
@@ -1402,11 +1548,11 @@ def update_stats(
 
 @app.callback(
     Output("line-div", "children"),
-    Input("category-dropdown", "value"),
-    Input("columns-dropdown", "value"),
+    Input("feature-dropdown-1", "value"),
+    Input("time-dropdown-1", "value"),
     Input("dataset", "data"),
-    Input("category-dropdown-2", "value"),
-    Input("columns-dropdown-2", "value"),
+    Input("feature-dropdown-2", "value"),
+    Input("time-dropdown-2", "value"),
     Input("dataset-2", "data"),
     State("line-div", "children"),
     Input("data-selector", "value"),
@@ -1414,11 +1560,11 @@ def update_stats(
     Input("geo-dropdown-2", "value"),
 )
 def update_line_plot(
-    selected_sub_category: str,
-    selected_column: str,
+    feature_dropdown_1: str,
+    time_dropdown_1: str,
     dataset: str,
-    selected_sub_category_2: str,
-    selected_column_2: str,
+    feature_dropdown_2: str,
+    time_dropdown_2: str,
     dataset_2: str,
     timeline_children: list,
     selected_dataset: str,
@@ -1448,32 +1594,45 @@ def update_line_plot(
 
     if (
         dataset
-        and selected_sub_category
-        and selected_column != "none"
-        and (geo_dropdown_1 or geo_dropdown_2)
+        and feature_dropdown_1
+        and time_dropdown_1
+        and geo_dropdown_1
+        and selected_dataset == "Dataset 1"
+    ) or (
+        dataset_2
+        and feature_dropdown_2
+        and time_dropdown_2
+        and geo_dropdown_2
+        and selected_dataset == "Dataset 2"
     ):
 
         datasets = {
             "Dataset 1": (
                 dataset,
-                selected_sub_category,
-                selected_column,
+                feature_dropdown_1,
+                time_dropdown_1,
                 geo_dropdown_1,
             ),
             "Dataset 2": (
                 dataset_2,
-                selected_sub_category_2,
-                selected_column_2,
+                feature_dropdown_2,
+                time_dropdown_2,
                 geo_dropdown_2,
             ),
         }
 
         df = pd.read_json(datasets[selected_dataset][0])
-        filtered_df = df[
-            df[datasets[selected_dataset][2]] == datasets[selected_dataset][1]
-        ]
 
-        fig = create_multi_line_plot(filtered_df, geo_col=datasets[selected_dataset][3])
+        time_column = datasets[selected_dataset][2]
+        feature_column = datasets[selected_dataset][1]
+        geo_column = datasets[selected_dataset][3]
+
+        fig = create_multi_line_plot(
+            df,
+            geo_col=geo_column,
+            time_column=time_column,
+            feature_column=feature_column,
+        )
 
         timeline_children.clear()
 
@@ -1481,7 +1640,7 @@ def update_line_plot(
 
         return timeline_children
 
-    elif dataset and selected_column == "none":
+    elif dataset and time_dropdown_1 == "none":
 
         df = pd.read_json(dataset)
         fig = create_multi_line_plot(df)
@@ -1498,12 +1657,12 @@ def update_line_plot(
 
 @app.callback(
     Output("map-div", "children"),
-    Input("category-dropdown", "value"),
-    Input("columns-dropdown", "value"),
+    Input("feature-dropdown-1", "value"),
+    Input("time-dropdown-1", "value"),
     Input("dataset", "data"),
     State("map-div", "children"),
-    Input("category-dropdown-2", "value"),
-    Input("columns-dropdown-2", "value"),
+    Input("feature-dropdown-2", "value"),
+    Input("time-dropdown-2", "value"),
     Input("dataset-2", "data"),
     Input("geo-dropdown-2", "value"),
     Input("geo-dropdown-1", "value"),
@@ -1511,12 +1670,12 @@ def update_line_plot(
     Input("data-selector", "value"),
 )
 def update_choropleth(
-    selected_sub_category: str,
-    selected_column: str,
+    feature_dropdown_1: str,
+    time_dropdown_1: str,
     dataset: str,
     map_children: list,
-    selected_sub_category_2: str,
-    selected_column_2: str,
+    feature_dropdown_2: str,
+    time_dropdown_2: str,
     dataset_2: str,
     geo_dropdown_2: str,
     geo_dropdown_1: str,
@@ -1547,43 +1706,44 @@ def update_choropleth(
 
     if (
         dataset
-        and selected_sub_category
-        and selected_column != "none"
+        and feature_dropdown_1
+        and time_dropdown_1
         and geo_dropdown_1
+        and selected_dataset == "Dataset 1"
     ) or (
         dataset_2
-        and selected_sub_category_2
-        and selected_column_2 != "none"
+        and feature_dropdown_2
+        and time_dropdown_2
         and geo_dropdown_2
+        and selected_dataset == "Dataset 2"
     ):
 
         datasets = {
             "Dataset 1": (
                 dataset,
-                selected_sub_category,
-                selected_column,
+                feature_dropdown_1,
+                time_dropdown_1,
                 geo_dropdown_1,
             ),
             "Dataset 2": (
                 dataset_2,
-                selected_sub_category_2,
-                selected_column_2,
+                feature_dropdown_2,
+                time_dropdown_2,
                 geo_dropdown_2,
             ),
         }
 
+        geo_column = datasets[selected_dataset][3]
+        feature_column = datasets[selected_dataset][1]
+        time_column = datasets[selected_dataset][2]
+
         df = pd.read_json(datasets[selected_dataset][0])
 
-        filtered_df = DigitalTwinTimeSeries(
-            df=df, geo_col=datasets[selected_dataset][3]
-        )
-        filtered_df = filtered_df.melt_data(
-            category_column=datasets[selected_dataset][2]
-        )
+        filtered_df = df[df[time_column] == selected_year_map]
 
-        filtered_df = filtered_df[datasets[selected_dataset][1]]
-
-        fig = create_choropleth_plot(filtered_df, year=selected_year_map)
+        fig = create_choropleth_plot(
+            filtered_df, geo_column=geo_column, feature_column=feature_column
+        )
 
         if map_children:
             map_children.clear()
@@ -1598,11 +1758,11 @@ def update_choropleth(
 
 @app.callback(
     Output("max_country-comparison-div", "children"),
-    Input("category-dropdown", "value"),
-    Input("columns-dropdown", "value"),
+    Input("feature-dropdown-1", "value"),
+    Input("time-dropdown-1", "value"),
     Input("dataset", "data"),
-    Input("category-dropdown-2", "value"),
-    Input("columns-dropdown-2", "value"),
+    Input("feature-dropdown-2", "value"),
+    Input("time-dropdown-2", "value"),
     Input("country-dropdown", "value"),
     Input("dataset-2", "data"),
     State("max_country-comparison-div", "children"),
@@ -1610,11 +1770,11 @@ def update_choropleth(
     Input("geo-dropdown-1", "value"),
 )
 def update_max_country_compare(
-    selected_sub_category: str,
-    selected_column: str,
+    feature_dropdown_1: str,
+    time_dropdown_1: str,
     dataset: str,
-    selected_sub_category_2: str,
-    selected_column_2: str,
+    feature_dropdown_2: str,
+    time_dropdown_2: str,
     selected_country: str,
     dataset_2: str,
     comparison_children: str,
@@ -1644,8 +1804,8 @@ def update_max_country_compare(
 
     if (
         selected_country
-        and selected_sub_category_2
-        and selected_sub_category
+        and feature_dropdown_2
+        and feature_dropdown_1
         and dataset
         and dataset_2
         and geo_dropdown_1
@@ -1655,37 +1815,25 @@ def update_max_country_compare(
         df_2 = pd.read_json(dataset_2)
 
         filtered_dfs = []
-        rows = []
         selected_values = (
-            (selected_column, selected_sub_category, geo_dropdown_1),
-            (selected_column_2, selected_sub_category_2, geo_dropdown_2),
+            (time_dropdown_1, feature_dropdown_1, geo_dropdown_1),
+            (time_dropdown_2, feature_dropdown_2, geo_dropdown_2),
         )
 
         for i, df in enumerate((df, df_2)):
-            filtered_df = df[
-                df[selected_values[i][0]] == selected_values[i][1]
-            ].reset_index(drop=True)
+            geo_column = selected_values[i][2]
 
-            row = filtered_df[
-                filtered_df[selected_values[i][2]] == selected_country
-            ].index[0]
+            if selected_country != "None":
+                filtered_df = df[df[geo_column] == selected_country]
+            else:
+                filtered_df = df
 
             filtered_dfs.append(filtered_df)
-            rows.append(row)
-
-        i_1, i_2 = find_column_intersection_indeces(
-            (filtered_dfs[0].columns.tolist(), filtered_dfs[1].columns.tolist())
-        )
 
         fig = create_two_line_plot(
-            filtered_dfs[0],
-            filtered_dfs[1],
-            rows[0],
-            rows[1],
-            i_1,
-            i_2,
-            selected_sub_category,
-            selected_sub_category_2,
+            filtered_dfs,
+            (feature_dropdown_1, feature_dropdown_2),
+            (time_dropdown_1, time_dropdown_2),
         )
 
         comparison_children.clear()
