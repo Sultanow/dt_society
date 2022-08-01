@@ -944,6 +944,8 @@ app.layout = html.Div(
     Output("table-upload", "contents"),
     Output("reshape-dropdown-1", "options"),
     Output("reshape-dropdown-1", "disabled"),
+    Output("geo-dropdown-1", "value"),
+    Output("reshape-switch-1", "on"),
     Input("table-upload", "contents"),
     Input("table-upload", "filename"),
     State("table-upload", "children"),
@@ -980,6 +982,9 @@ def preprocess_dataset(
     """
     changed_items = [p["prop_id"] for p in callback_context.triggered][0]
 
+    if "table-upload" in changed_items:
+        geo_dropdown_1 = None
+
     if delimiter_dropdown_1 == "\\t":
         delimiter_dropdown_1 = "\t"
 
@@ -1007,6 +1012,8 @@ def preprocess_dataset(
                     no_update,
                     True,
                     None,
+                    no_update,
+                    no_update,
                     no_update,
                     no_update,
                 )
@@ -1038,6 +1045,8 @@ def preprocess_dataset(
             None,
             filtered_cols,
             no_update,
+            no_update,
+            no_update,
         )
     elif (
         (file is not None or "demo-button" in changed_items)
@@ -1059,6 +1068,22 @@ def preprocess_dataset(
 
         upload_children["props"]["children"] = html.Div([filename])
 
+        if "table-upload" in changed_items:
+            return (
+                [],
+                None,
+                upload_children,
+                no_update,
+                no_update,
+                columns,
+                False,
+                file,
+                [],
+                False,
+                None,
+                False,
+            )
+
         return (
             no_update,
             None,
@@ -1070,8 +1095,15 @@ def preprocess_dataset(
             file,
             no_update,
             no_update,
+            no_update,
+            no_update,
         )
-    elif data and reshape_switch_status and reshape_dropdown_1:
+    elif (
+        data
+        and reshape_switch_status
+        and reshape_dropdown_1
+        and "reshape-switch-1" in changed_items
+    ):
         df = pd.read_json(data)
         df = DigitalTwinTimeSeries(df=df, geo_col=geo_dropdown_1)
         df = df.reshape_wide_to_long(reshape_dropdown_1)
@@ -1087,6 +1119,8 @@ def preprocess_dataset(
             None,
             no_update,
             True,
+            no_update,
+            no_update,
         )
 
     else:
@@ -1108,6 +1142,8 @@ def preprocess_dataset(
     Output("reshape-dropdown-2", "options"),
     Output("reshape-dropdown-2", "disabled"),
     Output("data-selector-div", "style"),
+    Output("geo-dropdown-2", "value"),
+    Output("reshape-switch-2", "on"),
     Input("table-upload-2", "contents"),
     Input("table-upload-2", "filename"),
     State("table-upload-2", "children"),
@@ -1149,6 +1185,10 @@ def preprocess_second_dataset(
     """
 
     changed_items = [p["prop_id"] for p in callback_context.triggered][0]
+
+    if "table-upload" in changed_items:
+        geo_dropdown_2 = None
+
     if delimiter_dropdown_2 == "\\t":
         delimiter_dropdown_2 = "\t"
 
@@ -1220,15 +1260,18 @@ def preprocess_second_dataset(
             filtered_cols,
             no_update,
             radio_visibility,
+            no_update,
+            no_update,
         )
     elif (
         (file is not None or "demo-button" in changed_items)
-        and not data_2
+        # and not data_2
         and geo_dropdown_2 is None
         and delimiter_dropdown_2
         and "geo-dropdown-1" not in changed_items
         and "dataset" not in changed_items
     ):
+        print("hi")
 
         if file:
             columns = get_available_columns(file, separator=delimiter_dropdown_2)
@@ -1243,6 +1286,26 @@ def preprocess_second_dataset(
             file = base64.b64encode(content).decode("utf-8")
 
         upload_children["props"]["children"] = html.Div([filename])
+
+        if "table-upload" in changed_items:
+            return (
+                [],
+                None,
+                upload_children,
+                no_update,
+                no_update,
+                no_update,
+                no_update,
+                no_update,
+                columns,
+                False,
+                file,
+                [],
+                False,
+                no_update,
+                None,
+                False,
+            )
 
         return (
             no_update,
@@ -1259,8 +1322,15 @@ def preprocess_second_dataset(
             no_update,
             no_update,
             no_update,
+            no_update,
+            no_update,
         )
-    elif data_2 and reshape_switch_status_2 and reshape_dropdown_2:
+    elif (
+        data_2
+        and reshape_switch_status_2
+        and reshape_dropdown_2
+        and "reshape-switch-2" in changed_items
+    ):
         df = pd.read_json(data_2)
         df = DigitalTwinTimeSeries(df=df, geo_col=geo_dropdown_2)
         df = df.reshape_wide_to_long(reshape_dropdown_2)
@@ -1280,9 +1350,12 @@ def preprocess_second_dataset(
             no_update,
             True,
             no_update,
+            no_update,
+            no_update,
         )
 
     else:
+        print("no update")
         raise exceptions.PreventUpdate
 
 
@@ -1308,12 +1381,16 @@ def update_sub_category_dropdown(
     Returns:
         tuple: sub categories and autoselect first sub category
     """
+
     if dataset and time_dropdown_1:
         df = pd.read_json(dataset)
         # if geo_dropdown_1 != "None":
         #    df = df.drop(columns=[time_dropdown_1, geo_dropdown_1])
 
         return df.columns.to_list(), no_update
+
+    elif not time_dropdown_1:
+        return [], None
 
     else:
         raise exceptions.PreventUpdate
@@ -1346,6 +1423,9 @@ def update_second_sub_category_dropdown(
         df = pd.read_json(dataset)
         df = df.drop(columns=[time_dropdown_2, geo_dropdown_2])
         return df.columns.to_list(), no_update
+
+    elif not time_dropdown_2:
+        return [], None
 
     else:
         raise exceptions.PreventUpdate
