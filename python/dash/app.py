@@ -136,8 +136,6 @@ app.layout = html.Div(
                                                 ]
                                             ),
                                             style={
-                                                # "width": "70%",
-                                                # "height": "60px",
                                                 "lineHeight": "60px",
                                                 "borderWidth": "1px",
                                                 "borderStyle": "dashed",
@@ -147,7 +145,7 @@ app.layout = html.Div(
                                                 "font-size": "12px",
                                                 "padding": "5px",
                                                 "width": "85%",
-                                                "min-width": "170px",
+                                                "min-width": "200px",
                                                 "max-width": "200px",
                                             },
                                         ),
@@ -168,106 +166,111 @@ app.layout = html.Div(
                                     style={"display": "flex"},
                                 ),
                                 html.Div(
-                                    "Select geo column",
-                                    style={"margin-left": "20px"},
-                                ),
-                                html.Div(
                                     [
+                                        html.Div(
+                                            "Select geo column",
+                                            style={
+                                                "width": "200px",
+                                                "textAlign": "center",
+                                                "margin-bottom": "20px",
+                                            },
+                                        ),
                                         dcc.Dropdown(
                                             ["none"],
                                             placeholder="No values found",
                                             clearable=False,
                                             id="geo-dropdown-1",
                                             style={
-                                                "margin-top": "5px",
-                                                "margin-left": "5px",
                                                 "border-color": "#5c6cfa",
                                                 "background-color": "#111111",
-                                                "width": "80%",
                                             },
                                         ),
                                     ],
-                                    style={"display": "flex"},
+                                    style={"margin-left": "20px", "padding": "10px"},
                                 ),
                                 html.Div(
                                     [
                                         html.Div(
-                                            "Reshape",
-                                            style={
-                                                "margin-top": "15px",
-                                                "font-weight": "bold",
-                                                "margin-left": "20px",
-                                            },
+                                            [
+                                                html.Div(
+                                                    "Reshape",
+                                                    style={
+                                                        "font-weight": "bold",
+                                                    },
+                                                ),
+                                                daq.BooleanSwitch(
+                                                    id="reshape-switch-1",
+                                                    style={
+                                                        "margin-bottom": "10px",
+                                                        "margin-left": "20px",
+                                                    },
+                                                ),
+                                            ],
+                                            style={"display": "flex"},
                                         ),
-                                        daq.BooleanSwitch(
-                                            id="reshape-switch-1",
+                                        dcc.Dropdown(
+                                            ["none"],
+                                            placeholder="No values found",
+                                            clearable=False,
+                                            id="reshape-dropdown-1",
                                             style={
-                                                "margin-top": "10px",
-                                                "margin-left": "45px",
+                                                "border-color": "#5c6cfa",
+                                                "background-color": "#111111",
                                             },
                                         ),
                                     ],
-                                    style={"display": "flex"},
-                                ),
-                                dcc.Dropdown(
-                                    ["none"],
-                                    placeholder="No values found",
-                                    clearable=False,
-                                    id="reshape-dropdown-1",
-                                    style={
-                                        "margin-top": "5px",
-                                        "margin-left": "5px",
-                                        "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
-                                        "width": "80%",
-                                    },
+                                    style={"margin-left": "20px", "padding": "10px"},
                                 ),
                                 html.Div(
-                                    "Select time column",
-                                    style={
-                                        "margin-top": "15px",
-                                        "font-weight": "bold",
-                                        "margin-left": "20px",
-                                    },
-                                ),
-                                dcc.Dropdown(
-                                    ["none"],
-                                    placeholder="No values found",
-                                    clearable=False,
-                                    id="time-dropdown-1",
-                                    style={
-                                        "margin-top": "5px",
-                                        "margin-left": "5px",
-                                        "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
-                                        "width": "80%",
-                                    },
+                                    [
+                                        html.Div(
+                                            "Select time column",
+                                            style={
+                                                "font-weight": "bold",
+                                                "width": "200px",
+                                                "margin-bottom": "20px",
+                                            },
+                                        ),
+                                        dcc.Dropdown(
+                                            ["none"],
+                                            placeholder="No values found",
+                                            clearable=False,
+                                            id="time-dropdown-1",
+                                            style={
+                                                "border-color": "#5c6cfa",
+                                                "background-color": "#111111",
+                                            },
+                                        ),
+                                    ],
+                                    style={"margin-left": "20px", "padding": "10px"},
                                 ),
                                 html.Div(
-                                    "Select feature",
-                                    style={
-                                        "margin-top": "15px",
-                                        "font-weight": "bold",
-                                        "margin-left": "20px",
-                                    },
+                                    [
+                                        html.Div(
+                                            "Select feature",
+                                            style={
+                                                "font-weight": "bold",
+                                                "width": "200px",
+                                                "margin-bottom": "20px",
+                                            },
+                                        ),
+                                        dcc.Dropdown(
+                                            ["none"],
+                                            placeholder="No values found",
+                                            clearable=False,
+                                            id="feature-dropdown-1",
+                                            style={
+                                                "border-color": "#5c6cfa",
+                                                "background-color": "#111111",
+                                            },
+                                        ),
+                                        dcc.Store(id="dataset"),
+                                    ],
+                                    style={"margin-left": "20px", "padding": "10px"},
                                 ),
-                                dcc.Dropdown(
-                                    ["none"],
-                                    placeholder="No values found",
-                                    clearable=False,
-                                    id="feature-dropdown-1",
-                                    style={
-                                        "margin-top": "5px",
-                                        "margin-left": "5px",
-                                        "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
-                                        "width": "80%",
-                                    },
-                                ),
-                                dcc.Store(id="dataset"),
                             ],
                             style={
-                                "display": "inline-block",
+                                "display": "flex",
                                 "min-width": "170px",
                             },
                         ),
@@ -284,7 +287,7 @@ app.layout = html.Div(
                                             children=html.Div(
                                                 [
                                                     "Drag and Drop or ",
-                                                    html.A("Select second file"),
+                                                    html.A("Select files"),
                                                 ]
                                             ),
                                             style={
@@ -317,108 +320,111 @@ app.layout = html.Div(
                                     style={"display": "flex"},
                                 ),
                                 html.Div(
-                                    "Select geo column", style={"margin-left": "20px"}
-                                ),
-                                html.Div(
                                     [
+                                        html.Div(
+                                            "Select geo column",
+                                            style={
+                                                "margin-bottom": "20px",
+                                                "width": "200px",
+                                            },
+                                        ),
                                         dcc.Dropdown(
                                             ["none"],
                                             placeholder="No values found",
                                             clearable=False,
                                             id="geo-dropdown-2",
                                             style={
-                                                "margin-top": "5px",
-                                                "margin-left": "5px",
                                                 "border-color": "#5c6cfa",
                                                 "background-color": "#111111",
-                                                "width": "80%",
                                             },
                                         ),
                                     ],
-                                    style={"display": "flex"},
+                                    style={"margin-left": "20px", "padding": "10px"},
                                 ),
                                 html.Div(
                                     [
                                         html.Div(
-                                            "Reshape",
-                                            style={
-                                                "margin-top": "15px",
-                                                "font-weight": "bold",
-                                                "margin-left": "20px",
-                                            },
+                                            [
+                                                html.Div(
+                                                    "Reshape",
+                                                    style={
+                                                        "font-weight": "bold",
+                                                    },
+                                                ),
+                                                daq.BooleanSwitch(
+                                                    id="reshape-switch-2",
+                                                    style={
+                                                        "margin-bottom": "10px",
+                                                        "margin-left": "20px",
+                                                    },
+                                                ),
+                                            ],
+                                            style={"display": "flex"},
                                         ),
-                                        daq.BooleanSwitch(
-                                            id="reshape-switch-2",
+                                        dcc.Dropdown(
+                                            ["none"],
+                                            placeholder="No values found",
+                                            clearable=False,
+                                            id="reshape-dropdown-2",
                                             style={
-                                                "margin-top": "10px",
-                                                "margin-left": "45px",
+                                                "border-color": "#5c6cfa",
+                                                "background-color": "#111111",
                                             },
                                         ),
                                     ],
-                                    style={"display": "flex"},
-                                ),
-                                dcc.Dropdown(
-                                    ["none"],
-                                    placeholder="No values found",
-                                    clearable=False,
-                                    id="reshape-dropdown-2",
-                                    style={
-                                        "margin-top": "5px",
-                                        "margin-left": "5px",
-                                        "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
-                                        "width": "80%",
-                                    },
+                                    style={"margin-left": "20px", "padding": "10px"},
                                 ),
                                 html.Div(
-                                    "Set time column",
-                                    style={
-                                        "margin-top": "15px",
-                                        "font-weight": "bold",
-                                        "margin-left": "20px",
-                                    },
-                                ),
-                                dcc.Dropdown(
-                                    ["none"],
-                                    placeholder="No values found",
-                                    clearable=False,
-                                    id="time-dropdown-2",
-                                    style={
-                                        "margin-top": "5px",
-                                        "margin-left": "5px",
-                                        "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
-                                        "width": "80%",
-                                    },
+                                    [
+                                        html.Div(
+                                            "Set time column",
+                                            style={
+                                                "font-weight": "bold",
+                                                "width": "200px",
+                                                "margin-bottom": "20px",
+                                            },
+                                        ),
+                                        dcc.Dropdown(
+                                            ["none"],
+                                            placeholder="No values found",
+                                            clearable=False,
+                                            id="time-dropdown-2",
+                                            style={
+                                                "border-color": "#5c6cfa",
+                                                "background-color": "#111111",
+                                            },
+                                        ),
+                                    ],
+                                    style={"margin-left": "20px", "padding": "10px"},
                                 ),
                                 html.Div(
-                                    "Select feature",
-                                    style={
-                                        "margin-top": "15px",
-                                        "font-weight": "bold",
-                                        "margin-left": "20px",
-                                    },
+                                    [
+                                        html.Div(
+                                            "Select feature",
+                                            style={
+                                                "font-weight": "bold",
+                                                "width": "200px",
+                                                "margin-bottom": "20px",
+                                            },
+                                        ),
+                                        dcc.Dropdown(
+                                            ["none"],
+                                            placeholder="No values found",
+                                            clearable=False,
+                                            id="feature-dropdown-2",
+                                            style={
+                                                "border-color": "#5c6cfa",
+                                                "background-color": "#111111",
+                                            },
+                                        ),
+                                        dcc.Store(id="dataset-2"),
+                                    ],
+                                    style={"margin-left": "20px", "padding": "10px"},
                                 ),
-                                dcc.Dropdown(
-                                    ["none"],
-                                    placeholder="No values found",
-                                    clearable=False,
-                                    id="feature-dropdown-2",
-                                    style={
-                                        "margin-top": "5px",
-                                        "margin-left": "5px",
-                                        "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
-                                        "width": "80%",
-                                    },
-                                ),
-                                dcc.Store(id="dataset-2"),
                             ],
                             id="second-file-upload",
                             style={
-                                "display": "inline-block",
-                                "margin-left": "10px",
-                                "min-width": "235px",
+                                "display": "flex",
                             },
                         ),
                         html.Div(
@@ -465,75 +471,70 @@ app.layout = html.Div(
                             ],
                             style={
                                 "margin-top": "20px",
-                                "margin-bottom": "10px",
-                                # "margin-left": "10px",
                             },
                         ),
                     ],
                     style={
                         "backgroundColor": "#111111",
-                        "width": "39%",
-                    },
-                ),
-                html.Div(
-                    [
-                        html.Div(
-                            [
-                                html.Div(
-                                    "Table",
-                                    style={
-                                        "padding-top": "10px",
-                                        "padding-left": "10px",
-                                        "padding-bottom": "10px",
-                                        "backgroundColor": "#111111",
-                                        "font-weight": "bold",
-                                        "textAlign": "center",
-                                    },
-                                ),
-                                html.Hr(
-                                    style={
-                                        "padding": "0px",
-                                        "margin": "0px",
-                                        "backgroundColor": "#5c6cfa",
-                                        "border-color": "#5c6cfa",
-                                    }
-                                ),
-                            ]
-                        ),
-                        html.Div(
-                            [
-                                dash_table.DataTable(
-                                    id="data-table",
-                                    style_data={
-                                        "backgroundColor": "#232323",
-                                        "border": "solid 1px #5c6cfa",
-                                    },
-                                    style_cell={"padding": "5px"},
-                                    style_header={
-                                        "backgroundColor": "#454545",
-                                        "border": "solid 1px #5c6cfa",
-                                    },
-                                )
-                            ],
-                            style={
-                                "backgroundColor": "#5c6cfa",
-                                "overflow": "auto",
-                                "max-height": "inherit",
-                            },
-                        ),
-                    ],
-                    style={
-                        "backroundColor": "#ffffff",
-                        "margin-left": "10px",
-                        "width": "60%",
-                        "max-height": "449px",
                     },
                 ),
             ],
             style={
                 "backgroundColor": "#232323",
-                "height": "500px",
-                "display": "flex",
+                "height": "300px",
+                "display": "block",
+            },
+        ),
+        html.Div(
+            [
+                html.Div(style={"backgroundColor": "#232323", "padding": "10px"}),
+                html.Div(
+                    [
+                        html.Div(
+                            "Table",
+                            style={
+                                "padding-top": "10px",
+                                "padding-left": "10px",
+                                "padding-bottom": "10px",
+                                "backgroundColor": "#111111",
+                                "font-weight": "bold",
+                                "textAlign": "center",
+                            },
+                        ),
+                        html.Hr(
+                            style={
+                                "padding": "0px",
+                                "margin": "0px",
+                                "backgroundColor": "#5c6cfa",
+                                "border-color": "#5c6cfa",
+                            }
+                        ),
+                    ]
+                ),
+                html.Div(
+                    [
+                        dash_table.DataTable(
+                            id="data-table",
+                            style_data={
+                                "backgroundColor": "#232323",
+                                "border": "solid 1px #5c6cfa",
+                            },
+                            style_cell={"padding": "5px"},
+                            style_header={
+                                "backgroundColor": "#454545",
+                                "border": "solid 1px #5c6cfa",
+                            },
+                        )
+                    ],
+                    style={
+                        "backgroundColor": "#5c6cfa",
+                        "overflow": "auto",
+                        "max-height": "250px",
+                    },
+                ),
+            ],
+            style={
+                "backroundColor": "#ffffff",
             },
         ),
         html.Div(
@@ -552,7 +553,6 @@ app.layout = html.Div(
                                             id="year-dropdown-stats",
                                             style={
                                                 "width": "110px",
-                                                # "display": "flex",
                                                 "font-size": "14px",
                                                 "border-top": "0px",
                                                 "border-left": "0px",
@@ -573,7 +573,7 @@ app.layout = html.Div(
                                                 "backgroundColor": "#111111",
                                                 "font-weight": "bold",
                                                 "textAlign": "center",
-                                                "width": "92%",
+                                                "width": "100%",
                                             },
                                         ),
                                         html.Div(
@@ -597,14 +597,13 @@ app.layout = html.Div(
                                                 "font-weight": "bold",
                                                 "textAlign": "center",
                                                 "display": "flex",
-                                                "margin-right": "10px",
                                                 "margin-left": "auto",
                                                 "padding-top": "7px",
                                                 "backgroundColor": "#111111",
                                             },
                                         ),
                                     ],
-                                    style={"display": "flex", "width": "99%"},
+                                    style={"display": "flex", "width": "100%"},
                                 ),
                                 html.Hr(
                                     style={
@@ -612,7 +611,7 @@ app.layout = html.Div(
                                         "margin": "0px",
                                         "backgroundColor": "#5c6cfa",
                                         "border-color": "#5c6cfa",
-                                        "width": "98%",
+                                        "width": "100%",
                                     }
                                 ),
                             ],
@@ -708,7 +707,6 @@ app.layout = html.Div(
                                                     clearable=False,
                                                     style={
                                                         "width": "100px",
-                                                        # "display": "flex",
                                                         "font-size": "14px",
                                                         "border-top": "0px",
                                                         "border-left": "0px",
@@ -733,9 +731,8 @@ app.layout = html.Div(
                                             style={
                                                 "backgroundColor": "#111111",
                                                 "display": "flex",
-                                                # "padding": "10px",
                                                 "height": "100px",
-                                                "width": "90%",
+                                                "width": "100%",
                                                 "textAlign": "center",
                                                 "font-size": "20px",
                                             },
@@ -803,7 +800,6 @@ app.layout = html.Div(
                                             id="year-dropdown-map",
                                             style={
                                                 "width": "110px",
-                                                # "display": "flex",
                                                 "font-size": "14px",
                                                 "border-top": "0px",
                                                 "border-left": "0px",
@@ -813,7 +809,6 @@ app.layout = html.Div(
                                                 "border-color": "#5c6cfa",
                                                 "border-radius": "0px",
                                                 "padding": "0",
-                                                # "textAlign": "center",
                                             },
                                         ),
                                         html.Div(
@@ -920,7 +915,6 @@ app.layout = html.Div(
                 ),
             ],
             id="compare-div",
-            # style={"display": "none"},
         ),
     ],
     style={
@@ -1032,7 +1026,7 @@ def preprocess_dataset(
         else:
             filtered_cols.insert(0, "None")
 
-        show_second_file_upload = {"display": "inline-block"}
+        show_second_file_upload = {"display": "flex"}
 
         return (
             filtered_cols,
@@ -1271,8 +1265,6 @@ def preprocess_second_dataset(
         and "geo-dropdown-1" not in changed_items
         and "dataset" not in changed_items
     ):
-        print("hi")
-
         if file:
             columns = get_available_columns(file, separator=delimiter_dropdown_2)
         elif "demo-button" in changed_items:
@@ -1355,7 +1347,6 @@ def preprocess_second_dataset(
         )
 
     else:
-        print("no update")
         raise exceptions.PreventUpdate
 
 
