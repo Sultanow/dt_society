@@ -100,8 +100,11 @@ class DigitalTwinTimeSeries:
             pd.DataFrame: Dataset with adjusted country codes
         """
 
-        def iso2_to_iso3(iso2_code):
-            country = pycountry.countries.get(alpha_2=iso2_code)
+        def get_iso3(country, from_iso2: bool):
+            if from_iso2:
+                country = pycountry.countries.get(alpha_2=country)
+            else:
+                country = pycountry.countries.get(name=country)
 
             if country is None:
                 unknown_country_code = "UNK"
@@ -111,8 +114,9 @@ class DigitalTwinTimeSeries:
 
         assert self.geo_col in data.columns, "No 'geo' column found in dataset."
 
-        if not (data[self.geo_col].str.len() > 9).any():
-            # EA = Eurasian Patent Organization
+        # if not (data[self.geo_col].str.len() > 10).any():
+        # EA = Eurasian Patent Organization
+        if (data[self.geo_col].str.isupper()).all():
             invalid_country_codes = ["EA", "XK"]
             old_iso2_codes = {"UK": "GB", "EL": "GR"}
 
@@ -123,7 +127,10 @@ class DigitalTwinTimeSeries:
             data = data.drop(data[data[self.geo_col].str.len() > 2].index)
             data = data.drop(data[data[self.geo_col].isin(invalid_country_codes)].index)
 
-            data[self.geo_col] = data[self.geo_col].apply(iso2_to_iso3)
+            data[self.geo_col] = data[self.geo_col].apply(get_iso3, from_iso2=True)
+
+        else:
+            data[self.geo_col] = data[self.geo_col].apply(get_iso3, from_iso2=False)
 
         return data
 

@@ -201,10 +201,26 @@ app.layout = html.Div(
                                         ),
                                         daq.BooleanSwitch(
                                             id="reshape-switch-1",
-                                            style={"margin-top": "10px"},
+                                            style={
+                                                "margin-top": "10px",
+                                                "margin-left": "45px",
+                                            },
                                         ),
                                     ],
                                     style={"display": "flex"},
+                                ),
+                                dcc.Dropdown(
+                                    ["none"],
+                                    placeholder="No values found",
+                                    clearable=False,
+                                    id="reshape-dropdown-1",
+                                    style={
+                                        "margin-top": "5px",
+                                        "margin-left": "5px",
+                                        "border-color": "#5c6cfa",
+                                        "background-color": "#111111",
+                                        "width": "80%",
+                                    },
                                 ),
                                 html.Div(
                                     "Select time column",
@@ -333,10 +349,26 @@ app.layout = html.Div(
                                         ),
                                         daq.BooleanSwitch(
                                             id="reshape-switch-2",
-                                            style={"margin-top": "10px"},
+                                            style={
+                                                "margin-top": "10px",
+                                                "margin-left": "45px",
+                                            },
                                         ),
                                     ],
                                     style={"display": "flex"},
+                                ),
+                                dcc.Dropdown(
+                                    ["none"],
+                                    placeholder="No values found",
+                                    clearable=False,
+                                    id="reshape-dropdown-2",
+                                    style={
+                                        "margin-top": "5px",
+                                        "margin-left": "5px",
+                                        "border-color": "#5c6cfa",
+                                        "background-color": "#111111",
+                                        "width": "80%",
+                                    },
                                 ),
                                 html.Div(
                                     "Set time column",
@@ -409,7 +441,11 @@ app.layout = html.Div(
                                                     inline=False,
                                                     style={"display": "flex"},
                                                 ),
-                                            ]
+                                            ],
+                                            id="data-selector-div",
+                                            style={
+                                                "display": "none",
+                                            },
                                         ),
                                         html.Button(
                                             "Demo",
@@ -490,13 +526,13 @@ app.layout = html.Div(
                         "backroundColor": "#ffffff",
                         "margin-left": "10px",
                         "width": "60%",
-                        "max-height": "318px",
+                        "max-height": "449px",
                     },
                 ),
             ],
             style={
                 "backgroundColor": "#232323",
-                "height": "440px",
+                "height": "500px",
                 "display": "flex",
             },
         ),
@@ -711,7 +747,8 @@ app.layout = html.Div(
                             style={"display": "flex"},
                         ),
                     ],
-                    style={"margin-bottom": "10px"},
+                    id="stats-div",
+                    style={"margin-bottom": "10px", "display": "none"},
                 ),
                 html.Div(
                     [
@@ -905,6 +942,8 @@ app.layout = html.Div(
     Output("geo-dropdown-1", "options"),
     Output("dataset-1-fail", "displayed"),
     Output("table-upload", "contents"),
+    Output("reshape-dropdown-1", "options"),
+    Output("reshape-dropdown-1", "disabled"),
     Input("table-upload", "contents"),
     Input("table-upload", "filename"),
     State("table-upload", "children"),
@@ -913,6 +952,7 @@ app.layout = html.Div(
     Input("delimiter-dropdown-1", "value"),
     Input("reshape-switch-1", "on"),
     Input("dataset", "data"),
+    Input("reshape-dropdown-1", "value"),
 )
 def preprocess_dataset(
     file: str,
@@ -923,6 +963,7 @@ def preprocess_dataset(
     delimiter_dropdown_1: str,
     reshape_switch_status: bool,
     data: str,
+    reshape_dropdown_1: str,
 ) -> tuple:
     """Processes file upload
 
@@ -966,6 +1007,8 @@ def preprocess_dataset(
                     no_update,
                     True,
                     None,
+                    no_update,
+                    no_update,
                 )
         elif "demo-button" in changed_items:
             filename = "arbeitslosenquote_eu.tsv"
@@ -993,6 +1036,8 @@ def preprocess_dataset(
             filtered_cols,
             False,
             None,
+            filtered_cols,
+            no_update,
         )
     elif (
         (file is not None or "demo-button" in changed_items)
@@ -1023,11 +1068,13 @@ def preprocess_dataset(
             columns,
             False,
             file,
+            no_update,
+            no_update,
         )
-    elif data and reshape_switch_status:
+    elif data and reshape_switch_status and reshape_dropdown_1:
         df = pd.read_json(data)
         df = DigitalTwinTimeSeries(df=df, geo_col=geo_dropdown_1)
-        df = df.reshape_wide_to_long("age")
+        df = df.reshape_wide_to_long(reshape_dropdown_1)
 
         return (
             df.columns.to_list(),
@@ -1038,6 +1085,8 @@ def preprocess_dataset(
             df.columns.to_list(),
             False,
             None,
+            no_update,
+            True,
         )
 
     else:
@@ -1056,6 +1105,9 @@ def preprocess_dataset(
     Output("geo-dropdown-2", "options"),
     Output("dataset-2-fail", "displayed"),
     Output("table-upload-2", "contents"),
+    Output("reshape-dropdown-2", "options"),
+    Output("reshape-dropdown-2", "disabled"),
+    Output("data-selector-div", "style"),
     Input("table-upload-2", "contents"),
     Input("table-upload-2", "filename"),
     State("table-upload-2", "children"),
@@ -1066,6 +1118,7 @@ def preprocess_dataset(
     Input("reshape-switch-2", "on"),
     Input("dataset-2", "data"),
     Input("geo-dropdown-1", "value"),
+    Input("reshape-dropdown-2", "value"),
 )
 def preprocess_second_dataset(
     file: str,
@@ -1078,6 +1131,7 @@ def preprocess_second_dataset(
     reshape_switch_status_2: bool,
     data_2: str,
     geo_dropdown_1: str,
+    reshape_dropdown_2: str,
 ) -> tuple:
     """Processes additional dataset
 
@@ -1127,6 +1181,9 @@ def preprocess_second_dataset(
                     no_update,
                     True,
                     None,
+                    no_update,
+                    no_update,
+                    no_update,
                 )
         elif "demo-button" in changed_items:
             filename = "bip_europa.tsv"
@@ -1160,6 +1217,9 @@ def preprocess_second_dataset(
             filtered_cols,
             False,
             None,
+            filtered_cols,
+            no_update,
+            radio_visibility,
         )
     elif (
         (file is not None or "demo-button" in changed_items)
@@ -1196,11 +1256,14 @@ def preprocess_second_dataset(
             columns,
             False,
             file,
+            no_update,
+            no_update,
+            no_update,
         )
-    elif data_2 and reshape_switch_status_2:
+    elif data_2 and reshape_switch_status_2 and reshape_dropdown_2:
         df = pd.read_json(data_2)
         df = DigitalTwinTimeSeries(df=df, geo_col=geo_dropdown_2)
-        df = df.reshape_wide_to_long("unit")
+        df = df.reshape_wide_to_long(reshape_dropdown_2)
 
         return (
             df.columns.to_list(),
@@ -1214,6 +1277,9 @@ def preprocess_second_dataset(
             df.columns.to_list(),
             False,
             None,
+            no_update,
+            True,
+            no_update,
         )
 
     else:
@@ -1397,6 +1463,7 @@ def update_table_content(
     Output("max-stat", "children"),
     Output("min-stat", "children"),
     Output("growth-stat", "children"),
+    Output("stats-div", "style"),
     Input("data-selector", "value"),
     State("avg-stat", "children"),
     State("max-stat", "children"),
@@ -1536,11 +1603,14 @@ def update_stats(
         growth_stat_children.clear()
         growth_stat_children.append("Growth rate:\n" + str(round(growth_rate, 2)))
 
+        visiblity = {"display": "block"}
+
         return (
             avg_stat_children,
             max_stat_children,
             min_stat_children,
             growth_stat_children,
+            visiblity,
         )
     else:
         raise exceptions.PreventUpdate
