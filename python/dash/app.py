@@ -14,6 +14,7 @@ from dash import (
     dash_table,
     callback_context,
 )
+import numpy as np
 import pandas as pd
 
 from preprocessing.dataset import DigitalTwinTimeSeries
@@ -1494,7 +1495,11 @@ def update_year_dropdown_stats(
             geo_selection = no_update
 
         time_options = df[time_column].unique()
+
         time_selection = time_options[0]
+
+        if isinstance(time_selection, np.datetime64):
+            time_selection = np.datetime_as_string(time_selection)
 
         return (
             time_options,
@@ -1646,6 +1651,9 @@ def update_stats(
         feature_column = datasets[selected_dataset][1]
 
         filtered_df = df[df[time_column] == year][[geo_column, feature_column]]
+
+        print(year_dropdown_stats)
+        print(type(country_dropdown_stats))
 
         filtered_df_by_country = df[
             (df[geo_column] == country_dropdown_stats)
