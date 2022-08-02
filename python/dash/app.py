@@ -1,5 +1,4 @@
 import gzip
-import json
 import base64
 import urllib
 import dash_daq as daq
@@ -15,18 +14,11 @@ from dash import (
     dash_table,
     callback_context,
 )
-import numpy as np
 import pandas as pd
-import re
-import requests
 
 from preprocessing.dataset import DigitalTwinTimeSeries
 from preprocessing.parse import parse_dataset, get_available_columns
 
-from helpers.layout import (
-    get_selected_category_column,
-    find_column_intersection_indeces,
-)
 from helpers.plots import (
     create_multi_line_plot,
     create_choropleth_plot,
@@ -619,6 +611,9 @@ app.layout = html.Div(
                         html.Div(
                             style={"padding": "5px", "backgroundColor": "#232323"}
                         ),
+                        dcc.RangeSlider(
+                            0, 20, step=None, value=[5, 15], id="year-range-slider"
+                        ),
                         html.Div(
                             [
                                 html.Div(
@@ -747,6 +742,7 @@ app.layout = html.Div(
                     id="stats-div",
                     style={"margin-bottom": "10px", "display": "none"},
                 ),
+                html.Div(style={"backgroundColor": "#232323", "padding": "10px"}),
                 html.Div(
                     [
                         html.Div(
@@ -808,7 +804,7 @@ app.layout = html.Div(
                                                 "backgroundColor": "#111111",
                                                 "border-color": "#5c6cfa",
                                                 "border-radius": "0px",
-                                                "padding": "0",
+                                                "padding-top": "1.5px",
                                             },
                                         ),
                                         html.Div(
@@ -845,7 +841,6 @@ app.layout = html.Div(
                         "display": "inline-block",
                         "width": "59.3%",
                         "margin-left": "10px",
-                        "padding-top": "15px",
                     },
                 ),
             ],
@@ -990,7 +985,7 @@ def preprocess_dataset(
         if file:
             try:
                 content = file.split(",")
-                df, filtered_cols = parse_dataset(
+                df, columns = parse_dataset(
                     content[-1],
                     separator=delimiter_dropdown_1,
                     geo_col=geo_dropdown_1,
@@ -1015,29 +1010,30 @@ def preprocess_dataset(
             filename = "arbeitslosenquote_eu.tsv"
             df_url = "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/tipsun20.tsv.gz"
 
-            df, filtered_cols = parse_dataset(df_url, upload_file=False, separator="\t")
+            df, columns = parse_dataset(df_url, upload_file=False, separator="\t")
 
         if "table-upload" in changed_items or "demo-button" in changed_items:
             upload_children["props"]["children"] = html.Div([filename])
 
-        if not filtered_cols:
+        time_options, geo_options, reshape_options = (columns, columns, columns)
+        if not columns:
 
-            filtered_cols = ["none"]
+            columns = ["none"]
         else:
-            filtered_cols.insert(0, "None")
+            columns.insert(0, "None")
 
         show_second_file_upload = {"display": "flex"}
 
         return (
-            filtered_cols,
+            time_options,
             df,
             upload_children,
             no_update,
             show_second_file_upload,
-            filtered_cols,
+            geo_options,
             False,
             None,
-            filtered_cols,
+            reshape_options,
             no_update,
             no_update,
             no_update,
@@ -1102,13 +1098,15 @@ def preprocess_dataset(
         df = DigitalTwinTimeSeries(df=df, geo_col=geo_dropdown_1)
         df = df.reshape_wide_to_long(reshape_dropdown_1)
 
+        columns = df.columns.to_list()
+
         return (
-            df.columns.to_list(),
+            columns,
             df.to_json(),
             no_update,
             no_update,
             no_update,
-            df.columns.to_list(),
+            columns,
             False,
             None,
             no_update,
@@ -1195,7 +1193,7 @@ def preprocess_second_dataset(
         if file:
             try:
                 content = file.split(",")
-                df_2, filtered_cols, countries = parse_dataset(
+                df_2, columns, countries = parse_dataset(
                     content[-1],
                     get_countries=True,
                     geo_col=geo_dropdown_2,
@@ -1222,9 +1220,11 @@ def preprocess_second_dataset(
         elif "demo-button" in changed_items:
             filename = "bip_europa.tsv"
             df_url = "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/tec00001.tsv.gz"
-            df_2, filtered_cols, countries = parse_dataset(
+            df_2, columns, countries = parse_dataset(
                 df_url, upload_file=False, get_countries=True
             )
+
+        time_options, geo_options, reshape_options = (columns, columns, columns)
 
         if geo_dropdown_1 != "None":
             countries_df_1 = pd.read_json(data)[geo_dropdown_1].unique().tolist()
@@ -1240,7 +1240,7 @@ def preprocess_second_dataset(
         show_compare_dropdown = {"display": "block"}
 
         return (
-            filtered_cols,
+            time_options,
             df_2,
             upload_children,
             no_update,
@@ -1248,10 +1248,10 @@ def preprocess_second_dataset(
             countries[0],
             radio_visibility,
             show_compare_dropdown,
-            filtered_cols,
+            geo_options,
             False,
             None,
-            filtered_cols,
+            reshape_options,
             no_update,
             radio_visibility,
             no_update,
@@ -1259,7 +1259,6 @@ def preprocess_second_dataset(
         )
     elif (
         (file is not None or "demo-button" in changed_items)
-        # and not data_2
         and geo_dropdown_2 is None
         and delimiter_dropdown_2
         and "geo-dropdown-1" not in changed_items
@@ -1327,8 +1326,10 @@ def preprocess_second_dataset(
         df = DigitalTwinTimeSeries(df=df, geo_col=geo_dropdown_2)
         df = df.reshape_wide_to_long(reshape_dropdown_2)
 
+        columns = df.columns.to_list()
+
         return (
-            df.columns.to_list(),
+            columns,
             df.to_json(),
             no_update,
             no_update,
@@ -1336,7 +1337,7 @@ def preprocess_second_dataset(
             no_update,
             no_update,
             no_update,
-            df.columns.to_list(),
+            columns,
             False,
             None,
             no_update,
@@ -1375,8 +1376,8 @@ def update_sub_category_dropdown(
 
     if dataset and time_dropdown_1:
         df = pd.read_json(dataset)
-        # if geo_dropdown_1 != "None":
-        #    df = df.drop(columns=[time_dropdown_1, geo_dropdown_1])
+        if geo_dropdown_1 != "None":
+            df = df.drop(columns=[time_dropdown_1, geo_dropdown_1])
 
         return df.columns.to_list(), no_update
 
@@ -1429,6 +1430,8 @@ def update_second_sub_category_dropdown(
     Output("country-dropdown-stats", "value"),
     Output("year-dropdown-map", "options"),
     Output("year-dropdown-map", "value"),
+    Output("year-range-slider", "min"),
+    Output("year-range-slider", "max"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("data-selector", "value"),
@@ -1482,13 +1485,26 @@ def update_year_dropdown_stats(
 
         df = pd.read_json(datasets[selected_dataset][0])
 
+        if geo_column != "None":
+
+            geo_options = df[geo_column].unique()
+            geo_selection = geo_options[0]
+        else:
+            geo_options = no_update
+            geo_selection = no_update
+
+        time_options = df[time_column].unique()
+        time_selection = time_options[0]
+
         return (
-            df[time_column].unique(),
-            df[time_column].unique()[0],
-            df[geo_column].unique(),
-            df[geo_column].unique()[0],
-            df[time_column].unique(),
-            df[time_column].unique()[0],
+            time_options,
+            time_selection,
+            geo_options,
+            geo_selection,
+            time_options,
+            time_selection,
+            time_options.min(),
+            time_options.max(),
         )
     else:
         raise exceptions.PreventUpdate

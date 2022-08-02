@@ -1,11 +1,6 @@
-from fileinput import filename
 from typing import Tuple
-from dash import Dash, dcc, html, Input, Output, exceptions, State
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+from dash import html
 import pandas as pd
-import re
 import base64
 import io
 
@@ -43,17 +38,15 @@ def parse_dataset(
     else:
         df = DigitalTwinTimeSeries(contents, geo_col="geo\\time", sep=separator)
 
-    years_excluded_re = re.compile("[^1-2][^0-9]*")
     columns = df.data.columns.to_list()
-    filtered_columns = [colum for colum in columns if years_excluded_re.match(colum)]
 
     df_json = df.data.to_json()
 
     if get_countries:
         countries = df.data[geo_col].unique().tolist()
-        return df_json, filtered_columns, countries
+        return df_json, columns, countries
     else:
-        return df_json, filtered_columns
+        return df_json, columns
 
 
 def get_available_columns(
