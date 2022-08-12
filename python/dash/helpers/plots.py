@@ -158,7 +158,7 @@ def create_correlation_heatmap(df: pd.DataFrame) -> go.Figure:
     Returns:
         go.Figure: Heatmap of lower triangular correlation matrix
     """
-
+    print("creating heatmap")
     triangular_upper_mask = np.triu(np.ones(df.corr().shape)).astype(bool)
 
     fig = px.imshow(
@@ -169,6 +169,8 @@ def create_correlation_heatmap(df: pd.DataFrame) -> go.Figure:
     )
 
     fig.update_layout(template=theme)
+
+    print("heatmap done")
 
     return fig
 
@@ -187,7 +189,6 @@ def create_forecast_plot(
     Returns:
         go.Figure: Lineplot with subplots for observations, model fit and future predictions respectively
     """
-
     fig = go.Figure()
 
     fig.add_traces(
@@ -209,7 +210,6 @@ def create_forecast_plot(
         )
     )
 
-    print(forecast["ds"][len(df) :])
     fig.add_traces(
         go.Scatter(
             x=forecast["ds"][len(df) :],

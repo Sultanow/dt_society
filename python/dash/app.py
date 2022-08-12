@@ -82,7 +82,9 @@ app.layout = html.Div(
                                                 "font-weight": "bold",
                                                 "textAlign": "center",
                                                 "display": "flex",
-                                                "margin-left": "200px",
+                                                # "margin-left": "200px",
+                                                "margin": "auto"
+                                                # "width": "80%",
                                             },
                                         ),
                                         html.Div(
@@ -594,7 +596,7 @@ app.layout = html.Div(
                                                     className="material-symbols-outlined",
                                                 ),
                                                 html.Span(
-                                                    "The statistics shown in this section are computed from the selected timestamp until the last time stamp. \n (eg. 2017-2021)",
+                                                    "Mean, max and min are computed for complete dataset. \n The slider sets the window for the growth rate computation.",
                                                     className="tooltiptext",
                                                     style={
                                                         "font-size": "10px",
@@ -630,8 +632,12 @@ app.layout = html.Div(
                         html.Div(
                             style={"padding": "5px", "backgroundColor": "#232323"}
                         ),
+                        html.Div(
+                            "Time unit window for growth rate",
+                            style={"padding": "15px"},
+                        ),
                         dcc.RangeSlider(
-                            0, 20, step=None, value=[5, 15], id="year-range-slider"
+                            0, 20, step=1, id="year-range-slider", allowCross=False
                         ),
                         html.Div(
                             [
@@ -720,7 +726,7 @@ app.layout = html.Div(
                                                     id="country-dropdown-stats",
                                                     clearable=False,
                                                     style={
-                                                        "width": "100px",
+                                                        "width": "140px",
                                                         "font-size": "14px",
                                                         "border-top": "0px",
                                                         "border-left": "0px",
@@ -884,7 +890,8 @@ app.layout = html.Div(
                                     clearable=False,
                                     id="country-dropdown",
                                     style={
-                                        "width": "110px",
+                                        "width": "140px",
+                                        "font-size": "14px",
                                         "border-color": "#5c6cfa",
                                         "background-color": "#111111",
                                         "border-top": "0px",
@@ -904,7 +911,7 @@ app.layout = html.Div(
                                         "backgroundColor": "#111111",
                                         "font-weight": "bold",
                                         "textAlign": "center",
-                                        "width": "85%",
+                                        "width": "80%",
                                     },
                                 ),
                             ],
@@ -949,7 +956,8 @@ app.layout = html.Div(
                                     clearable=False,
                                     id="country-dropdown-corr",
                                     style={
-                                        "width": "110px",
+                                        "width": "140px",
+                                        "font-size": "14px",
                                         "border-color": "#5c6cfa",
                                         "background-color": "#111111",
                                         "border-top": "0px",
@@ -969,7 +977,7 @@ app.layout = html.Div(
                                         "backgroundColor": "#111111",
                                         "font-weight": "bold",
                                         "textAlign": "center",
-                                        "width": "85%",
+                                        "width": "80%",
                                     },
                                 ),
                             ],
@@ -1014,7 +1022,8 @@ app.layout = html.Div(
                                     clearable=False,
                                     id="country-dropdown-forecast",
                                     style={
-                                        "width": "110px",
+                                        "width": "140px",
+                                        "font-size": "14px",
                                         "border-color": "#5c6cfa",
                                         "background-color": "#111111",
                                         "border-top": "0px",
@@ -1034,7 +1043,7 @@ app.layout = html.Div(
                                         "backgroundColor": "#111111",
                                         "font-weight": "bold",
                                         "textAlign": "center",
-                                        "width": "85%",
+                                        "width": "80%",
                                     },
                                 ),
                             ],
@@ -1598,6 +1607,7 @@ def update_second_sub_category_dropdown(
     Output("country-dropdown-corr", "value"),
     Output("country-dropdown-forecast", "options"),
     Output("country-dropdown-forecast", "value"),
+    Output("year-range-slider", "value"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("data-selector", "value"),
@@ -1659,9 +1669,13 @@ def update_year_dropdown_stats(
             geo_options = no_update
             geo_selection = no_update
 
-        time_options = df[time_column].unique()
+        time_options = np.sort(df[time_column].unique())
 
         time_selection = time_options[0]
+        time_min = 0
+        time_max = time_options.size - 1
+
+        time_span = [time_min, time_max]
 
         if isinstance(time_selection, np.datetime64):
             time_selection = np.datetime_as_string(time_selection)
@@ -1673,12 +1687,13 @@ def update_year_dropdown_stats(
             geo_selection,
             time_options,
             time_selection,
-            time_options.min(),
-            time_options.max(),
+            time_min,
+            time_max,
             geo_options,
             geo_options[0],
             geo_options,
             geo_options[0],
+            time_span,
         )
     else:
         raise exceptions.PreventUpdate
@@ -1740,6 +1755,7 @@ def update_table_content(
     Input("time-dropdown-1", "value"),
     Input("feature-dropdown-2", "value"),
     Input("time-dropdown-2", "value"),
+    [Input("year-range-slider", "value")],
 )
 def update_stats(
     selected_dataset: str,
@@ -1757,6 +1773,7 @@ def update_stats(
     time_dropdown_1: str,
     feature_dropdown_2: str,
     time_dropdown_2: str,
+    year_range: list,
 ) -> tuple:
     """Compute and display mean, max, min and growth value (per country) for selected dataset
 
@@ -1823,7 +1840,7 @@ def update_stats(
 
         filtered_df_by_country = df[
             (df[geo_column] == country_dropdown_stats)
-            & (df[time_column] >= year_dropdown_stats)
+            # & (df[time_column] >= year_dropdown_stats)
         ]
 
         avg_stat_children.clear()
@@ -1833,8 +1850,12 @@ def update_stats(
             + str(round(filtered_df[datasets[selected_dataset][1]].mean(axis=0), 2))
         )
 
-        start_value = filtered_df_by_country[feature_column].values[0]
-        end_value = filtered_df_by_country[feature_column].values[-1]
+        start_value = (
+            filtered_df_by_country[feature_column].sort_values().values[year_range[0]]
+        )
+        end_value = (
+            filtered_df_by_country[feature_column].sort_values().values[year_range[-1]]
+        )
 
         growth_rate = ((end_value - start_value) / end_value) * 100
 
