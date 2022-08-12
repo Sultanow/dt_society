@@ -1,5 +1,6 @@
 import gzip
 import base64
+from operator import index
 import urllib
 import dash_daq as daq
 from dash import (
@@ -15,7 +16,14 @@ from dash import (
     callback_context,
 )
 import numpy as np
+from numpy.core.fromnumeric import mean
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from prophet import Prophet
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from sklearn import tree, neighbors
 
 from preprocessing.dataset import DigitalTwinTimeSeries
 from preprocessing.parse import parse_dataset, get_available_columns
@@ -24,7 +32,11 @@ from helpers.plots import (
     create_multi_line_plot,
     create_choropleth_plot,
     create_two_line_plot,
+    create_correlation_heatmap,
+    create_forecast_plot,
 )
+from helpers.models import prophet_fit_and_predict
+
 
 external_stylesheets = [
     {
@@ -153,6 +165,7 @@ app.layout = html.Div(
                                                 "border-color": "#5c6cfa",
                                                 "background-color": "#111111",
                                                 "font-size": "10px",
+                                                "color": "white",
                                             },
                                         ),
                                     ],
@@ -438,12 +451,17 @@ app.layout = html.Div(
                                                     "Dataset 1",
                                                     id="data-selector",
                                                     inline=False,
-                                                    style={"display": "flex"},
+                                                    style={
+                                                        "display": "flex",
+                                                        "padding": "20px",
+                                                    },
                                                 ),
                                             ],
                                             id="data-selector-div",
                                             style={
                                                 "display": "none",
+                                                "padding": "20px",
+                                                "margin-bottom": "50px",
                                             },
                                         ),
                                         html.Button(
@@ -459,11 +477,11 @@ app.layout = html.Div(
                                             },
                                         ),
                                     ],
-                                    style={"display": "flex", "margin-top": "15px"},
+                                    style={"display": "flex"},
                                 ),
                             ],
                             style={
-                                "margin-top": "20px",
+                                # "margin-top": "20px",
                             },
                         ),
                     ],
@@ -862,7 +880,7 @@ app.layout = html.Div(
                             [
                                 dcc.Dropdown(
                                     ["none"],
-                                    placeholder="No values found",
+                                    placeholder="Select country",
                                     clearable=False,
                                     id="country-dropdown",
                                     style={
@@ -911,6 +929,145 @@ app.layout = html.Div(
                 ),
             ],
             id="compare-div",
+        ),
+        html.Div(
+            [
+                html.Div(
+                    style={
+                        "backgroundColor": "#232323",
+                        "display": "block",
+                        "padding": "10px",
+                    }
+                ),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                dcc.Dropdown(
+                                    ["none"],
+                                    placeholder="Select country",
+                                    clearable=False,
+                                    id="country-dropdown-corr",
+                                    style={
+                                        "width": "110px",
+                                        "border-color": "#5c6cfa",
+                                        "background-color": "#111111",
+                                        "border-top": "0px",
+                                        "border-left": "0px",
+                                        "border-right": "0px",
+                                        "border-bottom": "0px",
+                                        "border-radius": "0px",
+                                        "textAlign": "center",
+                                    },
+                                ),
+                                html.Div(
+                                    "Correlation heatmap",
+                                    style={
+                                        "padding-top": "10px",
+                                        "padding-left": "10px",
+                                        "padding-bottom": "10px",
+                                        "backgroundColor": "#111111",
+                                        "font-weight": "bold",
+                                        "textAlign": "center",
+                                        "width": "85%",
+                                    },
+                                ),
+                            ],
+                            style={"display": "flex"},
+                        ),
+                        html.Hr(
+                            style={
+                                "padding": "0px",
+                                "margin": "0px",
+                                "border-color": "#5c6cfa",
+                                "backgroundColor": "#5c6cfa",
+                            }
+                        ),
+                    ]
+                ),
+                html.Div(
+                    html.Div(
+                        [],
+                        id="heatmap-plot-div",
+                        style={"display": "inline-block", "width": "100%"},
+                    ),
+                ),
+            ],
+            id="heatmap-div",
+        ),
+        html.Div(
+            [
+                html.Div(
+                    style={
+                        "backgroundColor": "#232323",
+                        "display": "block",
+                        "padding": "10px",
+                    }
+                ),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                dcc.Dropdown(
+                                    ["none"],
+                                    placeholder="Select country",
+                                    clearable=False,
+                                    id="country-dropdown-forecast",
+                                    style={
+                                        "width": "110px",
+                                        "border-color": "#5c6cfa",
+                                        "background-color": "#111111",
+                                        "border-top": "0px",
+                                        "border-left": "0px",
+                                        "border-right": "0px",
+                                        "border-bottom": "0px",
+                                        "border-radius": "0px",
+                                        "textAlign": "center",
+                                    },
+                                ),
+                                html.Div(
+                                    "Trend forecast",
+                                    style={
+                                        "padding-top": "10px",
+                                        "padding-left": "10px",
+                                        "padding-bottom": "10px",
+                                        "backgroundColor": "#111111",
+                                        "font-weight": "bold",
+                                        "textAlign": "center",
+                                        "width": "85%",
+                                    },
+                                ),
+                            ],
+                            style={"display": "flex"},
+                        ),
+                        html.Hr(
+                            style={
+                                "padding": "0px",
+                                "margin": "0px",
+                                "border-color": "#5c6cfa",
+                                "backgroundColor": "#5c6cfa",
+                            }
+                        ),
+                    ]
+                ),
+                html.Div("Set amount of future time units", style={"padding": "15px"}),
+                dcc.Slider(1, 25, 1, id="forecast-slider"),
+                html.Div(
+                    html.Div(
+                        [],
+                        id="fit-plot-div",
+                        style={"display": "inline-block", "width": "100%"},
+                    ),
+                ),
+                html.Div(
+                    html.Div(
+                        [],
+                        id="forecast-plot-div",
+                        style={"display": "inline-block", "width": "100%"},
+                    ),
+                ),
+            ],
+            id="trend-div",
         ),
     ],
     style={
@@ -1237,7 +1394,11 @@ def preprocess_second_dataset(
         if "table-upload" in changed_items or "demo-button" in changed_items:
             upload_children["props"]["children"] = html.Div([filename])
 
-        radio_visibility = {"display": "block"}
+        radio_visibility = {
+            "display": "block",
+            "padding-bottom": "10px",
+            "padding-left": "5px",
+        }
         show_compare_dropdown = {"display": "block"}
 
         return (
@@ -1254,7 +1415,7 @@ def preprocess_second_dataset(
             None,
             reshape_options,
             no_update,
-            radio_visibility,
+            {"display": "block", "padding-left": "5px"},
             no_update,
             no_update,
         )
@@ -1433,6 +1594,10 @@ def update_second_sub_category_dropdown(
     Output("year-dropdown-map", "value"),
     Output("year-range-slider", "min"),
     Output("year-range-slider", "max"),
+    Output("country-dropdown-corr", "options"),
+    Output("country-dropdown-corr", "value"),
+    Output("country-dropdown-forecast", "options"),
+    Output("country-dropdown-forecast", "value"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("data-selector", "value"),
@@ -1510,6 +1675,10 @@ def update_year_dropdown_stats(
             time_selection,
             time_options.min(),
             time_options.max(),
+            geo_options,
+            geo_options[0],
+            geo_options,
+            geo_options[0],
         )
     else:
         raise exceptions.PreventUpdate
@@ -1651,9 +1820,6 @@ def update_stats(
         feature_column = datasets[selected_dataset][1]
 
         filtered_df = df[df[time_column] == year][[geo_column, feature_column]]
-
-        print(year_dropdown_stats)
-        print(type(country_dropdown_stats))
 
         filtered_df_by_country = df[
             (df[geo_column] == country_dropdown_stats)
@@ -2010,5 +2176,201 @@ def update_max_country_compare(
         raise exceptions.PreventUpdate
 
 
+@app.callback(
+    Output("fit-plot-div", "children"),
+    Output("forecast-plot-div", "children"),
+    Input("dataset", "data"),
+    Input("dataset-2", "data"),
+    Input("feature-dropdown-1", "value"),
+    Input("feature-dropdown-2", "value"),
+    Input("geo-dropdown-1", "value"),
+    Input("geo-dropdown-2", "value"),
+    Input("time-dropdown-1", "value"),
+    Input("time-dropdown-2", "value"),
+    Input("data-selector", "value"),
+    State("fit-plot-div", "children"),
+    State("forecast-plot-div", "children"),
+    Input("country-dropdown-forecast", "value"),
+    Input("forecast-slider", "value"),
+)
+def update_forecast(
+    dataset,
+    dataset_2,
+    feature_dropdown_1,
+    feature_dropdown_2,
+    geo_dropdown_1,
+    geo_dropdown_2,
+    time_dropdown_1,
+    time_dropdown_2,
+    selected_dataset,
+    fit_plot_children,
+    forecast_plot_children,
+    country_dropdown,
+    forecast_slider_value,
+):
+
+    if (
+        dataset
+        and feature_dropdown_1
+        and geo_dropdown_1
+        and selected_dataset == "Dataset 1"
+        and country_dropdown
+    ) or (
+        dataset_2
+        and feature_dropdown_2
+        and geo_dropdown_2
+        and selected_dataset == "Dataset 2"
+        and country_dropdown
+    ):
+
+        datasets = {
+            "Dataset 1": (dataset, feature_dropdown_1, geo_dropdown_1, time_dropdown_1),
+            "Dataset 2": (
+                dataset_2,
+                feature_dropdown_2,
+                geo_dropdown_2,
+                time_dropdown_2,
+            ),
+        }
+
+        geo_column = datasets[selected_dataset][2]
+        feature_column = datasets[selected_dataset][1]
+        time_column = datasets[selected_dataset][3]
+
+        df = pd.read_json(datasets[selected_dataset][0])
+
+        if not forecast_slider_value:
+            forecast_slider_value = 1
+
+        # model = LinearRegression()
+        # model = neighbors.KNeighborsRegressor()
+        # model = tree.DecisionTreeRegressor()
+
+        df = df[df[geo_column] == country_dropdown]
+
+        forecast, df = prophet_fit_and_predict(
+            df,
+            time_column=time_column,
+            feature_column=feature_column,
+            periods=forecast_slider_value,
+        )
+
+        fig = create_forecast_plot(
+            forecast=forecast,
+            df=df,
+            time_column=time_column,
+            feature_column=feature_column,
+        )
+
+        # x = np.expand_dims(df[time_column], axis=1)
+
+        # y_max = df[feature_column].max()
+
+        # model.fit(x, df[feature_column])
+
+        # x_range = np.linspace(x.min(), x.max(), 100)
+        # y_range = model.predict(x_range.reshape(-1, 1))
+
+        # rmse = np.sqrt(mean_squared_error(df[feature_column], model.predict(x)))
+
+        # if forecast_slider_value not in range(time_min, time_max):
+        #    forecast_slider_value = time_min
+
+        # future_years = [
+        #    year for year in range(time_min, time_max) if year <= forecast_slider_value
+        # ]
+
+        # future_years = np.expand_dims(np.array(future_years), axis=1)
+
+        # future_preds = model.predict(future_years)
+
+        # rmse = np.repeat(rmse, future_years.squeeze().size)
+
+        if fit_plot_children:
+            fit_plot_children.clear()
+
+        if forecast_plot_children:
+            forecast_plot_children.clear()
+
+        fit_plot_children.append(dcc.Graph(figure=fig))
+
+        return (
+            fit_plot_children,
+            forecast_plot_children,
+        )
+    else:
+        raise exceptions.PreventUpdate
+
+
+@app.callback(
+    Output("heatmap-plot-div", "children"),
+    Input("dataset", "data"),
+    Input("dataset-2", "data"),
+    Input("time-dropdown-1", "value"),
+    Input("time-dropdown-2", "value"),
+    Input("geo-dropdown-1", "value"),
+    Input("geo-dropdown-2", "value"),
+    Input("data-selector", "value"),
+    State("heatmap-plot-div", "children"),
+    Input("country-dropdown-corr", "value"),
+)
+def update_heatmap(
+    dataset,
+    dataset_2,
+    time_dropdown_1,
+    time_dropdown_2,
+    geo_dropdown_1,
+    geo_dropdown_2,
+    selected_dataset,
+    heatmap_children,
+    country_dropdown,
+):
+
+    if (
+        dataset
+        and time_dropdown_1
+        and geo_dropdown_1
+        and selected_dataset == "Dataset 1"
+    ) or (
+        dataset_2
+        and time_dropdown_2
+        and geo_dropdown_2
+        and selected_dataset == "Dataset 2"
+    ):
+
+        datasets = {
+            "Dataset 1": (
+                dataset,
+                time_dropdown_1,
+                geo_dropdown_1,
+            ),
+            "Dataset 2": (
+                dataset_2,
+                time_dropdown_2,
+                geo_dropdown_2,
+            ),
+        }
+
+        geo_column = datasets[selected_dataset][2]
+        time_column = datasets[selected_dataset][1]
+
+        df = pd.read_json(datasets[selected_dataset][0])
+
+        df = df[df[geo_column] == country_dropdown]
+
+        df = df.drop(columns=time_column)
+
+        fig = create_correlation_heatmap(df)
+
+        if heatmap_children:
+            heatmap_children.clear()
+
+        heatmap_children.append(dcc.Graph(figure=fig))
+
+        return heatmap_children
+    else:
+        raise exceptions.PreventUpdate
+
+
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run(host="127.0.0.1", debug=True)

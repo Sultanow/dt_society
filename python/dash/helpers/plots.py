@@ -1,4 +1,4 @@
-from matplotlib.pyplot import margins
+import numpy as np
 import plotly.graph_objects as go
 import pandas as pd
 import plotly.express as px
@@ -144,6 +144,88 @@ def create_two_line_plot(
         height=300,
         yaxis1_title=feature_columns[0],
         yaxis2_title=feature_columns[1],
+    )
+
+    return fig
+
+
+def create_correlation_heatmap(df: pd.DataFrame) -> go.Figure:
+    """Creates a correlation heatmap between all features in the dataset using Pearsons correlation coefficient.
+
+    Args:
+        df (pd.DataFrame): Dataframe containing features exclusively
+
+    Returns:
+        go.Figure: Heatmap of lower triangular correlation matrix
+    """
+
+    triangular_upper_mask = np.triu(np.ones(df.corr().shape)).astype(bool)
+
+    fig = px.imshow(
+        df.corr().where(~triangular_upper_mask),
+        aspect="auto",
+        color_continuous_scale="Viridis",
+        labels={"color": "Pearson r"},
+    )
+
+    fig.update_layout(template=theme)
+
+    return fig
+
+
+def create_forecast_plot(
+    forecast: pd.DataFrame, df: pd.DataFrame, time_column: str, feature_column: str
+) -> go.Figure:
+    """Creates a forecast plot with predictions made by the Prophet predictor. (https://facebook.github.io/prophet/)
+
+    Args:
+        forecast (pd.DataFrame): resulting predictions made by the Prophet predictor
+        df (pd.DataFrame): original dataframe
+        time_column (str): name of the time column in original dataframe
+        feature_column (str): name of the feature column in original dataframe
+
+    Returns:
+        go.Figure: Lineplot with subplots for observations, model fit and future predictions respectively
+    """
+
+    fig = go.Figure()
+
+    fig.add_traces(
+        go.Scatter(
+            x=df["ds"],
+            y=df["y"],
+            name="Observations",
+            mode="markers",
+            marker=go.scatter.Marker(symbol="x"),
+        )
+    )
+
+    fig.add_traces(
+        go.Scatter(
+            x=forecast["ds"][: len(df)],
+            y=forecast["yhat"][: len(df)],
+            name="Regression Fit",
+            mode="lines",
+        )
+    )
+
+    print(forecast["ds"][len(df) :])
+    fig.add_traces(
+        go.Scatter(
+            x=forecast["ds"][len(df) :],
+            y=forecast["yhat"][len(df) :],
+            error_y=go.scatter.ErrorY(
+                array=forecast["yhat_upper"][len(df) :]
+                - forecast["yhat_lower"][len(df) :],
+            ),
+            mode="markers",
+            name="Predictions",
+            marker=go.scatter.Marker(symbol="triangle-up"),
+        ),
+    )
+
+    fig.update_layout(
+        template=theme, xaxis_title=time_column, yaxis_title=feature_column
     )
 
     return fig
