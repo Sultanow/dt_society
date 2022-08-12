@@ -1,6 +1,7 @@
 import gzip
 import base64
 from operator import index
+from re import S
 import urllib
 import dash_daq as daq
 from dash import (
@@ -2199,7 +2200,6 @@ def update_max_country_compare(
 
 @app.callback(
     Output("fit-plot-div", "children"),
-    Output("forecast-plot-div", "children"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("feature-dropdown-1", "value"),
@@ -2215,20 +2215,41 @@ def update_max_country_compare(
     Input("forecast-slider", "value"),
 )
 def update_forecast(
-    dataset,
-    dataset_2,
-    feature_dropdown_1,
-    feature_dropdown_2,
-    geo_dropdown_1,
-    geo_dropdown_2,
-    time_dropdown_1,
-    time_dropdown_2,
-    selected_dataset,
-    fit_plot_children,
-    forecast_plot_children,
-    country_dropdown,
-    forecast_slider_value,
-):
+    dataset: str,
+    dataset_2: str,
+    feature_dropdown_1: str,
+    feature_dropdown_2: str,
+    geo_dropdown_1: str,
+    geo_dropdown_2: str,
+    time_dropdown_1: str,
+    time_dropdown_2: str,
+    selected_dataset: str,
+    fit_plot_children: list,
+    country_dropdown: str,
+    forecast_slider_value: str,
+) -> list:
+    """Creates a forecast using the Prophet model
+
+    Args:
+        dataset (str): First dataset
+        dataset_2 (str): Second dataset
+        feature_dropdown_1 (str): value of the first selected feature column
+        feature_dropdown_2 (str): value of the second selected feature column
+        geo_dropdown_1 (str): value of the first selected geo column
+        geo_dropdown_2 (str): value of the second selected geo column
+        time_dropdown_1 (str): value of the first selected time column
+        time_dropdown_2 (str): value of the second selected time column
+        selected_dataset (str): value of the dataset selector
+        fit_plot_children (list): container for the forecast plot
+        country_dropdown (str): selected country to forecast
+        forecast_slider_value (str): number of periods to forecast (set by slider)
+
+    Raises:
+        exceptions.PreventUpdate: update prevented if neither dataset is loaded with all columns selected
+
+    Returns:
+        list: container with forecast plot
+    """
 
     if (
         dataset
@@ -2310,15 +2331,9 @@ def update_forecast(
         if fit_plot_children:
             fit_plot_children.clear()
 
-        if forecast_plot_children:
-            forecast_plot_children.clear()
-
         fit_plot_children.append(dcc.Graph(figure=fig))
 
-        return (
-            fit_plot_children,
-            forecast_plot_children,
-        )
+        return (fit_plot_children,)
     else:
         raise exceptions.PreventUpdate
 
@@ -2336,16 +2351,35 @@ def update_forecast(
     Input("country-dropdown-corr", "value"),
 )
 def update_heatmap(
-    dataset,
-    dataset_2,
-    time_dropdown_1,
-    time_dropdown_2,
-    geo_dropdown_1,
-    geo_dropdown_2,
-    selected_dataset,
-    heatmap_children,
-    country_dropdown,
+    dataset: str,
+    dataset_2: str,
+    time_dropdown_1: str,
+    time_dropdown_2: str,
+    geo_dropdown_1: str,
+    geo_dropdown_2: str,
+    selected_dataset: str,
+    heatmap_children: list,
+    country_dropdown: str,
 ):
+    """Creates a heatmap from the correlation matrix of features
+
+    Args:
+        dataset (str): First dataset
+        dataset_2 (str): Second dataset
+        time_dropdown_1 (str): value of the selected time column value of the first dataset
+        time_dropdown_2 (str): value of the selcted time column value of the second dataset
+        geo_dropdown_1 (str): value of the selected geo column value of the first dataset
+        geo_dropdown_2 (str): value of the selected geo column value of the second dataset
+        selected_dataset (str): value of the dataset selector
+        heatmap_children (list): container that holds the figure
+        country_dropdown (str): selected country
+
+    Raises:
+        exceptions.PreventUpdate: update prevented if neither dataset is loaded with all columns selected
+
+    Returns:
+        list: container with heatmap plot
+    """
 
     if (
         dataset
