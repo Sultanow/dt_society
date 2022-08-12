@@ -2210,7 +2210,6 @@ def update_max_country_compare(
     Input("time-dropdown-2", "value"),
     Input("data-selector", "value"),
     State("fit-plot-div", "children"),
-    State("forecast-plot-div", "children"),
     Input("country-dropdown-forecast", "value"),
     Input("forecast-slider", "value"),
 )
@@ -2333,7 +2332,7 @@ def update_forecast(
 
         fit_plot_children.append(dcc.Graph(figure=fig))
 
-        return (fit_plot_children,)
+        return fit_plot_children
     else:
         raise exceptions.PreventUpdate
 
