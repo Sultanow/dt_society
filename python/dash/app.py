@@ -1,11 +1,5 @@
-import gzip
-import base64
-from operator import index
-from re import S
-import urllib
 import dash_daq as daq
 from dash import (
-    no_update,
     Dash,
     dcc,
     html,
@@ -14,20 +8,8 @@ from dash import (
     exceptions,
     State,
     dash_table,
-    callback_context,
 )
-import numpy as np
-from numpy.core.fromnumeric import mean
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-from prophet import Prophet
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error
-from sklearn import tree, neighbors
-
-from preprocessing.dataset import DigitalTwinTimeSeries
-from preprocessing.parse import parse_dataset
 
 from helpers.plots import (
     create_multi_line_plot,
@@ -89,9 +71,7 @@ app.layout = html.Div(
                                                 "font-weight": "bold",
                                                 "textAlign": "center",
                                                 "display": "flex",
-                                                # "margin-left": "200px",
-                                                "margin": "auto"
-                                                # "width": "80%",
+                                                "margin": "auto",
                                             },
                                         ),
                                         html.Div(
@@ -1448,8 +1428,6 @@ def update_stats(
 
         filtered_df_by_country = df[(df[geo_column] == country_dropdown_stats)]
 
-        avg_stat_children.clear()
-
         mean, max, min, max_country, min_country = compute_stats(
             filtered_df, feature_column, geo_column
         )
@@ -1458,13 +1436,15 @@ def update_stats(
             filtered_df_by_country, feature_column, year_range
         )
 
+        avg_stat_children.clear()
         avg_stat_children.append("Mean \n" + str(mean))
 
         max_stat_children.clear()
         max_stat_children.append("max:\n" + str(max) + " - " + max_country)
-        min_stat_children.clear()
 
+        min_stat_children.clear()
         min_stat_children.append("min: \n" + str(min) + " - " + min_country)
+
         growth_stat_children.clear()
         growth_stat_children.append("Growth rate:\n" + str(growth_rate) + "%")
 
