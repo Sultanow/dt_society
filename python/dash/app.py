@@ -27,7 +27,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn import tree, neighbors
 
 from preprocessing.dataset import DigitalTwinTimeSeries
-from preprocessing.parse import parse_dataset, get_available_columns
+from preprocessing.parse import parse_dataset
 
 from helpers.plots import (
     create_multi_line_plot,
@@ -37,6 +37,12 @@ from helpers.plots import (
     create_forecast_plot,
 )
 from helpers.models import prophet_fit_and_predict
+from helpers.layout import (
+    preprocess_dataset,
+    get_year_and_country_options_stats,
+    compute_stats,
+    compute_growth_rate,
+)
 
 
 external_stylesheets = [
@@ -1091,505 +1097,137 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output("time-dropdown-1", "options"),
     Output("dataset", "data"),
-    Output("table-upload", "children"),
-    Output("time-dropdown-1", "value"),
-    Output("second-file-upload", "style"),
     Output("geo-dropdown-1", "options"),
-    Output("dataset-1-fail", "displayed"),
-    Output("table-upload", "contents"),
     Output("reshape-dropdown-1", "options"),
-    Output("reshape-dropdown-1", "disabled"),
-    Output("geo-dropdown-1", "value"),
+    Output("table-upload", "children"),
+    Output("feature-dropdown-1", "options"),
+    Output("time-dropdown-1", "options"),
+    Output("table-upload", "contents"),
+    Output("delimiter-dropdown-1", "value"),
+    Output("table-upload", "filename"),
     Output("reshape-switch-1", "on"),
+    Output("geo-dropdown-1", "value"),
+    Input("delimiter-dropdown-1", "value"),
+    Input("geo-dropdown-1", "value"),
     Input("table-upload", "contents"),
     Input("table-upload", "filename"),
+    Input("reshape-dropdown-1", "value"),
+    Input("reshape-switch-1", "on"),
     State("table-upload", "children"),
     Input("demo-button", "n_clicks"),
-    Input("geo-dropdown-1", "value"),
-    Input("delimiter-dropdown-1", "value"),
-    Input("reshape-switch-1", "on"),
-    Input("dataset", "data"),
-    Input("reshape-dropdown-1", "value"),
+    prevent_initial_call=True,
 )
-def preprocess_dataset(
-    file: str,
-    filename: str,
-    upload_children: list,
-    demo_button_clicks: int,
-    geo_dropdown_1: str,
-    delimiter_dropdown_1: str,
+def preprocess_data(
+    delimiter_value: str,
+    geo_column_value: str,
+    file_content: str,
+    file_name: str,
+    reshape_column_value: str,
     reshape_switch_status: bool,
-    data: str,
-    reshape_dropdown_1: str,
-) -> tuple:
-    """Processes file upload
+    file_upload_children: str,
+    demo_button_n_clicks: int,
+):
 
-    Args:
-        file (str): _description_
-        filename (str): _description_
-        children (list): _description_
-
-    Raises:
-        exceptions.PreventUpdate: _description_
-
-    Returns:
-        _type_: _description_
-    """
-    changed_items = [p["prop_id"] for p in callback_context.triggered][0]
-
-    if "table-upload" in changed_items:
-        geo_dropdown_1 = None
-
-    if delimiter_dropdown_1 == "\\t":
-        delimiter_dropdown_1 = "\t"
-
-    if (
-        (file is not None or "demo-button" in changed_items)
-        and geo_dropdown_1 is not None
-        and delimiter_dropdown_1
-    ):
-        if file:
-            try:
-                content = file.split(",")
-                df, columns = parse_dataset(
-                    content[-1],
-                    separator=delimiter_dropdown_1,
-                    geo_col=geo_dropdown_1,
-                )
-            except Exception as e:
-                print(e)
-                return (
-                    no_update,
-                    None,
-                    no_update,
-                    no_update,
-                    no_update,
-                    no_update,
-                    True,
-                    None,
-                    no_update,
-                    no_update,
-                    no_update,
-                    no_update,
-                )
-        elif "demo-button" in changed_items:
-            filename = "arbeitslosenquote_eu.tsv"
-            df_url = "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/tipsun20.tsv.gz"
-
-            df, columns = parse_dataset(df_url, upload_file=False, separator="\t")
-
-        if "table-upload" in changed_items or "demo-button" in changed_items:
-            upload_children["props"]["children"] = html.Div([filename])
-
-        time_options, geo_options, reshape_options = (columns, columns, columns)
-        if not columns:
-
-            columns = ["none"]
-        else:
-            columns.insert(0, "None")
-
-        show_second_file_upload = {"display": "flex"}
-
-        return (
-            time_options,
-            df,
-            upload_children,
-            no_update,
-            show_second_file_upload,
-            geo_options,
-            False,
-            None,
-            reshape_options,
-            no_update,
-            no_update,
-            no_update,
-        )
-    elif (
-        (file is not None or "demo-button" in changed_items)
-        and geo_dropdown_1 is None
-        and delimiter_dropdown_1
-    ):
-        if file:
-            columns = get_available_columns(file, separator=delimiter_dropdown_1)
-            columns.insert(0, "None")
-        elif "demo-button" in changed_items:
-            filename = "arbeitslosenquote_eu.tsv"
-            df_url = "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/tipsun20.tsv.gz"
-
-            content = urllib.request.urlopen(df_url).read()
-            content = gzip.decompress(content)
-
-            columns = get_available_columns(content, upload_file=False, separator="\t")
-            file = base64.b64encode(content).decode("utf-8")
-
-        upload_children["props"]["children"] = html.Div([filename])
-
-        if "table-upload" in changed_items:
-            return (
-                [],
-                None,
-                upload_children,
-                no_update,
-                no_update,
-                columns,
-                False,
-                file,
-                [],
-                False,
-                None,
-                False,
-            )
-
-        return (
-            no_update,
-            None,
-            upload_children,
-            no_update,
-            no_update,
-            columns,
-            False,
-            file,
-            no_update,
-            no_update,
-            no_update,
-            no_update,
-        )
-    elif (
-        data
-        and reshape_switch_status
-        and reshape_dropdown_1
-        and "reshape-switch-1" in changed_items
-    ):
-        df = pd.read_json(data)
-        df = DigitalTwinTimeSeries(df=df, geo_col=geo_dropdown_1)
-        df = df.reshape_wide_to_long(reshape_dropdown_1)
-
-        columns = df.columns.to_list()
-
-        return (
-            columns,
-            df.to_json(),
-            no_update,
-            no_update,
-            no_update,
-            columns,
-            False,
-            None,
-            no_update,
-            True,
-            no_update,
-            no_update,
-        )
-
-    else:
-        raise exceptions.PreventUpdate
+    return preprocess_dataset(
+        delimiter_value,
+        geo_column_value,
+        file_content,
+        file_name,
+        reshape_column_value,
+        reshape_switch_status,
+        file_upload_children,
+        demo_button_n_clicks,
+        "Demo 1",
+    )
 
 
 @app.callback(
-    Output("time-dropdown-2", "options"),
     Output("dataset-2", "data"),
-    Output("table-upload-2", "children"),
-    Output("time-dropdown-2", "value"),
-    Output("country-dropdown", "options"),
-    Output("country-dropdown", "value"),
-    Output("data-selector", "style"),
-    Output("compare-div", "style"),
     Output("geo-dropdown-2", "options"),
-    Output("dataset-2-fail", "displayed"),
-    Output("table-upload-2", "contents"),
     Output("reshape-dropdown-2", "options"),
-    Output("reshape-dropdown-2", "disabled"),
-    Output("data-selector-div", "style"),
-    Output("geo-dropdown-2", "value"),
+    Output("table-upload-2", "children"),
+    Output("feature-dropdown-2", "options"),
+    Output("time-dropdown-2", "options"),
+    Output("table-upload-2", "contents"),
+    Output("delimiter-dropdown-2", "value"),
+    Output("table-upload-2", "filename"),
     Output("reshape-switch-2", "on"),
+    Output("geo-dropdown-2", "value"),
+    Output("data-selector", "style"),
+    Output("data-selector-div", "style"),
+    Output("compare-div", "style"),
+    Input("delimiter-dropdown-2", "value"),
+    Input("geo-dropdown-2", "value"),
     Input("table-upload-2", "contents"),
     Input("table-upload-2", "filename"),
-    State("table-upload-2", "children"),
-    Input("dataset", "data"),
-    Input("demo-button", "n_clicks"),
-    Input("geo-dropdown-2", "value"),
-    Input("delimiter-dropdown-2", "value"),
-    Input("reshape-switch-2", "on"),
-    Input("dataset-2", "data"),
-    Input("geo-dropdown-1", "value"),
     Input("reshape-dropdown-2", "value"),
+    Input("reshape-switch-2", "on"),
+    State("table-upload-2", "children"),
+    Input("demo-button", "n_clicks"),
+    prevent_initial_call=True,
 )
-def preprocess_second_dataset(
-    file: str,
-    filename: str,
-    upload_children: list,
-    data: str,
-    demo_button_clicks: int,
-    geo_dropdown_2: str,
-    delimiter_dropdown_2: str,
-    reshape_switch_status_2: bool,
-    data_2: str,
-    geo_dropdown_1: str,
-    reshape_dropdown_2: str,
-) -> tuple:
-    """Processes additional dataset
+def preprocess_second_data(
+    delimiter_value: str,
+    geo_column_value: str,
+    file_content: str,
+    file_name: str,
+    reshape_column_value: str,
+    reshape_switch_status: bool,
+    file_upload_children: str,
+    demo_button_n_clicks: int,
+):
+    radio_div_visibility = {
+        "display": "block",
+        "padding-bottom": "10px",
+        "padding-left": "5px",
+    }
 
-    Args:
-        file (str): _description_
-        filename (str): _description_
-        children (list): _description_
-        data (str): _description_
+    selector_visibility = {"display": "block", "padding-left": "5px"}
 
-    Raises:
-        exceptions.PreventUpdate: _description_
+    show_compare_dropdown = {"display": "block"}
 
-    Returns:
-        _type_: _description_
-    """
-
-    changed_items = [p["prop_id"] for p in callback_context.triggered][0]
-
-    if "table-upload" in changed_items:
-        geo_dropdown_2 = None
-
-    if delimiter_dropdown_2 == "\\t":
-        delimiter_dropdown_2 = "\t"
-
-    if (
-        (file is not None or "demo-button" in changed_items)
-        and geo_dropdown_2 is not None
-        and delimiter_dropdown_2
-    ):
-
-        if file:
-            try:
-                content = file.split(",")
-                df_2, columns, countries = parse_dataset(
-                    content[-1],
-                    get_countries=True,
-                    geo_col=geo_dropdown_2,
-                    separator=delimiter_dropdown_2,
-                )
-            except Exception as e:
-                print(e)
-                return (
-                    no_update,
-                    None,
-                    no_update,
-                    no_update,
-                    no_update,
-                    no_update,
-                    no_update,
-                    no_update,
-                    no_update,
-                    True,
-                    None,
-                    no_update,
-                    no_update,
-                    no_update,
-                )
-        elif "demo-button" in changed_items:
-            filename = "bip_europa.tsv"
-            df_url = "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/tec00001.tsv.gz"
-            df_2, columns, countries = parse_dataset(
-                df_url, upload_file=False, get_countries=True
-            )
-
-        time_options, geo_options, reshape_options = (columns, columns, columns)
-
-        if geo_dropdown_1 != "None":
-            countries_df_1 = pd.read_json(data)[geo_dropdown_1].unique().tolist()
-            countries = [c for c in countries_df_1 if c in set(countries)]
-
-        else:
-            countries = ["None"]
-
-        if "table-upload" in changed_items or "demo-button" in changed_items:
-            upload_children["props"]["children"] = html.Div([filename])
-
-        radio_visibility = {
-            "display": "block",
-            "padding-bottom": "10px",
-            "padding-left": "5px",
-        }
-        show_compare_dropdown = {"display": "block"}
-
-        return (
-            time_options,
-            df_2,
-            upload_children,
-            no_update,
-            countries,
-            countries[0],
-            radio_visibility,
-            show_compare_dropdown,
-            geo_options,
-            False,
-            None,
-            reshape_options,
-            no_update,
-            {"display": "block", "padding-left": "5px"},
-            no_update,
-            no_update,
-        )
-    elif (
-        (file is not None or "demo-button" in changed_items)
-        and geo_dropdown_2 is None
-        and delimiter_dropdown_2
-        and "geo-dropdown-1" not in changed_items
-        and "dataset" not in changed_items
-    ):
-        if file:
-            columns = get_available_columns(file, separator=delimiter_dropdown_2)
-        elif "demo-button" in changed_items:
-            filename = "bip_europa.tsv"
-            df_url = "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/tec00001.tsv.gz"
-
-            content = urllib.request.urlopen(df_url).read()
-            content = gzip.decompress(content)
-
-            columns = get_available_columns(content, upload_file=False, separator="\t")
-            file = base64.b64encode(content).decode("utf-8")
-
-        upload_children["props"]["children"] = html.Div([filename])
-
-        if "table-upload" in changed_items:
-            return (
-                [],
-                None,
-                upload_children,
-                no_update,
-                no_update,
-                no_update,
-                no_update,
-                no_update,
-                columns,
-                False,
-                file,
-                [],
-                False,
-                no_update,
-                None,
-                False,
-            )
-
-        return (
-            no_update,
-            None,
-            upload_children,
-            no_update,
-            no_update,
-            no_update,
-            no_update,
-            no_update,
-            columns,
-            False,
-            file,
-            no_update,
-            no_update,
-            no_update,
-            no_update,
-            no_update,
-        )
-    elif (
-        data_2
-        and reshape_switch_status_2
-        and reshape_dropdown_2
-        and "reshape-switch-2" in changed_items
-    ):
-        df = pd.read_json(data_2)
-        df = DigitalTwinTimeSeries(df=df, geo_col=geo_dropdown_2)
-        df = df.reshape_wide_to_long(reshape_dropdown_2)
-
-        columns = df.columns.to_list()
-
-        return (
-            columns,
-            df.to_json(),
-            no_update,
-            no_update,
-            no_update,
-            no_update,
-            no_update,
-            no_update,
-            columns,
-            False,
-            None,
-            no_update,
-            True,
-            no_update,
-            no_update,
-            no_update,
-        )
-
-    else:
-        raise exceptions.PreventUpdate
+    return (
+        *preprocess_dataset(
+            delimiter_value,
+            geo_column_value,
+            file_content,
+            file_name,
+            reshape_column_value,
+            reshape_switch_status,
+            file_upload_children,
+            demo_button_n_clicks,
+            "Demo 2",
+        ),
+        radio_div_visibility,
+        selector_visibility,
+        show_compare_dropdown,
+    )
 
 
 @app.callback(
-    Output("feature-dropdown-1", "options"),
-    Output("feature-dropdown-1", "value"),
-    Input("time-dropdown-1", "value"),
+    Output("country-dropdown", "options"),
+    Output("country-dropdown", "value"),
     Input("dataset", "data"),
-    Input("geo-dropdown-1", "value"),
-)
-def update_sub_category_dropdown(
-    time_dropdown_1: str, dataset: str, geo_dropdown_1: str
-) -> tuple:
-    """Updates the sub category dropdown based on the selected column
-
-    Args:
-        selected_column (str): current column selected in the dropdown
-        data (str): Dataset
-
-    Raises:
-        exceptions.PreventUpdate: if no data is available and no column selected
-
-    Returns:
-        tuple: sub categories and autoselect first sub category
-    """
-
-    if dataset and time_dropdown_1:
-        df = pd.read_json(dataset)
-        if geo_dropdown_1 != "None":
-            df = df.drop(columns=[time_dropdown_1, geo_dropdown_1])
-
-        return df.columns.to_list(), no_update
-
-    elif not time_dropdown_1:
-        return [], None
-
-    else:
-        raise exceptions.PreventUpdate
-
-
-@app.callback(
-    Output("feature-dropdown-2", "options"),
-    Output("feature-dropdown-2", "value"),
-    Input("time-dropdown-2", "value"),
     Input("dataset-2", "data"),
+    Input("geo-dropdown-1", "value"),
     Input("geo-dropdown-2", "value"),
 )
-def update_second_sub_category_dropdown(
-    time_dropdown_2: str, dataset: str, geo_dropdown_2: str
-) -> tuple:
-    """Updates the second sub category dropdown based on the selected column
-    in the second dataset
+def update_country_dropdown_comparison(
+    dataset_1: str, dataset_2: str, geo_dropdown_value_1: str, geo_dropdown_value_2: str
+):
+    if dataset_1 and dataset_2 and geo_dropdown_value_1 and geo_dropdown_value_2:
+        dataset_1_countries = pd.read_json(dataset_1)[geo_dropdown_value_1].unique()
 
-    Args:
-        selected_column (str): current column selected in the dropdown
-        data (str): Dataset
+        dataset_2_countries = pd.read_json(dataset_2)[geo_dropdown_value_2].unique()
 
-    Raises:
-        exceptions.PreventUpdate: if no data is available and no column selected
+        joint_countries = [
+            country
+            for country in dataset_1_countries
+            if country in set(dataset_2_countries)
+        ]
 
-    Returns:
-        tuple: sub categories and autoselect first sub category
-    """
-    if dataset and time_dropdown_2:
-        df = pd.read_json(dataset)
-        df = df.drop(columns=[time_dropdown_2, geo_dropdown_2])
-        return df.columns.to_list(), no_update
-
-    elif not time_dropdown_2:
-        return [], None
+        return joint_countries, joint_countries[0]
 
     else:
         raise exceptions.PreventUpdate
@@ -1617,7 +1255,7 @@ def update_second_sub_category_dropdown(
     Input("time-dropdown-1", "value"),
     Input("time-dropdown-2", "value"),
 )
-def update_year_dropdown_stats(
+def update_year_and_country_dropdown_stats(
     dataset: str,
     dataset_2: str,
     selected_dataset: str,
@@ -1662,39 +1300,8 @@ def update_year_dropdown_stats(
 
         df = pd.read_json(datasets[selected_dataset][0])
 
-        if geo_column != "None":
-
-            geo_options = df[geo_column].unique()
-            geo_selection = geo_options[0]
-        else:
-            geo_options = no_update
-            geo_selection = no_update
-
-        time_options = np.sort(df[time_column].unique())
-
-        time_selection = time_options[0]
-        time_min = 0
-        time_max = time_options.size - 1
-
-        time_span = [time_min, time_max]
-
-        if isinstance(time_selection, np.datetime64):
-            time_selection = np.datetime_as_string(time_selection)
-
-        return (
-            time_options,
-            time_selection,
-            geo_options,
-            geo_selection,
-            time_options,
-            time_selection,
-            time_min,
-            time_max,
-            geo_options,
-            geo_options[0],
-            geo_options,
-            geo_options[0],
-            time_span,
+        return get_year_and_country_options_stats(
+            df, geo_column=geo_column, time_column=time_column
         )
     else:
         raise exceptions.PreventUpdate
@@ -1839,52 +1446,27 @@ def update_stats(
 
         filtered_df = df[df[time_column] == year][[geo_column, feature_column]]
 
-        filtered_df_by_country = df[
-            (df[geo_column] == country_dropdown_stats)
-            # & (df[time_column] >= year_dropdown_stats)
-        ]
+        filtered_df_by_country = df[(df[geo_column] == country_dropdown_stats)]
 
         avg_stat_children.clear()
 
-        avg_stat_children.append(
-            "Mean \n"
-            + str(round(filtered_df[datasets[selected_dataset][1]].mean(axis=0), 2))
+        mean, max, min, max_country, min_country = compute_stats(
+            filtered_df, feature_column, geo_column
         )
 
-        start_value = (
-            filtered_df_by_country[feature_column].sort_values().values[year_range[0]]
-        )
-        end_value = (
-            filtered_df_by_country[feature_column].sort_values().values[year_range[-1]]
+        growth_rate = compute_growth_rate(
+            filtered_df_by_country, feature_column, year_range
         )
 
-        growth_rate = ((end_value - start_value) / end_value) * 100
+        avg_stat_children.append("Mean \n" + str(mean))
 
         max_stat_children.clear()
-
-        max_country = filtered_df.loc[
-            filtered_df[datasets[selected_dataset][1]].idxmax()
-        ][datasets[selected_dataset][3]]
-
-        max_stat_children.append(
-            "max:\n"
-            + str(round(filtered_df[datasets[selected_dataset][1]].max(), 2))
-            + " - "
-            + max_country
-        )
+        max_stat_children.append("max:\n" + str(max) + " - " + max_country)
         min_stat_children.clear()
 
-        min_country = filtered_df.loc[
-            filtered_df[datasets[selected_dataset][1]].idxmin()
-        ][datasets[selected_dataset][3]]
-        min_stat_children.append(
-            "min: \n"
-            + str(round(filtered_df[datasets[selected_dataset][1]].min(), 2))
-            + " - "
-            + min_country
-        )
+        min_stat_children.append("min: \n" + str(min) + " - " + min_country)
         growth_stat_children.clear()
-        growth_stat_children.append("Growth rate:\n" + str(round(growth_rate, 2)))
+        growth_stat_children.append("Growth rate:\n" + str(growth_rate) + "%")
 
         visiblity = {"display": "block"}
 
