@@ -8,6 +8,8 @@ from dash import (
     exceptions,
     State,
     dash_table,
+    callback_context,
+    no_update,
 )
 import pandas as pd
 
@@ -1340,9 +1342,17 @@ def update_year_and_country_dropdown_stats(
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("data-selector", "value"),
+    Input("table-upload", "contents"),
+    Input("delimiter-dropdown-1", "value"),
+    Input("delimiter-dropdown-2", "value"),
 )
 def update_table_content(
-    dataset_1: str, dataset_2: str, selected_dataset: str
+    dataset_1: str,
+    dataset_2: str,
+    selected_dataset: str,
+    file: str,
+    delimiter_dropdown_1,
+    delimiter_dropdown_2,
 ) -> pd.DataFrame:
     """Fills table section with data from the selected dataset
 
@@ -1358,8 +1368,8 @@ def update_table_content(
         pd.DataFrame: Dataframe of selected dataset
     """
 
-    if (dataset_1 and selected_dataset == "Dataset 1") or (
-        dataset_2 and selected_dataset == "Dataset 2"
+    if (dataset_1 and selected_dataset == "Dataset 1" and delimiter_dropdown_1) or (
+        dataset_2 and selected_dataset == "Dataset 2" and delimiter_dropdown_2
     ):
         datasets = {"Dataset 1": dataset_1, "Dataset 2": dataset_2}
 
@@ -1368,8 +1378,11 @@ def update_table_content(
         table_div_style = {"backroundColor": "#ffffff", "display": "block"}
 
         return df, table_div_style
+
     else:
-        raise exceptions.PreventUpdate
+        table_div_style = {"display": "none"}
+        return no_update, table_div_style
+        # raise exceptions.PreventUpdate
 
 
 @app.callback(
@@ -1394,6 +1407,7 @@ def update_table_content(
     Input("feature-dropdown-2", "value"),
     Input("time-dropdown-2", "value"),
     [Input("year-range-slider", "value")],
+    Input("table-upload", "contents"),
 )
 def update_stats(
     selected_dataset: str,
@@ -1412,6 +1426,7 @@ def update_stats(
     feature_dropdown_2: str,
     time_dropdown_2: str,
     year_range: list,
+    file: str,
 ) -> tuple:
     """Compute and display mean, max, min and growth value (per country) for selected dataset
 
@@ -1508,7 +1523,8 @@ def update_stats(
             stats_div_style,
         )
     else:
-        raise exceptions.PreventUpdate
+        table_div_style = {"display": "none"}
+        return no_update, no_update, no_update, no_update, table_div_style
 
 
 @app.callback(
@@ -1622,7 +1638,9 @@ def update_line_plot(
         return timeline_children, line_plot_style
 
     else:
-        raise exceptions.PreventUpdate
+        line_plot_style = {"display": "none"}
+
+        return timeline_children, line_plot_style
 
 
 @app.callback(
@@ -1730,7 +1748,9 @@ def update_choropleth(
         return map_children, map_div_style
 
     else:
-        raise exceptions.PreventUpdate
+        map_div_style = {"display": "none"}
+
+        return map_children, map_div_style
 
 
 @app.callback(
@@ -1822,7 +1842,9 @@ def update_max_country_compare(
 
         return comparison_children, compare_div_style
     else:
-        raise exceptions.PreventUpdate
+        compare_div_style = {"display": "none"}
+
+        return comparison_children, compare_div_style
 
 
 @app.callback(
@@ -1972,7 +1994,9 @@ def update_forecast(
         return fit_plot_children, forecast_div_style
 
     else:
-        raise exceptions.PreventUpdate
+        forecast_div_style = {"display": "none"}
+
+        return fit_plot_children, forecast_div_style
 
 
 @app.callback(
@@ -2070,7 +2094,10 @@ def update_heatmap(
 
         return heatmap_children, heatmap_div_style
     else:
-        raise exceptions.PreventUpdate
+
+        heatmap_div_style = {"display": "none"}
+
+        return heatmap_children, heatmap_div_style
 
 
 if __name__ == "__main__":
