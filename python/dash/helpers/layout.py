@@ -26,6 +26,8 @@ def preprocess_dataset(
 ):
     changed_item = [p["prop_id"] for p in callback_context.triggered][0]
 
+    show_error_notification = no_update
+
     if "demo-button" in changed_item or "table-upload" in changed_item:
         reshape_switch_status = False
         delimiter_value = None
@@ -72,18 +74,26 @@ def preprocess_dataset(
 
         except Exception as e:
             print(e)
+            show_error_notification = True
+            file_upload_children["props"]["children"] = html.Div(
+                [
+                    "Drag and Drop or ",
+                    html.A("Select Files"),
+                ]
+            )
             return (
-                no_update,
-                no_update,
-                no_update,
-                no_update,
-                no_update,
-                no_update,
-                no_update,
-                no_update,
-                no_update,
-                no_update,
-                no_update,
+                no_update,  # data
+                no_update,  # geo-dropdown-options
+                no_update,  # reshape-dropdown-options
+                file_upload_children,  # file-name-container
+                no_update,  # feature-dropdown-options
+                no_update,  # time-dropdown-options
+                no_update,  # table-upload-content
+                None,  # delimiter-dropdown-value
+                no_update,  # file-name
+                no_update,  # reshape-swtich-status
+                no_update,  # geo-dropdown-value
+                show_error_notification,  # dataset-fail-display
             )
         geo_column_value = no_update
         geo_options = columns
@@ -119,6 +129,7 @@ def preprocess_dataset(
         file_name,
         reshape_switch_status,
         geo_column_value,
+        show_error_notification,
     )
 
 

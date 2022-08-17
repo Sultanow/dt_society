@@ -18,7 +18,7 @@ from helpers.plots import (
     create_correlation_heatmap,
     create_forecast_plot,
 )
-from helpers.models import prophet_fit_and_predict
+from helpers.models import prophet_fit_and_predict, fit_and_predict
 from helpers.layout import (
     preprocess_dataset,
     get_year_and_country_options_stats,
@@ -117,7 +117,7 @@ app.layout = html.Div(
                             [
                                 dcc.ConfirmDialog(
                                     id="dataset-1-fail",
-                                    message="There was an error processing your data. Please make sure it comes in one of the supported formats.",
+                                    message="An error occured while processing your data. Please make sure that the data is in the correct format and select the appropriate separator.",
                                 ),
                                 html.Div(
                                     [
@@ -469,9 +469,6 @@ app.layout = html.Div(
                                     style={"display": "flex"},
                                 ),
                             ],
-                            style={
-                                # "margin-top": "20px",
-                            },
                         ),
                     ],
                     style={
@@ -533,9 +530,8 @@ app.layout = html.Div(
                     },
                 ),
             ],
-            style={
-                "backroundColor": "#ffffff",
-            },
+            id="table-div",
+            style={"backroundColor": "#ffffff", "display": "none"},
         ),
         html.Div(
             [
@@ -790,9 +786,9 @@ app.layout = html.Div(
                             id="line-div",
                         ),
                     ],
+                    id="line-plot",
                     style={
-                        "display": "inline-block",
-                        "width": "40%",
+                        "display": "none",
                     },
                 ),
                 html.Div(
@@ -849,11 +845,8 @@ app.layout = html.Div(
                             id="map-div",
                         ),
                     ],
-                    style={
-                        "display": "inline-block",
-                        "width": "59.3%",
-                        "margin-left": "10px",
-                    },
+                    id="map-plot",
+                    style={"display": "none"},
                 ),
             ],
             style={"backgroundColor": "#232323"},
@@ -923,6 +916,7 @@ app.layout = html.Div(
                 ),
             ],
             id="compare-div",
+            style={"display": "none"},
         ),
         html.Div(
             [
@@ -989,6 +983,7 @@ app.layout = html.Div(
                 ),
             ],
             id="heatmap-div",
+            style={"display": "none"},
         ),
         html.Div(
             [
@@ -1046,6 +1041,59 @@ app.layout = html.Div(
                         ),
                     ]
                 ),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                html.Div(
+                                    "Specify time frequency", style={"padding": "15px"}
+                                ),
+                                dcc.Dropdown(
+                                    ["Yearly", "Monthly", "Weekly", "Daily"],
+                                    placeholder="Select frequency",
+                                    clearable=False,
+                                    id="frequency-dropdown-forecast",
+                                    style={
+                                        "width": "140px",
+                                        "font-size": "14px",
+                                        "border-color": "#5c6cfa",
+                                        "background-color": "#111111",
+                                        "border-top": "0px",
+                                        "border-left": "0px",
+                                        "border-right": "0px",
+                                        "border-bottom": "0px",
+                                        "border-radius": "0px",
+                                        "textAlign": "center",
+                                    },
+                                ),
+                            ]
+                        ),
+                        html.Div(
+                            [
+                                html.Div("Select model", style={"padding": "15px"}),
+                                dcc.Dropdown(
+                                    ["Prophet", "k-NN", "Regression", "Tree"],
+                                    placeholder="Select model",
+                                    clearable=False,
+                                    id="model-dropdown-forecast",
+                                    style={
+                                        "width": "140px",
+                                        "font-size": "14px",
+                                        "border-color": "#5c6cfa",
+                                        "background-color": "#111111",
+                                        "border-top": "0px",
+                                        "border-left": "0px",
+                                        "border-right": "0px",
+                                        "border-bottom": "0px",
+                                        "border-radius": "0px",
+                                        "textAlign": "center",
+                                    },
+                                ),
+                            ]
+                        ),
+                    ],
+                    style={"display": "flex"},
+                ),
                 html.Div("Set amount of future time units", style={"padding": "15px"}),
                 dcc.Slider(1, 25, 1, id="forecast-slider"),
                 html.Div(
@@ -1064,6 +1112,7 @@ app.layout = html.Div(
                 ),
             ],
             id="trend-div",
+            style={"display": "none"},
         ),
     ],
     style={
@@ -1088,6 +1137,7 @@ app.layout = html.Div(
     Output("table-upload", "filename"),
     Output("reshape-switch-1", "on"),
     Output("geo-dropdown-1", "value"),
+    Output("dataset-1-fail", "displayed"),
     Input("delimiter-dropdown-1", "value"),
     Input("geo-dropdown-1", "value"),
     Input("table-upload", "contents"),
@@ -1134,9 +1184,9 @@ def preprocess_data(
     Output("table-upload-2", "filename"),
     Output("reshape-switch-2", "on"),
     Output("geo-dropdown-2", "value"),
+    Output("dataset-2-fail", "displayed"),
     Output("data-selector", "style"),
     Output("data-selector-div", "style"),
-    Output("compare-div", "style"),
     Input("delimiter-dropdown-2", "value"),
     Input("geo-dropdown-2", "value"),
     Input("table-upload-2", "contents"),
@@ -1165,8 +1215,6 @@ def preprocess_second_data(
 
     selector_visibility = {"display": "block", "padding-left": "5px"}
 
-    show_compare_dropdown = {"display": "block"}
-
     return (
         *preprocess_dataset(
             delimiter_value,
@@ -1181,7 +1229,6 @@ def preprocess_second_data(
         ),
         radio_div_visibility,
         selector_visibility,
-        show_compare_dropdown,
     )
 
 
@@ -1289,6 +1336,7 @@ def update_year_and_country_dropdown_stats(
 
 @app.callback(
     Output("data-table", "data"),
+    Output("table-div", "style"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("data-selector", "value"),
@@ -1317,7 +1365,9 @@ def update_table_content(
 
         df = pd.read_json(datasets[selected_dataset]).round(2).to_dict("records")
 
-        return df
+        table_div_style = {"backroundColor": "#ffffff", "display": "block"}
+
+        return df, table_div_style
     else:
         raise exceptions.PreventUpdate
 
@@ -1448,14 +1498,14 @@ def update_stats(
         growth_stat_children.clear()
         growth_stat_children.append("Growth rate:\n" + str(growth_rate) + "%")
 
-        visiblity = {"display": "block"}
+        stats_div_style = {"display": "block"}
 
         return (
             avg_stat_children,
             max_stat_children,
             min_stat_children,
             growth_stat_children,
-            visiblity,
+            stats_div_style,
         )
     else:
         raise exceptions.PreventUpdate
@@ -1463,6 +1513,7 @@ def update_stats(
 
 @app.callback(
     Output("line-div", "children"),
+    Output("line-plot", "style"),
     Input("feature-dropdown-1", "value"),
     Input("time-dropdown-1", "value"),
     Input("dataset", "data"),
@@ -1553,7 +1604,9 @@ def update_line_plot(
 
         timeline_children.append(dcc.Graph(figure=fig))
 
-        return timeline_children
+        line_plot_style = {"display": "inline-block", "width": "40%"}
+
+        return timeline_children, line_plot_style
 
     elif dataset and time_dropdown_1 == "none":
 
@@ -1564,7 +1617,9 @@ def update_line_plot(
 
         timeline_children.append(dcc.Graph(figure=fig))
 
-        return timeline_children
+        line_plot_style = {"display": "inline-block", "width": "40%"}
+
+        return timeline_children, line_plot_style
 
     else:
         raise exceptions.PreventUpdate
@@ -1572,6 +1627,7 @@ def update_line_plot(
 
 @app.callback(
     Output("map-div", "children"),
+    Output("map-plot", "style"),
     Input("feature-dropdown-1", "value"),
     Input("time-dropdown-1", "value"),
     Input("dataset", "data"),
@@ -1665,7 +1721,13 @@ def update_choropleth(
 
         map_children.append(dcc.Graph(figure=fig))
 
-        return map_children
+        map_div_style = {
+            "display": "inline-block",
+            "width": "59.3%",
+            "margin-left": "10px",
+        }
+
+        return map_children, map_div_style
 
     else:
         raise exceptions.PreventUpdate
@@ -1673,6 +1735,7 @@ def update_choropleth(
 
 @app.callback(
     Output("max_country-comparison-div", "children"),
+    Output("compare-div", "style"),
     Input("feature-dropdown-1", "value"),
     Input("time-dropdown-1", "value"),
     Input("dataset", "data"),
@@ -1755,13 +1818,16 @@ def update_max_country_compare(
 
         comparison_children.append(dcc.Graph(figure=fig))
 
-        return comparison_children
+        compare_div_style = {"display": "block"}
+
+        return comparison_children, compare_div_style
     else:
         raise exceptions.PreventUpdate
 
 
 @app.callback(
     Output("fit-plot-div", "children"),
+    Output("trend-div", "style"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("feature-dropdown-1", "value"),
@@ -1774,6 +1840,8 @@ def update_max_country_compare(
     State("fit-plot-div", "children"),
     Input("country-dropdown-forecast", "value"),
     Input("forecast-slider", "value"),
+    Input("frequency-dropdown-forecast", "value"),
+    Input("model-dropdown-forecast", "value"),
 )
 def update_forecast(
     dataset: str,
@@ -1788,6 +1856,8 @@ def update_forecast(
     fit_plot_children: list,
     country_dropdown: str,
     forecast_slider_value: str,
+    frequency_dropdown: str,
+    model_dropdown: str,
 ) -> list:
     """Creates a forecast using the Prophet model
 
@@ -1818,12 +1888,16 @@ def update_forecast(
         and geo_dropdown_1
         and selected_dataset == "Dataset 1"
         and country_dropdown
+        and frequency_dropdown
+        and model_dropdown
     ) or (
         dataset_2
         and feature_dropdown_2
         and geo_dropdown_2
         and selected_dataset == "Dataset 2"
         and country_dropdown
+        and frequency_dropdown
+        and model_dropdown
     ):
 
         datasets = {
@@ -1845,18 +1919,26 @@ def update_forecast(
         if not forecast_slider_value:
             forecast_slider_value = 1
 
-        # model = LinearRegression()
-        # model = neighbors.KNeighborsRegressor()
-        # model = tree.DecisionTreeRegressor()
-
         df = df[df[geo_column] == country_dropdown]
 
-        forecast, df = prophet_fit_and_predict(
-            df,
-            time_column=time_column,
-            feature_column=feature_column,
-            periods=forecast_slider_value,
-        )
+        if model_dropdown == "Prophet":
+            forecast, df = prophet_fit_and_predict(
+                df,
+                time_column=time_column,
+                feature_column=feature_column,
+                periods=forecast_slider_value,
+                frequency=frequency_dropdown,
+            )
+
+        else:
+            forecast, df = fit_and_predict(
+                df,
+                time_column,
+                feature_column,
+                frequency_dropdown,
+                forecast_slider_value,
+                model=model_dropdown,
+            )
 
         fig = create_forecast_plot(
             forecast=forecast,
@@ -1865,42 +1947,37 @@ def update_forecast(
             feature_column=feature_column,
         )
 
-        # x = np.expand_dims(df[time_column], axis=1)
-
-        # y_max = df[feature_column].max()
-
-        # model.fit(x, df[feature_column])
-
-        # x_range = np.linspace(x.min(), x.max(), 100)
-        # y_range = model.predict(x_range.reshape(-1, 1))
-
-        # rmse = np.sqrt(mean_squared_error(df[feature_column], model.predict(x)))
-
-        # if forecast_slider_value not in range(time_min, time_max):
-        #    forecast_slider_value = time_min
-
-        # future_years = [
-        #    year for year in range(time_min, time_max) if year <= forecast_slider_value
-        # ]
-
-        # future_years = np.expand_dims(np.array(future_years), axis=1)
-
-        # future_preds = model.predict(future_years)
-
-        # rmse = np.repeat(rmse, future_years.squeeze().size)
-
         if fit_plot_children:
             fit_plot_children.clear()
 
         fit_plot_children.append(dcc.Graph(figure=fig))
 
-        return fit_plot_children
+        forecast_div_style = {"display": "block"}
+
+        return fit_plot_children, forecast_div_style
+
+    elif (
+        dataset
+        and feature_dropdown_1
+        and geo_dropdown_1
+        and selected_dataset == "Dataset 1"
+    ) or (
+        dataset_2
+        and feature_dropdown_2
+        and geo_dropdown_2
+        and selected_dataset == "Dataset 2"
+    ):
+        forecast_div_style = {"display": "block"}
+
+        return fit_plot_children, forecast_div_style
+
     else:
         raise exceptions.PreventUpdate
 
 
 @app.callback(
     Output("heatmap-plot-div", "children"),
+    Output("heatmap-div", "style"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("time-dropdown-1", "value"),
@@ -1910,6 +1987,8 @@ def update_forecast(
     Input("data-selector", "value"),
     State("heatmap-plot-div", "children"),
     Input("country-dropdown-corr", "value"),
+    Input("feature-dropdown-1", "value"),
+    Input("feature-dropdown-2", "value"),
 )
 def update_heatmap(
     dataset: str,
@@ -1921,6 +2000,8 @@ def update_heatmap(
     selected_dataset: str,
     heatmap_children: list,
     country_dropdown: str,
+    feature_dropdown_1: str,
+    feature_dropdown_2: str,
 ):
     """Creates a heatmap from the correlation matrix of features
 
@@ -1946,11 +2027,13 @@ def update_heatmap(
         dataset
         and time_dropdown_1
         and geo_dropdown_1
+        and feature_dropdown_1
         and selected_dataset == "Dataset 1"
     ) or (
         dataset_2
         and time_dropdown_2
         and geo_dropdown_2
+        and feature_dropdown_2
         and selected_dataset == "Dataset 2"
     ):
 
@@ -1983,7 +2066,9 @@ def update_heatmap(
 
         heatmap_children.append(dcc.Graph(figure=fig))
 
-        return heatmap_children
+        heatmap_div_style = {"display": "block"}
+
+        return heatmap_children, heatmap_div_style
     else:
         raise exceptions.PreventUpdate
 
