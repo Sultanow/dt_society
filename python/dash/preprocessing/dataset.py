@@ -130,6 +130,9 @@ class DigitalTwinTimeSeries:
             data[self.geo_col] = data[self.geo_col].apply(get_iso3, from_iso2=True)
 
         else:
+            # territories = {"Mainland China": "China", "US": "United States"}
+            # for key in territories:
+            #     data.loc[data[self.geo_col] == key, self.geo_col] = territories[key]
             data[self.geo_col] = data[self.geo_col].apply(get_iso3, from_iso2=False)
 
         return data
@@ -152,43 +155,6 @@ class DigitalTwinTimeSeries:
         data = data.drop(columns=redundant_columns, axis=1)
 
         return data
-
-    def melt_data(self, category_column: str) -> Dict[str, pd.DataFrame]:
-        """Transform dataset to have a row for each pair of year/country.
-
-        Args:
-            category_column (str): Name of additional category column such as age group
-
-        Returns:
-            Dict[pd.DataFrame]: Dict containing a dataset for each category (categories are keys)
-        """
-        categories = self.data[category_column].unique()
-
-        melted_datasets = {}
-
-        year_pattern = re.compile("[1-2][0-9]{3}")
-
-        first_year = next(i for i in self.data.columns if year_pattern.match(i))
-
-        first_year_i = self.data.columns.tolist().index(first_year)
-
-        for category in categories:
-            data_slice = self.data[self.data[category_column] == category]
-
-            data_slice_melted = data_slice.melt(
-                id_vars=self.geo_col,
-                value_vars=self.data.columns[first_year_i:],
-                var_name="year",
-            )
-            data_slice_melted[self.geo_col] = data_slice_melted[self.geo_col].astype(
-                str
-            )
-            data_slice_melted["value"] = data_slice_melted["value"].astype(np.float32)
-            data_slice_melted["year"] = data_slice_melted["year"].astype(str)
-
-            melted_datasets[category] = data_slice_melted
-
-        return melted_datasets
 
     def reshape_wide_to_long(self, value_id_column):
         reshaped_data = (

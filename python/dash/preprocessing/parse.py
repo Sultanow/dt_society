@@ -9,7 +9,6 @@ from .dataset import DigitalTwinTimeSeries
 
 def parse_dataset(
     contents: str,
-    get_countries: bool = False,
     geo_col: str = None,
     separator: str = "\t",
     reshape_col: str = None,
@@ -39,8 +38,4 @@ def parse_dataset(
         columns = df.data.columns.to_list()
         df_json = df.data.to_json()
 
-    if get_countries:
-        countries = df.data[geo_col].unique().tolist()
-        return df_json, columns, countries
-    else:
-        return df_json, columns
+    return df_json, columns
