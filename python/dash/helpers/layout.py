@@ -26,6 +26,23 @@ def preprocess_dataset(
     demo_dataset_n: str,
     preset_file: str = None,
 ) -> tuple:
+    """Preprocesses an uploaded file
+
+    Args:
+        delimiter_value (str): value of delimiter
+        geo_column_value (str): value of geo column
+        file_content (str): content of uploaded file
+        file_name (str): name of uploaded file
+        reshape_column_value (str): value of column to reshape on
+        reshape_switch_status (bool): value of reshape toggle
+        file_upload_children (str): container of file uploaded element
+        demo_button_n_clicks (int): number of demo button clicks
+        demo_dataset_n (str): value of selected demo dataset
+        preset_file (str, optional): content of imported preset file. Defaults to None.
+
+    Returns:
+        tuple: _description_
+    """
 
     changed_item = [p["prop_id"] for p in callback_context.triggered][0]
 
@@ -176,6 +193,23 @@ def export_settings(
     feature_column_value: str,
     filename: str,
 ) -> dict:
+    """Downloads a JSON file containing the selected values for each dropdown. Resulting file can be imported as preset.
+
+    Args:
+        delimiter_value (str): value of delimiter
+        geo_column_value (str): value of geo column
+        reshape_column_value (str): value of reshape column
+        reshape_switch_status (str): status of reshape toggle
+        time_column_value (str): value of time column
+        feature_column_value (str): value of feature column
+        filename (str): name of the uploaded dataset
+
+    Raises:
+        exceptions.PreventUpdate: Update prevented unless button is pressed
+
+    Returns:
+        dict: JSON object, file name
+    """
 
     if (
         delimiter_value
@@ -245,6 +279,16 @@ def compute_stats(
     feature_column: str,
     geo_column: str,
 ) -> tuple:
+    """Compute statistics of a given dataset
+
+    Args:
+        df (pd.DataFrame): dataframe
+        feature_column (str): value of feature column
+        geo_column (str): value of geo column
+
+    Returns:
+        tuple: mean, max, min, country name of max, country name of min
+    """
 
     mean = round(df[feature_column].mean(axis=0), 2)
     max = round(df[feature_column].max(), 2)
@@ -264,7 +308,17 @@ def compute_stats(
 
 def compute_growth_rate(
     df: pd.DataFrame, feature_column: str, time_span: list
-) -> tuple:
+) -> float:
+    """Computes the growth rate of a feature in a given time window
+
+    Args:
+        df (pd.DataFrame): dataframe
+        feature_column (str): name of feature column
+        time_span (list): list defining the time window
+
+    Returns:
+        float: growth rate
+    """
 
     start_value = df[feature_column].sort_values().values[time_span[0]]
     end_value = df[feature_column].sort_values().values[time_span[-1]]

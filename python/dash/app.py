@@ -1228,6 +1228,24 @@ def export_dropdown_settings(
     download_button_n_clicks: int,
     filename: str,
 ):
+    """Downloads a JSON file containing the selected values for each dropdown. Resulting file can be uploaded as preset as well.
+
+    Args:
+        delimiter_value (str): value of delimiter
+        geo_column_value (str): value of geo column
+        reshape_column_value (str): value of reshape column
+        reshape_switch_status (str): status of reshape toggle
+        time_column_value (str): value of time column
+        feature_column_value (str): value of feature column
+        download_button_n_clicks (int): number of clicks for download button (used to listen for button press)
+        filename (str): name of the uploaded dataset
+
+    Raises:
+        exceptions.PreventUpdate: Update prevented unless button is pressed
+
+    Returns:
+        dict: JSON object, file name
+    """
     changed_item = [p["prop_id"] for p in callback_context.triggered][0]
 
     if "preset-down-button-1" in changed_item:
@@ -1267,6 +1285,24 @@ def export_second_dropdown_settings(
     download_button_n_clicks: int,
     filename: str,
 ):
+    """Downloads a JSON file containing the selected values for each dropdown. Resulting file can be imported as preset.
+
+    Args:
+        delimiter_value (str): value of delimiter
+        geo_column_value (str): value of geo column
+        reshape_column_value (str): value of reshape column
+        reshape_switch_status (str): status of reshape toggle
+        time_column_value (str): value of time column
+        feature_column_value (str): value of feature column
+        download_button_n_clicks (int): number of clicks for download button (used to listen for button press)
+        filename (str): name of the uploaded dataset
+
+    Raises:
+        exceptions.PreventUpdate: Update prevented unless button is pressed
+
+    Returns:
+        dict: JSON object, file name
+    """
     changed_item = [p["prop_id"] for p in callback_context.triggered][0]
 
     if "preset-down-button-2" in changed_item:
@@ -1324,6 +1360,22 @@ def preprocess_data(
     demo_button_n_clicks: int,
     preset_file: str,
 ):
+    """Handles the preprocessing of an uploaded dataset. In demo mode, a predefined dataset is loaded instead.
+
+    Args:
+        delimiter_value (str): value of delimiter dropdown
+        geo_column_value (str): value of geo column
+        file_content (str): uploaded file content
+        file_name (str): uploaded file name
+        reshape_column_value (str): value of column to reshape on
+        reshape_switch_status (bool): value of reshape toggle
+        file_upload_children (str): container of file upload element
+        demo_button_n_clicks (int): number of clicks of demo button (used to listen for presses)
+        preset_file (str): content of uploaded preset file
+
+    Returns:
+        tuple: 
+    """
 
     return preprocess_dataset(
         delimiter_value,
@@ -1380,6 +1432,22 @@ def preprocess_second_data(
     demo_button_n_clicks: int,
     preset_file,
 ):
+    """Handles the preprocessing of an uploaded dataset. In demo mode, a predefined dataset is loaded instead.
+
+    Args:
+        delimiter_value (str): value of delimiter dropdown
+        geo_column_value (str): value of geo column
+        file_content (str): uploaded file content
+        file_name (str): uploaded file name
+        reshape_column_value (str): value of column to reshape on
+        reshape_switch_status (bool): value of reshape toggle
+        file_upload_children (str): container of file upload element
+        demo_button_n_clicks (int): number of clicks of demo button (used to listen for presses)
+        preset_file (str): content of uploaded preset file
+
+    Returns:
+        tuple: 
+    """
     radio_div_visibility = {
         "display": "block",
         "padding-bottom": "10px",
@@ -1417,6 +1485,20 @@ def preprocess_second_data(
 def update_country_dropdown_comparison(
     dataset_1: str, dataset_2: str, geo_dropdown_value_1: str, geo_dropdown_value_2: str
 ):
+    """Fills the dropdown in comparison section with countries that occur in both datasets
+
+    Args:
+        dataset_1 (str): first dataset
+        dataset_2 (str): second dataset
+        geo_dropdown_value_1 (str): value of first geo column
+        geo_dropdown_value_2 (str): value of second geo column
+
+    Raises:
+        exceptions.PreventUpdate: Update prevented unless both datasets and geo-columns are available
+
+    Returns:
+        tuple: _description_
+    """
     if dataset_1 and dataset_2 and geo_dropdown_value_1 and geo_dropdown_value_2:
         dataset_1_countries = pd.read_json(dataset_1)[geo_dropdown_value_1].unique()
 

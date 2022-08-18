@@ -57,7 +57,27 @@ def prophet_fit_and_predict(
     return forecast, df
 
 
-def fit_and_predict(df, time_column, feature_column, frequency, periods, model: str):
+def fit_and_predict(
+    df: pd.DataFrame,
+    time_column: str,
+    feature_column: str,
+    frequency: str,
+    periods: int,
+    model: str,
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Fits a scikit-learn model to given dataframe and returns predictions for set amount of periods
+
+    Args:
+        df (pd.DataFrame): dataframe
+        time_column (str): value of time column
+        feature_column (str): value of feature column
+        frequency (str): time frequency in the given dataframe such as yearly
+        periods (int): amount of future time periods to predict
+        model (str): name of scikit-learn model to use
+
+    Returns:
+        Tuple[pd.DataFrame, pd.DataFrame]: forecast dataframe, original dataframe
+    """
 
     models = {
         "Regression": LinearRegression(),
