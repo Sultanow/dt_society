@@ -1,3 +1,4 @@
+import base64
 import dash_daq as daq
 from dash import (
     Dash,
@@ -11,7 +12,9 @@ from dash import (
     callback_context,
     no_update,
 )
+import json
 import pandas as pd
+import time
 
 from helpers.plots import (
     create_multi_line_plot,
@@ -26,6 +29,7 @@ from helpers.layout import (
     get_year_and_country_options_stats,
     compute_stats,
     compute_growth_rate,
+    export_settings,
 )
 
 
@@ -265,6 +269,44 @@ app.layout = html.Div(
                                     ],
                                     style={"margin-left": "20px", "padding": "10px"},
                                 ),
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            "Preset",
+                                            style={
+                                                "font-weight": "bold",
+                                                "width": "200px",
+                                                "margin-bottom": "20px",
+                                            },
+                                        ),
+                                        html.Div(
+                                            [
+                                                dcc.Upload(
+                                                    id="preset-upload-1",
+                                                    children=html.Button(
+                                                        "Import",
+                                                        id="preset-up-button-1",
+                                                        n_clicks=0,
+                                                        style={
+                                                            "border-color": "#5c6cfa",
+                                                        },
+                                                    ),
+                                                ),
+                                                dcc.Download(id="preset-download-1"),
+                                                html.Button(
+                                                    "Export",
+                                                    id="preset-down-button-1",
+                                                    n_clicks=0,
+                                                    style={
+                                                        "border-color": "#5c6cfa",
+                                                    },
+                                                ),
+                                            ],
+                                            style={"display": "flex"},
+                                        ),
+                                    ],
+                                    style={"margin-left": "20px", "padding": "10px"},
+                                ),
                             ],
                             style={
                                 "display": "flex",
@@ -418,6 +460,44 @@ app.layout = html.Div(
                                     ],
                                     style={"margin-left": "20px", "padding": "10px"},
                                 ),
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            "Preset",
+                                            style={
+                                                "font-weight": "bold",
+                                                "width": "200px",
+                                                "margin-bottom": "20px",
+                                            },
+                                        ),
+                                        html.Div(
+                                            [
+                                                dcc.Upload(
+                                                    id="preset-upload-2",
+                                                    children=html.Button(
+                                                        "Import",
+                                                        id="preset-up-button-2",
+                                                        n_clicks=0,
+                                                        style={
+                                                            "border-color": "#5c6cfa",
+                                                        },
+                                                    ),
+                                                ),
+                                                dcc.Download(id="preset-download-2"),
+                                                html.Button(
+                                                    "Export",
+                                                    id="preset-down-button-2",
+                                                    n_clicks=0,
+                                                    style={
+                                                        "border-color": "#5c6cfa",
+                                                    },
+                                                ),
+                                            ],
+                                            style={"display": "flex"},
+                                        ),
+                                    ],
+                                    style={"margin-left": "20px", "padding": "10px"},
+                                ),
                             ],
                             id="second-file-upload",
                             style={
@@ -433,7 +513,8 @@ app.layout = html.Div(
                                                 html.Div(
                                                     "Toggle displayed data",
                                                     style={
-                                                        "margin": "10px",
+                                                        "margin-left": "10px",
+                                                        "margin-bottom": "10px",
                                                         "font-weight": "bold",
                                                     },
                                                 ),
@@ -451,8 +532,6 @@ app.layout = html.Div(
                                             id="data-selector-div",
                                             style={
                                                 "display": "none",
-                                                "padding": "20px",
-                                                "margin-bottom": "50px",
                                             },
                                         ),
                                         html.Button(
@@ -460,7 +539,7 @@ app.layout = html.Div(
                                             id="demo-button",
                                             n_clicks=0,
                                             style={
-                                                "margin-right": "20px",
+                                                "margin-right": "45px",
                                                 "float": "right",
                                                 "display": "flex",
                                                 "margin-left": "auto",
@@ -471,6 +550,7 @@ app.layout = html.Div(
                                     style={"display": "flex"},
                                 ),
                             ],
+                            style={"margin-top": "15px", "padding-bottom": "10px"},
                         ),
                     ],
                     style={
@@ -480,7 +560,7 @@ app.layout = html.Div(
             ],
             style={
                 "backgroundColor": "#232323",
-                "height": "300px",
+                "height": "315px",
                 "display": "block",
             },
         ),
@@ -1074,7 +1154,7 @@ app.layout = html.Div(
                             [
                                 html.Div("Select model", style={"padding": "15px"}),
                                 dcc.Dropdown(
-                                    ["Prophet", "k-NN", "Regression", "Tree"],
+                                    ["Prophet", "Regression"],
                                     placeholder="Select model",
                                     clearable=False,
                                     id="model-dropdown-forecast",
@@ -1128,6 +1208,84 @@ app.layout = html.Div(
 
 
 @app.callback(
+    Output("preset-download-1", "data"),
+    Input("delimiter-dropdown-1", "value"),
+    Input("geo-dropdown-1", "value"),
+    Input("reshape-dropdown-1", "value"),
+    Input("reshape-switch-1", "on"),
+    Input("time-dropdown-1", "value"),
+    Input("feature-dropdown-1", "value"),
+    Input("preset-down-button-1", "n_clicks"),
+    Input("table-upload", "filename"),
+)
+def export_dropdown_settings(
+    delimiter_value: str,
+    geo_column_value: str,
+    reshape_column_value: str,
+    reshape_switch_status: str,
+    time_column_value: str,
+    feature_column_value: str,
+    download_button_n_clicks: int,
+    filename: str,
+):
+    changed_item = [p["prop_id"] for p in callback_context.triggered][0]
+
+    if "preset-down-button-1" in changed_item:
+
+        return export_settings(
+            delimiter_value,
+            geo_column_value,
+            reshape_column_value,
+            reshape_switch_status,
+            time_column_value,
+            feature_column_value,
+            filename,
+        )
+
+    else:
+        raise exceptions.PreventUpdate
+
+
+@app.callback(
+    Output("preset-download-2", "data"),
+    Input("delimiter-dropdown-2", "value"),
+    Input("geo-dropdown-2", "value"),
+    Input("reshape-dropdown-2", "value"),
+    Input("reshape-switch-2", "on"),
+    Input("time-dropdown-2", "value"),
+    Input("feature-dropdown-2", "value"),
+    Input("preset-down-button-2", "n_clicks"),
+    Input("table-upload-2", "filename"),
+)
+def export_second_dropdown_settings(
+    delimiter_value: str,
+    geo_column_value: str,
+    reshape_column_value: str,
+    reshape_switch_status: str,
+    time_column_value: str,
+    feature_column_value: str,
+    download_button_n_clicks: int,
+    filename: str,
+):
+    changed_item = [p["prop_id"] for p in callback_context.triggered][0]
+
+    if "preset-down-button-2" in changed_item:
+
+        return export_settings(
+            delimiter_value,
+            geo_column_value,
+            reshape_column_value,
+            reshape_switch_status,
+            time_column_value,
+            feature_column_value,
+            filename,
+        )
+
+    else:
+        raise exceptions.PreventUpdate
+
+
+@app.callback(
     Output("dataset", "data"),
     Output("geo-dropdown-1", "options"),
     Output("reshape-dropdown-1", "options"),
@@ -1140,6 +1298,10 @@ app.layout = html.Div(
     Output("reshape-switch-1", "on"),
     Output("geo-dropdown-1", "value"),
     Output("dataset-1-fail", "displayed"),
+    Output("feature-dropdown-1", "value"),
+    Output("time-dropdown-1", "value"),
+    Output("preset-upload-1", "contents"),
+    Output("reshape-dropdown-1", "value"),
     Input("delimiter-dropdown-1", "value"),
     Input("geo-dropdown-1", "value"),
     Input("table-upload", "contents"),
@@ -1148,6 +1310,7 @@ app.layout = html.Div(
     Input("reshape-switch-1", "on"),
     State("table-upload", "children"),
     Input("demo-button", "n_clicks"),
+    Input("preset-upload-1", "contents"),
     prevent_initial_call=True,
 )
 def preprocess_data(
@@ -1159,6 +1322,7 @@ def preprocess_data(
     reshape_switch_status: bool,
     file_upload_children: str,
     demo_button_n_clicks: int,
+    preset_file: str,
 ):
 
     return preprocess_dataset(
@@ -1171,6 +1335,7 @@ def preprocess_data(
         file_upload_children,
         demo_button_n_clicks,
         "Demo 1",
+        preset_file,
     )
 
 
@@ -1187,6 +1352,10 @@ def preprocess_data(
     Output("reshape-switch-2", "on"),
     Output("geo-dropdown-2", "value"),
     Output("dataset-2-fail", "displayed"),
+    Output("feature-dropdown-2", "value"),
+    Output("time-dropdown-2", "value"),
+    Output("preset-upload-2", "contents"),
+    Output("reshape-dropdown-2", "value"),
     Output("data-selector", "style"),
     Output("data-selector-div", "style"),
     Input("delimiter-dropdown-2", "value"),
@@ -1197,6 +1366,7 @@ def preprocess_data(
     Input("reshape-switch-2", "on"),
     State("table-upload-2", "children"),
     Input("demo-button", "n_clicks"),
+    Input("preset-upload-2", "contents"),
     prevent_initial_call=True,
 )
 def preprocess_second_data(
@@ -1208,6 +1378,7 @@ def preprocess_second_data(
     reshape_switch_status: bool,
     file_upload_children: str,
     demo_button_n_clicks: int,
+    preset_file,
 ):
     radio_div_visibility = {
         "display": "block",
@@ -1228,6 +1399,7 @@ def preprocess_second_data(
             file_upload_children,
             demo_button_n_clicks,
             "Demo 2",
+            preset_file,
         ),
         radio_div_visibility,
         selector_visibility,

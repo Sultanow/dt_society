@@ -25,7 +25,7 @@ button,
 input[type="submit"],
 input[type="reset"],
 input[type="button"] {
-    margin-bottom: 100px;
+    /*margin-bottom: 100px;*/
     height: 38px;
     padding: 0 30px;
     color: white;

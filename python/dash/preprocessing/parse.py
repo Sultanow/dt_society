@@ -1,6 +1,4 @@
 from typing import Tuple
-from dash import html
-import pandas as pd
 import base64
 import io
 
@@ -29,13 +27,14 @@ def parse_dataset(
         io.StringIO(decoded.decode("utf-8")), geo_col=geo_col, sep=separator
     )
 
+    columns_pre_reshape = df.data.columns.to_list()
+
     if reshape_col is not None:
         df = df.reshape_wide_to_long(value_id_column=reshape_col)
-        columns = df.columns.to_list()
-        df_json = df.to_json()
-
     else:
-        columns = df.data.columns.to_list()
-        df_json = df.data.to_json()
+        df = df.data
 
-    return df_json, columns
+    columns = df.columns.to_list()
+    df_json = df.to_json()
+
+    return df_json, columns, columns_pre_reshape

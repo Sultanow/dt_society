@@ -26,10 +26,10 @@ class DigitalTwinTimeSeries:
             country_codes (bool, optional): _description_. Defaults to True.
             geo_col (str, optional): name of the column containing geographical information. Defaults to "geo".
         """
-        self.geo_col = geo_col
-        self.sep = sep
-        self.to_iso3 = to_iso3
-        self.data = self._preprocess(path) if df is None else df
+        self.geo_col: str = geo_col
+        self.sep: str = sep
+        self.to_iso3: bool = to_iso3
+        self.data: pd.DataFrame = self._preprocess(path) if df is None else df
 
     def _preprocess(self, path: str) -> pd.DataFrame:
         """Preprocesses dataframe into required format
