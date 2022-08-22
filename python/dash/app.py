@@ -698,7 +698,7 @@ app.layout = html.Div(
                             style={"padding": "5px", "backgroundColor": "#232323"}
                         ),
                         html.Div(
-                            "Time unit window for growth rate",
+                            "Growth rate window",
                             style={"padding": "15px"},
                         ),
                         dcc.RangeSlider(
@@ -709,73 +709,35 @@ app.layout = html.Div(
                                 html.Div(
                                     [
                                         html.Div(
-                                            html.Div(
-                                                ["text"],
-                                                style={
-                                                    "margin-top": "40px",
-                                                    "white-space": "pre-line",
-                                                    "display": "flex",
-                                                    "margin-left": "150px",
-                                                },
-                                                id="avg-stat",
-                                            ),
+                                            [
+                                                html.Div(
+                                                    "Mean",
+                                                    style={
+                                                        "backgroundColor": "#111111",
+                                                        "font-weight": "bolder",
+                                                        "textAlign": "center",
+                                                        "margin-left": "auto",
+                                                        "margin-right": "auto",
+                                                        "padding": "15px",
+                                                    },
+                                                ),
+                                                html.Div(
+                                                    ["text"],
+                                                    style={
+                                                        "white-space": "pre-line",
+                                                        "margin-left": "auto",
+                                                        "margin-right": "auto",
+                                                        "textAlign": "center",
+                                                        "font-size": "40px",
+                                                    },
+                                                    id="avg-stat",
+                                                ),
+                                            ],
                                             style={
                                                 "backgroundColor": "#111111",
-                                                "display": "flex",
                                                 "height": "100px",
                                                 "width": "90%",
-                                                "textAlign": "center",
-                                                "font-size": "20px",
-                                            },
-                                        ),
-                                    ],
-                                    style={"display": "inline-block", "width": "25%"},
-                                ),
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            html.Div(
-                                                ["text"],
-                                                style={
-                                                    "margin-top": "40px",
-                                                    "white-space": "pre-line",
-                                                    "display": "flex",
-                                                    "margin-left": "120px",
-                                                },
-                                                id="max-stat",
-                                            ),
-                                            style={
-                                                "backgroundColor": "#111111",
-                                                "display": "flex",
-                                                "height": "100px",
-                                                "width": "90%",
-                                                "textAlign": "center",
-                                                "font-size": "20px",
-                                            },
-                                        ),
-                                    ],
-                                    style={"display": "inline-block", "width": "25%"},
-                                ),
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            html.Div(
-                                                ["text"],
-                                                style={
-                                                    "margin-top": "40px",
-                                                    "white-space": "pre-line",
-                                                    "display": "flex",
-                                                    "margin-left": "100px",
-                                                },
-                                                id="min-stat",
-                                            ),
-                                            style={
-                                                "backgroundColor": "#111111",
-                                                "display": "flex",
-                                                "height": "100px",
-                                                "width": "90%",
-                                                "textAlign": "center",
-                                                "font-size": "20px",
+                                                # "font-size": "20px",
                                             },
                                         ),
                                     ],
@@ -785,41 +747,125 @@ app.layout = html.Div(
                                     [
                                         html.Div(
                                             [
-                                                dcc.Dropdown(
-                                                    options=["1111", "1111"],
-                                                    placeholder="Country",
-                                                    id="country-dropdown-stats",
-                                                    clearable=False,
+                                                html.Div(
+                                                    "Max",
                                                     style={
-                                                        "width": "140px",
-                                                        "font-size": "14px",
-                                                        "border-top": "0px",
-                                                        "border-left": "0px",
-                                                        "border-right": "0px",
                                                         "backgroundColor": "#111111",
-                                                        "border-color": "#5c6cfa",
-                                                        "border-radius": "0px",
-                                                        "padding": "0",
+                                                        "font-weight": "bolder",
+                                                        "textAlign": "center",
+                                                        "margin-left": "auto",
+                                                        "margin-right": "auto",
+                                                        "padding": "15px",
                                                     },
                                                 ),
                                                 html.Div(
                                                     ["text"],
                                                     style={
-                                                        "margin-top": "40px",
                                                         "white-space": "pre-line",
+                                                        "text-align": "center",
+                                                        "font-size": "40px",
+                                                    },
+                                                    id="max-stat",
+                                                ),
+                                            ],
+                                            style={
+                                                "backgroundColor": "#111111",
+                                                "height": "100px",
+                                                "width": "90%",
+                                            },
+                                        ),
+                                    ],
+                                    style={"display": "inline-block", "width": "25%"},
+                                ),
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            [
+                                                html.Div(
+                                                    "Min",
+                                                    style={
+                                                        "backgroundColor": "#111111",
+                                                        "font-weight": "bolder",
+                                                        "textAlign": "center",
+                                                        "margin-left": "auto",
+                                                        "margin-right": "auto",
+                                                        "padding": "15px",
+                                                    },
+                                                ),
+                                                html.Div(
+                                                    ["text"],
+                                                    style={
+                                                        "white-space": "pre-line",
+                                                        "textAlign": "center",
+                                                        "font-size": "40px",
+                                                    },
+                                                    id="min-stat",
+                                                ),
+                                            ],
+                                            style={
+                                                "backgroundColor": "#111111",
+                                                "height": "100px",
+                                                "width": "90%",
+                                            },
+                                        ),
+                                    ],
+                                    style={"display": "inline-block", "width": "25%"},
+                                ),
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            [
+                                                html.Div(
+                                                    [
+                                                        dcc.Dropdown(
+                                                            options=["1111", "1111"],
+                                                            placeholder="Country",
+                                                            id="country-dropdown-stats",
+                                                            clearable=False,
+                                                            style={
+                                                                "width": "75px",
+                                                                "font-size": "14px",
+                                                                "border-top": "0px",
+                                                                "border-left": "0px",
+                                                                "border-right": "0px",
+                                                                "backgroundColor": "#111111",
+                                                                "border-color": "#5c6cfa",
+                                                                "border-radius": "0px",
+                                                                "padding": "0",
+                                                            },
+                                                        ),
+                                                        html.Div(
+                                                            "Growth",
+                                                            style={
+                                                                "backgroundColor": "#111111",
+                                                                "font-weight": "bolder",
+                                                                "textAlign": "center",
+                                                                "padding": "15px",
+                                                                "margin-left": "65px",
+                                                                "margin-right": "auto",
+                                                            },
+                                                        ),
+                                                    ],
+                                                    style={
                                                         "display": "flex",
-                                                        "margin-left": "50px",
+                                                        "margin-left": "auto",
+                                                        "margin-right": "auto",
+                                                    },
+                                                ),
+                                                html.Div(
+                                                    ["text"],
+                                                    style={
+                                                        "white-space": "pre-line",
+                                                        "textAlign": "center",
+                                                        "font-size": "40px",
                                                     },
                                                     id="growth-stat",
                                                 ),
                                             ],
                                             style={
                                                 "backgroundColor": "#111111",
-                                                "display": "flex",
                                                 "height": "100px",
                                                 "width": "100%",
-                                                "textAlign": "center",
-                                                "font-size": "20px",
                                             },
                                         ),
                                     ],
@@ -1374,7 +1420,7 @@ def preprocess_data(
         preset_file (str): content of uploaded preset file
 
     Returns:
-        tuple: 
+        tuple:
     """
 
     return preprocess_dataset(
@@ -1446,7 +1492,7 @@ def preprocess_second_data(
         preset_file (str): content of uploaded preset file
 
     Returns:
-        tuple: 
+        tuple:
     """
     radio_div_visibility = {
         "display": "block",
@@ -1756,16 +1802,16 @@ def update_stats(
         )
 
         avg_stat_children.clear()
-        avg_stat_children.append("Mean \n" + str(mean))
+        avg_stat_children.append(str(mean))
 
         max_stat_children.clear()
-        max_stat_children.append("max:\n" + str(max) + " - " + max_country)
+        max_stat_children.append(str(max) + " - " + max_country)
 
         min_stat_children.clear()
-        min_stat_children.append("min: \n" + str(min) + " - " + min_country)
+        min_stat_children.append(str(min) + " - " + min_country)
 
         growth_stat_children.clear()
-        growth_stat_children.append("Growth rate:\n" + str(growth_rate) + "%")
+        growth_stat_children.append(str(growth_rate) + "%")
 
         stats_div_style = {"display": "block"}
 
