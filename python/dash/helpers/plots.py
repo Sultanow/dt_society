@@ -1,3 +1,4 @@
+import datetime
 import numpy as np
 import plotly.graph_objects as go
 import pandas as pd
@@ -102,6 +103,135 @@ def create_choropleth_plot(
     )
 
     return fig
+
+
+def create_choropleth_slider_plot(
+    data: pd.DataFrame,
+    geo_column: str,
+    feature_column: str,
+    facet: str = None,
+    time_column: str = None,
+):
+    fig_dict = {"data": [], "layout": {}, "frames": []}
+
+    fig_dict["layout"] = dict(
+        geo=dict(
+            scope="europe",
+            projection={"type": "natural earth2", "scale": 1.7},
+            bgcolor="rgba(0,0,0,0)",
+            center=dict(lat=50.5, lon=11),
+        ),
+        margin=dict(l=0, r=0, b=0, t=5, pad=0, autoexpand=True),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+    )
+
+    fig_dict["layout"]["updatemenus"] = [
+        {
+            "buttons": [
+                {
+                    "args": [
+                        None,
+                        {
+                            "frame": {"duration": 500, "redraw": True},
+                            "fromcurrent": True,
+                            "transition": {
+                                "duration": 300,
+                                "easing": "quadratic-in-out",
+                            },
+                        },
+                    ],
+                    "label": "Play",
+                    "method": "animate",
+                },
+            ],
+            "direction": "left",
+            "pad": {"r": 10, "t": 0},
+            "showactive": False,
+            "type": "buttons",
+            "x": 0.1,
+            "xanchor": "right",
+            "y": 0,
+            "yanchor": "top",
+        }
+    ]
+
+    sliders_dict = {
+        "active": 0,
+        "yanchor": "top",
+        "xanchor": "left",
+        "currentvalue": {
+            "visible": False,
+        },
+        "transition": {"duration": 300},
+        "pad": {"b": 10, "t": 0},
+        "len": 0.9,
+        "x": 0.1,
+        "y": 0,
+        "steps": [],
+    }
+
+    if np.issubdtype(np.datetime64, data[time_column]):
+        data[time_column] = data[time_column].dt.strftime("%b-%d")
+
+    first_year = data[time_column].unique()[0]
+
+    data_dict = dict(
+        type="choropleth",
+        locations=data[data[time_column] == first_year][geo_column],
+        locationmode="ISO-3",
+        z=data[data[time_column] == first_year][feature_column],
+        zmin=0,
+        zmax=data[feature_column].max(),
+        colorscale="Magma",
+        colorbar=go.choropleth.ColorBar(
+            title=go.choropleth.colorbar.Title(text=feature_column)
+        ),
+        marker_line_color="darkgray",
+        marker_line_width=0.5,
+    )
+
+    fig_dict["data"].append(data_dict)
+
+    for time in data[time_column].unique():
+
+        df_per_year = data[data[time_column] == time]
+
+        fig_dict["frames"].append(
+            dict(
+                data=dict(
+                    type="choropleth",
+                    locations=df_per_year[geo_column],
+                    locationmode="ISO-3",
+                    z=df_per_year[feature_column],
+                ),
+                name=str(time),
+            )
+        )
+
+        slider_step = {
+            "args": [
+                [time],
+                {
+                    "frame": {"duration": 300, "redraw": True},
+                    "mode": "immediate",
+                    "transition": {"duration": 300},
+                },
+            ],
+            "label": str(time),
+            "method": "animate",
+        }
+        sliders_dict["steps"].append(slider_step)
+
+    fig_dict["layout"]["sliders"] = [sliders_dict]
+
+    fig_choropleth = go.Figure(fig_dict)
+    fig_choropleth.update_geos(
+        showcoastlines=True, showsubunits=True, showframe=False, resolution=50
+    )
+    fig_choropleth.update_layout(template=theme)
+
+    return fig_choropleth
 
 
 def create_two_line_plot(

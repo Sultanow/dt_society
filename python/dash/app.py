@@ -19,6 +19,7 @@ import time
 from helpers.plots import (
     create_multi_line_plot,
     create_choropleth_plot,
+    create_choropleth_slider_plot,
     create_two_line_plot,
     create_correlation_heatmap,
     create_forecast_plot,
@@ -702,7 +703,12 @@ app.layout = html.Div(
                             style={"padding": "15px"},
                         ),
                         dcc.RangeSlider(
-                            0, 20, step=1, id="year-range-slider", allowCross=False
+                            0,
+                            20,
+                            step=1,
+                            id="year-range-slider",
+                            marks=None,
+                            allowCross=False,
                         ),
                         html.Div(
                             [
@@ -1576,6 +1582,7 @@ def update_country_dropdown_comparison(
     Output("country-dropdown-forecast", "options"),
     Output("country-dropdown-forecast", "value"),
     Output("year-range-slider", "value"),
+    Output("year-range-slider", "marks"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("data-selector", "value"),
@@ -1920,7 +1927,7 @@ def update_line_plot(
 
         timeline_children.append(dcc.Graph(figure=fig))
 
-        line_plot_style = {"display": "inline-block", "width": "40%"}
+        line_plot_style = {"display": "inline-block", "width": "57%"}
 
         return timeline_children, line_plot_style
 
@@ -2030,8 +2037,15 @@ def update_choropleth(
 
         filtered_df = df[df[time_column] == selected_year_map]
 
-        fig = create_choropleth_plot(
-            filtered_df, geo_column=geo_column, feature_column=feature_column
+        # fig = create_choropleth_plot(
+        #     filtered_df, geo_column=geo_column, feature_column=feature_column
+        # )
+
+        fig = create_choropleth_slider_plot(
+            df,
+            geo_column=geo_column,
+            feature_column=feature_column,
+            time_column=time_column,
         )
 
         if map_children:
@@ -2041,7 +2055,7 @@ def update_choropleth(
 
         map_div_style = {
             "display": "inline-block",
-            "width": "59.3%",
+            "width": "42.3%",
             "margin-left": "10px",
         }
 
