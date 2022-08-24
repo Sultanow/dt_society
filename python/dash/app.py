@@ -13,6 +13,7 @@ from dash import (
     no_update,
 )
 import json
+import numpy as np
 import pandas as pd
 import time
 
@@ -947,10 +948,11 @@ app.layout = html.Div(
                                                 "border-color": "#5c6cfa",
                                                 "border-radius": "0px",
                                                 "padding-top": "1.5px",
+                                                "display": "none",  # disabled
                                             },
                                         ),
                                         html.Div(
-                                            "Countries",
+                                            "Map",
                                             style={
                                                 "padding-top": "10px",
                                                 "padding-left": "10px",
@@ -958,7 +960,7 @@ app.layout = html.Div(
                                                 "backgroundColor": "#111111",
                                                 "font-weight": "bold",
                                                 "textAlign": "center",
-                                                "width": "92%",
+                                                "width": "100%",
                                             },
                                         ),
                                     ],
@@ -1229,7 +1231,7 @@ app.layout = html.Div(
                     style={"display": "flex"},
                 ),
                 html.Div("Set amount of future time units", style={"padding": "15px"}),
-                dcc.Slider(1, 25, 1, id="forecast-slider"),
+                dcc.Slider(1, 30, 1, id="forecast-slider"),
                 html.Div(
                     html.Div(
                         [],
@@ -1247,6 +1249,46 @@ app.layout = html.Div(
             ],
             id="trend-div",
             style={"display": "none"},
+        ),
+        html.Div(
+            [
+                html.Div(
+                    style={
+                        "backgroundColor": "#232323",
+                        "display": "block",
+                        "padding": "10px",
+                    }
+                ),
+                html.Div(
+                    [
+                        html.Div(
+                            [
+                                html.Div(
+                                    "Multivariate forecast",
+                                    style={
+                                        "padding-top": "10px",
+                                        "padding-left": "10px",
+                                        "padding-bottom": "10px",
+                                        "backgroundColor": "#111111",
+                                        "font-weight": "bold",
+                                        "textAlign": "center",
+                                        "width": "80%",
+                                    },
+                                ),
+                            ],
+                            style={"display": "flex"},
+                        ),
+                        html.Hr(
+                            style={
+                                "padding": "0px",
+                                "margin": "0px",
+                                "border-color": "#5c6cfa",
+                                "backgroundColor": "#5c6cfa",
+                            }
+                        ),
+                    ]
+                ),
+            ]
         ),
     ],
     style={
@@ -2159,6 +2201,78 @@ def update_max_country_compare(
         compare_div_style = {"display": "none"}
 
         return comparison_children, compare_div_style
+
+
+@app.callback(
+    Output("forecast-slider", "marks"),
+    Input("dataset", "data"),
+    Input("dataset-2", "data"),
+    Input("time-dropdown-1", "value"),
+    Input("time-dropdown-2", "value"),
+    Input("data-selector", "value"),
+    Input("frequency-dropdown-forecast", "value"),
+)
+def update_forecast_slider(
+    dataset,
+    dataset_2,
+    time_dropdown_1,
+    time_dropdown_2,
+    selected_dataset,
+    frequency_dropdown,
+):
+    if (
+        dataset
+        and time_dropdown_1
+        and selected_dataset == "Dataset 1"
+        and frequency_dropdown
+    ) or (
+        dataset_2
+        and time_dropdown_2
+        and selected_dataset == "Dataset 2"
+        and frequency_dropdown
+    ):
+
+        frequencies = {
+            "Yearly": ("AS", 365, "%Y"),
+            "Monthly": ("MS", 30, "%b-%Y"),
+            "Weekly": ("W", 7, "%Y-%m-%d"),
+            "Daily": ("D", 1, "%b-%d"),
+        }
+
+        datasets = {
+            "Dataset 1": (dataset, time_dropdown_1),
+            "Dataset 2": (dataset_2, time_dropdown_2),
+        }
+
+        df = pd.read_json(datasets[selected_dataset][0])
+        time_column = datasets[selected_dataset][1]
+
+        time_max = pd.to_datetime(
+            str(df[time_column].max()), infer_datetime_format=True
+        )
+
+        future_start = time_max + pd.Timedelta(
+            np.timedelta64(1 * frequencies[frequency_dropdown][1], "D")
+        )
+
+        future_range = np.array(
+            pd.date_range(
+                start=future_start, periods=30, freq=frequencies[frequency_dropdown][0]
+            ).strftime(frequencies[frequency_dropdown][2])
+        )
+
+        future_range_slice = future_range[::3]
+
+        marks = {}
+
+        for i, date in enumerate(future_range_slice):
+
+            marks[i * 3 + 1] = str(date)
+
+            if i == len(future_range_slice) - 1:
+                marks[len(future_range)] = future_range[-1]
+
+        return marks
 
 
 @app.callback(
