@@ -135,6 +135,8 @@ class DigitalTwinTimeSeries:
             #     data.loc[data[self.geo_col] == key, self.geo_col] = territories[key]
             data[self.geo_col] = data[self.geo_col].apply(get_iso3, from_iso2=False)
 
+        assert not data.empty, "Column did not contain correct country codes."
+
         return data
 
     def _drop_redundant_columns(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -157,6 +159,9 @@ class DigitalTwinTimeSeries:
         return data
 
     def reshape_wide_to_long(self, value_id_column):
+        
+        assert self.geo_col != value_id_column, "Column to reshape on can not be the column that has been set as geo column."
+        
         reshaped_data = (
             self.data.set_index([self.geo_col, value_id_column])
             .rename_axis(["Time"], axis=1)

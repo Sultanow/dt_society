@@ -111,14 +111,40 @@ def preprocess_dataset(
             )
 
         except Exception as e:
+
+            if "too many values to unpack" in str(e):
+                error = "Chosen separator does not match separator in file."
+                delimiter_value = None
+
+                file_upload_children["props"]["children"] = html.Div(
+                    [
+                        "Drag and Drop or ",
+                        html.A("Select Files"),
+                    ]
+                )
+
+            else:
+                error = str(e)
+
+                if delimiter_value == "\t":
+                    delimiter_value = "\\t"
+
+                if "Column did not contain correct country codes" in error:
+                    geo_column_value = None
+
+                if (
+                    "Column to reshape on can not be the column that has been set as geo column"
+                    in error
+                ):
+                    if reshape_switch_status:
+                        reshape_switch_status = False
+
+                    reshape_column_value = None
+
             print(e)
+
             show_error_notification = True
-            file_upload_children["props"]["children"] = html.Div(
-                [
-                    "Drag and Drop or ",
-                    html.A("Select Files"),
-                ]
-            )
+
             return (
                 no_update,  # data
                 no_update,  # geo-dropdown-options
@@ -127,14 +153,16 @@ def preprocess_dataset(
                 no_update,  # feature-dropdown-options
                 no_update,  # time-dropdown-options
                 no_update,  # table-upload-content
-                None,  # delimiter-dropdown-value
+                delimiter_value,  # delimiter-dropdown-value
                 no_update,  # file-name
-                no_update,  # reshape-swtich-status
-                no_update,  # geo-dropdown-value
+                reshape_switch_status,  # reshape-swtich-status
+                geo_column_value,  # geo-dropdown-value
                 show_error_notification,  # dataset-fail-display
                 no_update,  # feature-dropdown-value
                 no_update,  # time-dropdown-value
-                no_update,  # reshape-column-value
+                no_update,  # preset-upload-content
+                reshape_column_value,  # reshape-column-value
+                error,
             )
 
         geo_options = columns
@@ -181,6 +209,7 @@ def preprocess_dataset(
         time_column_value,
         saved_preset_file,
         reshape_column_value,
+        no_update,
     )
 
 
@@ -350,9 +379,7 @@ def compute_growth_rate(
     return round(growth_rate, 2)
 
 
-def get_time_marks(
-    df: pd.DataFrame, time_column: str, frequency: str
-):
+def get_time_marks(df: pd.DataFrame, time_column: str, frequency: str):
     frequencies = {
         "Yearly": ("AS", 365, "%Y"),
         "Monthly": ("MS", 30, "%b-%Y"),
