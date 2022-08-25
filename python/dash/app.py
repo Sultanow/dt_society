@@ -1,4 +1,3 @@
-import base64
 import dash_daq as daq
 from dash import (
     Dash,
@@ -12,10 +11,8 @@ from dash import (
     callback_context,
     no_update,
 )
-import json
-import numpy as np
+
 import pandas as pd
-import time
 
 from helpers.plots import (
     create_multi_line_plot,
@@ -90,7 +87,12 @@ app.layout = html.Div(
                                                     className="material-symbols-outlined",
                                                 ),
                                                 html.Span(
-                                                    "Supported column formats:\n [feature, country, (n timestamps..)],\n [timestamp, country, (n_features...)]",
+                                                    """File format: .csv, .tsv \n 
+                                                    Geo column: column that contains either country names or ISO codes \n
+                                                    Reshape: pivots the dataset from a wide to long format (adds new columns for unique values of selected column) \n
+                                                    Time column: column that contains time data / timestamps (represents x-axis in figures)\n
+                                                    Feature: column that contains the feature of interest (represents y-axis in figures)\n
+                                                    Preset: upload/download a preset file that contains pre-selected column values""",
                                                     className="tooltiptext",
                                                     style={
                                                         "font-size": "10px",
