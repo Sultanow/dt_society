@@ -29,6 +29,7 @@ from helpers.models import prophet_fit_and_predict, fit_and_predict
 from helpers.layout import (
     preprocess_dataset,
     get_year_and_country_options_stats,
+    get_time_marks,
     compute_stats,
     compute_growth_rate,
     export_settings,
@@ -267,7 +268,15 @@ app.layout = html.Div(
                                                 "background-color": "#111111",
                                             },
                                         ),
-                                        dcc.Store(id="dataset"),
+                                        dcc.Loading(
+                                            children=[
+                                                dcc.Store(id="dataset"),
+                                            ],
+                                            fullscreen=True,
+                                            style={
+                                                "backgroundColor": "rgba(8,8,8,0.8)"
+                                            },
+                                        ),
                                     ],
                                     style={"margin-left": "20px", "padding": "10px"},
                                 ),
@@ -458,7 +467,15 @@ app.layout = html.Div(
                                                 "background-color": "#111111",
                                             },
                                         ),
-                                        dcc.Store(id="dataset-2"),
+                                        dcc.Loading(
+                                            children=[
+                                                dcc.Store(id="dataset-2"),
+                                            ],
+                                            fullscreen=True,
+                                            style={
+                                                "backgroundColor": "rgba(8,8,8,0.8)"
+                                            },
+                                        ),
                                     ],
                                     style={"margin-left": "20px", "padding": "10px"},
                                 ),
@@ -594,18 +611,24 @@ app.layout = html.Div(
                 ),
                 html.Div(
                     [
-                        dash_table.DataTable(
-                            id="data-table",
-                            style_data={
-                                "backgroundColor": "#232323",
-                                "border": "solid 1px #5c6cfa",
-                            },
-                            style_cell={"padding": "5px"},
-                            style_header={
-                                "backgroundColor": "#454545",
-                                "border": "solid 1px #5c6cfa",
-                            },
-                        )
+                        dcc.Loading(
+                            parent_style={"backgroundColor": "transparent"},
+                            style={"backgroundColor": "transparent"},
+                            children=[
+                                dash_table.DataTable(
+                                    id="data-table",
+                                    style_data={
+                                        "backgroundColor": "#232323",
+                                        "border": "solid 1px #5c6cfa",
+                                    },
+                                    style_cell={"padding": "5px"},
+                                    style_header={
+                                        "backgroundColor": "#454545",
+                                        "border": "solid 1px #5c6cfa",
+                                    },
+                                )
+                            ],
+                        ),
                     ],
                     style={
                         "backgroundColor": "#5c6cfa",
@@ -728,16 +751,21 @@ app.layout = html.Div(
                                                         "padding": "15px",
                                                     },
                                                 ),
-                                                html.Div(
-                                                    ["text"],
-                                                    style={
-                                                        "white-space": "pre-line",
-                                                        "margin-left": "auto",
-                                                        "margin-right": "auto",
-                                                        "textAlign": "center",
-                                                        "font-size": "40px",
-                                                    },
-                                                    id="avg-stat",
+                                                dcc.Loading(
+                                                    type="circle",
+                                                    children=[
+                                                        html.Div(
+                                                            ["text"],
+                                                            style={
+                                                                "white-space": "pre-line",
+                                                                "margin-left": "auto",
+                                                                "margin-right": "auto",
+                                                                "textAlign": "center",
+                                                                "font-size": "40px",
+                                                            },
+                                                            id="avg-stat",
+                                                        ),
+                                                    ],
                                                 ),
                                             ],
                                             style={
@@ -765,14 +793,19 @@ app.layout = html.Div(
                                                         "padding": "15px",
                                                     },
                                                 ),
-                                                html.Div(
-                                                    ["text"],
-                                                    style={
-                                                        "white-space": "pre-line",
-                                                        "text-align": "center",
-                                                        "font-size": "40px",
-                                                    },
-                                                    id="max-stat",
+                                                dcc.Loading(
+                                                    type="circle",
+                                                    children=[
+                                                        html.Div(
+                                                            ["text"],
+                                                            style={
+                                                                "white-space": "pre-line",
+                                                                "text-align": "center",
+                                                                "font-size": "40px",
+                                                            },
+                                                            id="max-stat",
+                                                        ),
+                                                    ],
                                                 ),
                                             ],
                                             style={
@@ -799,14 +832,19 @@ app.layout = html.Div(
                                                         "padding": "15px",
                                                     },
                                                 ),
-                                                html.Div(
-                                                    ["text"],
-                                                    style={
-                                                        "white-space": "pre-line",
-                                                        "textAlign": "center",
-                                                        "font-size": "40px",
-                                                    },
-                                                    id="min-stat",
+                                                dcc.Loading(
+                                                    type="circle",
+                                                    children=[
+                                                        html.Div(
+                                                            ["text"],
+                                                            style={
+                                                                "white-space": "pre-line",
+                                                                "textAlign": "center",
+                                                                "font-size": "40px",
+                                                            },
+                                                            id="min-stat",
+                                                        ),
+                                                    ],
                                                 ),
                                             ],
                                             style={
@@ -859,14 +897,19 @@ app.layout = html.Div(
                                                         "margin-right": "auto",
                                                     },
                                                 ),
-                                                html.Div(
-                                                    ["text"],
-                                                    style={
-                                                        "white-space": "pre-line",
-                                                        "textAlign": "center",
-                                                        "font-size": "40px",
-                                                    },
-                                                    id="growth-stat",
+                                                dcc.Loading(
+                                                    type="circle",
+                                                    children=[
+                                                        html.Div(
+                                                            ["text"],
+                                                            style={
+                                                                "white-space": "pre-line",
+                                                                "textAlign": "center",
+                                                                "font-size": "40px",
+                                                            },
+                                                            id="growth-stat",
+                                                        ),
+                                                    ],
                                                 ),
                                             ],
                                             style={
@@ -916,9 +959,14 @@ app.layout = html.Div(
                             ],
                             style={"backgroundColor": "#111111"},
                         ),
-                        html.Div(
-                            [],
-                            id="line-div",
+                        dcc.Loading(
+                            type="circle",
+                            children=[
+                                html.Div(
+                                    [],
+                                    id="line-div",
+                                ),
+                            ],
                         ),
                     ],
                     id="line-plot",
@@ -976,9 +1024,14 @@ app.layout = html.Div(
                                 ),
                             ]
                         ),
-                        html.Div(
-                            [],
-                            id="map-div",
+                        dcc.Loading(
+                            type="circle",
+                            children=[
+                                html.Div(
+                                    [],
+                                    id="map-div",
+                                ),
+                            ],
                         ),
                     ],
                     id="map-plot",
@@ -1044,10 +1097,15 @@ app.layout = html.Div(
                     ]
                 ),
                 html.Div(
-                    html.Div(
-                        [],
-                        id="max_country-comparison-div",
-                        style={"display": "inline-block", "width": "100%"},
+                    dcc.Loading(
+                        type="circle",
+                        children=[
+                            html.Div(
+                                [],
+                                id="max_country-comparison-div",
+                                style={"display": "inline-block", "width": "100%"},
+                            ),
+                        ],
                     ),
                 ),
             ],
@@ -1110,12 +1168,17 @@ app.layout = html.Div(
                         ),
                     ]
                 ),
-                html.Div(
-                    html.Div(
-                        [],
-                        id="heatmap-plot-div",
-                        style={"display": "inline-block", "width": "100%"},
-                    ),
+                dcc.Loading(
+                    type="circle",
+                    children=[
+                        html.Div(
+                            html.Div(
+                                [],
+                                id="heatmap-plot-div",
+                                style={"display": "inline-block", "width": "100%"},
+                            ),
+                        ),
+                    ],
                 ),
             ],
             id="heatmap-div",
@@ -1230,21 +1293,25 @@ app.layout = html.Div(
                     ],
                     style={"display": "flex"},
                 ),
-                html.Div("Set amount of future time units", style={"padding": "15px"}),
-                dcc.Slider(1, 30, 1, id="forecast-slider"),
                 html.Div(
-                    html.Div(
-                        [],
-                        id="fit-plot-div",
-                        style={"display": "inline-block", "width": "100%"},
-                    ),
+                    [
+                        html.Div("Set future prediction", style={"padding": "15px"}),
+                        dcc.Slider(1, 30, 1, id="forecast-slider"),
+                    ],
+                    id="forecast-slider-div",
+                    style={"display": "none"},
                 ),
-                html.Div(
-                    html.Div(
-                        [],
-                        id="forecast-plot-div",
-                        style={"display": "inline-block", "width": "100%"},
-                    ),
+                dcc.Loading(
+                    type="circle",
+                    children=[
+                        html.Div(
+                            html.Div(
+                                [],
+                                id="fit-plot-div",
+                                style={"display": "inline-block", "width": "100%"},
+                            ),
+                        ),
+                    ],
                 ),
             ],
             id="trend-div",
@@ -1288,7 +1355,8 @@ app.layout = html.Div(
                         ),
                     ]
                 ),
-            ]
+            ],
+            style={"display": "none"},
         ),
     ],
     style={
@@ -2205,6 +2273,7 @@ def update_max_country_compare(
 
 @app.callback(
     Output("forecast-slider", "marks"),
+    Output("forecast-slider-div", "style"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("time-dropdown-1", "value"),
@@ -2232,13 +2301,6 @@ def update_forecast_slider(
         and frequency_dropdown
     ):
 
-        frequencies = {
-            "Yearly": ("AS", 365, "%Y"),
-            "Monthly": ("MS", 30, "%b-%Y"),
-            "Weekly": ("W", 7, "%Y-%m-%d"),
-            "Daily": ("D", 1, "%b-%d"),
-        }
-
         datasets = {
             "Dataset 1": (dataset, time_dropdown_1),
             "Dataset 2": (dataset_2, time_dropdown_2),
@@ -2247,32 +2309,14 @@ def update_forecast_slider(
         df = pd.read_json(datasets[selected_dataset][0])
         time_column = datasets[selected_dataset][1]
 
-        time_max = pd.to_datetime(
-            str(df[time_column].max()), infer_datetime_format=True
-        )
+        marks = get_time_marks(df, time_column, frequency_dropdown)
 
-        future_start = time_max + pd.Timedelta(
-            np.timedelta64(1 * frequencies[frequency_dropdown][1], "D")
-        )
+        slider_visibility = {"display": "block"}
 
-        future_range = np.array(
-            pd.date_range(
-                start=future_start, periods=30, freq=frequencies[frequency_dropdown][0]
-            ).strftime(frequencies[frequency_dropdown][2])
-        )
+        return marks, slider_visibility
 
-        future_range_slice = future_range[::3]
-
-        marks = {}
-
-        for i, date in enumerate(future_range_slice):
-
-            marks[i * 3 + 1] = str(date)
-
-            if i == len(future_range_slice) - 1:
-                marks[len(future_range)] = future_range[-1]
-
-        return marks
+    else:
+        raise exceptions.PreventUpdate
 
 
 @app.callback(

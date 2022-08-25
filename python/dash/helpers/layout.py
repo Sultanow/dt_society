@@ -348,3 +348,39 @@ def compute_growth_rate(
     growth_rate = ((end_value - start_value) / end_value) * 100
 
     return round(growth_rate, 2)
+
+
+def get_time_marks(
+    df: pd.DataFrame, time_column: str, frequency: str
+):
+    frequencies = {
+        "Yearly": ("AS", 365, "%Y"),
+        "Monthly": ("MS", 30, "%b-%Y"),
+        "Weekly": ("W", 7, "%Y-%m-%d"),
+        "Daily": ("D", 1, "%b-%d"),
+    }
+
+    time_max = pd.to_datetime(str(df[time_column].max()), infer_datetime_format=True)
+
+    future_start = time_max + pd.Timedelta(
+        np.timedelta64(1 * frequencies[frequency][1], "D")
+    )
+
+    future_range = np.array(
+        pd.date_range(
+            start=future_start, periods=30, freq=frequencies[frequency][0]
+        ).strftime(frequencies[frequency][2])
+    )
+
+    future_range_slice = future_range[::3]
+
+    marks = {}
+
+    for i, date in enumerate(future_range_slice):
+
+        marks[i * 3 + 1] = str(date)
+
+        if i == len(future_range_slice) - 1:
+            marks[len(future_range)] = future_range[-1]
+
+    return marks
