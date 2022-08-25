@@ -122,6 +122,10 @@ def preprocess_dataset(
                         html.A("Select Files"),
                     ]
                 )
+            elif preset_file and preset["file-name"] != file_name:
+                error = (
+                    "Filename in preset does not match filename of uploaded dataset."
+                )
 
             else:
                 error = str(e)
@@ -247,6 +251,7 @@ def export_settings(
         and feature_column_value
     ):
         preset = {
+            "file-name": filename,
             "separator": delimiter_value,
             "geo-column": geo_column_value,
             "reshape": reshape_switch_status,
@@ -288,9 +293,11 @@ def get_year_and_country_options_stats(
 
     if np.issubdtype(np.datetime64, df[time_column]):
         time_options_strp = np.sort(df[time_column].dt.strftime("%b-%d").unique())
-        time_options_split = np.array(np.array_split(time_options_strp, 7))
+        time_options_split = np.array(
+            np.array_split(time_options_strp, 7), dtype="object"
+        )
     else:
-        time_options_split = np.array(np.array_split(time_options, 7))
+        time_options_split = np.array(np.array_split(time_options, 7), dtype="object")
 
     marks = {}
 
