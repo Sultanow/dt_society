@@ -55,6 +55,13 @@ def preprocess_dataset(
         delimiter_value = None
         geo_column_value = None
 
+    if "reset-button" in changed_item:
+        reshape_switch_status = False
+        delimiter_value = None
+        geo_column_value = None
+        file_name = None
+        reshape_column_value = None
+
     if preset_file is not None:
         _, content = preset_file.split(",")
         decoded = base64.b64decode(content)
@@ -185,13 +192,26 @@ def preprocess_dataset(
             reshape_column_value = no_update
 
     else:
-        df = no_update
-        geo_options = no_update
-        reshape_options = no_update
-        feature_options = no_update
-        time_options = no_update
+        if "reset-button" in changed_item:
+            df = None
+            geo_options = []
+            reshape_options = []
+            feature_options = []
+            time_options = []
+        else:
+            df = (
+                geo_options
+            ) = reshape_options = feature_options = time_options = no_update
 
-    file_upload_children["props"]["children"] = html.Div([file_name])
+    if "reset-button" in changed_item:
+        file_upload_children["props"]["children"] = html.Div(
+            [
+                "Drag and Drop or ",
+                html.A("Select Files"),
+            ]
+        )
+    else:
+        file_upload_children["props"]["children"] = html.Div([file_name])
 
     if delimiter_value == "\t":
         delimiter_value = "\\t"

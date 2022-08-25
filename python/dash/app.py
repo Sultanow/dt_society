@@ -302,6 +302,8 @@ app.layout = html.Div(
                                                         n_clicks=0,
                                                         style={
                                                             "border-color": "#5c6cfa",
+                                                            "width": "120px",
+                                                            "margin-right": "4px",
                                                         },
                                                     ),
                                                 ),
@@ -312,6 +314,7 @@ app.layout = html.Div(
                                                     n_clicks=0,
                                                     style={
                                                         "border-color": "#5c6cfa",
+                                                        "width": "120px",
                                                     },
                                                 ),
                                             ],
@@ -501,6 +504,8 @@ app.layout = html.Div(
                                                         n_clicks=0,
                                                         style={
                                                             "border-color": "#5c6cfa",
+                                                            "width": "120px",
+                                                            "margin-right": "4px",
                                                         },
                                                     ),
                                                 ),
@@ -511,6 +516,7 @@ app.layout = html.Div(
                                                     n_clicks=0,
                                                     style={
                                                         "border-color": "#5c6cfa",
+                                                        "width": "120px",
                                                     },
                                                 ),
                                             ],
@@ -555,12 +561,30 @@ app.layout = html.Div(
                                                 "display": "none",
                                             },
                                         ),
-                                        html.Button(
-                                            "Demo",
-                                            id="demo-button",
-                                            n_clicks=0,
+                                        html.Div(
+                                            [
+                                                html.Button(
+                                                    "Reset",
+                                                    id="reset-button",
+                                                    n_clicks=0,
+                                                    style={
+                                                        "border-color": "#5c6cfa",
+                                                        "width": "120px",
+                                                        "margin-right": "4px",
+                                                    },
+                                                ),
+                                                html.Button(
+                                                    "Demo",
+                                                    id="demo-button",
+                                                    n_clicks=0,
+                                                    style={
+                                                        "border-color": "#5c6cfa",
+                                                        "width": "120px",
+                                                    },
+                                                ),
+                                            ],
                                             style={
-                                                "margin-right": "45px",
+                                                "margin-right": "40px",
                                                 "float": "right",
                                                 "display": "flex",
                                                 "margin-left": "auto",
@@ -1512,6 +1536,7 @@ def export_second_dropdown_settings(
     State("table-upload", "children"),
     Input("demo-button", "n_clicks"),
     Input("preset-upload-1", "contents"),
+    Input("reset-button", "n_clicks"),
     prevent_initial_call=True,
 )
 def preprocess_data(
@@ -1524,6 +1549,7 @@ def preprocess_data(
     file_upload_children: str,
     demo_button_n_clicks: int,
     preset_file: str,
+    reset_button_n_clicks: int,
 ):
     """Handles the preprocessing of an uploaded dataset. In demo mode, a predefined dataset is loaded instead.
 
@@ -1585,6 +1611,7 @@ def preprocess_data(
     State("table-upload-2", "children"),
     Input("demo-button", "n_clicks"),
     Input("preset-upload-2", "contents"),
+    Input("reset-button", "n_clicks"),
     prevent_initial_call=True,
 )
 def preprocess_second_data(
@@ -1597,6 +1624,7 @@ def preprocess_second_data(
     file_upload_children: str,
     demo_button_n_clicks: int,
     preset_file,
+    reset_button_n_clicks: int,
 ):
     """Handles the preprocessing of an uploaded dataset. In demo mode, a predefined dataset is loaded instead.
 
