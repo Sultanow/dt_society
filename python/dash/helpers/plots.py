@@ -109,9 +109,19 @@ def create_choropleth_slider_plot(
     data: pd.DataFrame,
     geo_column: str,
     feature_column: str,
-    facet: str = None,
     time_column: str = None,
-):
+) -> go.Figure:
+    """Creates choropleth plot with time slider and animation
+
+    Args:
+        data (pd.DataFrame): Data
+        geo_column (str): value of geo column
+        feature_column (str): value of feature column
+        time_column (str, optional): value of column with time data. Defaults to None.
+
+    Returns:
+        go.Figure: Choropleth figure
+    """
     fig_dict = {"data": [], "layout": {}, "frames": []}
 
     fig_dict["layout"] = dict(

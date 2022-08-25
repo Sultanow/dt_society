@@ -406,7 +406,17 @@ def compute_growth_rate(
     return round(growth_rate, 2)
 
 
-def get_time_marks(df: pd.DataFrame, time_column: str, frequency: str):
+def get_time_marks(df: pd.DataFrame, time_column: str, frequency: str) -> dict:
+    """Creates dictionary to assign time labels to slider marks
+
+    Args:
+        df (pd.DataFrame): Data
+        time_column (str): value of column containing time data
+        frequency (str): frequency of underlying time data
+
+    Returns:
+        dict: key value pairs ( slider mark:label )
+    """
     frequencies = {
         "Yearly": ("AS", 365, "%Y"),
         "Monthly": ("MS", 30, "%b-%Y"),
