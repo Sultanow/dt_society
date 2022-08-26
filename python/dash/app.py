@@ -11,8 +11,12 @@ from dash import (
     callback_context,
     no_update,
 )
+import numpy as np
+import plotly.graph_objects as go
 
 import pandas as pd
+from plotly.subplots import make_subplots
+from prophet import Prophet
 
 from helpers.plots import (
     create_multi_line_plot,
@@ -21,8 +25,13 @@ from helpers.plots import (
     create_two_line_plot,
     create_correlation_heatmap,
     create_forecast_plot,
+    create_multivariate_forecast,
 )
-from helpers.models import prophet_fit_and_predict, fit_and_predict
+from helpers.models import (
+    prophet_fit_and_predict,
+    fit_and_predict,
+    prophet_fit_and_predict_multi,
+)
 from helpers.layout import (
     preprocess_dataset,
     get_year_and_country_options_stats,
@@ -1356,6 +1365,24 @@ app.layout = html.Div(
                     [
                         html.Div(
                             [
+                                dcc.Dropdown(
+                                    ["none"],
+                                    placeholder="Select country",
+                                    clearable=False,
+                                    id="country-dropdown-multi-forecast",
+                                    style={
+                                        "width": "140px",
+                                        "font-size": "14px",
+                                        "border-color": "#5c6cfa",
+                                        "background-color": "#111111",
+                                        "border-top": "0px",
+                                        "border-left": "0px",
+                                        "border-right": "0px",
+                                        "border-bottom": "0px",
+                                        "border-radius": "0px",
+                                        "textAlign": "center",
+                                    },
+                                ),
                                 html.Div(
                                     "Multivariate forecast",
                                     style={
@@ -1365,7 +1392,7 @@ app.layout = html.Div(
                                         "backgroundColor": "#111111",
                                         "font-weight": "bold",
                                         "textAlign": "center",
-                                        "width": "80%",
+                                        "width": "100%",
                                     },
                                 ),
                             ],
@@ -1379,10 +1406,84 @@ app.layout = html.Div(
                                 "backgroundColor": "#5c6cfa",
                             }
                         ),
+                        html.Div(
+                            [
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            "Specify time frequency",
+                                            style={"padding": "15px"},
+                                        ),
+                                        dcc.Dropdown(
+                                            ["Yearly", "Monthly", "Weekly", "Daily"],
+                                            placeholder="Select frequency",
+                                            clearable=False,
+                                            id="multi-frequency-dropdown-forecast",
+                                            style={
+                                                "width": "140px",
+                                                "font-size": "14px",
+                                                "border-color": "#5c6cfa",
+                                                "background-color": "#111111",
+                                                "border-top": "0px",
+                                                "border-left": "0px",
+                                                "border-right": "0px",
+                                                "border-bottom": "0px",
+                                                "border-radius": "0px",
+                                                "textAlign": "center",
+                                            },
+                                        ),
+                                    ]
+                                ),
+                            ],
+                            style={"display": "flex"},
+                        ),
+                        html.Div(
+                            [
+                                dcc.Store(id="scenario-store"),
+                                dcc.Input(
+                                    id="scenario-input",
+                                    type="text",
+                                    style={
+                                        "backgroundColor": "#111111",
+                                        "color": "#f2f2f2",
+                                        "padding": "10px",
+                                        "border-top": "0px",
+                                        "border-left": "0px",
+                                        "border-right": "0px",
+                                        "border-color": "#5c6cfa",
+                                    },
+                                ),
+                                html.Button(
+                                    "Predict",
+                                    id="submit-scenario-button",
+                                    n_clicks=0,
+                                    style={
+                                        "border-color": "#5c6cfa",
+                                        "width": "120px",
+                                    },
+                                ),
+                            ],
+                            style={"padding-left": "10px", "margin-top": "10px"},
+                        ),
+                        dcc.Loading(
+                            type="circle",
+                            children=[
+                                html.Div(
+                                    html.Div(
+                                        [],
+                                        id="multi-fit-plot-div",
+                                        style={
+                                            "display": "inline-block",
+                                            "width": "100%",
+                                        },
+                                    ),
+                                ),
+                            ],
+                        ),
                     ]
                 ),
             ],
-            style={"display": "none"},
+            style={},
         ),
     ],
     style={
@@ -1725,6 +1826,8 @@ def update_country_dropdown_comparison(
     Output("country-dropdown-forecast", "value"),
     Output("year-range-slider", "value"),
     Output("year-range-slider", "marks"),
+    Output("country-dropdown-multi-forecast", "options"),
+    Output("country-dropdown-multi-forecast", "value"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("data-selector", "value"),
@@ -2602,6 +2705,99 @@ def update_heatmap(
         heatmap_div_style = {"display": "none"}
 
         return heatmap_children, heatmap_div_style
+
+
+@app.callback(
+    Output("scenario-store", "data"),
+    Input("scenario-input", "value"),
+    Input("submit-scenario-button", "n_clicks"),
+)
+def update_scenario_store(scenario_input: str, button_n_clicks: int):
+
+    changed_item = [p["prop_id"] for p in callback_context.triggered][0]
+
+    if scenario_input and "submit-scenario-button" in changed_item:
+        future_values = scenario_input.replace(" ", "").split(",")
+
+        future_values_int = [int(x) for x in future_values]
+
+        return future_values_int
+    else:
+        raise exceptions.PreventUpdate
+
+
+@app.callback(
+    Output("multi-fit-plot-div", "children"),
+    Input("dataset", "data"),
+    Input("dataset-2", "data"),
+    Input("feature-dropdown-1", "value"),
+    Input("feature-dropdown-2", "value"),
+    Input("geo-dropdown-1", "value"),
+    Input("geo-dropdown-2", "value"),
+    Input("time-dropdown-1", "value"),
+    Input("time-dropdown-2", "value"),
+    State("multi-fit-plot-div", "children"),
+    Input("multi-frequency-dropdown-forecast", "value"),
+    Input("scenario-store", "data"),
+    Input("country-dropdown-multi-forecast", "value"),
+)
+def update_multivariate_forecast(
+    dataset_1: str,
+    dataset_2: str,
+    feature_dropdown_1: str,
+    feature_dropdown_2: str,
+    geo_dropdown_1: str,
+    geo_dropdown_2: str,
+    time_dropdown_1: str,
+    time_dropdown_2: str,
+    multi_forecast_children: list,
+    multi_frequency_dropdown: str,
+    scenario_data: list,
+    selected_country: str,
+):
+
+    if (
+        dataset_1
+        and dataset_2
+        and feature_dropdown_1
+        and feature_dropdown_2
+        and scenario_data
+    ):
+
+        df_1 = pd.read_json(dataset_1)
+        df_2 = pd.read_json(dataset_2)
+
+        filtered_df_1 = df_1[df_1[geo_dropdown_1] == selected_country][
+            [time_dropdown_1, feature_dropdown_1]
+        ]
+
+        filtered_df_2 = df_2[df_2[geo_dropdown_2] == selected_country][
+            [time_dropdown_2, feature_dropdown_2]
+        ]
+
+        forecast, merged_df, future_df = prophet_fit_and_predict_multi(
+            filtered_df_1,
+            filtered_df_2,
+            time_dropdown_1,
+            time_dropdown_2,
+            feature_dropdown_1,
+            feature_dropdown_2,
+            scenario_data,
+            multi_frequency_dropdown,
+        )
+
+        fig = create_multivariate_forecast(
+            forecast, merged_df, future_df, feature_dropdown_1, feature_dropdown_2
+        )
+
+        if multi_forecast_children:
+            multi_forecast_children.clear()
+
+        multi_forecast_children.append(dcc.Graph(figure=fig))
+
+        return multi_forecast_children
+    else:
+        raise exceptions.PreventUpdate
 
 
 if __name__ == "__main__":

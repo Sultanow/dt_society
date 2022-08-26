@@ -360,6 +360,8 @@ def get_year_and_country_options_stats(
         geo_options[0],
         time_span,
         marks,
+        geo_options,
+        geo_options[0],
     )
 
 

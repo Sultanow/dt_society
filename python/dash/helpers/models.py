@@ -133,3 +133,75 @@ def fit_and_predict(
     df["yhat"] = model_fit
 
     return f_df, df
+
+
+def prophet_fit_and_predict_multi(
+    df_1,
+    df_2,
+    time_column_1,
+    time_column_2,
+    feature_column_1,
+    feature_column_2,
+    artificial_future_data,
+    frequency,
+):
+
+    frequencies = {
+        "Yearly": ("AS", 365),
+        "Monthly": ("MS", 30),
+        "Weekly": ("W", 7),
+        "Daily": ("D", 1),
+    }
+
+    merged_df = pd.merge(
+        df_1,
+        df_2,
+        left_on=[time_column_1],
+        right_on=[time_column_2],
+        how="inner",
+    )
+
+    if time_column_1 != time_column_2:
+        if len(df_1[time_column_1]) > len(df_2[time_column_2]):
+            column_to_drop = time_column_2
+            column_to_rename = time_column_1
+
+        elif len(df_1[time_column_1]) < len(df_2[time_column_2]):
+            column_to_drop = time_column_1
+            column_to_rename = time_column_2
+
+        merged_df = merged_df.drop(columns=[column_to_drop])
+
+    else:
+        column_to_rename = time_column_1
+
+    merged_df = merged_df.fillna(0).rename(
+        columns={column_to_rename: "ds", feature_column_1: "y"}
+    )
+
+    merged_df["ds"] = pd.to_datetime(merged_df["ds"].astype(str))
+
+    model = Prophet()
+
+    model.add_regressor(feature_column_2)
+
+    model.fit(merged_df)
+
+    future = model.make_future_dataframe(
+        periods=len(artificial_future_data), freq=frequencies[frequency][0]
+    )
+
+    artificial_scenario = np.append(
+        merged_df[feature_column_2].values,
+        artificial_future_data,
+    )
+
+    future[feature_column_2] = artificial_scenario
+
+    predictions = model.predict(future)
+
+    forecast = predictions[len(merged_df) :][["ds", "yhat", "yhat_upper", "yhat_lower"]]
+
+    future_df = future[len(merged_df) - 1 :][["ds", feature_column_2]]
+
+    return forecast, merged_df, future_df

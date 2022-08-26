@@ -363,3 +363,65 @@ def create_forecast_plot(
     )
 
     return fig
+
+
+def create_multivariate_forecast(
+    forecast, df, future_df, feature_column_1, feature_column_2
+):
+    fig = go.Figure(make_subplots(specs=[[{"secondary_y": True}]]))
+
+    fig.add_trace(
+        go.Scatter(
+            x=df["ds"],
+            y=df["y"],
+            name=feature_column_1,
+            mode="lines",
+            line={"color": "mediumpurple"},
+        ),
+        secondary_y=False,
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=df["ds"],
+            y=df[feature_column_2],
+            name=feature_column_2,
+            mode="lines",
+            line={"color": "mediumspringgreen"},
+        ),
+        secondary_y=True,
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=future_df["ds"],
+            y=future_df[feature_column_2],
+            name=feature_column_2,
+            mode="lines",
+            line={"dash": "dash", "color": "mediumspringgreen"},
+        ),
+        secondary_y=True,
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=forecast["ds"],
+            y=forecast["yhat"],
+            name="Prediction " + feature_column_1,
+            mode="markers",
+            marker=go.scatter.Marker(symbol="triangle-up", color="mediumpurple"),
+            error_y=go.scatter.ErrorY(
+                array=forecast["yhat_upper"] - forecast["yhat"],
+                arrayminus=forecast["yhat"] - forecast["yhat_lower"],
+            ),
+        ),
+        secondary_y=False,
+    )
+
+    fig.update_layout(
+        template="plotly_dark",
+        yaxis1_title=feature_column_1,
+        yaxis2_title=feature_column_2,
+    )
+
+    return fig
