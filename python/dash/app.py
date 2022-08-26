@@ -1831,7 +1831,6 @@ def update_table_content(
     else:
         table_div_style = {"display": "none"}
         return no_update, table_div_style
-        # raise exceptions.PreventUpdate
 
 
 @app.callback(
@@ -2179,6 +2178,7 @@ def update_choropleth(
 
         filtered_df = df[df[time_column] == selected_year_map]
 
+        # mapbox choropleth
         # fig = create_choropleth_plot(
         #     filtered_df, geo_column=geo_column, feature_column=feature_column
         # )

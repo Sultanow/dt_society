@@ -347,8 +347,6 @@ def create_forecast_plot(
         )
     )
 
-    # print(forecast)
-
     fig.add_traces(
         go.Scatter(
             x=forecast["ds"],

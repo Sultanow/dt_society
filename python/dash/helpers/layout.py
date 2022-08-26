@@ -173,7 +173,7 @@ def preprocess_dataset(
                 no_update,  # time-dropdown-value
                 no_update,  # preset-upload-content
                 reshape_column_value,  # reshape-column-value
-                error,
+                error,  # dataset-fail-message
             )
 
         geo_options = columns
@@ -290,7 +290,17 @@ def export_settings(
 
 def get_year_and_country_options_stats(
     df: pd.DataFrame, geo_column: str, time_column: str
-):
+) -> tuple:
+    """Creates options for time and country dropdown in statistics section. Slider receives labels based on time data.
+
+    Args:
+        df (pd.DataFrame): Data
+        geo_column (str): value of column with geo data
+        time_column (str): value of column with time data
+
+    Returns:
+        tuple: _description_
+    """
 
     if geo_column != None:
 
