@@ -37,7 +37,7 @@ def prophet_fit_and_predict(
         start=str(time[0]), end=str(time[-1]), freq=frequencies[frequency]
     )
 
-    df = df.replace(to_replace=time, value=time_range)
+    df["ds"] = df["ds"].replace(to_replace=time, value=time_range)
 
     model = Prophet()
 
@@ -96,7 +96,7 @@ def fit_and_predict(
         start=str(time[0]), end=str(time[-1]), freq=frequencies[frequency][0]
     )
 
-    df = df.replace(to_replace=time, value=time_range)
+    df[time_column] = df[time_column].replace(to_replace=time, value=time_range)
 
     future_start = time_range[-1] + pd.Timedelta(
         np.timedelta64(1 * frequencies[frequency][-1], "D")
