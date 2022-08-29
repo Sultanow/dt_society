@@ -2487,7 +2487,7 @@ def update_forecast(
     forecast_slider_value: str,
     frequency_dropdown: str,
     model_dropdown: str,
-) -> list:
+) -> tuple:
     """Creates a forecast using the Prophet model
 
     Args:
@@ -2508,7 +2508,7 @@ def update_forecast(
         exceptions.PreventUpdate: update prevented if neither dataset is loaded with all columns selected
 
     Returns:
-        list: container with forecast plot
+        tuple: container with forecast plot, style component
     """
 
     if (
@@ -2754,7 +2754,29 @@ def update_multivariate_forecast(
     multi_frequency_dropdown: str,
     scenario_data: list,
     selected_country: str,
-):
+) -> tuple:
+    """Performs multivariate forecast with an additional dataset and plots the result
+
+    Args:
+        dataset_1 (str): Dataset which is forecasted for
+        dataset_2 (str): Dataset which is used as additional timeseries for the forecast
+        feature_dropdown_1 (str): selected feature column of first dataset
+        feature_dropdown_2 (str): selected feature column of second dataset
+        geo_dropdown_1 (str): selected geo column of first dataset
+        geo_dropdown_2 (str): selected geo column of second dataset
+        time_dropdown_1 (str): selected time column of first dataset
+        time_dropdown_2 (str): selected time column of second dataset
+        multi_forecast_children (list): container for the forecast figure
+        multi_frequency_dropdown (str): selected frequency value
+        scenario_data (list): artifical future data for the second dataset (needed for multivariate forecast with Prophet)
+        selected_country (str): selected country of country dropdown
+
+    Raises:
+        exceptions.PreventUpdate: Update prevented until both datasets loaded, feature columns selected and artifical data is available
+
+    Returns:
+        tuple:
+    """
 
     if (
         dataset_1
