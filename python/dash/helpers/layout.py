@@ -183,9 +183,9 @@ def preprocess_dataset(
         if reshape_column_value:
             reshape_options = no_update
         elif preset_file is not None:
-            reshape_options = columns_pre_reshape
+            reshape_options = ["None"] + columns_pre_reshape
         else:
-            reshape_options = columns
+            reshape_options = ["None"] + columns 
 
         if preset_file is None:
             geo_column_value = no_update

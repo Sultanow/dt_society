@@ -159,17 +159,23 @@ class DigitalTwinTimeSeries:
         return data
 
     def reshape_wide_to_long(self, value_id_column):
-        
-        assert self.geo_col != value_id_column, "Column to reshape on can not be the column that has been set as geo column."
-        
-        reshaped_data = (
-            self.data.set_index([self.geo_col, value_id_column])
-            .rename_axis(["Time"], axis=1)
-            .stack()
-            .unstack(value_id_column)
-            .reset_index()
-        )
 
-        reshaped_data["Time"] = reshaped_data["Time"].str.strip()
+        assert (
+            self.geo_col != value_id_column
+        ), "Column to reshape on can not be the column that has been set as geo column."
+
+        if value_id_column == "None":
+            reshaped_data = self.data.melt(id_vars=[self.geo_col], var_name="Time")
+
+        else:
+            reshaped_data = (
+                self.data.set_index([self.geo_col, value_id_column])
+                .rename_axis(["Time"], axis=1)
+                .stack()
+                .unstack(value_id_column)
+                .reset_index()
+            )
+
+            reshaped_data["Time"] = reshaped_data["Time"].str.strip()
 
         return reshaped_data
