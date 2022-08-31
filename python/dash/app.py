@@ -98,7 +98,7 @@ app.layout = html.Div(
                                                 html.Span(
                                                     """File format: .csv, .tsv \n 
                                                     Geo column: column that contains either country names or ISO codes \n
-                                                    Reshape: pivots the dataset from a wide to long format (adds new columns for unique values of selected column) \n
+                                                    Reshape: pivots the dataset from a wide to long format (adds new columns for unique values of selected column, if there is no additional identifier select "None") \n
                                                     Time column: column that contains time data / timestamps (represents x-axis in figures)\n
                                                     Feature: column that contains the feature of interest (represents y-axis in figures)\n
                                                     Preset: upload/download a preset file that contains pre-selected column values""",
@@ -1451,6 +1451,7 @@ app.layout = html.Div(
                                         "border-left": "0px",
                                         "border-right": "0px",
                                         "border-color": "#5c6cfa",
+                                        "width": "300px",
                                     },
                                 ),
                                 html.Button(
@@ -1460,6 +1461,7 @@ app.layout = html.Div(
                                     style={
                                         "border-color": "#5c6cfa",
                                         "width": "120px",
+                                        "margin-left": "5px",
                                     },
                                 ),
                             ],
