@@ -11,12 +11,7 @@ from dash import (
     callback_context,
     no_update,
 )
-import numpy as np
-import plotly.graph_objects as go
-
 import pandas as pd
-from plotly.subplots import make_subplots
-from prophet import Prophet
 
 from helpers.plots import (
     create_multi_line_plot,
@@ -26,11 +21,13 @@ from helpers.plots import (
     create_correlation_heatmap,
     create_forecast_plot,
     create_multivariate_forecast,
+    create_var_forecast_plot,
 )
 from helpers.models import (
     prophet_fit_and_predict,
     fit_and_predict,
     prophet_fit_and_predict_multi,
+    var_fit_and_predict,
 )
 from helpers.layout import (
     preprocess_dataset,
@@ -1434,8 +1431,45 @@ app.layout = html.Div(
                                         ),
                                     ]
                                 ),
+                                html.Div(
+                                    [
+                                        html.Div(
+                                            "Select model", style={"padding": "15px"}
+                                        ),
+                                        dcc.Dropdown(
+                                            ["Prophet", "Vector Auto Regression"],
+                                            placeholder="Select model",
+                                            clearable=False,
+                                            id="model-dropdown-multi-forecast",
+                                            style={
+                                                "width": "140px",
+                                                "font-size": "14px",
+                                                "border-color": "#5c6cfa",
+                                                "background-color": "#111111",
+                                                "border-top": "0px",
+                                                "border-left": "0px",
+                                                "border-right": "0px",
+                                                "border-bottom": "0px",
+                                                "border-radius": "0px",
+                                                "textAlign": "center",
+                                            },
+                                        ),
+                                    ]
+                                ),
                             ],
                             style={"display": "flex"},
+                        ),
+                        html.Div(
+                            [
+                                html.Div(
+                                    "Set future prediction", style={"padding": "15px"}
+                                ),
+                                dcc.Slider(1, 30, 1, id="var-forecast-slider"),
+                                html.Div("Set maximum lags", style={"padding": "15px"}),
+                                dcc.Slider(1, 7, 1, id="var-maxlags-slider"),
+                            ],
+                            id="var-slider-div",
+                            style={"display": "none"},
                         ),
                         html.Div(
                             [
@@ -1465,7 +1499,12 @@ app.layout = html.Div(
                                     },
                                 ),
                             ],
-                            style={"padding-left": "10px", "margin-top": "10px"},
+                            id="scenario-div",
+                            style={
+                                "padding-left": "10px",
+                                "margin-top": "10px",
+                                "display": "none",
+                            },
                         ),
                         dcc.Loading(
                             type="circle",
@@ -2730,6 +2769,9 @@ def update_scenario_store(scenario_input: str, button_n_clicks: int):
 
 @app.callback(
     Output("multi-fit-plot-div", "children"),
+    Output("var-slider-div", "style"),
+    Output("scenario-div", "style"),
+    Output("var-forecast-slider", "marks"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("feature-dropdown-1", "value"),
@@ -2742,6 +2784,9 @@ def update_scenario_store(scenario_input: str, button_n_clicks: int):
     Input("multi-frequency-dropdown-forecast", "value"),
     Input("scenario-store", "data"),
     Input("country-dropdown-multi-forecast", "value"),
+    Input("model-dropdown-multi-forecast", "value"),
+    Input("var-forecast-slider", "value"),
+    Input("var-maxlags-slider", "value"),
 )
 def update_multivariate_forecast(
     dataset_1: str,
@@ -2756,6 +2801,9 @@ def update_multivariate_forecast(
     multi_frequency_dropdown: str,
     scenario_data: list,
     selected_country: str,
+    selected_model: str,
+    var_slider_value: int,
+    var_maxlags_value: str,
 ) -> tuple:
     """Performs multivariate forecast with an additional dataset and plots the result
 
@@ -2785,7 +2833,7 @@ def update_multivariate_forecast(
         and dataset_2
         and feature_dropdown_1
         and feature_dropdown_2
-        and scenario_data
+        and selected_model
     ):
 
         df_1 = pd.read_json(dataset_1)
@@ -2799,27 +2847,77 @@ def update_multivariate_forecast(
             [time_dropdown_2, feature_dropdown_2]
         ]
 
-        forecast, merged_df, future_df = prophet_fit_and_predict_multi(
-            filtered_df_1,
-            filtered_df_2,
-            time_dropdown_1,
-            time_dropdown_2,
-            feature_dropdown_1,
-            feature_dropdown_2,
-            scenario_data,
-            multi_frequency_dropdown,
-        )
+        if selected_model == "Vector Auto Regression":
+            if not var_slider_value:
+                var_slider_value = 1
 
-        fig = create_multivariate_forecast(
-            forecast, merged_df, future_df, feature_dropdown_1, feature_dropdown_2
-        )
+            if not var_maxlags_value:
+                var_maxlags_value = 1
+
+            forecast, marks = var_fit_and_predict(
+                filtered_df_1,
+                filtered_df_2,
+                time_dropdown_1,
+                time_dropdown_2,
+                feature_dropdown_1,
+                feature_dropdown_2,
+                var_maxlags_value,
+                var_slider_value,
+                multi_frequency_dropdown,
+            )
+
+            fig = create_var_forecast_plot(
+                forecast,
+                feature_dropdown_1,
+                feature_dropdown_2,
+                time_dropdown_1,
+                var_slider_value,
+            )
+
+            var_slider_style = {"display": "block"}
+            scenario_div_style = {
+                "padding-left": "10px",
+                "margin-top": "10px",
+                "display": "none",
+            }
+
+        elif selected_model == "Prophet":
+            marks = no_update
+            if scenario_data:
+                forecast, merged_df, future_df = prophet_fit_and_predict_multi(
+                    filtered_df_1,
+                    filtered_df_2,
+                    time_dropdown_1,
+                    time_dropdown_2,
+                    feature_dropdown_1,
+                    feature_dropdown_2,
+                    scenario_data,
+                    multi_frequency_dropdown,
+                )
+
+                fig = create_multivariate_forecast(
+                    forecast,
+                    merged_df,
+                    future_df,
+                    feature_dropdown_1,
+                    feature_dropdown_2,
+                )
+            var_slider_style = {"display": "none"}
+            scenario_div_style = {
+                "padding-left": "10px",
+                "margin-top": "10px",
+                "display": "block",
+            }
 
         if multi_forecast_children:
             multi_forecast_children.clear()
 
-        multi_forecast_children.append(dcc.Graph(figure=fig))
+        if (
+            selected_model == "Prophet" and scenario_data
+        ) or selected_model == "Vector Auto Regression":
+            multi_forecast_children.append(dcc.Graph(figure=fig))
 
-        return multi_forecast_children
+        return multi_forecast_children, var_slider_style, scenario_div_style, marks
     else:
         raise exceptions.PreventUpdate
 

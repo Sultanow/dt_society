@@ -425,3 +425,62 @@ def create_multivariate_forecast(
     )
 
     return fig
+
+
+def create_var_forecast_plot(
+    df, feature_column_1, feature_column_2, time_column, periods
+):
+
+    fig = go.Figure(make_subplots(specs=[[{"secondary_y": True}]]))
+
+    fig.add_trace(
+        go.Scatter(
+            x=df[time_column][:-periods],
+            y=df[feature_column_1][:-periods],
+            name=feature_column_1,
+            mode="lines",
+            line={"color": "mediumpurple"},
+        ),
+        secondary_y=False,
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=df[time_column][-periods - 1 :],
+            y=df[feature_column_1][-periods - 1 :],
+            name=feature_column_1 + " Prediction",
+            mode="lines",
+            line={"dash": "dash", "color": "mediumpurple"},
+        ),
+        secondary_y=False,
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=df[time_column][:-periods],
+            y=df[feature_column_2][:-periods],
+            name=feature_column_2,
+            mode="lines",
+            line={"color": "mediumspringgreen"},
+        ),
+        secondary_y=True,
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=df[time_column][-periods - 1 :],
+            y=df[feature_column_2][-periods - 1 :],
+            name=feature_column_2 + " Prediction",
+            mode="lines",
+            line={"dash": "dash", "color": "mediumspringgreen"},
+        ),
+        secondary_y=True,
+    )
+
+    fig.update_layout(
+        template="plotly_dark",
+        yaxis1_title=feature_column_1,
+        yaxis2_title=feature_column_2,
+    )
+
+    return fig
