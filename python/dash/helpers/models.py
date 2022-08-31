@@ -270,7 +270,7 @@ def var_fit_and_predict(
 
     forecast_df = pd.DataFrame()
 
-    forecast_df["Time"] = pd.date_range(
+    forecast_df[time] = pd.date_range(
         start=marks[1], periods=periods, freq=frequencies[frequency][0]
     )
 

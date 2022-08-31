@@ -185,7 +185,7 @@ def preprocess_dataset(
         elif preset_file is not None:
             reshape_options = ["None"] + columns_pre_reshape
         else:
-            reshape_options = ["None"] + columns 
+            reshape_options = ["None"] + columns
 
         if preset_file is None:
             geo_column_value = no_update
@@ -433,7 +433,7 @@ def get_time_marks(df: pd.DataFrame, time_column: str, frequency: str) -> dict:
         "Yearly": ("AS", 365, "%Y"),
         "Monthly": ("MS", 30, "%b-%Y"),
         "Weekly": ("W", 7, "%Y-%m-%d"),
-        "Daily": ("D", 1, "%b-%d"),
+        "Daily": ("D", 1, "%Y-%b-%d"),
     }
 
     time_max = pd.to_datetime(str(df[time_column].max()), infer_datetime_format=True)
