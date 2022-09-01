@@ -1524,7 +1524,8 @@ app.layout = html.Div(
                     ]
                 ),
             ],
-            style={},
+            id="multi-forecast-div",
+            style={"display": "none"},
         ),
     ],
     style={
@@ -2772,6 +2773,7 @@ def update_scenario_store(scenario_input: str, button_n_clicks: int):
     Output("var-slider-div", "style"),
     Output("scenario-div", "style"),
     Output("var-forecast-slider", "marks"),
+    Output("multi-forecast-div", "style"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("feature-dropdown-1", "value"),
@@ -2917,9 +2919,38 @@ def update_multivariate_forecast(
         ) or selected_model == "Vector Auto Regression":
             multi_forecast_children.append(dcc.Graph(figure=fig))
 
-        return multi_forecast_children, var_slider_style, scenario_div_style, marks
+        multi_forecast_div_style = {"display": "block"}
+
+        return (
+            multi_forecast_children,
+            var_slider_style,
+            scenario_div_style,
+            marks,
+            multi_forecast_div_style,
+        )
+    elif dataset_1 and dataset_2 and feature_dropdown_1 and feature_dropdown_2:
+
+        multi_forecast_div_style = {"display": "block"}
+
+        return (
+            multi_forecast_children,
+            no_update,
+            no_update,
+            no_update,
+            multi_forecast_div_style,
+        )
+
     else:
-        raise exceptions.PreventUpdate
+
+        multi_forecast_div_style = {"display": "none"}
+
+        return (
+            multi_forecast_children,
+            no_update,
+            no_update,
+            no_update,
+            multi_forecast_div_style,
+        )
 
 
 if __name__ == "__main__":
