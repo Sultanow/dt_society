@@ -28,6 +28,7 @@ from helpers.models import (
     fit_and_predict,
     prophet_fit_and_predict_multi,
     var_fit_and_predict,
+    hw_es_fit_and_predict,
 )
 from helpers.layout import (
     preprocess_dataset,
@@ -1437,7 +1438,11 @@ app.layout = html.Div(
                                             "Select model", style={"padding": "15px"}
                                         ),
                                         dcc.Dropdown(
-                                            ["Prophet", "Vector Auto Regression"],
+                                            [
+                                                "Prophet",
+                                                "Vector Auto Regression",
+                                                "HW Smoothing",
+                                            ],
                                             placeholder="Select model",
                                             clearable=False,
                                             id="model-dropdown-multi-forecast",
@@ -1465,15 +1470,74 @@ app.layout = html.Div(
                                     "Set future prediction", style={"padding": "15px"}
                                 ),
                                 dcc.Slider(1, 30, 1, id="var-forecast-slider"),
-                                html.Div("Set maximum lags", style={"padding": "15px"}),
-                                dcc.Slider(1, 7, 1, id="var-maxlags-slider"),
                             ],
                             id="var-slider-div",
                             style={"display": "none"},
                         ),
                         html.Div(
                             [
+                                html.Div("Set maximum lags", style={"padding": "15px"}),
+                                dcc.Slider(1, 7, 1, id="var-maxlags-slider"),
+                            ],
+                            id="var-lags-div",
+                            style={"display": "none"},
+                        ),
+                        html.Div(
+                            [
+                                dcc.Store(id="alpha-store"),
+                                html.Div(
+                                    "Set \u03B1-coefficient",
+                                    style={
+                                        "padding-top": "15px",
+                                        "padding-bottom": "15px",
+                                    },
+                                ),
+                                dcc.Input(
+                                    value=0.5,
+                                    id="alpha-coefficient",
+                                    type="number",
+                                    min=1e-4,
+                                    max=1 - 1e-4,
+                                    step=1e-4,
+                                    style={
+                                        "backgroundColor": "#111111",
+                                        "color": "#f2f2f2",
+                                        "padding": "10px",
+                                        "border-top": "0px",
+                                        "border-left": "0px",
+                                        "border-right": "0px",
+                                        "border-color": "#5c6cfa",
+                                        "width": "300px",
+                                    },
+                                ),
+                                html.Button(
+                                    "Predict",
+                                    id="submit-alpha-button",
+                                    n_clicks=0,
+                                    style={
+                                        "border-color": "#5c6cfa",
+                                        "width": "120px",
+                                        "margin-left": "5px",
+                                    },
+                                ),
+                            ],
+                            id="alpha-div",
+                            style={
+                                "padding-left": "10px",
+                                "margin-top": "10px",
+                                "display": "none",
+                            },
+                        ),
+                        html.Div(
+                            [
                                 dcc.Store(id="scenario-store"),
+                                html.Div(
+                                    "Specify future scenario",
+                                    style={
+                                        "padding-top": "15px",
+                                        "padding-bottom": "15px",
+                                    },
+                                ),
                                 dcc.Input(
                                     id="scenario-input",
                                     type="text",
@@ -2769,11 +2833,28 @@ def update_scenario_store(scenario_input: str, button_n_clicks: int):
 
 
 @app.callback(
+    Output("alpha-store", "data"),
+    Input("alpha-coefficient", "value"),
+    Input("submit-alpha-button", "n_clicks"),
+)
+def update_scenario_store(alpha: int, button_n_clicks: int):
+
+    changed_item = [p["prop_id"] for p in callback_context.triggered][0]
+
+    if alpha and "submit-alpha-button" in changed_item:
+        return alpha
+    else:
+        raise exceptions.PreventUpdate
+
+
+@app.callback(
     Output("multi-fit-plot-div", "children"),
     Output("var-slider-div", "style"),
     Output("scenario-div", "style"),
     Output("var-forecast-slider", "marks"),
     Output("multi-forecast-div", "style"),
+    Output("var-lags-div", "style"),
+    Output("alpha-div", "style"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("feature-dropdown-1", "value"),
@@ -2789,6 +2870,7 @@ def update_scenario_store(scenario_input: str, button_n_clicks: int):
     Input("model-dropdown-multi-forecast", "value"),
     Input("var-forecast-slider", "value"),
     Input("var-maxlags-slider", "value"),
+    Input("alpha-store", "data"),
 )
 def update_multivariate_forecast(
     dataset_1: str,
@@ -2806,6 +2888,7 @@ def update_multivariate_forecast(
     selected_model: str,
     var_slider_value: int,
     var_maxlags_value: str,
+    alpha_parameter: int,
 ) -> tuple:
     """Performs multivariate forecast with an additional dataset and plots the result
 
@@ -2877,8 +2960,56 @@ def update_multivariate_forecast(
             )
 
             var_slider_style = {"display": "block"}
+            var_lags_style = {"display": "block"}
+            alpha_div_style = {
+                "padding-left": "15px",
+                "margin-top": "10px",
+                "display": "none",
+            }
             scenario_div_style = {
-                "padding-left": "10px",
+                "padding-left": "15px",
+                "margin-top": "10px",
+                "display": "none",
+            }
+        elif selected_model == "HW Smoothing":
+            if not var_slider_value:
+                var_slider_value = 1
+
+            if not var_maxlags_value:
+                var_maxlags_value = 1
+
+            if not alpha_parameter:
+                alpha_parameter = 0.5
+
+            forecast, marks = hw_es_fit_and_predict(
+                filtered_df_1,
+                filtered_df_2,
+                time_dropdown_1,
+                time_dropdown_2,
+                feature_dropdown_1,
+                feature_dropdown_2,
+                multi_frequency_dropdown,
+                var_slider_value,
+                alpha_parameter,
+            )
+
+            fig = create_var_forecast_plot(
+                forecast,
+                feature_dropdown_1,
+                feature_dropdown_2,
+                time_dropdown_1,
+                var_slider_value,
+            )
+
+            var_slider_style = {"display": "block"}
+            var_lags_style = {"display": "none"}
+            alpha_div_style = {
+                "padding-left": "15px",
+                "margin-top": "10px",
+                "display": "block",
+            }
+            scenario_div_style = {
+                "padding-left": "15px",
                 "margin-top": "10px",
                 "display": "none",
             }
@@ -2905,8 +3036,14 @@ def update_multivariate_forecast(
                     feature_dropdown_2,
                 )
             var_slider_style = {"display": "none"}
+            var_lags_style = {"display": "none"}
+            alpha_div_style = {
+                "padding-left": "15px",
+                "margin-top": "10px",
+                "display": "none",
+            }
             scenario_div_style = {
-                "padding-left": "10px",
+                "padding-left": "15px",
                 "margin-top": "10px",
                 "display": "block",
             }
@@ -2915,8 +3052,10 @@ def update_multivariate_forecast(
             multi_forecast_children.clear()
 
         if (
-            selected_model == "Prophet" and scenario_data
-        ) or selected_model == "Vector Auto Regression":
+            (selected_model == "Prophet" and scenario_data)
+            or selected_model == "Vector Auto Regression"
+            or selected_model == "HW Smoothing"
+        ):
             multi_forecast_children.append(dcc.Graph(figure=fig))
 
         multi_forecast_div_style = {"display": "block"}
@@ -2927,6 +3066,8 @@ def update_multivariate_forecast(
             scenario_div_style,
             marks,
             multi_forecast_div_style,
+            var_lags_style,
+            alpha_div_style,
         )
     elif dataset_1 and dataset_2 and feature_dropdown_1 and feature_dropdown_2:
 
@@ -2938,6 +3079,8 @@ def update_multivariate_forecast(
             no_update,
             no_update,
             multi_forecast_div_style,
+            no_update,
+            no_update,
         )
 
     else:
@@ -2950,6 +3093,8 @@ def update_multivariate_forecast(
             no_update,
             no_update,
             multi_forecast_div_style,
+            no_update,
+            no_update,
         )
 
 

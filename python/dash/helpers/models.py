@@ -10,6 +10,7 @@ from statsmodels.tsa.stattools import adfuller
 from typing import Tuple
 
 from .layout import get_time_marks
+from .smoothing import multivariate_ES
 
 
 def prophet_fit_and_predict(
@@ -282,5 +283,76 @@ def var_fit_and_predict(
     df_final.loc[len(merged_df) - 1 :, [feature_column_1, feature_column_2]] = df_final[
         [feature_column_1, feature_column_2]
     ][len(merged_df) - 1 :].cumsum()
+
+    return df_final, marks
+
+
+def hw_es_fit_and_predict(
+    df_1,
+    df_2,
+    time_column_1,
+    time_column_2,
+    feature_column_1,
+    feature_column_2,
+    frequency,
+    periods,
+    alpha,
+):
+
+    frequencies = {
+        "Yearly": ("AS", 365),
+        "Monthly": ("MS", 30),
+        "Weekly": ("W", 7),
+        "Daily": ("D", 1),
+    }
+
+    merged_df = pd.merge(
+        df_1,
+        df_2,
+        left_on=[time_column_1],
+        right_on=[time_column_2],
+        how="inner",
+    )
+
+    if time_column_1 != time_column_2:
+        if len(df_1[time_column_1]) > len(df_2[time_column_2]):
+            column_to_drop = time_column_2
+            time = time_column_1
+
+        elif len(df_1[time_column_1]) < len(df_2[time_column_2]):
+            column_to_drop = time_column_1
+            time = time_column_2
+
+        merged_df = merged_df.drop(columns=[column_to_drop])
+    else:
+        time = time_column_1
+
+    marks = get_time_marks(merged_df, time_column=time, frequency=frequency)
+
+    merged_df[time] = pd.to_datetime(merged_df[time].astype(str))
+
+    df_features = (
+        merged_df[[feature_column_1, feature_column_2]]
+        .reset_index(drop=True)
+        .reindex(sorted([feature_column_1, feature_column_2]), axis=1)
+        .rename(columns={feature_column_1: 0, feature_column_2: 1})
+    )
+
+    forecast = []
+
+    for t in range(periods):
+        test = multivariate_ES(df_features, len(df_features), t + 1, 2, alpha)
+        forecast.append(test[-1])
+
+    forecast_df = pd.DataFrame()
+
+    forecast_df[time] = pd.date_range(
+        start=marks[1], periods=periods, freq=frequencies[frequency][0]
+    )
+
+    forecast_df[feature_column_2] = [x[0] for x in forecast]
+    forecast_df[feature_column_1] = [x[1] for x in forecast]
+
+    df_final = pd.concat([merged_df, forecast_df], ignore_index=True)
 
     return df_final, marks
