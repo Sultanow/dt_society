@@ -1,5 +1,6 @@
 import gzip
 import base64
+from math import floor, log
 import urllib
 from dash import (
     no_update,
@@ -211,7 +212,14 @@ def preprocess_dataset(
             ]
         )
     else:
-        file_upload_children["props"]["children"] = html.Div([file_name])
+        file_upload_children["props"]["children"] = html.Div(
+            [file_name],
+            style={
+                "text-overflow": "ellipsis",
+                "overflow": "hidden",
+                "white-space": "nowrap",
+            },
+        )
 
     if delimiter_value == "\t":
         delimiter_value = "\\t"
@@ -381,6 +389,15 @@ def compute_stats(
         tuple: mean, max, min, country name of max, country name of min
     """
 
+    def human_format(number):
+        units = ["", "K", "M", "G", "T", "P"]
+        k = 1000.0
+        if number != 0.0 and number >= 1:
+            magnitude = int(floor(log(number, k)))
+        else:
+            magnitude = 0
+        return "%.2f%s" % (number / k**magnitude, units[magnitude])
+
     mean = round(df[feature_column].mean(axis=0), 2)
     max = round(df[feature_column].max(), 2)
     min = round(df[feature_column].min(), 2)
@@ -389,9 +406,9 @@ def compute_stats(
     country_min = df.loc[df[feature_column].idxmin()][geo_column]
 
     return (
-        mean,
-        max,
-        min,
+        human_format(mean),
+        human_format(max),
+        human_format(min),
         country_max,
         country_min,
     )
