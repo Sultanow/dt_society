@@ -1440,7 +1440,7 @@ app.layout = html.Div(
                                         dcc.Dropdown(
                                             [
                                                 "Prophet",
-                                                "Vector Auto Regression",
+                                                "Vector AR",
                                                 "HW Smoothing",
                                             ],
                                             placeholder="Select model",
@@ -1476,11 +1476,44 @@ app.layout = html.Div(
                         ),
                         html.Div(
                             [
+                                dcc.Store(id="maxlags-store"),
                                 html.Div("Set maximum lags", style={"padding": "15px"}),
-                                dcc.Slider(1, 7, 1, id="var-maxlags-slider"),
+                                # dcc.Slider(1, 7, 1, id="var-maxlags-slider"),
+                                dcc.Input(
+                                    value=1,
+                                    min=1,
+                                    max=7,
+                                    step=1,
+                                    id="var-maxlags-slider",
+                                    type="number",
+                                    style={
+                                        "backgroundColor": "#111111",
+                                        "color": "#f2f2f2",
+                                        "padding": "10px",
+                                        "border-top": "0px",
+                                        "border-left": "0px",
+                                        "border-right": "0px",
+                                        "border-color": "#5c6cfa",
+                                        "width": "300px",
+                                    },
+                                ),
+                                html.Button(
+                                    "Predict",
+                                    id="submit-maxlags-button",
+                                    n_clicks=0,
+                                    style={
+                                        "border-color": "#5c6cfa",
+                                        "width": "120px",
+                                        "margin-left": "5px",
+                                    },
+                                ),
                             ],
                             id="var-lags-div",
-                            style={"display": "none"},
+                            style={
+                                "display": "none",
+                                "padding-left": "10px",
+                                "margin-top": "10px",
+                            },
                         ),
                         html.Div(
                             [
@@ -1530,6 +1563,12 @@ app.layout = html.Div(
                         ),
                         html.Div(
                             [
+                                html.Div("Select dataset to predict for"),
+                                dcc.RadioItems(
+                                    [],
+                                    id="forecast-data-selector",
+                                    labelStyle={"display": "block"},
+                                ),
                                 dcc.Store(id="scenario-store"),
                                 html.Div(
                                     "Specify future scenario",
@@ -2814,35 +2853,40 @@ def update_heatmap(
 
 
 @app.callback(
+    Output("alpha-store", "data"),
+    Output("maxlags-store", "data"),
     Output("scenario-store", "data"),
+    Input("alpha-coefficient", "value"),
+    Input("submit-alpha-button", "n_clicks"),
+    Input("var-maxlags-slider", "value"),
+    Input("submit-maxlags-button", "n_clicks"),
     Input("scenario-input", "value"),
     Input("submit-scenario-button", "n_clicks"),
 )
-def update_scenario_store(scenario_input: str, button_n_clicks: int):
-
-    changed_item = [p["prop_id"] for p in callback_context.triggered][0]
-
-    if scenario_input and "submit-scenario-button" in changed_item:
-        future_values = scenario_input.replace(" ", "").split(",")
-
-        future_values_int = [int(x) for x in future_values]
-
-        return future_values_int
-    else:
-        raise exceptions.PreventUpdate
-
-
-@app.callback(
-    Output("alpha-store", "data"),
-    Input("alpha-coefficient", "value"),
-    Input("submit-alpha-button", "n_clicks"),
-)
-def update_scenario_store(alpha: int, button_n_clicks: int):
+def update_parameter_stores(
+    alpha: int,
+    button_n_clicks: int,
+    max_lags: int,
+    max_lags_button_n_clicks: int,
+    scenario: str,
+    scenario_button_n_clicks: int,
+):
 
     changed_item = [p["prop_id"] for p in callback_context.triggered][0]
 
     if alpha and "submit-alpha-button" in changed_item:
-        return alpha
+        return alpha, no_update, no_update
+
+    elif max_lags and "submit-maxlags-button" in changed_item:
+        return no_update, max_lags, no_update
+
+    elif scenario and "submit-scenario-button" in changed_item:
+        future_values = scenario.replace(" ", "").split(",")
+
+        future_values_int = [int(x) for x in future_values]
+
+        return no_update, no_update, future_values_int
+
     else:
         raise exceptions.PreventUpdate
 
@@ -2855,6 +2899,7 @@ def update_scenario_store(alpha: int, button_n_clicks: int):
     Output("multi-forecast-div", "style"),
     Output("var-lags-div", "style"),
     Output("alpha-div", "style"),
+    Output("forecast-data-selector", "options"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("feature-dropdown-1", "value"),
@@ -2869,8 +2914,13 @@ def update_scenario_store(alpha: int, button_n_clicks: int):
     Input("country-dropdown-multi-forecast", "value"),
     Input("model-dropdown-multi-forecast", "value"),
     Input("var-forecast-slider", "value"),
-    Input("var-maxlags-slider", "value"),
+    # Input("var-maxlags-slider", "value"),
     Input("alpha-store", "data"),
+    Input("maxlags-store", "data"),
+    Input("table-upload", "filename"),
+    Input("table-upload-2", "filename"),
+    Input("forecast-data-selector", "options"),
+    Input("forecast-data-selector", "value"),
 )
 def update_multivariate_forecast(
     dataset_1: str,
@@ -2887,8 +2937,13 @@ def update_multivariate_forecast(
     selected_country: str,
     selected_model: str,
     var_slider_value: int,
-    var_maxlags_value: str,
+    # var_maxlags_value: str,
     alpha_parameter: int,
+    max_lags_parameter: int,
+    filename_1: str,
+    filename_2: str,
+    forecast_data_selector_options: str,
+    selected_dataset: str,
 ) -> tuple:
     """Performs multivariate forecast with an additional dataset and plots the result
 
@@ -2919,25 +2974,47 @@ def update_multivariate_forecast(
         and feature_dropdown_1
         and feature_dropdown_2
         and selected_model
+        and selected_country
+        and geo_dropdown_1
+        and geo_dropdown_2
     ):
 
-        df_1 = pd.read_json(dataset_1)
-        df_2 = pd.read_json(dataset_2)
+        datasets = {filename_1: dataset_1, filename_2: dataset_2}
 
-        filtered_df_1 = df_1[df_1[geo_dropdown_1] == selected_country][
-            [time_dropdown_1, feature_dropdown_1]
+        columns = {
+            dataset_1: (geo_dropdown_1, time_dropdown_1, feature_dropdown_1),
+            dataset_2: (geo_dropdown_2, time_dropdown_2, feature_dropdown_2),
+        }
+
+        if selected_dataset and selected_model == "Prophet":
+            file_1 = [datasets[data] for data in datasets if data == selected_dataset][
+                0
+            ]
+            file_2 = [datasets[data] for data in datasets if data != selected_dataset][
+                0
+            ]
+        else:
+            file_1 = dataset_1
+            file_2 = dataset_2
+
+        df_1 = pd.read_json(file_1)
+        df_2 = pd.read_json(file_2)
+
+        filtered_df_1 = df_1[df_1[columns[file_1][0]] == selected_country][
+            [columns[file_1][1], columns[file_1][2]]
         ]
 
-        filtered_df_2 = df_2[df_2[geo_dropdown_2] == selected_country][
-            [time_dropdown_2, feature_dropdown_2]
+        filtered_df_2 = df_2[df_2[columns[file_2][0]] == selected_country][
+            [columns[file_2][1], columns[file_2][2]]
         ]
 
-        if selected_model == "Vector Auto Regression":
+        if selected_model == "Vector AR":
+
             if not var_slider_value:
                 var_slider_value = 1
 
-            if not var_maxlags_value:
-                var_maxlags_value = 1
+            if not max_lags_parameter:
+                max_lags_parameter = 1
 
             forecast, marks = var_fit_and_predict(
                 filtered_df_1,
@@ -2946,7 +3023,7 @@ def update_multivariate_forecast(
                 time_dropdown_2,
                 feature_dropdown_1,
                 feature_dropdown_2,
-                var_maxlags_value,
+                max_lags_parameter,
                 var_slider_value,
                 multi_frequency_dropdown,
             )
@@ -2975,8 +3052,8 @@ def update_multivariate_forecast(
             if not var_slider_value:
                 var_slider_value = 1
 
-            if not var_maxlags_value:
-                var_maxlags_value = 1
+            if not max_lags_parameter:
+                max_lags_parameter = 1
 
             if not alpha_parameter:
                 alpha_parameter = 0.5
@@ -3015,15 +3092,17 @@ def update_multivariate_forecast(
             }
 
         elif selected_model == "Prophet":
+            forecast_data_selector_options = [filename_1, filename_2]
+
             marks = no_update
             if scenario_data:
                 forecast, merged_df, future_df = prophet_fit_and_predict_multi(
                     filtered_df_1,
                     filtered_df_2,
-                    time_dropdown_1,
-                    time_dropdown_2,
-                    feature_dropdown_1,
-                    feature_dropdown_2,
+                    columns[file_1][1],
+                    columns[file_2][1],
+                    columns[file_1][2],
+                    columns[file_2][2],
                     scenario_data,
                     multi_frequency_dropdown,
                 )
@@ -3032,8 +3111,8 @@ def update_multivariate_forecast(
                     forecast,
                     merged_df,
                     future_df,
-                    feature_dropdown_1,
-                    feature_dropdown_2,
+                    columns[file_1][2],
+                    columns[file_2][2],
                 )
             var_slider_style = {"display": "none"}
             var_lags_style = {"display": "none"}
@@ -3053,7 +3132,7 @@ def update_multivariate_forecast(
 
         if (
             (selected_model == "Prophet" and scenario_data)
-            or selected_model == "Vector Auto Regression"
+            or selected_model == "Vector AR"
             or selected_model == "HW Smoothing"
         ):
             multi_forecast_children.append(dcc.Graph(figure=fig))
@@ -3068,6 +3147,7 @@ def update_multivariate_forecast(
             multi_forecast_div_style,
             var_lags_style,
             alpha_div_style,
+            forecast_data_selector_options,
         )
     elif dataset_1 and dataset_2 and feature_dropdown_1 and feature_dropdown_2:
 
@@ -3079,6 +3159,7 @@ def update_multivariate_forecast(
             no_update,
             no_update,
             multi_forecast_div_style,
+            no_update,
             no_update,
             no_update,
         )
@@ -3093,6 +3174,7 @@ def update_multivariate_forecast(
             no_update,
             no_update,
             multi_forecast_div_style,
+            no_update,
             no_update,
             no_update,
         )
