@@ -11,6 +11,7 @@ from typing import Tuple
 
 from .layout import get_time_marks
 from .smoothing import multivariate_ES
+from preprocessing.parse import merge_dataframes
 
 
 def prophet_fit_and_predict(
@@ -158,31 +159,9 @@ def prophet_fit_and_predict_multi(
         "Daily": ("D", 1),
     }
 
-    merged_df = pd.merge(
-        df_1,
-        df_2,
-        left_on=[time_column_1],
-        right_on=[time_column_2],
-        how="inner",
-    )
+    merged_df, time = merge_dataframes(df_1, df_2, time_column_1, time_column_2)
 
-    if time_column_1 != time_column_2:
-        if len(df_1[time_column_1]) > len(df_2[time_column_2]):
-            column_to_drop = time_column_2
-            column_to_rename = time_column_1
-
-        elif len(df_1[time_column_1]) < len(df_2[time_column_2]):
-            column_to_drop = time_column_1
-            column_to_rename = time_column_2
-
-        merged_df = merged_df.drop(columns=[column_to_drop])
-
-    else:
-        column_to_rename = time_column_1
-
-    merged_df = merged_df.fillna(0).rename(
-        columns={column_to_rename: "ds", feature_column_1: "y"}
-    )
+    merged_df = merged_df.rename(columns={time: "ds", feature_column_1: "y"})
 
     merged_df["ds"] = pd.to_datetime(merged_df["ds"].astype(str))
 
@@ -231,26 +210,7 @@ def var_fit_and_predict(
         "Daily": ("D", 1),
     }
 
-    merged_df = pd.merge(
-        df_1,
-        df_2,
-        left_on=[time_column_1],
-        right_on=[time_column_2],
-        how="inner",
-    )
-
-    if time_column_1 != time_column_2:
-        if len(df_1[time_column_1]) > len(df_2[time_column_2]):
-            column_to_drop = time_column_2
-            time = time_column_1
-
-        elif len(df_1[time_column_1]) < len(df_2[time_column_2]):
-            column_to_drop = time_column_1
-            time = time_column_2
-
-        merged_df = merged_df.drop(columns=[column_to_drop])
-    else:
-        time = time_column_1
+    merged_df, time = merge_dataframes(df_1, df_2, time_column_1, time_column_2)
 
     marks = get_time_marks(merged_df, time_column=time, frequency=frequency)
 
@@ -306,26 +266,7 @@ def hw_es_fit_and_predict(
         "Daily": ("D", 1),
     }
 
-    merged_df = pd.merge(
-        df_1,
-        df_2,
-        left_on=[time_column_1],
-        right_on=[time_column_2],
-        how="inner",
-    )
-
-    if time_column_1 != time_column_2:
-        if len(df_1[time_column_1]) > len(df_2[time_column_2]):
-            column_to_drop = time_column_2
-            time = time_column_1
-
-        elif len(df_1[time_column_1]) < len(df_2[time_column_2]):
-            column_to_drop = time_column_1
-            time = time_column_2
-
-        merged_df = merged_df.drop(columns=[column_to_drop])
-    else:
-        time = time_column_1
+    merged_df, time = merge_dataframes(df_1, df_2, time_column_1, time_column_2)
 
     marks = get_time_marks(merged_df, time_column=time, frequency=frequency)
 
