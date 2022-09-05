@@ -3100,8 +3100,6 @@ def update_multivariate_forecast(
         and geo_dropdown_2
     ) and "Multivariate Forecast" in visibility_checklist:
 
-        datasets = {filename_1: dataset_1, filename_2: dataset_2}
-
         columns = {
             "Dataset 1": (
                 dataset_1,
@@ -3127,9 +3125,6 @@ def update_multivariate_forecast(
         df_1 = pd.read_json(columns[file_1][0])
         df_2 = pd.read_json(columns[file_2][0])
 
-        print(df_1)
-        print(df_2)
-
         filtered_df_1 = df_1[df_1[columns[file_1][1]] == selected_country][
             [columns[file_1][2], columns[file_1][3]]
         ]
@@ -3137,9 +3132,6 @@ def update_multivariate_forecast(
         filtered_df_2 = df_2[df_2[columns[file_2][1]] == selected_country][
             [columns[file_2][2], columns[file_2][3]]
         ]
-
-        print(filtered_df_1)
-        print(filtered_df_2)
 
         last_five_datapoints = no_update
 
