@@ -359,7 +359,10 @@ def create_forecast_plot(
     )
 
     fig.update_layout(
-        template=theme, xaxis_title=time_column, yaxis_title=feature_column
+        template=theme,
+        xaxis_title=time_column,
+        yaxis_title=feature_column,
+        margin={"t": 20},
     )
 
     return fig
