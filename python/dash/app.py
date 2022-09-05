@@ -39,6 +39,8 @@ from helpers.layout import (
     export_settings,
 )
 
+from preprocessing.parse import merge_dataframes
+
 
 external_stylesheets = [
     {
@@ -1410,7 +1412,11 @@ app.layout = html.Div(
                                     [
                                         html.Div(
                                             "Specify time frequency",
-                                            style={"padding": "15px"},
+                                            style={
+                                                "padding-top": "15px",
+                                                "padding-bottom": "15px",
+                                                "padding-right": "15px",
+                                            },
                                         ),
                                         dcc.Dropdown(
                                             ["Yearly", "Monthly", "Weekly", "Daily"],
@@ -1422,20 +1428,21 @@ app.layout = html.Div(
                                                 "font-size": "14px",
                                                 "border-color": "#5c6cfa",
                                                 "background-color": "#111111",
-                                                "border-top": "0px",
-                                                "border-left": "0px",
-                                                "border-right": "0px",
-                                                "border-bottom": "0px",
-                                                "border-radius": "0px",
-                                                "textAlign": "center",
+                                                # "textAlign": "center",
                                             },
                                         ),
-                                    ]
+                                    ],
+                                    style={"margin-left": "10px"},
                                 ),
                                 html.Div(
                                     [
                                         html.Div(
-                                            "Select model", style={"padding": "15px"}
+                                            "Select model",
+                                            style={
+                                                "padding-top": "15px",
+                                                "padding-bottom": "15px",
+                                                "padding-right": "15px",
+                                            },
                                         ),
                                         dcc.Dropdown(
                                             [
@@ -1451,12 +1458,7 @@ app.layout = html.Div(
                                                 "font-size": "14px",
                                                 "border-color": "#5c6cfa",
                                                 "background-color": "#111111",
-                                                "border-top": "0px",
-                                                "border-left": "0px",
-                                                "border-right": "0px",
-                                                "border-bottom": "0px",
-                                                "border-radius": "0px",
-                                                "textAlign": "center",
+                                                # "textAlign": "center",
                                             },
                                         ),
                                     ]
@@ -1563,42 +1565,89 @@ app.layout = html.Div(
                         ),
                         html.Div(
                             [
-                                html.Div("Select dataset to predict for"),
-                                dcc.RadioItems(
-                                    [],
-                                    id="forecast-data-selector",
-                                    labelStyle={"display": "block"},
-                                ),
-                                dcc.Store(id="scenario-store"),
                                 html.Div(
-                                    "Specify future scenario",
-                                    style={
-                                        "padding-top": "15px",
-                                        "padding-bottom": "15px",
-                                    },
+                                    [
+                                        html.Div("Select dependent dataset"),
+                                        dcc.RadioItems(
+                                            [],
+                                            id="forecast-data-selector",
+                                            labelStyle={
+                                                "display": "block",
+                                                "padding": "5px",
+                                                "font-size": "12px",
+                                                "font-weight": "lighter",
+                                            },
+                                            style={
+                                                "padding-bottom": "10px",
+                                                "padding-top": "5px",
+                                            },
+                                        ),
+                                        dcc.Store(id="scenario-store"),
+                                        html.Div(
+                                            "Specify future scenario for independent dataset",
+                                            style={
+                                                "padding-top": "10px",
+                                                "padding-bottom": "5px",
+                                            },
+                                        ),
+                                        html.Div(
+                                            [
+                                                dcc.Input(
+                                                    id="scenario-input",
+                                                    type="text",
+                                                    style={
+                                                        "backgroundColor": "#111111",
+                                                        "color": "#f2f2f2",
+                                                        "border-top": "0px",
+                                                        "border-left": "0px",
+                                                        "border-right": "0px",
+                                                        "border-color": "#5c6cfa",
+                                                        "width": "300px",
+                                                        "font-size": "14px",
+                                                        "font-weight": "lighter",
+                                                    },
+                                                ),
+                                            ],
+                                            style={
+                                                "padding-top": "5px",
+                                                "padding-bottom": "5px",
+                                            },
+                                        ),
+                                        html.Button(
+                                            "Predict",
+                                            id="submit-scenario-button",
+                                            n_clicks=0,
+                                            style={
+                                                "border-color": "#5c6cfa",
+                                                "width": "120px",
+                                                # "margin-left": "5px",
+                                                "margin-top": "5px",
+                                            },
+                                        ),
+                                    ]
                                 ),
-                                dcc.Input(
-                                    id="scenario-input",
-                                    type="text",
+                                html.Div(
+                                    [
+                                        dash_table.DataTable(
+                                            id="forecast-data-table",
+                                            style_data={
+                                                "backgroundColor": "#232323",
+                                                "border": "solid 1px #5c6cfa",
+                                            },
+                                            style_cell={"padding": "5px"},
+                                            style_header={
+                                                "backgroundColor": "#454545",
+                                                "border": "solid 1px #5c6cfa",
+                                            },
+                                        ),
+                                    ],
                                     style={
-                                        "backgroundColor": "#111111",
-                                        "color": "#f2f2f2",
-                                        "padding": "10px",
-                                        "border-top": "0px",
-                                        "border-left": "0px",
-                                        "border-right": "0px",
-                                        "border-color": "#5c6cfa",
-                                        "width": "300px",
-                                    },
-                                ),
-                                html.Button(
-                                    "Predict",
-                                    id="submit-scenario-button",
-                                    n_clicks=0,
-                                    style={
-                                        "border-color": "#5c6cfa",
-                                        "width": "120px",
-                                        "margin-left": "5px",
+                                        "margin-left": "auto",
+                                        "float": "right",
+                                        "margin-right": "20px",
+                                        "overflow": "auto",
+                                        "max-height": "175px",
+                                        "width": "50%",
                                     },
                                 ),
                             ],
@@ -2900,6 +2949,7 @@ def update_parameter_stores(
     Output("var-lags-div", "style"),
     Output("alpha-div", "style"),
     Output("forecast-data-selector", "options"),
+    Output("forecast-data-table", "data"),
     Input("dataset", "data"),
     Input("dataset-2", "data"),
     Input("feature-dropdown-1", "value"),
@@ -2987,12 +3037,12 @@ def update_multivariate_forecast(
         }
 
         if selected_dataset and selected_model == "Prophet":
-            file_1 = [datasets[data] for data in datasets if data == selected_dataset][
+            file_1 = [datasets[data] for data in datasets if data in selected_dataset][
                 0
             ]
-            file_2 = [datasets[data] for data in datasets if data != selected_dataset][
-                0
-            ]
+            file_2 = [
+                datasets[data] for data in datasets if data not in selected_dataset
+            ][0]
         else:
             file_1 = dataset_1
             file_2 = dataset_2
@@ -3007,6 +3057,8 @@ def update_multivariate_forecast(
         filtered_df_2 = df_2[df_2[columns[file_2][0]] == selected_country][
             [columns[file_2][1], columns[file_2][2]]
         ]
+
+        last_five_datapoints = no_update
 
         if selected_model == "Vector AR":
 
@@ -3092,7 +3144,10 @@ def update_multivariate_forecast(
             }
 
         elif selected_model == "Prophet":
-            forecast_data_selector_options = [filename_1, filename_2]
+            forecast_data_selector_options = [
+                f"{filename_1} ({feature_dropdown_1})",
+                f"{filename_2} ({feature_dropdown_2})",
+            ]
 
             marks = no_update
             if scenario_data:
@@ -3114,6 +3169,12 @@ def update_multivariate_forecast(
                     columns[file_1][2],
                     columns[file_2][2],
                 )
+            else:
+                merged_df, _ = merge_dataframes(
+                    filtered_df_1, filtered_df_2, columns[file_1][1], columns[file_2][1]
+                )
+
+                last_five_datapoints = merged_df.iloc[::-1].round(2).to_dict("records")
             var_slider_style = {"display": "none"}
             var_lags_style = {"display": "none"}
             alpha_div_style = {
@@ -3123,8 +3184,8 @@ def update_multivariate_forecast(
             }
             scenario_div_style = {
                 "padding-left": "15px",
-                "margin-top": "10px",
-                "display": "block",
+                "margin-top": "15px",
+                "display": "flex",
             }
 
         if multi_forecast_children:
@@ -3148,6 +3209,7 @@ def update_multivariate_forecast(
             var_lags_style,
             alpha_div_style,
             forecast_data_selector_options,
+            last_five_datapoints,
         )
     elif dataset_1 and dataset_2 and feature_dropdown_1 and feature_dropdown_2:
 
@@ -3159,6 +3221,7 @@ def update_multivariate_forecast(
             no_update,
             no_update,
             multi_forecast_div_style,
+            no_update,
             no_update,
             no_update,
             no_update,
@@ -3174,6 +3237,7 @@ def update_multivariate_forecast(
             no_update,
             no_update,
             multi_forecast_div_style,
+            no_update,
             no_update,
             no_update,
             no_update,

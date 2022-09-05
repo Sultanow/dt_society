@@ -438,6 +438,7 @@ def create_multivariate_forecast(
         template="plotly_dark",
         yaxis1_title=feature_column_1,
         yaxis2_title=feature_column_2,
+        margin={"t": 20},
     )
 
     return fig
@@ -497,6 +498,7 @@ def create_var_forecast_plot(
         template="plotly_dark",
         yaxis1_title=feature_column_1,
         yaxis2_title=feature_column_2,
+        margin={"t": 20},
     )
 
     return fig
