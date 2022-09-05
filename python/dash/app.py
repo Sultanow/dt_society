@@ -2134,9 +2134,9 @@ def update_table_content(
     dataset_2: str,
     selected_dataset: str,
     file: str,
-    delimiter_dropdown_1,
-    delimiter_dropdown_2,
-    visibility_checklist,
+    delimiter_dropdown_1: str,
+    delimiter_dropdown_2: str,
+    visibility_checklist: list,
 ) -> pd.DataFrame:
     """Fills table section with data from the selected dataset
 
@@ -2212,7 +2212,7 @@ def update_stats(
     time_dropdown_2: str,
     year_range: list,
     file: str,
-    visibility_checklist,
+    visibility_checklist: list,
 ) -> tuple:
     """Compute and display mean, max, min and growth value (per country) for selected dataset
 
@@ -2342,7 +2342,7 @@ def update_line_plot(
     selected_dataset: str,
     geo_dropdown_1: str,
     geo_dropdown_2: str,
-    visibility_checklist,
+    visibility_checklist: list,
 ) -> list:
     """Draws a line plot with the selected data specified in the dropdowns
 
@@ -2465,7 +2465,7 @@ def update_choropleth(
     geo_dropdown_1: str,
     selected_year_map: str,
     selected_dataset: str,
-    visiblity_checklist,
+    visiblity_checklist: list,
 ) -> list:
     """Displays choropleth mapbox in countries section
 
@@ -2586,7 +2586,7 @@ def update_max_country_compare(
     comparison_children: str,
     geo_dropdown_2: str,
     geo_dropdown_1: str,
-    visibility_checklist,
+    visibility_checklist: list,
 ) -> list:
     """Creates a line plot with two subplots (one for each dataset respectively)
 
@@ -2667,12 +2667,12 @@ def update_max_country_compare(
     Input("frequency-dropdown-forecast", "value"),
 )
 def update_forecast_slider(
-    dataset,
-    dataset_2,
-    time_dropdown_1,
-    time_dropdown_2,
-    selected_dataset,
-    frequency_dropdown,
+    dataset: str,
+    dataset_2: str,
+    time_dropdown_1: str,
+    time_dropdown_2: str,
+    selected_dataset: str,
+    frequency_dropdown: str,
 ):
     if (
         dataset
@@ -2738,7 +2738,7 @@ def update_forecast(
     forecast_slider_value: str,
     frequency_dropdown: str,
     model_dropdown: str,
-    visibility_checklist,
+    visibility_checklist: list,
 ) -> tuple:
     """Creates a forecast using the Prophet model
 
@@ -2892,7 +2892,7 @@ def update_heatmap(
     country_dropdown: str,
     feature_dropdown_1: str,
     feature_dropdown_2: str,
-    visibility_checklist,
+    visibility_checklist: list,
 ):
     """Creates a heatmap from the correlation matrix of features
 
@@ -3064,7 +3064,7 @@ def update_multivariate_forecast(
     filename_2: str,
     forecast_data_selector_options: str,
     selected_dataset: str,
-    visibility_checklist,
+    visibility_checklist: list,
 ) -> tuple:
     """Performs multivariate forecast with an additional dataset and plots the result
 
@@ -3103,31 +3103,43 @@ def update_multivariate_forecast(
         datasets = {filename_1: dataset_1, filename_2: dataset_2}
 
         columns = {
-            dataset_1: (geo_dropdown_1, time_dropdown_1, feature_dropdown_1),
-            dataset_2: (geo_dropdown_2, time_dropdown_2, feature_dropdown_2),
+            "Dataset 1": (
+                dataset_1,
+                geo_dropdown_1,
+                time_dropdown_1,
+                feature_dropdown_1,
+            ),
+            "Dataset 2": (
+                dataset_2,
+                geo_dropdown_2,
+                time_dropdown_2,
+                feature_dropdown_2,
+            ),
         }
 
         if selected_dataset and selected_model == "Prophet":
-            file_1 = [datasets[data] for data in datasets if data in selected_dataset][
-                0
-            ]
-            file_2 = [
-                datasets[data] for data in datasets if data not in selected_dataset
-            ][0]
+            file_1 = [key for key in columns if key in selected_dataset][0]
+            file_2 = [key for key in columns if key not in selected_dataset][0]
         else:
-            file_1 = dataset_1
-            file_2 = dataset_2
+            file_1 = "Dataset 1"
+            file_2 = "Dataset 2"
 
-        df_1 = pd.read_json(file_1)
-        df_2 = pd.read_json(file_2)
+        df_1 = pd.read_json(columns[file_1][0])
+        df_2 = pd.read_json(columns[file_2][0])
 
-        filtered_df_1 = df_1[df_1[columns[file_1][0]] == selected_country][
-            [columns[file_1][1], columns[file_1][2]]
+        print(df_1)
+        print(df_2)
+
+        filtered_df_1 = df_1[df_1[columns[file_1][1]] == selected_country][
+            [columns[file_1][2], columns[file_1][3]]
         ]
 
-        filtered_df_2 = df_2[df_2[columns[file_2][0]] == selected_country][
-            [columns[file_2][1], columns[file_2][2]]
+        filtered_df_2 = df_2[df_2[columns[file_2][1]] == selected_country][
+            [columns[file_2][2], columns[file_2][3]]
         ]
+
+        print(filtered_df_1)
+        print(filtered_df_2)
 
         last_five_datapoints = no_update
 
@@ -3219,20 +3231,20 @@ def update_multivariate_forecast(
             }
 
         elif selected_model == "Prophet":
-            forecast_data_selector_options = [
-                f"{filename_1} ({feature_dropdown_1})",
-                f"{filename_2} ({feature_dropdown_2})",
-            ]
+            forecast_data_selector_options = {
+                "Dataset 1": f"{filename_1} ({feature_dropdown_1})",
+                "Dataset 2": f"{filename_2} ({feature_dropdown_2})",
+            }
 
             marks = no_update
             if scenario_data:
                 forecast, merged_df, future_df = prophet_fit_and_predict_multi(
                     filtered_df_1,
                     filtered_df_2,
-                    columns[file_1][1],
-                    columns[file_2][1],
                     columns[file_1][2],
                     columns[file_2][2],
+                    columns[file_1][3],
+                    columns[file_2][3],
                     scenario_data,
                     multi_frequency_dropdown,
                 )
@@ -3241,12 +3253,12 @@ def update_multivariate_forecast(
                     forecast,
                     merged_df,
                     future_df,
-                    columns[file_1][2],
-                    columns[file_2][2],
+                    columns[file_1][3],
+                    columns[file_2][3],
                 )
             else:
                 merged_df, _ = merge_dataframes(
-                    filtered_df_1, filtered_df_2, columns[file_1][1], columns[file_2][1]
+                    filtered_df_1, filtered_df_2, columns[file_1][2], columns[file_2][2]
                 )
 
                 last_five_datapoints = merged_df.iloc[::-1].round(2).to_dict("records")
