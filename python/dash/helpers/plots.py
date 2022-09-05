@@ -408,12 +408,28 @@ def create_multivariate_forecast(
             x=forecast["ds"],
             y=forecast["yhat"],
             name="Prediction " + feature_column_1,
-            mode="markers",
+            mode="lines+markers",
+            line={"dash": "dash"},
             marker=go.scatter.Marker(symbol="triangle-up", color="mediumpurple"),
             error_y=go.scatter.ErrorY(
                 array=forecast["yhat_upper"] - forecast["yhat"],
                 arrayminus=forecast["yhat"] - forecast["yhat_lower"],
             ),
+        ),
+        secondary_y=False,
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=pd.concat([df.iloc[-1], forecast.rename(columns={"yhat": "y"}).iloc[0]])[
+                "ds"
+            ],
+            y=pd.concat([df.iloc[-1], forecast.rename(columns={"yhat": "y"}).iloc[0]])[
+                "y"
+            ],
+            mode="lines",
+            line={"dash": "dash", "color": "mediumpurple"},
+            showlegend=False,
         ),
         secondary_y=False,
     )
