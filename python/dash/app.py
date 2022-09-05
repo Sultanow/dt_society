@@ -606,6 +606,37 @@ app.layout = html.Div(
                             ],
                             style={"margin-top": "15px", "padding-bottom": "10px"},
                         ),
+                        dcc.Checklist(
+                            [
+                                "Table",
+                                "Stats",
+                                "Timeline",
+                                "Map",
+                                "Country comparison",
+                                "Correlation Heatmap",
+                                "Univariate Forecast",
+                                "Multivariate Forecast",
+                            ],
+                            value=[
+                                "Table",
+                                "Stats",
+                                "Timeline",
+                                "Map",
+                                "Country comparison",
+                                "Correlation Heatmap",
+                                "Univariate Forecast",
+                                "Multivariate Forecast",
+                            ],
+                            labelStyle={
+                                "margin-left": "10px",
+                                "font-weight": "lighter",
+                                "font-size": "14px",
+                                "padding-bottom": "20px",
+                            },
+                            inline=True,
+                            id="visibility-checklist",
+                            style={"margin-bottom": "10px"},
+                        ),
                     ],
                     style={
                         "backgroundColor": "#111111",
@@ -614,7 +645,7 @@ app.layout = html.Div(
             ],
             style={
                 "backgroundColor": "#232323",
-                "height": "315px",
+                "height": "340px",
                 "display": "block",
             },
         ),
@@ -1251,7 +1282,7 @@ app.layout = html.Div(
                                     },
                                 ),
                                 html.Div(
-                                    "Trend forecast",
+                                    "Univariate forecast",
                                     style={
                                         "padding-top": "10px",
                                         "padding-left": "10px",
@@ -1280,7 +1311,12 @@ app.layout = html.Div(
                         html.Div(
                             [
                                 html.Div(
-                                    "Specify time frequency", style={"padding": "15px"}
+                                    "Specify time frequency",
+                                    style={
+                                        "padding-top": "15px",
+                                        "padding-bottom": "15px",
+                                        "padding-right": "15px",
+                                    },
                                 ),
                                 dcc.Dropdown(
                                     ["Yearly", "Monthly", "Weekly", "Daily"],
@@ -1292,19 +1328,20 @@ app.layout = html.Div(
                                         "font-size": "14px",
                                         "border-color": "#5c6cfa",
                                         "background-color": "#111111",
-                                        "border-top": "0px",
-                                        "border-left": "0px",
-                                        "border-right": "0px",
-                                        "border-bottom": "0px",
-                                        "border-radius": "0px",
-                                        "textAlign": "center",
                                     },
                                 ),
                             ]
                         ),
                         html.Div(
                             [
-                                html.Div("Select model", style={"padding": "15px"}),
+                                html.Div(
+                                    "Select model",
+                                    style={
+                                        "padding-top": "15px",
+                                        "padding-bottom": "15px",
+                                        "padding-right": "15px",
+                                    },
+                                ),
                                 dcc.Dropdown(
                                     ["Prophet", "Regression"],
                                     placeholder="Select model",
@@ -1315,18 +1352,12 @@ app.layout = html.Div(
                                         "font-size": "14px",
                                         "border-color": "#5c6cfa",
                                         "background-color": "#111111",
-                                        "border-top": "0px",
-                                        "border-left": "0px",
-                                        "border-right": "0px",
-                                        "border-bottom": "0px",
-                                        "border-radius": "0px",
-                                        "textAlign": "center",
                                     },
                                 ),
                             ]
                         ),
                     ],
-                    style={"display": "flex"},
+                    style={"display": "flex", "margin-left": "10px"},
                 ),
                 html.Div(
                     [
@@ -1392,7 +1423,7 @@ app.layout = html.Div(
                                         "backgroundColor": "#111111",
                                         "font-weight": "bold",
                                         "textAlign": "center",
-                                        "width": "100%",
+                                        "width": "80%",
                                     },
                                 ),
                             ],
@@ -1479,7 +1510,7 @@ app.layout = html.Div(
                         html.Div(
                             [
                                 dcc.Store(id="maxlags-store"),
-                                html.Div("Set maximum lags", style={"padding": "15px"}),
+                                html.Div("Set maximum lags", style={}),
                                 # dcc.Slider(1, 7, 1, id="var-maxlags-slider"),
                                 dcc.Input(
                                     value=1,
@@ -1499,15 +1530,19 @@ app.layout = html.Div(
                                         "width": "300px",
                                     },
                                 ),
-                                html.Button(
-                                    "Predict",
-                                    id="submit-maxlags-button",
-                                    n_clicks=0,
-                                    style={
-                                        "border-color": "#5c6cfa",
-                                        "width": "120px",
-                                        "margin-left": "5px",
-                                    },
+                                html.Div(
+                                    [
+                                        html.Button(
+                                            "Predict",
+                                            id="submit-maxlags-button",
+                                            n_clicks=0,
+                                            style={
+                                                "border-color": "#5c6cfa",
+                                                "width": "120px",
+                                                "margin-top": "10px",
+                                            },
+                                        ),
+                                    ]
                                 ),
                             ],
                             id="var-lags-div",
@@ -1521,11 +1556,8 @@ app.layout = html.Div(
                             [
                                 dcc.Store(id="alpha-store"),
                                 html.Div(
-                                    "Set \u03B1-coefficient",
-                                    style={
-                                        "padding-top": "15px",
-                                        "padding-bottom": "15px",
-                                    },
+                                    "Set \u03B1-parameter",
+                                    style={},
                                 ),
                                 dcc.Input(
                                     value=0.5,
@@ -1545,15 +1577,19 @@ app.layout = html.Div(
                                         "width": "300px",
                                     },
                                 ),
-                                html.Button(
-                                    "Predict",
-                                    id="submit-alpha-button",
-                                    n_clicks=0,
-                                    style={
-                                        "border-color": "#5c6cfa",
-                                        "width": "120px",
-                                        "margin-left": "5px",
-                                    },
+                                html.Div(
+                                    [
+                                        html.Button(
+                                            "Predict",
+                                            id="submit-alpha-button",
+                                            n_clicks=0,
+                                            style={
+                                                "border-color": "#5c6cfa",
+                                                "width": "120px",
+                                                "margin-top": "10px",
+                                            },
+                                        ),
+                                    ]
                                 ),
                             ],
                             id="alpha-div",
@@ -2091,6 +2127,7 @@ def update_year_and_country_dropdown_stats(
     Input("table-upload", "contents"),
     Input("delimiter-dropdown-1", "value"),
     Input("delimiter-dropdown-2", "value"),
+    Input("visibility-checklist", "value"),
 )
 def update_table_content(
     dataset_1: str,
@@ -2099,6 +2136,7 @@ def update_table_content(
     file: str,
     delimiter_dropdown_1,
     delimiter_dropdown_2,
+    visibility_checklist,
 ) -> pd.DataFrame:
     """Fills table section with data from the selected dataset
 
@@ -2114,9 +2152,10 @@ def update_table_content(
         pd.DataFrame: Dataframe of selected dataset
     """
 
-    if (dataset_1 and selected_dataset == "Dataset 1" and delimiter_dropdown_1) or (
-        dataset_2 and selected_dataset == "Dataset 2" and delimiter_dropdown_2
-    ):
+    if (
+        (dataset_1 and selected_dataset == "Dataset 1" and delimiter_dropdown_1)
+        or (dataset_2 and selected_dataset == "Dataset 2" and delimiter_dropdown_2)
+    ) and "Table" in visibility_checklist:
         datasets = {"Dataset 1": dataset_1, "Dataset 2": dataset_2}
 
         df = pd.read_json(datasets[selected_dataset]).round(2).to_dict("records")
@@ -2153,6 +2192,7 @@ def update_table_content(
     Input("time-dropdown-2", "value"),
     [Input("year-range-slider", "value")],
     Input("table-upload", "contents"),
+    Input("visibility-checklist", "value"),
 )
 def update_stats(
     selected_dataset: str,
@@ -2172,6 +2212,7 @@ def update_stats(
     time_dropdown_2: str,
     year_range: list,
     file: str,
+    visibility_checklist,
 ) -> tuple:
     """Compute and display mean, max, min and growth value (per country) for selected dataset
 
@@ -2200,18 +2241,21 @@ def update_stats(
     """
 
     if (
-        dataset
-        and feature_dropdown_1
-        and time_dropdown_1
-        and geo_dropdown_1
-        and selected_dataset == "Dataset 1"
-    ) or (
-        dataset_2
-        and feature_dropdown_2
-        and time_dropdown_2
-        and geo_dropdown_2
-        and selected_dataset == "Dataset 2"
-    ):
+        (
+            dataset
+            and feature_dropdown_1
+            and time_dropdown_1
+            and geo_dropdown_1
+            and selected_dataset == "Dataset 1"
+        )
+        or (
+            dataset_2
+            and feature_dropdown_2
+            and time_dropdown_2
+            and geo_dropdown_2
+            and selected_dataset == "Dataset 2"
+        )
+    ) and "Stats" in visibility_checklist:
         datasets = {
             "Dataset 1": [
                 dataset,
@@ -2285,6 +2329,7 @@ def update_stats(
     Input("data-selector", "value"),
     Input("geo-dropdown-1", "value"),
     Input("geo-dropdown-2", "value"),
+    Input("visibility-checklist", "value"),
 )
 def update_line_plot(
     feature_dropdown_1: str,
@@ -2297,6 +2342,7 @@ def update_line_plot(
     selected_dataset: str,
     geo_dropdown_1: str,
     geo_dropdown_2: str,
+    visibility_checklist,
 ) -> list:
     """Draws a line plot with the selected data specified in the dropdowns
 
@@ -2320,18 +2366,21 @@ def update_line_plot(
     """
 
     if (
-        dataset
-        and feature_dropdown_1
-        and time_dropdown_1
-        and geo_dropdown_1
-        and selected_dataset == "Dataset 1"
-    ) or (
-        dataset_2
-        and feature_dropdown_2
-        and time_dropdown_2
-        and geo_dropdown_2
-        and selected_dataset == "Dataset 2"
-    ):
+        (
+            dataset
+            and feature_dropdown_1
+            and time_dropdown_1
+            and geo_dropdown_1
+            and selected_dataset == "Dataset 1"
+        )
+        or (
+            dataset_2
+            and feature_dropdown_2
+            and time_dropdown_2
+            and geo_dropdown_2
+            and selected_dataset == "Dataset 2"
+        )
+    ) and "Timeline" in visibility_checklist:
 
         datasets = {
             "Dataset 1": (
@@ -2402,6 +2451,7 @@ def update_line_plot(
     Input("geo-dropdown-1", "value"),
     Input("year-dropdown-map", "value"),
     Input("data-selector", "value"),
+    Input("visibility-checklist", "value"),
 )
 def update_choropleth(
     feature_dropdown_1: str,
@@ -2415,6 +2465,7 @@ def update_choropleth(
     geo_dropdown_1: str,
     selected_year_map: str,
     selected_dataset: str,
+    visiblity_checklist,
 ) -> list:
     """Displays choropleth mapbox in countries section
 
@@ -2439,18 +2490,21 @@ def update_choropleth(
     """
 
     if (
-        dataset
-        and feature_dropdown_1
-        and time_dropdown_1
-        and geo_dropdown_1
-        and selected_dataset == "Dataset 1"
-    ) or (
-        dataset_2
-        and feature_dropdown_2
-        and time_dropdown_2
-        and geo_dropdown_2
-        and selected_dataset == "Dataset 2"
-    ):
+        (
+            dataset
+            and feature_dropdown_1
+            and time_dropdown_1
+            and geo_dropdown_1
+            and selected_dataset == "Dataset 1"
+        )
+        or (
+            dataset_2
+            and feature_dropdown_2
+            and time_dropdown_2
+            and geo_dropdown_2
+            and selected_dataset == "Dataset 2"
+        )
+    ) and "Map" in visiblity_checklist:
 
         datasets = {
             "Dataset 1": (
@@ -2519,6 +2573,7 @@ def update_choropleth(
     State("max_country-comparison-div", "children"),
     Input("geo-dropdown-2", "value"),
     Input("geo-dropdown-1", "value"),
+    Input("visibility-checklist", "value"),
 )
 def update_max_country_compare(
     feature_dropdown_1: str,
@@ -2531,6 +2586,7 @@ def update_max_country_compare(
     comparison_children: str,
     geo_dropdown_2: str,
     geo_dropdown_1: str,
+    visibility_checklist,
 ) -> list:
     """Creates a line plot with two subplots (one for each dataset respectively)
 
@@ -2561,7 +2617,7 @@ def update_max_country_compare(
         and dataset_2
         and geo_dropdown_1
         and geo_dropdown_2
-    ):
+    ) and "Country comparison" in visibility_checklist:
         df = pd.read_json(dataset)
         df_2 = pd.read_json(dataset_2)
 
@@ -2665,6 +2721,7 @@ def update_forecast_slider(
     Input("forecast-slider", "value"),
     Input("frequency-dropdown-forecast", "value"),
     Input("model-dropdown-forecast", "value"),
+    Input("visibility-checklist", "value"),
 )
 def update_forecast(
     dataset: str,
@@ -2681,6 +2738,7 @@ def update_forecast(
     forecast_slider_value: str,
     frequency_dropdown: str,
     model_dropdown: str,
+    visibility_checklist,
 ) -> tuple:
     """Creates a forecast using the Prophet model
 
@@ -2706,22 +2764,25 @@ def update_forecast(
     """
 
     if (
-        dataset
-        and feature_dropdown_1
-        and geo_dropdown_1
-        and selected_dataset == "Dataset 1"
-        and country_dropdown
-        and frequency_dropdown
-        and model_dropdown
-    ) or (
-        dataset_2
-        and feature_dropdown_2
-        and geo_dropdown_2
-        and selected_dataset == "Dataset 2"
-        and country_dropdown
-        and frequency_dropdown
-        and model_dropdown
-    ):
+        (
+            dataset
+            and feature_dropdown_1
+            and geo_dropdown_1
+            and selected_dataset == "Dataset 1"
+            and country_dropdown
+            and frequency_dropdown
+            and model_dropdown
+        )
+        or (
+            dataset_2
+            and feature_dropdown_2
+            and geo_dropdown_2
+            and selected_dataset == "Dataset 2"
+            and country_dropdown
+            and frequency_dropdown
+            and model_dropdown
+        )
+    ) and "Univariate Forecast" in visibility_checklist:
 
         datasets = {
             "Dataset 1": (dataset, feature_dropdown_1, geo_dropdown_1, time_dropdown_1),
@@ -2780,16 +2841,19 @@ def update_forecast(
         return fit_plot_children, forecast_div_style
 
     elif (
-        dataset
-        and feature_dropdown_1
-        and geo_dropdown_1
-        and selected_dataset == "Dataset 1"
-    ) or (
-        dataset_2
-        and feature_dropdown_2
-        and geo_dropdown_2
-        and selected_dataset == "Dataset 2"
-    ):
+        (
+            dataset
+            and feature_dropdown_1
+            and geo_dropdown_1
+            and selected_dataset == "Dataset 1"
+        )
+        or (
+            dataset_2
+            and feature_dropdown_2
+            and geo_dropdown_2
+            and selected_dataset == "Dataset 2"
+        )
+    ) and "Univariate Forecast" in visibility_checklist:
         forecast_div_style = {"display": "block"}
 
         return fit_plot_children, forecast_div_style
@@ -2814,6 +2878,7 @@ def update_forecast(
     Input("country-dropdown-corr", "value"),
     Input("feature-dropdown-1", "value"),
     Input("feature-dropdown-2", "value"),
+    Input("visibility-checklist", "value"),
 )
 def update_heatmap(
     dataset: str,
@@ -2827,6 +2892,7 @@ def update_heatmap(
     country_dropdown: str,
     feature_dropdown_1: str,
     feature_dropdown_2: str,
+    visibility_checklist,
 ):
     """Creates a heatmap from the correlation matrix of features
 
@@ -2849,18 +2915,21 @@ def update_heatmap(
     """
 
     if (
-        dataset
-        and time_dropdown_1
-        and geo_dropdown_1
-        and feature_dropdown_1
-        and selected_dataset == "Dataset 1"
-    ) or (
-        dataset_2
-        and time_dropdown_2
-        and geo_dropdown_2
-        and feature_dropdown_2
-        and selected_dataset == "Dataset 2"
-    ):
+        (
+            dataset
+            and time_dropdown_1
+            and geo_dropdown_1
+            and feature_dropdown_1
+            and selected_dataset == "Dataset 1"
+        )
+        or (
+            dataset_2
+            and time_dropdown_2
+            and geo_dropdown_2
+            and feature_dropdown_2
+            and selected_dataset == "Dataset 2"
+        )
+    ) and "Correlation Heatmap" in visibility_checklist:
 
         datasets = {
             "Dataset 1": (
@@ -2971,6 +3040,7 @@ def update_parameter_stores(
     Input("table-upload-2", "filename"),
     Input("forecast-data-selector", "options"),
     Input("forecast-data-selector", "value"),
+    Input("visibility-checklist", "value"),
 )
 def update_multivariate_forecast(
     dataset_1: str,
@@ -2994,6 +3064,7 @@ def update_multivariate_forecast(
     filename_2: str,
     forecast_data_selector_options: str,
     selected_dataset: str,
+    visibility_checklist,
 ) -> tuple:
     """Performs multivariate forecast with an additional dataset and plots the result
 
@@ -3027,7 +3098,7 @@ def update_multivariate_forecast(
         and selected_country
         and geo_dropdown_1
         and geo_dropdown_2
-    ):
+    ) and "Multivariate Forecast" in visibility_checklist:
 
         datasets = {filename_1: dataset_1, filename_2: dataset_2}
 
@@ -3089,7 +3160,11 @@ def update_multivariate_forecast(
             )
 
             var_slider_style = {"display": "block"}
-            var_lags_style = {"display": "block"}
+            var_lags_style = {
+                "padding-left": "15px",
+                "margin-top": "10px",
+                "display": "block",
+            }
             alpha_div_style = {
                 "padding-left": "15px",
                 "margin-top": "10px",
@@ -3211,7 +3286,13 @@ def update_multivariate_forecast(
             forecast_data_selector_options,
             last_five_datapoints,
         )
-    elif dataset_1 and dataset_2 and feature_dropdown_1 and feature_dropdown_2:
+    elif (
+        dataset_1
+        and dataset_2
+        and feature_dropdown_1
+        and feature_dropdown_2
+        and "Multivariate Forecast" in visibility_checklist
+    ):
 
         multi_forecast_div_style = {"display": "block"}
 
