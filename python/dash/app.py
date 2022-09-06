@@ -1118,144 +1118,161 @@ app.layout = html.Div(
                         "padding": "10px",
                     }
                 ),
-                html.Div(
+                dcc.Tabs(
                     [
-                        html.Div(
-                            [
-                                dcc.Dropdown(
-                                    ["none"],
-                                    placeholder="Select country",
-                                    clearable=False,
-                                    id="country-dropdown",
-                                    style={
-                                        "width": "140px",
-                                        "font-size": "14px",
-                                        "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
-                                        "border-top": "0px",
-                                        "border-left": "0px",
-                                        "border-right": "0px",
-                                        "border-bottom": "0px",
-                                        "border-radius": "0px",
-                                        "textAlign": "center",
-                                    },
-                                ),
+                        dcc.Tab(
+                            style={
+                                "background-color": "#111111",
+                                "border-left": "0px",
+                                "border-right": "0px",
+                                "border-bottom": "0px",
+                                "border-radius": "0px",
+                                "border-top": "0px",
+                            },
+                            selected_style={
+                                "background-color": "#111111",
+                                "color": "white",
+                                "border-left": "0px",
+                                "border-right": "0px",
+                                "border-bottom": "0px",
+                                "border-radius": "0px",
+                            },
+                            label="Feature correlation",
+                            children=[
                                 html.Div(
-                                    "Country comparison",
-                                    style={
-                                        "padding-top": "10px",
-                                        "padding-left": "10px",
-                                        "padding-bottom": "10px",
-                                        "backgroundColor": "#111111",
-                                        "font-weight": "bold",
-                                        "textAlign": "center",
-                                        "width": "80%",
-                                    },
+                                    [
+                                        html.Hr(
+                                            style={
+                                                "padding": "0px",
+                                                "margin": "0px",
+                                                "border-color": "#2f2f2f",
+                                                "backgroundColor": "#2f2f2f",
+                                            }
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.Div(
+                                                    "Country",
+                                                    style={
+                                                        "padding-top": "15px",
+                                                        "padding-bottom": "15px",
+                                                        "padding-right": "15px",
+                                                    },
+                                                ),
+                                                dcc.Dropdown(
+                                                    ["none"],
+                                                    placeholder="Select country",
+                                                    clearable=False,
+                                                    id="country-dropdown-corr",
+                                                    style={
+                                                        "width": "140px",
+                                                        "font-size": "14px",
+                                                        "border-color": "#5c6cfa",
+                                                        "background-color": "#111111",
+                                                    },
+                                                ),
+                                            ],
+                                            style={"margin-left": "10px"},
+                                        ),
+                                    ],
+                                    style={"margin-left": "10px"},
+                                ),
+                                dcc.Loading(
+                                    type="circle",
+                                    children=[
+                                        html.Div(
+                                            html.Div(
+                                                [],
+                                                id="heatmap-plot-div",
+                                                style={
+                                                    "display": "inline-block",
+                                                    "width": "100%",
+                                                },
+                                            ),
+                                        ),
+                                    ],
                                 ),
                             ],
-                            style={"display": "flex"},
                         ),
-                        html.Hr(
+                        dcc.Tab(
+                            id="compare-div",
                             style={
-                                "padding": "0px",
-                                "margin": "0px",
-                                "border-color": "#5c6cfa",
-                                "backgroundColor": "#5c6cfa",
-                            }
-                        ),
-                    ]
-                ),
-                html.Div(
-                    dcc.Loading(
-                        type="circle",
-                        children=[
-                            html.Div(
-                                [],
-                                id="max_country-comparison-div",
-                                style={"display": "inline-block", "width": "100%"},
-                            ),
-                        ],
-                    ),
-                ),
-            ],
-            id="compare-div",
-            style={"display": "none"},
-        ),
-        html.Div(
-            [
-                html.Div(
-                    style={
-                        "backgroundColor": "#232323",
-                        "display": "block",
-                        "padding": "10px",
-                    }
-                ),
-                html.Div(
-                    [
-                        html.Div(
-                            [
-                                dcc.Dropdown(
-                                    ["none"],
-                                    placeholder="Select country",
-                                    clearable=False,
-                                    id="country-dropdown-corr",
-                                    style={
-                                        "width": "140px",
-                                        "font-size": "14px",
-                                        "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
-                                        "border-top": "0px",
-                                        "border-left": "0px",
-                                        "border-right": "0px",
-                                        "border-bottom": "0px",
-                                        "border-radius": "0px",
-                                        "textAlign": "center",
-                                    },
+                                "background-color": "#111111",
+                                "border-left": "0px",
+                                "border-right": "0px",
+                                "border-bottom": "0px",
+                                "border-radius": "0px",
+                                "border-top": "0px",
+                            },
+                            selected_style={
+                                "background-color": "#111111",
+                                "color": "white",
+                                "border-left": "0px",
+                                "border-right": "0px",
+                                "border-bottom": "0px",
+                                "border-radius": "0px",
+                            },
+                            label="Dataset correlation",
+                            children=[
+                                html.Div(
+                                    [
+                                        html.Hr(
+                                            style={
+                                                "padding": "0px",
+                                                "margin": "0px",
+                                                "border-color": "#2f2f2f",
+                                                "backgroundColor": "#2f2f2f",
+                                            }
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.Div(
+                                                    "Country",
+                                                    style={
+                                                        "padding-top": "15px",
+                                                        "padding-bottom": "15px",
+                                                        "padding-right": "15px",
+                                                    },
+                                                ),
+                                                dcc.Dropdown(
+                                                    ["none"],
+                                                    placeholder="Select country",
+                                                    clearable=False,
+                                                    id="country-dropdown",
+                                                    style={
+                                                        "width": "140px",
+                                                        "font-size": "14px",
+                                                        "border-color": "#5c6cfa",
+                                                        "background-color": "#111111",
+                                                    },
+                                                ),
+                                            ],
+                                            style={"margin-left": "10px"},
+                                        ),
+                                    ],
+                                    style={"margin-left": "10px"},
                                 ),
                                 html.Div(
-                                    "Correlation heatmap",
-                                    style={
-                                        "padding-top": "10px",
-                                        "padding-left": "10px",
-                                        "padding-bottom": "10px",
-                                        "backgroundColor": "#111111",
-                                        "font-weight": "bold",
-                                        "textAlign": "center",
-                                        "width": "80%",
-                                    },
+                                    dcc.Loading(
+                                        type="circle",
+                                        children=[
+                                            html.Div(
+                                                [],
+                                                id="max_country-comparison-div",
+                                                style={
+                                                    "display": "inline-block",
+                                                    "width": "100%",
+                                                },
+                                            ),
+                                        ],
+                                    ),
                                 ),
                             ],
-                            style={"display": "flex"},
-                        ),
-                        html.Hr(
-                            style={
-                                "padding": "0px",
-                                "margin": "0px",
-                                "border-color": "#5c6cfa",
-                                "backgroundColor": "#5c6cfa",
-                            }
                         ),
                     ]
-                ),
-                dcc.Loading(
-                    type="circle",
-                    children=[
-                        html.Div(
-                            html.Div(
-                                [],
-                                id="heatmap-plot-div",
-                                style={"display": "inline-block", "width": "100%"},
-                            ),
-                        ),
-                    ],
                 ),
             ],
             id="heatmap-div",
-            style={"display": "none"},
-        ),
-        html.Div(
-            [],
-            id="trend-div",
             style={"display": "none"},
         ),
         html.Div(
@@ -1414,6 +1431,7 @@ app.layout = html.Div(
                             ],
                         ),
                         dcc.Tab(
+                            id="multi-forecast-div",
                             style={
                                 "background-color": "#111111",
                                 "border-left": "0px",
@@ -1767,7 +1785,8 @@ app.layout = html.Div(
                     ],
                 ),
             ],
-            id="multi-forecast-div",
+            # id="multi-forecast-div",
+            id="trend-div",
             style={"display": "none"},
         ),
     ],
@@ -2702,7 +2721,15 @@ def update_max_country_compare(
 
         comparison_children.append(dcc.Graph(figure=fig))
 
-        compare_div_style = {"display": "block"}
+        compare_div_style = {
+            "display": "block",
+            "background-color": "#111111",
+            "border-left": "0px",
+            "border-right": "0px",
+            "border-bottom": "0px",
+            "border-radius": "0px",
+            "border-top": "0px",
+        }
 
         return comparison_children, compare_div_style
     else:
@@ -3332,7 +3359,15 @@ def update_multivariate_forecast(
         ):
             multi_forecast_children.append(dcc.Graph(figure=fig))
 
-        multi_forecast_div_style = {"display": "block"}
+        multi_forecast_div_style = {
+            "display": "block",
+            "background-color": "#111111",
+            "border-left": "0px",
+            "border-right": "0px",
+            "border-bottom": "0px",
+            "border-radius": "0px",
+            "border-top": "0px",
+        }
 
         return (
             multi_forecast_children,
@@ -3353,7 +3388,15 @@ def update_multivariate_forecast(
         and "Multivariate Forecast" in visibility_checklist
     ):
 
-        multi_forecast_div_style = {"display": "block"}
+        multi_forecast_div_style = {
+            "display": "block",
+            "background-color": "#111111",
+            "border-left": "0px",
+            "border-right": "0px",
+            "border-bottom": "0px",
+            "border-radius": "0px",
+            "border-top": "0px",
+        }
 
         return (
             multi_forecast_children,

@@ -307,7 +307,7 @@ def create_correlation_heatmap(df: pd.DataFrame) -> go.Figure:
         labels={"color": "Pearson r"},
     )
 
-    fig.update_layout(template=theme)
+    fig.update_layout(template=theme, margin={"t": 20})
 
     return fig
 
