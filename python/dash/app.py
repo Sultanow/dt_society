@@ -612,20 +612,16 @@ app.layout = html.Div(
                                 "Stats",
                                 "Timeline",
                                 "Map",
-                                "Country comparison",
-                                "Correlation Heatmap",
-                                "Univariate Forecast",
-                                "Multivariate Forecast",
+                                "Correlation",
+                                "Forecast",
                             ],
                             value=[
                                 "Table",
                                 "Stats",
                                 "Timeline",
                                 "Map",
-                                "Country comparison",
-                                "Correlation Heatmap",
-                                "Univariate Forecast",
-                                "Multivariate Forecast",
+                                "Correlation",
+                                "Forecast",
                             ],
                             labelStyle={
                                 "margin-left": "10px",
@@ -2691,7 +2687,7 @@ def update_max_country_compare(
         and dataset_2
         and geo_dropdown_1
         and geo_dropdown_2
-    ) and "Country comparison" in visibility_checklist:
+    ) and "Correlation" in visibility_checklist:
         df = pd.read_json(dataset)
         df_2 = pd.read_json(dataset_2)
 
@@ -2864,7 +2860,7 @@ def update_forecast(
             and frequency_dropdown
             and model_dropdown
         )
-    ) and "Univariate Forecast" in visibility_checklist:
+    ) and "Forecast" in visibility_checklist:
 
         datasets = {
             "Dataset 1": (dataset, feature_dropdown_1, geo_dropdown_1, time_dropdown_1),
@@ -2935,7 +2931,7 @@ def update_forecast(
             and geo_dropdown_2
             and selected_dataset == "Dataset 2"
         )
-    ) and "Univariate Forecast" in visibility_checklist:
+    ) and "Forecast" in visibility_checklist:
         forecast_div_style = {"display": "block"}
 
         return fit_plot_children, forecast_div_style
@@ -3011,7 +3007,7 @@ def update_heatmap(
             and feature_dropdown_2
             and selected_dataset == "Dataset 2"
         )
-    ) and "Correlation Heatmap" in visibility_checklist:
+    ) and "Correlation" in visibility_checklist:
 
         datasets = {
             "Dataset 1": (
@@ -3180,7 +3176,7 @@ def update_multivariate_forecast(
         and selected_country
         and geo_dropdown_1
         and geo_dropdown_2
-    ) and "Multivariate Forecast" in visibility_checklist:
+    ) and "Forecast" in visibility_checklist:
 
         columns = {
             "Dataset 1": (
@@ -3385,7 +3381,7 @@ def update_multivariate_forecast(
         and dataset_2
         and feature_dropdown_1
         and feature_dropdown_2
-        and "Multivariate Forecast" in visibility_checklist
+        and "Forecast" in visibility_checklist
     ):
 
         multi_forecast_div_style = {
