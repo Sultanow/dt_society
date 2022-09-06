@@ -1254,135 +1254,7 @@ app.layout = html.Div(
             style={"display": "none"},
         ),
         html.Div(
-            [
-                html.Div(
-                    style={
-                        "backgroundColor": "#232323",
-                        "display": "block",
-                        "padding": "10px",
-                    }
-                ),
-                html.Div(
-                    [
-                        html.Div(
-                            [
-                                dcc.Dropdown(
-                                    ["none"],
-                                    placeholder="Select country",
-                                    clearable=False,
-                                    id="country-dropdown-forecast",
-                                    style={
-                                        "width": "140px",
-                                        "font-size": "14px",
-                                        "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
-                                        "border-top": "0px",
-                                        "border-left": "0px",
-                                        "border-right": "0px",
-                                        "border-bottom": "0px",
-                                        "border-radius": "0px",
-                                        "textAlign": "center",
-                                    },
-                                ),
-                                html.Div(
-                                    "Univariate forecast",
-                                    style={
-                                        "padding-top": "10px",
-                                        "padding-left": "10px",
-                                        "padding-bottom": "10px",
-                                        "backgroundColor": "#111111",
-                                        "font-weight": "bold",
-                                        "textAlign": "center",
-                                        "width": "80%",
-                                    },
-                                ),
-                            ],
-                            style={"display": "flex"},
-                        ),
-                        html.Hr(
-                            style={
-                                "padding": "0px",
-                                "margin": "0px",
-                                "border-color": "#5c6cfa",
-                                "backgroundColor": "#5c6cfa",
-                            }
-                        ),
-                    ]
-                ),
-                html.Div(
-                    [
-                        html.Div(
-                            [
-                                html.Div(
-                                    "Specify time frequency",
-                                    style={
-                                        "padding-top": "15px",
-                                        "padding-bottom": "15px",
-                                        "padding-right": "15px",
-                                    },
-                                ),
-                                dcc.Dropdown(
-                                    ["Yearly", "Monthly", "Weekly", "Daily"],
-                                    placeholder="Select frequency",
-                                    clearable=False,
-                                    id="frequency-dropdown-forecast",
-                                    style={
-                                        "width": "140px",
-                                        "font-size": "14px",
-                                        "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
-                                    },
-                                ),
-                            ]
-                        ),
-                        html.Div(
-                            [
-                                html.Div(
-                                    "Select model",
-                                    style={
-                                        "padding-top": "15px",
-                                        "padding-bottom": "15px",
-                                        "padding-right": "15px",
-                                    },
-                                ),
-                                dcc.Dropdown(
-                                    ["Prophet", "Regression"],
-                                    placeholder="Select model",
-                                    clearable=False,
-                                    id="model-dropdown-forecast",
-                                    style={
-                                        "width": "140px",
-                                        "font-size": "14px",
-                                        "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
-                                    },
-                                ),
-                            ]
-                        ),
-                    ],
-                    style={"display": "flex", "margin-left": "10px"},
-                ),
-                html.Div(
-                    [
-                        html.Div("Set future prediction", style={"padding": "15px"}),
-                        dcc.Slider(1, 30, 1, id="forecast-slider"),
-                    ],
-                    id="forecast-slider-div",
-                    style={"display": "none"},
-                ),
-                dcc.Loading(
-                    type="circle",
-                    children=[
-                        html.Div(
-                            html.Div(
-                                [],
-                                id="fit-plot-div",
-                                style={"display": "inline-block", "width": "100%"},
-                            ),
-                        ),
-                    ],
-                ),
-            ],
+            [],
             id="trend-div",
             style={"display": "none"},
         ),
@@ -1395,330 +1267,504 @@ app.layout = html.Div(
                         "padding": "10px",
                     }
                 ),
-                html.Div(
+                dcc.Tabs(
                     [
-                        html.Div(
-                            [
-                                dcc.Dropdown(
-                                    ["none"],
-                                    placeholder="Select country",
-                                    clearable=False,
-                                    id="country-dropdown-multi-forecast",
-                                    style={
-                                        "width": "140px",
-                                        "font-size": "14px",
-                                        "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
-                                        "border-top": "0px",
-                                        "border-left": "0px",
-                                        "border-right": "0px",
-                                        "border-bottom": "0px",
-                                        "border-radius": "0px",
-                                        "textAlign": "center",
-                                    },
-                                ),
-                                html.Div(
-                                    "Multivariate forecast",
-                                    style={
-                                        "padding-top": "10px",
-                                        "padding-left": "10px",
-                                        "padding-bottom": "10px",
-                                        "backgroundColor": "#111111",
-                                        "font-weight": "bold",
-                                        "textAlign": "center",
-                                        "width": "80%",
-                                    },
-                                ),
-                            ],
-                            style={"display": "flex"},
-                        ),
-                        html.Hr(
+                        dcc.Tab(
                             style={
-                                "padding": "0px",
-                                "margin": "0px",
-                                "border-color": "#5c6cfa",
-                                "backgroundColor": "#5c6cfa",
-                            }
-                        ),
-                        html.Div(
-                            [
+                                "background-color": "#111111",
+                                "border-left": "0px",
+                                "border-right": "0px",
+                                "border-bottom": "0px",
+                                "border-radius": "0px",
+                                "border-top": "0px",
+                            },
+                            selected_style={
+                                "background-color": "#111111",
+                                "color": "white",
+                                "border-left": "0px",
+                                "border-right": "0px",
+                                "border-bottom": "0px",
+                                "border-radius": "0px",
+                            },
+                            label="Univariate Forecast",
+                            children=[
+                                html.Div(
+                                    [
+                                        html.Hr(
+                                            style={
+                                                "padding": "0px",
+                                                "margin": "0px",
+                                                "border-color": "#2f2f2f",
+                                                "backgroundColor": "#2f2f2f",
+                                            }
+                                        ),
+                                    ]
+                                ),
                                 html.Div(
                                     [
                                         html.Div(
-                                            "Specify time frequency",
-                                            style={
-                                                "padding-top": "15px",
-                                                "padding-bottom": "15px",
-                                                "padding-right": "15px",
-                                            },
+                                            [
+                                                html.Div(
+                                                    "Time frequency",
+                                                    style={
+                                                        "padding-top": "15px",
+                                                        "padding-bottom": "15px",
+                                                        "padding-right": "15px",
+                                                    },
+                                                ),
+                                                dcc.Dropdown(
+                                                    [
+                                                        "Yearly",
+                                                        "Monthly",
+                                                        "Weekly",
+                                                        "Daily",
+                                                    ],
+                                                    placeholder="Select frequency",
+                                                    clearable=False,
+                                                    id="frequency-dropdown-forecast",
+                                                    style={
+                                                        "width": "140px",
+                                                        "font-size": "14px",
+                                                        "border-color": "#5c6cfa",
+                                                        "background-color": "#111111",
+                                                    },
+                                                ),
+                                            ],
+                                            style={"margin-left": "10px"},
                                         ),
-                                        dcc.Dropdown(
-                                            ["Yearly", "Monthly", "Weekly", "Daily"],
-                                            placeholder="Select frequency",
-                                            clearable=False,
-                                            id="multi-frequency-dropdown-forecast",
-                                            style={
-                                                "width": "140px",
-                                                "font-size": "14px",
-                                                "border-color": "#5c6cfa",
-                                                "background-color": "#111111",
-                                                # "textAlign": "center",
-                                            },
+                                        html.Div(
+                                            [
+                                                html.Div(
+                                                    "Model",
+                                                    style={
+                                                        "padding-top": "15px",
+                                                        "padding-bottom": "15px",
+                                                        "padding-right": "15px",
+                                                    },
+                                                ),
+                                                dcc.Dropdown(
+                                                    ["Prophet", "Regression"],
+                                                    placeholder="Select model",
+                                                    clearable=False,
+                                                    id="model-dropdown-forecast",
+                                                    style={
+                                                        "width": "140px",
+                                                        "font-size": "14px",
+                                                        "border-color": "#5c6cfa",
+                                                        "background-color": "#111111",
+                                                    },
+                                                ),
+                                            ],
+                                            style={"margin-left": "10px"},
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.Div(
+                                                    "Country",
+                                                    style={
+                                                        "padding-top": "15px",
+                                                        "padding-bottom": "15px",
+                                                        "padding-right": "15px",
+                                                    },
+                                                ),
+                                                dcc.Dropdown(
+                                                    ["none"],
+                                                    placeholder="Select country",
+                                                    clearable=False,
+                                                    id="country-dropdown-forecast",
+                                                    style={
+                                                        "width": "140px",
+                                                        "font-size": "14px",
+                                                        "border-color": "#5c6cfa",
+                                                        "background-color": "#111111",
+                                                    },
+                                                ),
+                                            ],
+                                            style={"margin-left": "10px"},
                                         ),
                                     ],
-                                    style={"margin-left": "10px"},
+                                    style={"display": "flex", "margin-left": "10px"},
                                 ),
                                 html.Div(
                                     [
                                         html.Div(
-                                            "Select model",
-                                            style={
-                                                "padding-top": "15px",
-                                                "padding-bottom": "15px",
-                                                "padding-right": "15px",
-                                            },
+                                            "Set future prediction",
+                                            style={"padding": "15px"},
                                         ),
-                                        dcc.Dropdown(
+                                        dcc.Slider(1, 30, 1, id="forecast-slider"),
+                                    ],
+                                    id="forecast-slider-div",
+                                    style={"display": "none"},
+                                ),
+                                dcc.Loading(
+                                    type="circle",
+                                    children=[
+                                        html.Div(
+                                            html.Div(
+                                                [],
+                                                id="fit-plot-div",
+                                                style={
+                                                    "display": "inline-block",
+                                                    "width": "100%",
+                                                },
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                            ],
+                        ),
+                        dcc.Tab(
+                            style={
+                                "background-color": "#111111",
+                                "border-left": "0px",
+                                "border-right": "0px",
+                                "border-bottom": "0px",
+                                "border-radius": "0px",
+                                "border-top": "0px",
+                            },
+                            selected_style={
+                                "background-color": "#111111",
+                                "color": "white",
+                                "border-left": "0px",
+                                "border-right": "0px",
+                                "border-bottom": "0px",
+                                "border-radius": "0px",
+                            },
+                            label="Multivariate Forecast",
+                            children=[
+                                html.Div(
+                                    [
+                                        html.Hr(
+                                            style={
+                                                "padding": "0px",
+                                                "margin": "0px",
+                                                "border-color": "#2f2f2f",
+                                                "backgroundColor": "#2f2f2f",
+                                            }
+                                        ),
+                                        html.Div(
                                             [
-                                                "Prophet",
-                                                "Vector AR",
-                                                "HW Smoothing",
+                                                html.Div(
+                                                    [
+                                                        html.Div(
+                                                            "Time frequency",
+                                                            style={
+                                                                "padding-top": "15px",
+                                                                "padding-bottom": "15px",
+                                                                "padding-right": "15px",
+                                                            },
+                                                        ),
+                                                        dcc.Dropdown(
+                                                            [
+                                                                "Yearly",
+                                                                "Monthly",
+                                                                "Weekly",
+                                                                "Daily",
+                                                            ],
+                                                            placeholder="Select frequency",
+                                                            clearable=False,
+                                                            id="multi-frequency-dropdown-forecast",
+                                                            style={
+                                                                "width": "140px",
+                                                                "font-size": "14px",
+                                                                "border-color": "#5c6cfa",
+                                                                "background-color": "#111111",
+                                                            },
+                                                        ),
+                                                    ],
+                                                    style={"margin-left": "10px"},
+                                                ),
+                                                html.Div(
+                                                    [
+                                                        html.Div(
+                                                            "Model",
+                                                            style={
+                                                                "padding-top": "15px",
+                                                                "padding-bottom": "15px",
+                                                                "padding-right": "15px",
+                                                            },
+                                                        ),
+                                                        dcc.Dropdown(
+                                                            [
+                                                                "Prophet",
+                                                                "Vector AR",
+                                                                "HW Smoothing",
+                                                            ],
+                                                            placeholder="Select model",
+                                                            clearable=False,
+                                                            id="model-dropdown-multi-forecast",
+                                                            style={
+                                                                "width": "140px",
+                                                                "font-size": "14px",
+                                                                "border-color": "#5c6cfa",
+                                                                "background-color": "#111111",
+                                                                # "textAlign": "center",
+                                                            },
+                                                        ),
+                                                    ],
+                                                    style={"margin-left": "10px"},
+                                                ),
+                                                html.Div(
+                                                    [
+                                                        html.Div(
+                                                            "Country",
+                                                            style={
+                                                                "padding-top": "15px",
+                                                                "padding-bottom": "15px",
+                                                                "padding-right": "15px",
+                                                            },
+                                                        ),
+                                                        dcc.Dropdown(
+                                                            ["none"],
+                                                            placeholder="Select country",
+                                                            clearable=False,
+                                                            id="country-dropdown-multi-forecast",
+                                                            style={
+                                                                "width": "140px",
+                                                                "font-size": "14px",
+                                                                "border-color": "#5c6cfa",
+                                                                "background-color": "#111111",
+                                                            },
+                                                        ),
+                                                    ],
+                                                    style={"margin-left": "10px"},
+                                                ),
                                             ],
-                                            placeholder="Select model",
-                                            clearable=False,
-                                            id="model-dropdown-multi-forecast",
                                             style={
-                                                "width": "140px",
-                                                "font-size": "14px",
-                                                "border-color": "#5c6cfa",
-                                                "background-color": "#111111",
-                                                # "textAlign": "center",
-                                            },
-                                        ),
-                                    ]
-                                ),
-                            ],
-                            style={"display": "flex"},
-                        ),
-                        html.Div(
-                            [
-                                html.Div(
-                                    "Set future prediction", style={"padding": "15px"}
-                                ),
-                                dcc.Slider(1, 30, 1, id="var-forecast-slider"),
-                            ],
-                            id="var-slider-div",
-                            style={"display": "none"},
-                        ),
-                        html.Div(
-                            [
-                                dcc.Store(id="maxlags-store"),
-                                html.Div("Set maximum lags", style={}),
-                                # dcc.Slider(1, 7, 1, id="var-maxlags-slider"),
-                                dcc.Input(
-                                    value=1,
-                                    min=1,
-                                    max=7,
-                                    step=1,
-                                    id="var-maxlags-slider",
-                                    type="number",
-                                    style={
-                                        "backgroundColor": "#111111",
-                                        "color": "#f2f2f2",
-                                        "padding": "10px",
-                                        "border-top": "0px",
-                                        "border-left": "0px",
-                                        "border-right": "0px",
-                                        "border-color": "#5c6cfa",
-                                        "width": "300px",
-                                    },
-                                ),
-                                html.Div(
-                                    [
-                                        html.Button(
-                                            "Predict",
-                                            id="submit-maxlags-button",
-                                            n_clicks=0,
-                                            style={
-                                                "border-color": "#5c6cfa",
-                                                "width": "120px",
-                                                "margin-top": "10px",
-                                            },
-                                        ),
-                                    ]
-                                ),
-                            ],
-                            id="var-lags-div",
-                            style={
-                                "display": "none",
-                                "padding-left": "10px",
-                                "margin-top": "10px",
-                            },
-                        ),
-                        html.Div(
-                            [
-                                dcc.Store(id="alpha-store"),
-                                html.Div(
-                                    "Set \u03B1-parameter",
-                                    style={},
-                                ),
-                                dcc.Input(
-                                    value=0.5,
-                                    id="alpha-coefficient",
-                                    type="number",
-                                    min=1e-4,
-                                    max=1 - 1e-4,
-                                    step=1e-4,
-                                    style={
-                                        "backgroundColor": "#111111",
-                                        "color": "#f2f2f2",
-                                        "padding": "10px",
-                                        "border-top": "0px",
-                                        "border-left": "0px",
-                                        "border-right": "0px",
-                                        "border-color": "#5c6cfa",
-                                        "width": "300px",
-                                    },
-                                ),
-                                html.Div(
-                                    [
-                                        html.Button(
-                                            "Predict",
-                                            id="submit-alpha-button",
-                                            n_clicks=0,
-                                            style={
-                                                "border-color": "#5c6cfa",
-                                                "width": "120px",
-                                                "margin-top": "10px",
-                                            },
-                                        ),
-                                    ]
-                                ),
-                            ],
-                            id="alpha-div",
-                            style={
-                                "padding-left": "10px",
-                                "margin-top": "10px",
-                                "display": "none",
-                            },
-                        ),
-                        html.Div(
-                            [
-                                html.Div(
-                                    [
-                                        html.Div("Select dependent dataset"),
-                                        dcc.RadioItems(
-                                            [],
-                                            id="forecast-data-selector",
-                                            labelStyle={
-                                                "display": "block",
-                                                "padding": "5px",
-                                                "font-size": "12px",
-                                                "font-weight": "lighter",
-                                            },
-                                            style={
-                                                "padding-bottom": "10px",
-                                                "padding-top": "5px",
-                                            },
-                                        ),
-                                        dcc.Store(id="scenario-store"),
-                                        html.Div(
-                                            "Specify future scenario for independent dataset",
-                                            style={
-                                                "padding-top": "10px",
-                                                "padding-bottom": "5px",
+                                                "display": "flex",
+                                                "margin-left": "10px",
                                             },
                                         ),
                                         html.Div(
                                             [
+                                                html.Div(
+                                                    "Set future prediction",
+                                                    style={"padding": "15px"},
+                                                ),
+                                                dcc.Slider(
+                                                    1, 30, 1, id="var-forecast-slider"
+                                                ),
+                                            ],
+                                            id="var-slider-div",
+                                            style={"display": "none"},
+                                        ),
+                                        html.Div(
+                                            [
+                                                dcc.Store(id="maxlags-store"),
+                                                html.Div("Set maximum lags", style={}),
+                                                # dcc.Slider(1, 7, 1, id="var-maxlags-slider"),
                                                 dcc.Input(
-                                                    id="scenario-input",
-                                                    type="text",
+                                                    value=1,
+                                                    min=1,
+                                                    max=7,
+                                                    step=1,
+                                                    id="var-maxlags-slider",
+                                                    type="number",
                                                     style={
                                                         "backgroundColor": "#111111",
                                                         "color": "#f2f2f2",
+                                                        "padding": "10px",
                                                         "border-top": "0px",
                                                         "border-left": "0px",
                                                         "border-right": "0px",
                                                         "border-color": "#5c6cfa",
                                                         "width": "300px",
-                                                        "font-size": "14px",
-                                                        "font-weight": "lighter",
+                                                    },
+                                                ),
+                                                html.Div(
+                                                    [
+                                                        html.Button(
+                                                            "Predict",
+                                                            id="submit-maxlags-button",
+                                                            n_clicks=0,
+                                                            style={
+                                                                "border-color": "#5c6cfa",
+                                                                "width": "120px",
+                                                                "margin-top": "10px",
+                                                            },
+                                                        ),
+                                                    ]
+                                                ),
+                                            ],
+                                            id="var-lags-div",
+                                            style={
+                                                "display": "none",
+                                                "padding-left": "10px",
+                                                "margin-top": "10px",
+                                            },
+                                        ),
+                                        html.Div(
+                                            [
+                                                dcc.Store(id="alpha-store"),
+                                                html.Div(
+                                                    "Set \u03B1-parameter",
+                                                    style={},
+                                                ),
+                                                dcc.Input(
+                                                    value=0.5,
+                                                    id="alpha-coefficient",
+                                                    type="number",
+                                                    min=1e-4,
+                                                    max=1 - 1e-4,
+                                                    step=1e-4,
+                                                    style={
+                                                        "backgroundColor": "#111111",
+                                                        "color": "#f2f2f2",
+                                                        "padding": "10px",
+                                                        "border-top": "0px",
+                                                        "border-left": "0px",
+                                                        "border-right": "0px",
+                                                        "border-color": "#5c6cfa",
+                                                        "width": "300px",
+                                                    },
+                                                ),
+                                                html.Div(
+                                                    [
+                                                        html.Button(
+                                                            "Predict",
+                                                            id="submit-alpha-button",
+                                                            n_clicks=0,
+                                                            style={
+                                                                "border-color": "#5c6cfa",
+                                                                "width": "120px",
+                                                                "margin-top": "10px",
+                                                            },
+                                                        ),
+                                                    ]
+                                                ),
+                                            ],
+                                            id="alpha-div",
+                                            style={
+                                                "padding-left": "10px",
+                                                "margin-top": "10px",
+                                                "display": "none",
+                                            },
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.Div(
+                                                    [
+                                                        html.Div(
+                                                            "Select dependent dataset"
+                                                        ),
+                                                        dcc.RadioItems(
+                                                            [],
+                                                            id="forecast-data-selector",
+                                                            labelStyle={
+                                                                "display": "block",
+                                                                "padding": "5px",
+                                                                "font-size": "12px",
+                                                                "font-weight": "lighter",
+                                                            },
+                                                            style={
+                                                                "padding-bottom": "10px",
+                                                                "padding-top": "5px",
+                                                            },
+                                                        ),
+                                                        dcc.Store(id="scenario-store"),
+                                                        html.Div(
+                                                            "Specify future scenario for independent dataset",
+                                                            style={
+                                                                "padding-top": "10px",
+                                                                "padding-bottom": "5px",
+                                                            },
+                                                        ),
+                                                        html.Div(
+                                                            [
+                                                                dcc.Input(
+                                                                    id="scenario-input",
+                                                                    type="text",
+                                                                    style={
+                                                                        "backgroundColor": "#111111",
+                                                                        "color": "#f2f2f2",
+                                                                        "border-top": "0px",
+                                                                        "border-left": "0px",
+                                                                        "border-right": "0px",
+                                                                        "border-color": "#5c6cfa",
+                                                                        "width": "300px",
+                                                                        "font-size": "14px",
+                                                                        "font-weight": "lighter",
+                                                                    },
+                                                                ),
+                                                            ],
+                                                            style={
+                                                                "padding-top": "5px",
+                                                                "padding-bottom": "5px",
+                                                            },
+                                                        ),
+                                                        html.Button(
+                                                            "Predict",
+                                                            id="submit-scenario-button",
+                                                            n_clicks=0,
+                                                            style={
+                                                                "border-color": "#5c6cfa",
+                                                                "width": "120px",
+                                                                # "margin-left": "5px",
+                                                                "margin-top": "5px",
+                                                            },
+                                                        ),
+                                                    ]
+                                                ),
+                                                html.Div(
+                                                    [
+                                                        dash_table.DataTable(
+                                                            id="forecast-data-table",
+                                                            style_data={
+                                                                "backgroundColor": "#232323",
+                                                                "border": "solid 1px #5c6cfa",
+                                                            },
+                                                            style_cell={
+                                                                "padding": "5px",
+                                                                "textAlign": "left",
+                                                            },
+                                                            style_header={
+                                                                "backgroundColor": "#454545",
+                                                                "border": "solid 1px #5c6cfa",
+                                                            },
+                                                            fixed_rows={
+                                                                "headers": True
+                                                            },
+                                                            style_table={
+                                                                "overflowY": "auto",
+                                                                "height": "175px",
+                                                            },
+                                                        ),
+                                                    ],
+                                                    style={
+                                                        "margin-left": "auto",
+                                                        "float": "right",
+                                                        "margin-right": "20px",
+                                                        "width": "50%",
                                                     },
                                                 ),
                                             ],
+                                            id="scenario-div",
                                             style={
-                                                "padding-top": "5px",
-                                                "padding-bottom": "5px",
+                                                "padding-left": "10px",
+                                                "margin-top": "10px",
+                                                "display": "none",
                                             },
                                         ),
-                                        html.Button(
-                                            "Predict",
-                                            id="submit-scenario-button",
-                                            n_clicks=0,
-                                            style={
-                                                "border-color": "#5c6cfa",
-                                                "width": "120px",
-                                                # "margin-left": "5px",
-                                                "margin-top": "5px",
-                                            },
+                                        dcc.Loading(
+                                            type="circle",
+                                            children=[
+                                                html.Div(
+                                                    html.Div(
+                                                        [],
+                                                        id="multi-fit-plot-div",
+                                                        style={
+                                                            "display": "inline-block",
+                                                            "width": "100%",
+                                                        },
+                                                    ),
+                                                ),
+                                            ],
                                         ),
                                     ]
                                 ),
-                                html.Div(
-                                    [
-                                        dash_table.DataTable(
-                                            id="forecast-data-table",
-                                            style_data={
-                                                "backgroundColor": "#232323",
-                                                "border": "solid 1px #5c6cfa",
-                                            },
-                                            style_cell={
-                                                "padding": "5px",
-                                                "textAlign": "left",
-                                            },
-                                            style_header={
-                                                "backgroundColor": "#454545",
-                                                "border": "solid 1px #5c6cfa",
-                                            },
-                                            fixed_rows={"headers": True},
-                                            style_table={
-                                                "overflowY": "auto",
-                                                "height": "175px",
-                                            },
-                                        ),
-                                    ],
-                                    style={
-                                        "margin-left": "auto",
-                                        "float": "right",
-                                        "margin-right": "20px",
-                                        "width": "50%",
-                                    },
-                                ),
-                            ],
-                            id="scenario-div",
-                            style={
-                                "padding-left": "10px",
-                                "margin-top": "10px",
-                                "display": "none",
-                            },
-                        ),
-                        dcc.Loading(
-                            type="circle",
-                            children=[
-                                html.Div(
-                                    html.Div(
-                                        [],
-                                        id="multi-fit-plot-div",
-                                        style={
-                                            "display": "inline-block",
-                                            "width": "100%",
-                                        },
-                                    ),
-                                ),
                             ],
                         ),
-                    ]
+                    ],
                 ),
             ],
             id="multi-forecast-div",
