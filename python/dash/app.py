@@ -687,10 +687,15 @@ app.layout = html.Div(
                                         "backgroundColor": "#232323",
                                         "border": "solid 1px #5c6cfa",
                                     },
-                                    style_cell={"padding": "5px"},
+                                    style_cell={"padding": "5px", "textAlign": "left"},
                                     style_header={
                                         "backgroundColor": "#454545",
                                         "border": "solid 1px #5c6cfa",
+                                    },
+                                    fixed_rows={"headers": True},
+                                    style_table={
+                                        "overflowY": "auto",
+                                        "height": "250px",
                                     },
                                 )
                             ],
@@ -698,8 +703,6 @@ app.layout = html.Div(
                     ],
                     style={
                         "backgroundColor": "#5c6cfa",
-                        "overflow": "auto",
-                        "max-height": "250px",
                     },
                 ),
             ],
@@ -1670,10 +1673,18 @@ app.layout = html.Div(
                                                 "backgroundColor": "#232323",
                                                 "border": "solid 1px #5c6cfa",
                                             },
-                                            style_cell={"padding": "5px"},
+                                            style_cell={
+                                                "padding": "5px",
+                                                "textAlign": "left",
+                                            },
                                             style_header={
                                                 "backgroundColor": "#454545",
                                                 "border": "solid 1px #5c6cfa",
+                                            },
+                                            fixed_rows={"headers": True},
+                                            style_table={
+                                                "overflowY": "auto",
+                                                "height": "175px",
                                             },
                                         ),
                                     ],
@@ -1681,8 +1692,6 @@ app.layout = html.Div(
                                         "margin-left": "auto",
                                         "float": "right",
                                         "margin-right": "20px",
-                                        "overflow": "auto",
-                                        "max-height": "175px",
                                         "width": "50%",
                                     },
                                 ),
