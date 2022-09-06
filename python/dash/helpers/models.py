@@ -161,6 +161,10 @@ def prophet_fit_and_predict_multi(
 
     merged_df, time = merge_dataframes(df_1, df_2, time_column_1, time_column_2)
 
+    if feature_column_1 == feature_column_2:
+        feature_column_1 += "_x"
+        feature_column_2 += "_y"
+
     merged_df = merged_df.rename(columns={time: "ds", feature_column_1: "y"})
 
     merged_df["ds"] = pd.to_datetime(merged_df["ds"].astype(str))
@@ -211,6 +215,10 @@ def var_fit_and_predict(
     }
 
     merged_df, time = merge_dataframes(df_1, df_2, time_column_1, time_column_2)
+
+    if feature_column_1 == feature_column_2:
+        feature_column_1 += "_x"
+        feature_column_2 += "_y"
 
     marks = get_time_marks(merged_df, time_column=time, frequency=frequency)
 
@@ -267,6 +275,10 @@ def hw_es_fit_and_predict(
     }
 
     merged_df, time = merge_dataframes(df_1, df_2, time_column_1, time_column_2)
+
+    if feature_column_1 == feature_column_2:
+        feature_column_1 += "_x"
+        feature_column_2 += "_y"
 
     marks = get_time_marks(merged_df, time_column=time, frequency=frequency)
 

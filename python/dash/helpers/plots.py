@@ -371,6 +371,10 @@ def create_forecast_plot(
 def create_multivariate_forecast(
     forecast, df, future_df, feature_column_1, feature_column_2
 ):
+    if feature_column_1 == feature_column_2:
+        feature_column_1 += "_x"
+        feature_column_2 += "_y"
+
     fig = go.Figure(make_subplots(specs=[[{"secondary_y": True}]]))
 
     fig.add_trace(
@@ -450,6 +454,10 @@ def create_multivariate_forecast(
 def create_var_forecast_plot(
     df, feature_column_1, feature_column_2, time_column, periods
 ):
+
+    if feature_column_1 == feature_column_2:
+        feature_column_1 += "_x"
+        feature_column_2 += "_y"
 
     fig = go.Figure(make_subplots(specs=[[{"secondary_y": True}]]))
 
