@@ -1,5 +1,6 @@
 import dash_daq as daq
 from dash import (
+    MATCH,
     Dash,
     dcc,
     html,
@@ -12,6 +13,10 @@ from dash import (
     no_update,
 )
 import pandas as pd
+
+from aio_components.filepreprocessing import FilePreProcessingAIO
+from aio_components.stats import StatAIO
+from aio_components.parameters import ParameterStoreAIO
 
 from helpers.plots import (
     create_multi_line_plot,
@@ -133,413 +138,8 @@ app.layout = html.Div(
                                 ),
                             ]
                         ),
-                        html.Div(
-                            [
-                                dcc.ConfirmDialog(
-                                    id="dataset-1-fail",
-                                    message="An error occured while processing your data. Please make sure that the data is in the correct format and select the appropriate separator.",
-                                ),
-                                html.Div(
-                                    [
-                                        dcc.Upload(
-                                            id="table-upload",
-                                            children=html.Div(
-                                                [
-                                                    "Drag and Drop or ",
-                                                    html.A("Select Files"),
-                                                ]
-                                            ),
-                                            style={
-                                                "lineHeight": "60px",
-                                                "borderWidth": "1px",
-                                                "borderStyle": "dashed",
-                                                "borderRadius": "5px",
-                                                "textAlign": "center",
-                                                "margin": "10px",
-                                                "font-size": "12px",
-                                                "padding": "5px",
-                                                "width": "85%",
-                                                "min-width": "200px",
-                                                "max-width": "200px",
-                                            },
-                                        ),
-                                        dcc.Dropdown(
-                                            [",", ";", "\\t", "space"],
-                                            placeholder="Sep",
-                                            id="delimiter-dropdown-1",
-                                            clearable=False,
-                                            style={
-                                                "margin-top": "5px",
-                                                "margin-left": "0px",
-                                                "border-color": "#5c6cfa",
-                                                "background-color": "#111111",
-                                                "font-size": "10px",
-                                                "color": "white",
-                                            },
-                                        ),
-                                    ],
-                                    style={"display": "flex"},
-                                ),
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            "Select geo column",
-                                            style={
-                                                "width": "200px",
-                                                "textAlign": "center",
-                                                "margin-bottom": "20px",
-                                            },
-                                        ),
-                                        dcc.Dropdown(
-                                            ["none"],
-                                            placeholder="No values found",
-                                            clearable=False,
-                                            id="geo-dropdown-1",
-                                            style={
-                                                "border-color": "#5c6cfa",
-                                                "background-color": "#111111",
-                                            },
-                                        ),
-                                    ],
-                                    style={"margin-left": "20px", "padding": "10px"},
-                                ),
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            [
-                                                html.Div(
-                                                    "Reshape",
-                                                    style={
-                                                        "font-weight": "bold",
-                                                    },
-                                                ),
-                                                daq.BooleanSwitch(
-                                                    id="reshape-switch-1",
-                                                    style={
-                                                        "margin-bottom": "10px",
-                                                        "margin-left": "20px",
-                                                    },
-                                                ),
-                                            ],
-                                            style={"display": "flex"},
-                                        ),
-                                        dcc.Dropdown(
-                                            ["none"],
-                                            placeholder="No values found",
-                                            clearable=False,
-                                            id="reshape-dropdown-1",
-                                            style={
-                                                "border-color": "#5c6cfa",
-                                                "background-color": "#111111",
-                                            },
-                                        ),
-                                    ],
-                                    style={"margin-left": "20px", "padding": "10px"},
-                                ),
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            "Select time column",
-                                            style={
-                                                "font-weight": "bold",
-                                                "width": "200px",
-                                                "margin-bottom": "20px",
-                                            },
-                                        ),
-                                        dcc.Dropdown(
-                                            ["none"],
-                                            placeholder="No values found",
-                                            clearable=False,
-                                            id="time-dropdown-1",
-                                            style={
-                                                "border-color": "#5c6cfa",
-                                                "background-color": "#111111",
-                                            },
-                                        ),
-                                    ],
-                                    style={"margin-left": "20px", "padding": "10px"},
-                                ),
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            "Select feature",
-                                            style={
-                                                "font-weight": "bold",
-                                                "width": "200px",
-                                                "margin-bottom": "20px",
-                                            },
-                                        ),
-                                        dcc.Dropdown(
-                                            ["none"],
-                                            placeholder="No values found",
-                                            clearable=False,
-                                            id="feature-dropdown-1",
-                                            style={
-                                                "border-color": "#5c6cfa",
-                                                "background-color": "#111111",
-                                            },
-                                        ),
-                                        dcc.Loading(
-                                            children=[
-                                                dcc.Store(id="dataset"),
-                                            ],
-                                            fullscreen=True,
-                                            style={
-                                                "backgroundColor": "rgba(8,8,8,0.8)"
-                                            },
-                                        ),
-                                    ],
-                                    style={"margin-left": "20px", "padding": "10px"},
-                                ),
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            "Preset",
-                                            style={
-                                                "font-weight": "bold",
-                                                "width": "200px",
-                                                "margin-bottom": "20px",
-                                            },
-                                        ),
-                                        html.Div(
-                                            [
-                                                dcc.Upload(
-                                                    id="preset-upload-1",
-                                                    children=html.Button(
-                                                        "Import",
-                                                        id="preset-up-button-1",
-                                                        n_clicks=0,
-                                                        style={
-                                                            "border-color": "#5c6cfa",
-                                                            "width": "120px",
-                                                            "margin-right": "4px",
-                                                        },
-                                                    ),
-                                                ),
-                                                dcc.Download(id="preset-download-1"),
-                                                html.Button(
-                                                    "Export",
-                                                    id="preset-down-button-1",
-                                                    n_clicks=0,
-                                                    style={
-                                                        "border-color": "#5c6cfa",
-                                                        "width": "120px",
-                                                    },
-                                                ),
-                                            ],
-                                            style={"display": "flex"},
-                                        ),
-                                    ],
-                                    style={"margin-left": "20px", "padding": "10px"},
-                                ),
-                            ],
-                            style={
-                                "display": "flex",
-                                "min-width": "170px",
-                            },
-                        ),
-                        html.Div(
-                            [
-                                dcc.ConfirmDialog(
-                                    id="dataset-2-fail",
-                                    message="There was an error while processing your data. Please make sure it comes in one of the supported formats.",
-                                ),
-                                html.Div(
-                                    [
-                                        dcc.Upload(
-                                            id="table-upload-2",
-                                            children=html.Div(
-                                                [
-                                                    "Drag and Drop or ",
-                                                    html.A("Select files"),
-                                                ]
-                                            ),
-                                            style={
-                                                "lineHeight": "60px",
-                                                "borderWidth": "1px",
-                                                "borderStyle": "dashed",
-                                                "borderRadius": "5px",
-                                                "textAlign": "center",
-                                                "margin": "10px",
-                                                "font-size": "12px",
-                                                "padding": "5px",
-                                                "width": "85%",
-                                                "min-width": "200px",
-                                            },
-                                        ),
-                                        dcc.Dropdown(
-                                            [",", ";", "\\t", "space"],
-                                            placeholder="Sep",
-                                            id="delimiter-dropdown-2",
-                                            clearable=False,
-                                            style={
-                                                "margin-top": "5px",
-                                                "margin-left": "0px",
-                                                "border-color": "#5c6cfa",
-                                                "background-color": "#111111",
-                                                "font-size": "10px",
-                                            },
-                                        ),
-                                    ],
-                                    style={"display": "flex"},
-                                ),
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            "Select geo column",
-                                            style={
-                                                "margin-bottom": "20px",
-                                                "width": "200px",
-                                            },
-                                        ),
-                                        dcc.Dropdown(
-                                            ["none"],
-                                            placeholder="No values found",
-                                            clearable=False,
-                                            id="geo-dropdown-2",
-                                            style={
-                                                "border-color": "#5c6cfa",
-                                                "background-color": "#111111",
-                                            },
-                                        ),
-                                    ],
-                                    style={"margin-left": "20px", "padding": "10px"},
-                                ),
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            [
-                                                html.Div(
-                                                    "Reshape",
-                                                    style={
-                                                        "font-weight": "bold",
-                                                    },
-                                                ),
-                                                daq.BooleanSwitch(
-                                                    id="reshape-switch-2",
-                                                    style={
-                                                        "margin-bottom": "10px",
-                                                        "margin-left": "20px",
-                                                    },
-                                                ),
-                                            ],
-                                            style={"display": "flex"},
-                                        ),
-                                        dcc.Dropdown(
-                                            ["none"],
-                                            placeholder="No values found",
-                                            clearable=False,
-                                            id="reshape-dropdown-2",
-                                            style={
-                                                "border-color": "#5c6cfa",
-                                                "background-color": "#111111",
-                                            },
-                                        ),
-                                    ],
-                                    style={"margin-left": "20px", "padding": "10px"},
-                                ),
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            "Set time column",
-                                            style={
-                                                "font-weight": "bold",
-                                                "width": "200px",
-                                                "margin-bottom": "20px",
-                                            },
-                                        ),
-                                        dcc.Dropdown(
-                                            ["none"],
-                                            placeholder="No values found",
-                                            clearable=False,
-                                            id="time-dropdown-2",
-                                            style={
-                                                "border-color": "#5c6cfa",
-                                                "background-color": "#111111",
-                                            },
-                                        ),
-                                    ],
-                                    style={"margin-left": "20px", "padding": "10px"},
-                                ),
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            "Select feature",
-                                            style={
-                                                "font-weight": "bold",
-                                                "width": "200px",
-                                                "margin-bottom": "20px",
-                                            },
-                                        ),
-                                        dcc.Dropdown(
-                                            ["none"],
-                                            placeholder="No values found",
-                                            clearable=False,
-                                            id="feature-dropdown-2",
-                                            style={
-                                                "border-color": "#5c6cfa",
-                                                "background-color": "#111111",
-                                            },
-                                        ),
-                                        dcc.Loading(
-                                            children=[
-                                                dcc.Store(id="dataset-2"),
-                                            ],
-                                            fullscreen=True,
-                                            style={
-                                                "backgroundColor": "rgba(8,8,8,0.8)"
-                                            },
-                                        ),
-                                    ],
-                                    style={"margin-left": "20px", "padding": "10px"},
-                                ),
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            "Preset",
-                                            style={
-                                                "font-weight": "bold",
-                                                "width": "200px",
-                                                "margin-bottom": "20px",
-                                            },
-                                        ),
-                                        html.Div(
-                                            [
-                                                dcc.Upload(
-                                                    id="preset-upload-2",
-                                                    children=html.Button(
-                                                        "Import",
-                                                        id="preset-up-button-2",
-                                                        n_clicks=0,
-                                                        style={
-                                                            "border-color": "#5c6cfa",
-                                                            "width": "120px",
-                                                            "margin-right": "4px",
-                                                        },
-                                                    ),
-                                                ),
-                                                dcc.Download(id="preset-download-2"),
-                                                html.Button(
-                                                    "Export",
-                                                    id="preset-down-button-2",
-                                                    n_clicks=0,
-                                                    style={
-                                                        "border-color": "#5c6cfa",
-                                                        "width": "120px",
-                                                    },
-                                                ),
-                                            ],
-                                            style={"display": "flex"},
-                                        ),
-                                    ],
-                                    style={"margin-left": "20px", "padding": "10px"},
-                                ),
-                            ],
-                            id="second-file-upload",
-                            style={
-                                "display": "flex",
-                            },
-                        ),
+                        FilePreProcessingAIO(1),
+                        FilePreProcessingAIO(2),
                         html.Div(
                             [
                                 html.Div(
@@ -801,126 +401,9 @@ app.layout = html.Div(
                         ),
                         html.Div(
                             [
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            [
-                                                html.Div(
-                                                    "Mean",
-                                                    style={
-                                                        "backgroundColor": "#111111",
-                                                        "font-weight": "bolder",
-                                                        "textAlign": "center",
-                                                        "margin-left": "auto",
-                                                        "margin-right": "auto",
-                                                        "padding": "15px",
-                                                    },
-                                                ),
-                                                dcc.Loading(
-                                                    type="circle",
-                                                    children=[
-                                                        html.Div(
-                                                            ["text"],
-                                                            style={
-                                                                "white-space": "pre-line",
-                                                                "margin-left": "auto",
-                                                                "margin-right": "auto",
-                                                                "textAlign": "center",
-                                                                "font-size": "40px",
-                                                            },
-                                                            id="avg-stat",
-                                                        ),
-                                                    ],
-                                                ),
-                                            ],
-                                            style={
-                                                "backgroundColor": "#111111",
-                                                "height": "100px",
-                                                "width": "90%",
-                                                # "font-size": "20px",
-                                            },
-                                        ),
-                                    ],
-                                    style={"display": "inline-block", "width": "25%"},
-                                ),
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            [
-                                                html.Div(
-                                                    "Max",
-                                                    style={
-                                                        "backgroundColor": "#111111",
-                                                        "font-weight": "bolder",
-                                                        "textAlign": "center",
-                                                        "margin-left": "auto",
-                                                        "margin-right": "auto",
-                                                        "padding": "15px",
-                                                    },
-                                                ),
-                                                dcc.Loading(
-                                                    type="circle",
-                                                    children=[
-                                                        html.Div(
-                                                            ["text"],
-                                                            style={
-                                                                "white-space": "pre-line",
-                                                                "text-align": "center",
-                                                                "font-size": "40px",
-                                                            },
-                                                            id="max-stat",
-                                                        ),
-                                                    ],
-                                                ),
-                                            ],
-                                            style={
-                                                "backgroundColor": "#111111",
-                                                "height": "100px",
-                                                "width": "90%",
-                                            },
-                                        ),
-                                    ],
-                                    style={"display": "inline-block", "width": "25%"},
-                                ),
-                                html.Div(
-                                    [
-                                        html.Div(
-                                            [
-                                                html.Div(
-                                                    "Min",
-                                                    style={
-                                                        "backgroundColor": "#111111",
-                                                        "font-weight": "bolder",
-                                                        "textAlign": "center",
-                                                        "margin-left": "auto",
-                                                        "margin-right": "auto",
-                                                        "padding": "15px",
-                                                    },
-                                                ),
-                                                dcc.Loading(
-                                                    type="circle",
-                                                    children=[
-                                                        html.Div(
-                                                            ["text"],
-                                                            style={
-                                                                "white-space": "pre-line",
-                                                                "textAlign": "center",
-                                                                "font-size": "40px",
-                                                            },
-                                                            id="min-stat",
-                                                        ),
-                                                    ],
-                                                ),
-                                            ],
-                                            style={
-                                                "backgroundColor": "#111111",
-                                                "height": "100px",
-                                                "width": "90%",
-                                            },
-                                        ),
-                                    ],
-                                    style={"display": "inline-block", "width": "25%"},
-                                ),
+                                StatAIO("Mean"),
+                                StatAIO("Max"),
+                                StatAIO("Min"),
                                 html.Div(
                                     [
                                         html.Div(
@@ -1562,97 +1045,21 @@ app.layout = html.Div(
                                             id="var-slider-div",
                                             style={"display": "none"},
                                         ),
-                                        html.Div(
-                                            [
-                                                dcc.Store(id="maxlags-store"),
-                                                html.Div("Set maximum lags", style={}),
-                                                # dcc.Slider(1, 7, 1, id="var-maxlags-slider"),
-                                                dcc.Input(
-                                                    value=1,
-                                                    min=1,
-                                                    max=7,
-                                                    step=1,
-                                                    id="var-maxlags-slider",
-                                                    type="number",
-                                                    style={
-                                                        "backgroundColor": "#111111",
-                                                        "color": "#f2f2f2",
-                                                        "padding": "10px",
-                                                        "border-top": "0px",
-                                                        "border-left": "0px",
-                                                        "border-right": "0px",
-                                                        "border-color": "#5c6cfa",
-                                                        "width": "300px",
-                                                    },
-                                                ),
-                                                html.Div(
-                                                    [
-                                                        html.Button(
-                                                            "Predict",
-                                                            id="submit-maxlags-button",
-                                                            n_clicks=0,
-                                                            style={
-                                                                "border-color": "#5c6cfa",
-                                                                "width": "120px",
-                                                                "margin-top": "10px",
-                                                            },
-                                                        ),
-                                                    ]
-                                                ),
-                                            ],
-                                            id="var-lags-div",
-                                            style={
-                                                "display": "none",
-                                                "padding-left": "10px",
-                                                "margin-top": "10px",
-                                            },
+                                        ParameterStoreAIO(
+                                            parameter="max_lags",
+                                            value=1,
+                                            min=1,
+                                            max=7,
+                                            step=1,
+                                            type="number",
                                         ),
-                                        html.Div(
-                                            [
-                                                dcc.Store(id="alpha-store"),
-                                                html.Div(
-                                                    "Set \u03B1-parameter",
-                                                    style={},
-                                                ),
-                                                dcc.Input(
-                                                    value=0.5,
-                                                    id="alpha-coefficient",
-                                                    type="number",
-                                                    min=1e-4,
-                                                    max=1 - 1e-4,
-                                                    step=1e-4,
-                                                    style={
-                                                        "backgroundColor": "#111111",
-                                                        "color": "#f2f2f2",
-                                                        "padding": "10px",
-                                                        "border-top": "0px",
-                                                        "border-left": "0px",
-                                                        "border-right": "0px",
-                                                        "border-color": "#5c6cfa",
-                                                        "width": "300px",
-                                                    },
-                                                ),
-                                                html.Div(
-                                                    [
-                                                        html.Button(
-                                                            "Predict",
-                                                            id="submit-alpha-button",
-                                                            n_clicks=0,
-                                                            style={
-                                                                "border-color": "#5c6cfa",
-                                                                "width": "120px",
-                                                                "margin-top": "10px",
-                                                            },
-                                                        ),
-                                                    ]
-                                                ),
-                                            ],
-                                            id="alpha-div",
-                                            style={
-                                                "padding-left": "10px",
-                                                "margin-top": "10px",
-                                                "display": "none",
-                                            },
+                                        ParameterStoreAIO(
+                                            parameter="\u03B1",
+                                            value=0.5,
+                                            min=1e-4,
+                                            max=1 - 1e-4,
+                                            step=1e-4,
+                                            type="number",
                                         ),
                                         html.Div(
                                             [
@@ -1675,47 +1082,9 @@ app.layout = html.Div(
                                                                 "padding-top": "5px",
                                                             },
                                                         ),
-                                                        dcc.Store(id="scenario-store"),
-                                                        html.Div(
-                                                            "Specify future scenario for independent dataset",
-                                                            style={
-                                                                "padding-top": "10px",
-                                                                "padding-bottom": "5px",
-                                                            },
-                                                        ),
-                                                        html.Div(
-                                                            [
-                                                                dcc.Input(
-                                                                    id="scenario-input",
-                                                                    type="text",
-                                                                    style={
-                                                                        "backgroundColor": "#111111",
-                                                                        "color": "#f2f2f2",
-                                                                        "border-top": "0px",
-                                                                        "border-left": "0px",
-                                                                        "border-right": "0px",
-                                                                        "border-color": "#5c6cfa",
-                                                                        "width": "300px",
-                                                                        "font-size": "14px",
-                                                                        "font-weight": "lighter",
-                                                                    },
-                                                                ),
-                                                            ],
-                                                            style={
-                                                                "padding-top": "5px",
-                                                                "padding-bottom": "5px",
-                                                            },
-                                                        ),
-                                                        html.Button(
-                                                            "Predict",
-                                                            id="submit-scenario-button",
-                                                            n_clicks=0,
-                                                            style={
-                                                                "border-color": "#5c6cfa",
-                                                                "width": "120px",
-                                                                # "margin-left": "5px",
-                                                                "margin-top": "5px",
-                                                            },
+                                                        ParameterStoreAIO(
+                                                            parameter="scenario",
+                                                            type="text",
                                                         ),
                                                     ]
                                                 ),
@@ -1797,285 +1166,35 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output("preset-download-1", "data"),
-    Input("delimiter-dropdown-1", "value"),
-    Input("geo-dropdown-1", "value"),
-    Input("reshape-dropdown-1", "value"),
-    Input("reshape-switch-1", "on"),
-    Input("time-dropdown-1", "value"),
-    Input("feature-dropdown-1", "value"),
-    Input("preset-down-button-1", "n_clicks"),
-    Input("table-upload", "filename"),
-)
-def export_dropdown_settings(
-    delimiter_value: str,
-    geo_column_value: str,
-    reshape_column_value: str,
-    reshape_switch_status: str,
-    time_column_value: str,
-    feature_column_value: str,
-    download_button_n_clicks: int,
-    filename: str,
-):
-    """Downloads a JSON file containing the selected values for each dropdown. Resulting file can be uploaded as preset as well.
-
-    Args:
-        delimiter_value (str): value of delimiter
-        geo_column_value (str): value of geo column
-        reshape_column_value (str): value of reshape column
-        reshape_switch_status (str): status of reshape toggle
-        time_column_value (str): value of time column
-        feature_column_value (str): value of feature column
-        download_button_n_clicks (int): number of clicks for download button (used to listen for button press)
-        filename (str): name of the uploaded dataset
-
-    Raises:
-        exceptions.PreventUpdate: Update prevented unless button is pressed
-
-    Returns:
-        dict: JSON object, file name
-    """
-    changed_item = [p["prop_id"] for p in callback_context.triggered][0]
-
-    if "preset-down-button-1" in changed_item:
-
-        return export_settings(
-            delimiter_value,
-            geo_column_value,
-            reshape_column_value,
-            reshape_switch_status,
-            time_column_value,
-            feature_column_value,
-            filename,
-        )
-
-    else:
-        raise exceptions.PreventUpdate
-
-
-@app.callback(
-    Output("preset-download-2", "data"),
-    Input("delimiter-dropdown-2", "value"),
-    Input("geo-dropdown-2", "value"),
-    Input("reshape-dropdown-2", "value"),
-    Input("reshape-switch-2", "on"),
-    Input("time-dropdown-2", "value"),
-    Input("feature-dropdown-2", "value"),
-    Input("preset-down-button-2", "n_clicks"),
-    Input("table-upload-2", "filename"),
-)
-def export_second_dropdown_settings(
-    delimiter_value: str,
-    geo_column_value: str,
-    reshape_column_value: str,
-    reshape_switch_status: str,
-    time_column_value: str,
-    feature_column_value: str,
-    download_button_n_clicks: int,
-    filename: str,
-):
-    """Downloads a JSON file containing the selected values for each dropdown. Resulting file can be imported as preset.
-
-    Args:
-        delimiter_value (str): value of delimiter
-        geo_column_value (str): value of geo column
-        reshape_column_value (str): value of reshape column
-        reshape_switch_status (str): status of reshape toggle
-        time_column_value (str): value of time column
-        feature_column_value (str): value of feature column
-        download_button_n_clicks (int): number of clicks for download button (used to listen for button press)
-        filename (str): name of the uploaded dataset
-
-    Raises:
-        exceptions.PreventUpdate: Update prevented unless button is pressed
-
-    Returns:
-        dict: JSON object, file name
-    """
-    changed_item = [p["prop_id"] for p in callback_context.triggered][0]
-
-    if "preset-down-button-2" in changed_item:
-
-        return export_settings(
-            delimiter_value,
-            geo_column_value,
-            reshape_column_value,
-            reshape_switch_status,
-            time_column_value,
-            feature_column_value,
-            filename,
-        )
-
-    else:
-        raise exceptions.PreventUpdate
-
-
-@app.callback(
-    Output("dataset", "data"),
-    Output("geo-dropdown-1", "options"),
-    Output("reshape-dropdown-1", "options"),
-    Output("table-upload", "children"),
-    Output("feature-dropdown-1", "options"),
-    Output("time-dropdown-1", "options"),
-    Output("table-upload", "contents"),
-    Output("delimiter-dropdown-1", "value"),
-    Output("table-upload", "filename"),
-    Output("reshape-switch-1", "on"),
-    Output("geo-dropdown-1", "value"),
-    Output("dataset-1-fail", "displayed"),
-    Output("feature-dropdown-1", "value"),
-    Output("time-dropdown-1", "value"),
-    Output("preset-upload-1", "contents"),
-    Output("reshape-dropdown-1", "value"),
-    Output("dataset-1-fail", "message"),
-    Input("delimiter-dropdown-1", "value"),
-    Input("geo-dropdown-1", "value"),
-    Input("table-upload", "contents"),
-    Input("table-upload", "filename"),
-    Input("reshape-dropdown-1", "value"),
-    Input("reshape-switch-1", "on"),
-    State("table-upload", "children"),
-    Input("demo-button", "n_clicks"),
-    Input("preset-upload-1", "contents"),
-    Input("reset-button", "n_clicks"),
-    prevent_initial_call=True,
-)
-def preprocess_data(
-    delimiter_value: str,
-    geo_column_value: str,
-    file_content: str,
-    file_name: str,
-    reshape_column_value: str,
-    reshape_switch_status: bool,
-    file_upload_children: str,
-    demo_button_n_clicks: int,
-    preset_file: str,
-    reset_button_n_clicks: int,
-):
-    """Handles the preprocessing of an uploaded dataset. In demo mode, a predefined dataset is loaded instead.
-
-    Args:
-        delimiter_value (str): value of delimiter dropdown
-        geo_column_value (str): value of geo column
-        file_content (str): uploaded file content
-        file_name (str): uploaded file name
-        reshape_column_value (str): value of column to reshape on
-        reshape_switch_status (bool): value of reshape toggle
-        file_upload_children (str): container of file upload element
-        demo_button_n_clicks (int): number of clicks of demo button (used to listen for presses)
-        preset_file (str): content of uploaded preset file
-
-    Returns:
-        tuple:
-    """
-
-    return preprocess_dataset(
-        delimiter_value,
-        geo_column_value,
-        file_content,
-        file_name,
-        reshape_column_value,
-        reshape_switch_status,
-        file_upload_children,
-        demo_button_n_clicks,
-        "Demo 1",
-        preset_file,
-    )
-
-
-@app.callback(
-    Output("dataset-2", "data"),
-    Output("geo-dropdown-2", "options"),
-    Output("reshape-dropdown-2", "options"),
-    Output("table-upload-2", "children"),
-    Output("feature-dropdown-2", "options"),
-    Output("time-dropdown-2", "options"),
-    Output("table-upload-2", "contents"),
-    Output("delimiter-dropdown-2", "value"),
-    Output("table-upload-2", "filename"),
-    Output("reshape-switch-2", "on"),
-    Output("geo-dropdown-2", "value"),
-    Output("dataset-2-fail", "displayed"),
-    Output("feature-dropdown-2", "value"),
-    Output("time-dropdown-2", "value"),
-    Output("preset-upload-2", "contents"),
-    Output("reshape-dropdown-2", "value"),
-    Output("dataset-2-fail", "message"),
     Output("data-selector", "style"),
     Output("data-selector-div", "style"),
-    Input("delimiter-dropdown-2", "value"),
-    Input("geo-dropdown-2", "value"),
-    Input("table-upload-2", "contents"),
-    Input("table-upload-2", "filename"),
-    Input("reshape-dropdown-2", "value"),
-    Input("reshape-switch-2", "on"),
-    State("table-upload-2", "children"),
-    Input("demo-button", "n_clicks"),
-    Input("preset-upload-2", "contents"),
-    Input("reset-button", "n_clicks"),
-    prevent_initial_call=True,
+    Input(FilePreProcessingAIO.ids.store(1), "data"),
+    Input(FilePreProcessingAIO.ids.store(2), "data"),
 )
-def preprocess_second_data(
-    delimiter_value: str,
-    geo_column_value: str,
-    file_content: str,
-    file_name: str,
-    reshape_column_value: str,
-    reshape_switch_status: bool,
-    file_upload_children: str,
-    demo_button_n_clicks: int,
-    preset_file,
-    reset_button_n_clicks: int,
-):
-    """Handles the preprocessing of an uploaded dataset. In demo mode, a predefined dataset is loaded instead.
+def update_selector_visibility(dataset_1, dataset_2):
 
-    Args:
-        delimiter_value (str): value of delimiter dropdown
-        geo_column_value (str): value of geo column
-        file_content (str): uploaded file content
-        file_name (str): uploaded file name
-        reshape_column_value (str): value of column to reshape on
-        reshape_switch_status (bool): value of reshape toggle
-        file_upload_children (str): container of file upload element
-        demo_button_n_clicks (int): number of clicks of demo button (used to listen for presses)
-        preset_file (str): content of uploaded preset file
+    if dataset_1 and dataset_2:
+        radio_div_visibility = {
+            "display": "block",
+            "padding-bottom": "10px",
+            "padding-left": "5px",
+        }
 
-    Returns:
-        tuple:
-    """
-    radio_div_visibility = {
-        "display": "block",
-        "padding-bottom": "10px",
-        "padding-left": "5px",
-    }
+        selector_visibility = {"display": "block", "padding-left": "5px"}
+    else:
+        radio_div_visibility = {"display": "none"}
+        selector_visibility = {"display": "none"}
 
-    selector_visibility = {"display": "block", "padding-left": "5px"}
-
-    return (
-        *preprocess_dataset(
-            delimiter_value,
-            geo_column_value,
-            file_content,
-            file_name,
-            reshape_column_value,
-            reshape_switch_status,
-            file_upload_children,
-            demo_button_n_clicks,
-            "Demo 2",
-            preset_file,
-        ),
-        radio_div_visibility,
-        selector_visibility,
-    )
+    return radio_div_visibility, selector_visibility
 
 
 @app.callback(
     Output("country-dropdown", "options"),
     Output("country-dropdown", "value"),
-    Input("dataset", "data"),
-    Input("dataset-2", "data"),
-    Input("geo-dropdown-1", "value"),
-    Input("geo-dropdown-2", "value"),
+    Input(FilePreProcessingAIO.ids.store(1), "data"),
+    Input(FilePreProcessingAIO.ids.store(2), "data"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
 )
 def update_country_dropdown_comparison(
     dataset_1: str, dataset_2: str, geo_dropdown_value_1: str, geo_dropdown_value_2: str
@@ -2128,13 +1247,13 @@ def update_country_dropdown_comparison(
     Output("year-range-slider", "marks"),
     Output("country-dropdown-multi-forecast", "options"),
     Output("country-dropdown-multi-forecast", "value"),
-    Input("dataset", "data"),
-    Input("dataset-2", "data"),
+    Input(FilePreProcessingAIO.ids.store(1), "data"),
+    Input(FilePreProcessingAIO.ids.store(2), "data"),
     Input("data-selector", "value"),
-    Input("geo-dropdown-1", "value"),
-    Input("geo-dropdown-2", "value"),
-    Input("time-dropdown-1", "value"),
-    Input("time-dropdown-2", "value"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
 )
 def update_year_and_country_dropdown_stats(
     dataset: str,
@@ -2191,12 +1310,12 @@ def update_year_and_country_dropdown_stats(
 @app.callback(
     Output("data-table", "data"),
     Output("table-div", "style"),
-    Input("dataset", "data"),
-    Input("dataset-2", "data"),
+    Input(FilePreProcessingAIO.ids.store(1), "data"),
+    Input(FilePreProcessingAIO.ids.store(2), "data"),
     Input("data-selector", "value"),
-    Input("table-upload", "contents"),
-    Input("delimiter-dropdown-1", "value"),
-    Input("delimiter-dropdown-2", "value"),
+    Input(FilePreProcessingAIO.ids.file_upload(1), "contents"),
+    Input(FilePreProcessingAIO.ids.separator_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.separator_dropdown(2), "value"),
     Input("visibility-checklist", "value"),
 )
 def update_table_content(
@@ -2240,28 +1359,28 @@ def update_table_content(
 
 
 @app.callback(
-    Output("avg-stat", "children"),
-    Output("max-stat", "children"),
-    Output("min-stat", "children"),
+    Output(StatAIO.ids.stat("Mean"), "children"),
+    Output(StatAIO.ids.stat("Max"), "children"),
+    Output(StatAIO.ids.stat("Min"), "children"),
     Output("growth-stat", "children"),
     Output("stats-div", "style"),
     Input("data-selector", "value"),
-    State("avg-stat", "children"),
-    State("max-stat", "children"),
-    State("min-stat", "children"),
+    State(StatAIO.ids.stat("Mean"), "children"),
+    State(StatAIO.ids.stat("Max"), "children"),
+    State(StatAIO.ids.stat("Min"), "children"),
     State("growth-stat", "children"),
     Input("year-dropdown-stats", "value"),
     Input("country-dropdown-stats", "value"),
-    Input("geo-dropdown-1", "value"),
-    Input("geo-dropdown-2", "value"),
-    Input("dataset", "data"),
-    Input("dataset-2", "data"),
-    Input("feature-dropdown-1", "value"),
-    Input("time-dropdown-1", "value"),
-    Input("feature-dropdown-2", "value"),
-    Input("time-dropdown-2", "value"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
+    Input(FilePreProcessingAIO.ids.store(1), "data"),
+    Input(FilePreProcessingAIO.ids.store(2), "data"),
+    Input(FilePreProcessingAIO.ids.feature_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.feature_dropdown(2), "value"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
     [Input("year-range-slider", "value")],
-    Input("table-upload", "contents"),
+    Input(FilePreProcessingAIO.ids.file_upload(1), "contents"),
     Input("visibility-checklist", "value"),
 )
 def update_stats(
@@ -2389,16 +1508,16 @@ def update_stats(
 @app.callback(
     Output("line-div", "children"),
     Output("line-plot", "style"),
-    Input("feature-dropdown-1", "value"),
-    Input("time-dropdown-1", "value"),
-    Input("dataset", "data"),
-    Input("feature-dropdown-2", "value"),
-    Input("time-dropdown-2", "value"),
-    Input("dataset-2", "data"),
+    Input(FilePreProcessingAIO.ids.feature_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.store(1), "data"),
+    Input(FilePreProcessingAIO.ids.feature_dropdown(2), "value"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
+    Input(FilePreProcessingAIO.ids.store(2), "data"),
     State("line-div", "children"),
     Input("data-selector", "value"),
-    Input("geo-dropdown-1", "value"),
-    Input("geo-dropdown-2", "value"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
     Input("visibility-checklist", "value"),
 )
 def update_line_plot(
@@ -2510,15 +1629,15 @@ def update_line_plot(
 @app.callback(
     Output("map-div", "children"),
     Output("map-plot", "style"),
-    Input("feature-dropdown-1", "value"),
-    Input("time-dropdown-1", "value"),
-    Input("dataset", "data"),
+    Input(FilePreProcessingAIO.ids.feature_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.store(1), "data"),
     State("map-div", "children"),
-    Input("feature-dropdown-2", "value"),
-    Input("time-dropdown-2", "value"),
-    Input("dataset-2", "data"),
-    Input("geo-dropdown-2", "value"),
-    Input("geo-dropdown-1", "value"),
+    Input(FilePreProcessingAIO.ids.feature_dropdown(2), "value"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
+    Input(FilePreProcessingAIO.ids.store(2), "data"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
     Input("year-dropdown-map", "value"),
     Input("data-selector", "value"),
     Input("visibility-checklist", "value"),
@@ -2633,16 +1752,16 @@ def update_choropleth(
 @app.callback(
     Output("max_country-comparison-div", "children"),
     Output("compare-div", "style"),
-    Input("feature-dropdown-1", "value"),
-    Input("time-dropdown-1", "value"),
-    Input("dataset", "data"),
-    Input("feature-dropdown-2", "value"),
-    Input("time-dropdown-2", "value"),
+    Input(FilePreProcessingAIO.ids.feature_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.store(1), "data"),
+    Input(FilePreProcessingAIO.ids.feature_dropdown(2), "value"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
     Input("country-dropdown", "value"),
-    Input("dataset-2", "data"),
+    Input(FilePreProcessingAIO.ids.store(2), "data"),
     State("max_country-comparison-div", "children"),
-    Input("geo-dropdown-2", "value"),
-    Input("geo-dropdown-1", "value"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
     Input("visibility-checklist", "value"),
 )
 def update_max_country_compare(
@@ -2737,10 +1856,10 @@ def update_max_country_compare(
 @app.callback(
     Output("forecast-slider", "marks"),
     Output("forecast-slider-div", "style"),
-    Input("dataset", "data"),
-    Input("dataset-2", "data"),
-    Input("time-dropdown-1", "value"),
-    Input("time-dropdown-2", "value"),
+    Input(FilePreProcessingAIO.ids.store(1), "data"),
+    Input(FilePreProcessingAIO.ids.store(2), "data"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
     Input("data-selector", "value"),
     Input("frequency-dropdown-forecast", "value"),
 )
@@ -2785,14 +1904,14 @@ def update_forecast_slider(
 @app.callback(
     Output("fit-plot-div", "children"),
     Output("trend-div", "style"),
-    Input("dataset", "data"),
-    Input("dataset-2", "data"),
-    Input("feature-dropdown-1", "value"),
-    Input("feature-dropdown-2", "value"),
-    Input("geo-dropdown-1", "value"),
-    Input("geo-dropdown-2", "value"),
-    Input("time-dropdown-1", "value"),
-    Input("time-dropdown-2", "value"),
+    Input(FilePreProcessingAIO.ids.store(1), "data"),
+    Input(FilePreProcessingAIO.ids.store(2), "data"),
+    Input(FilePreProcessingAIO.ids.feature_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.feature_dropdown(2), "value"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
     Input("data-selector", "value"),
     State("fit-plot-div", "children"),
     Input("country-dropdown-forecast", "value"),
@@ -2945,17 +2064,17 @@ def update_forecast(
 @app.callback(
     Output("heatmap-plot-div", "children"),
     Output("heatmap-div", "style"),
-    Input("dataset", "data"),
-    Input("dataset-2", "data"),
-    Input("time-dropdown-1", "value"),
-    Input("time-dropdown-2", "value"),
-    Input("geo-dropdown-1", "value"),
-    Input("geo-dropdown-2", "value"),
+    Input(FilePreProcessingAIO.ids.store(1), "data"),
+    Input(FilePreProcessingAIO.ids.store(2), "data"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
     Input("data-selector", "value"),
     State("heatmap-plot-div", "children"),
     Input("country-dropdown-corr", "value"),
-    Input("feature-dropdown-1", "value"),
-    Input("feature-dropdown-2", "value"),
+    Input(FilePreProcessingAIO.ids.feature_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.feature_dropdown(2), "value"),
     Input("visibility-checklist", "value"),
 )
 def update_heatmap(
@@ -3049,73 +2168,35 @@ def update_heatmap(
 
 
 @app.callback(
-    Output("alpha-store", "data"),
-    Output("maxlags-store", "data"),
-    Output("scenario-store", "data"),
-    Input("alpha-coefficient", "value"),
-    Input("submit-alpha-button", "n_clicks"),
-    Input("var-maxlags-slider", "value"),
-    Input("submit-maxlags-button", "n_clicks"),
-    Input("scenario-input", "value"),
-    Input("submit-scenario-button", "n_clicks"),
-)
-def update_parameter_stores(
-    alpha: int,
-    button_n_clicks: int,
-    max_lags: int,
-    max_lags_button_n_clicks: int,
-    scenario: str,
-    scenario_button_n_clicks: int,
-):
-
-    changed_item = [p["prop_id"] for p in callback_context.triggered][0]
-
-    if alpha and "submit-alpha-button" in changed_item:
-        return alpha, no_update, no_update
-
-    elif max_lags and "submit-maxlags-button" in changed_item:
-        return no_update, max_lags, no_update
-
-    elif scenario and "submit-scenario-button" in changed_item:
-        future_values = scenario.replace(" ", "").split(",")
-
-        future_values_int = [int(x) for x in future_values]
-
-        return no_update, no_update, future_values_int
-
-    else:
-        raise exceptions.PreventUpdate
-
-
-@app.callback(
     Output("multi-fit-plot-div", "children"),
     Output("var-slider-div", "style"),
     Output("scenario-div", "style"),
     Output("var-forecast-slider", "marks"),
     Output("multi-forecast-div", "style"),
-    Output("var-lags-div", "style"),
-    Output("alpha-div", "style"),
+    Output(ParameterStoreAIO.ids.container("max_lags"), "style"),
+    Output(ParameterStoreAIO.ids.container("\u03B1"), "style"),
     Output("forecast-data-selector", "options"),
     Output("forecast-data-table", "data"),
-    Input("dataset", "data"),
-    Input("dataset-2", "data"),
-    Input("feature-dropdown-1", "value"),
-    Input("feature-dropdown-2", "value"),
-    Input("geo-dropdown-1", "value"),
-    Input("geo-dropdown-2", "value"),
-    Input("time-dropdown-1", "value"),
-    Input("time-dropdown-2", "value"),
+    Output(ParameterStoreAIO.ids.container("scenario"), "style"),
+    Input(FilePreProcessingAIO.ids.store(1), "data"),
+    Input(FilePreProcessingAIO.ids.store(2), "data"),
+    Input(FilePreProcessingAIO.ids.feature_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.feature_dropdown(2), "value"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
+    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
     State("multi-fit-plot-div", "children"),
     Input("multi-frequency-dropdown-forecast", "value"),
-    Input("scenario-store", "data"),
+    Input(ParameterStoreAIO.ids.store("scenario"), "data"),
     Input("country-dropdown-multi-forecast", "value"),
     Input("model-dropdown-multi-forecast", "value"),
     Input("var-forecast-slider", "value"),
-    # Input("var-maxlags-slider", "value"),
-    Input("alpha-store", "data"),
-    Input("maxlags-store", "data"),
-    Input("table-upload", "filename"),
-    Input("table-upload-2", "filename"),
+    # Input(ParameterStoreAIO.ids.input("max_lags"), "value"),
+    Input(ParameterStoreAIO.ids.store("\u03B1"), "data"),
+    Input(ParameterStoreAIO.ids.store("max_lags"), "data"),
+    Input(FilePreProcessingAIO.ids.file_upload(1), "filename"),
+    Input(FilePreProcessingAIO.ids.file_upload(2), "filename"),
     Input("forecast-data-selector", "options"),
     Input("forecast-data-selector", "value"),
     Input("visibility-checklist", "value"),
@@ -3257,6 +2338,8 @@ def update_multivariate_forecast(
                 "margin-top": "10px",
                 "display": "none",
             }
+
+            scenario_input_style = {"display": "none"}
         elif selected_model == "HW Smoothing":
             if not var_slider_value:
                 var_slider_value = 1
@@ -3299,6 +2382,8 @@ def update_multivariate_forecast(
                 "margin-top": "10px",
                 "display": "none",
             }
+
+            scenario_input_style = {"display": "none"}
 
         elif selected_model == "Prophet":
             forecast_data_selector_options = {
@@ -3345,6 +2430,8 @@ def update_multivariate_forecast(
                 "display": "flex",
             }
 
+            scenario_input_style = {"display": "block"}
+
         if multi_forecast_children:
             multi_forecast_children.clear()
 
@@ -3375,6 +2462,7 @@ def update_multivariate_forecast(
             alpha_div_style,
             forecast_data_selector_options,
             last_five_datapoints,
+            scenario_input_style,
         )
     elif (
         dataset_1
@@ -3404,6 +2492,7 @@ def update_multivariate_forecast(
             no_update,
             no_update,
             no_update,
+            no_update,
         )
 
     else:
@@ -3416,6 +2505,7 @@ def update_multivariate_forecast(
             no_update,
             no_update,
             multi_forecast_div_style,
+            no_update,
             no_update,
             no_update,
             no_update,
