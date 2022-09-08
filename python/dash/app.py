@@ -1,5 +1,6 @@
 import dash_daq as daq
 from dash import (
+    ALL,
     MATCH,
     Dash,
     dcc,
@@ -17,6 +18,7 @@ import pandas as pd
 from aio_components.filepreprocessing import FilePreProcessingAIO
 from aio_components.stats import StatAIO
 from aio_components.parameters import ParameterStoreAIO
+from aio_components.figure import FigureAIO
 
 from helpers.plots import (
     create_multi_line_plot,
@@ -1508,30 +1510,50 @@ def update_stats(
 @app.callback(
     Output("line-div", "children"),
     Output("line-plot", "style"),
-    Input(FilePreProcessingAIO.ids.feature_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.store(1), "data"),
-    Input(FilePreProcessingAIO.ids.feature_dropdown(2), "value"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
-    Input(FilePreProcessingAIO.ids.store(2), "data"),
     State("line-div", "children"),
     Input("data-selector", "value"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
     Input("visibility-checklist", "value"),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "store",
+            "aio_id": ALL,
+        },
+        "data",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "feature_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "time_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "geo_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
 )
 def update_line_plot(
-    feature_dropdown_1: str,
-    time_dropdown_1: str,
-    dataset: str,
-    feature_dropdown_2: str,
-    time_dropdown_2: str,
-    dataset_2: str,
     timeline_children: list,
     selected_dataset: str,
-    geo_dropdown_1: str,
-    geo_dropdown_2: str,
     visibility_checklist: list,
+    dataframes,
+    feature_dropdowns,
+    time_dropdowns,
+    geo_dropdowns,
 ) -> list:
     """Draws a line plot with the selected data specified in the dropdowns
 
@@ -1554,43 +1576,18 @@ def update_line_plot(
         list: container with line plot
     """
 
+    dfs = {"Dataset 1": 0, "Dataset 2": 1}
+
+    time_column = time_dropdowns[dfs[selected_dataset]]
+    feature_column = feature_dropdowns[dfs[selected_dataset]]
+    geo_column = geo_dropdowns[dfs[selected_dataset]]
+    data = dataframes[dfs[selected_dataset]]
+
     if (
-        (
-            dataset
-            and feature_dropdown_1
-            and time_dropdown_1
-            and geo_dropdown_1
-            and selected_dataset == "Dataset 1"
-        )
-        or (
-            dataset_2
-            and feature_dropdown_2
-            and time_dropdown_2
-            and geo_dropdown_2
-            and selected_dataset == "Dataset 2"
-        )
+        time_column and feature_column and geo_column and data
     ) and "Timeline" in visibility_checklist:
 
-        datasets = {
-            "Dataset 1": (
-                dataset,
-                feature_dropdown_1,
-                time_dropdown_1,
-                geo_dropdown_1,
-            ),
-            "Dataset 2": (
-                dataset_2,
-                feature_dropdown_2,
-                time_dropdown_2,
-                geo_dropdown_2,
-            ),
-        }
-
-        df = pd.read_json(datasets[selected_dataset][0])
-
-        time_column = datasets[selected_dataset][2]
-        feature_column = datasets[selected_dataset][1]
-        geo_column = datasets[selected_dataset][3]
+        df = pd.read_json(data)
 
         fig = create_multi_line_plot(
             df,
@@ -1607,9 +1604,9 @@ def update_line_plot(
 
         return timeline_children, line_plot_style
 
-    elif dataset and time_dropdown_1 == "none":
+    elif data and time_column == "none":
 
-        df = pd.read_json(dataset)
+        df = pd.read_json(data)
         fig = create_multi_line_plot(df)
 
         timeline_children.clear()
@@ -1629,32 +1626,50 @@ def update_line_plot(
 @app.callback(
     Output("map-div", "children"),
     Output("map-plot", "style"),
-    Input(FilePreProcessingAIO.ids.feature_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.store(1), "data"),
     State("map-div", "children"),
-    Input(FilePreProcessingAIO.ids.feature_dropdown(2), "value"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
-    Input(FilePreProcessingAIO.ids.store(2), "data"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
-    Input("year-dropdown-map", "value"),
     Input("data-selector", "value"),
     Input("visibility-checklist", "value"),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "store",
+            "aio_id": ALL,
+        },
+        "data",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "feature_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "time_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "geo_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
 )
 def update_choropleth(
-    feature_dropdown_1: str,
-    time_dropdown_1: str,
-    dataset: str,
     map_children: list,
-    feature_dropdown_2: str,
-    time_dropdown_2: str,
-    dataset_2: str,
-    geo_dropdown_2: str,
-    geo_dropdown_1: str,
-    selected_year_map: str,
     selected_dataset: str,
     visiblity_checklist: list,
+    dataframes,
+    feature_dropdowns,
+    time_dropdowns,
+    geo_dropdowns,
 ) -> list:
     """Displays choropleth mapbox in countries section
 
@@ -1678,47 +1693,22 @@ def update_choropleth(
         list: container with choropleth mapbox
     """
 
+    dfs = {"Dataset 1": 0, "Dataset 2": 1}
+
+    time_column = time_dropdowns[dfs[selected_dataset]]
+    feature_column = feature_dropdowns[dfs[selected_dataset]]
+    geo_column = geo_dropdowns[dfs[selected_dataset]]
+    data = dataframes[dfs[selected_dataset]]
+
     if (
-        (
-            dataset
-            and feature_dropdown_1
-            and time_dropdown_1
-            and geo_dropdown_1
-            and selected_dataset == "Dataset 1"
-        )
-        or (
-            dataset_2
-            and feature_dropdown_2
-            and time_dropdown_2
-            and geo_dropdown_2
-            and selected_dataset == "Dataset 2"
-        )
+        time_column and feature_column and geo_column and data
     ) and "Map" in visiblity_checklist:
 
-        datasets = {
-            "Dataset 1": (
-                dataset,
-                feature_dropdown_1,
-                time_dropdown_1,
-                geo_dropdown_1,
-            ),
-            "Dataset 2": (
-                dataset_2,
-                feature_dropdown_2,
-                time_dropdown_2,
-                geo_dropdown_2,
-            ),
-        }
+        df = pd.read_json(data)
 
-        geo_column = datasets[selected_dataset][3]
-        feature_column = datasets[selected_dataset][1]
-        time_column = datasets[selected_dataset][2]
-
-        df = pd.read_json(datasets[selected_dataset][0])
-
-        filtered_df = df[df[time_column] == selected_year_map]
-
-        # mapbox choropleth
+        # mapbox choropleth disabled for now
+        #
+        # filtered_df = df[df[time_column] == selected_year_map]
         # fig = create_choropleth_plot(
         #     filtered_df, geo_column=geo_column, feature_column=feature_column
         # )
@@ -1752,30 +1742,50 @@ def update_choropleth(
 @app.callback(
     Output("max_country-comparison-div", "children"),
     Output("compare-div", "style"),
-    Input(FilePreProcessingAIO.ids.feature_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.store(1), "data"),
-    Input(FilePreProcessingAIO.ids.feature_dropdown(2), "value"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
     Input("country-dropdown", "value"),
-    Input(FilePreProcessingAIO.ids.store(2), "data"),
     State("max_country-comparison-div", "children"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
     Input("visibility-checklist", "value"),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "store",
+            "aio_id": ALL,
+        },
+        "data",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "feature_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "time_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "geo_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
 )
 def update_max_country_compare(
-    feature_dropdown_1: str,
-    time_dropdown_1: str,
-    dataset: str,
-    feature_dropdown_2: str,
-    time_dropdown_2: str,
     selected_country: str,
-    dataset_2: str,
     comparison_children: str,
-    geo_dropdown_2: str,
-    geo_dropdown_1: str,
     visibility_checklist: list,
+    dataframes,
+    feature_dropdowns,
+    time_dropdowns,
+    geo_dropdowns,
 ) -> list:
     """Creates a line plot with two subplots (one for each dataset respectively)
 
@@ -1799,37 +1809,24 @@ def update_max_country_compare(
     """
 
     if (
-        selected_country
-        and feature_dropdown_2
-        and feature_dropdown_1
-        and dataset
-        and dataset_2
-        and geo_dropdown_1
-        and geo_dropdown_2
-    ) and "Correlation" in visibility_checklist:
-        df = pd.read_json(dataset)
-        df_2 = pd.read_json(dataset_2)
-
-        filtered_dfs = []
-        selected_values = (
-            (time_dropdown_1, feature_dropdown_1, geo_dropdown_1),
-            (time_dropdown_2, feature_dropdown_2, geo_dropdown_2),
+        not any(
+            x is None
+            for x in dataframes + feature_dropdowns + time_dropdowns + geo_dropdowns
         )
+    ) and "Correlation" in visibility_checklist:
 
-        for i, df in enumerate((df, df_2)):
-            geo_column = selected_values[i][2]
+        dfs = []
 
-            if selected_country != "None":
-                filtered_df = df[df[geo_column] == selected_country]
-            else:
-                filtered_df = df
+        for i, data in enumerate(dataframes):
+            df = pd.read_json(data)
+            df_by_country = df[df[geo_dropdowns[i]] == selected_country]
 
-            filtered_dfs.append(filtered_df)
+            dfs.append(df_by_country)
 
         fig = create_two_line_plot(
-            filtered_dfs,
-            (feature_dropdown_1, feature_dropdown_2),
-            (time_dropdown_1, time_dropdown_2),
+            dfs,
+            feature_dropdowns,
+            time_dropdowns,
         )
 
         comparison_children.clear()
@@ -1856,40 +1853,40 @@ def update_max_country_compare(
 @app.callback(
     Output("forecast-slider", "marks"),
     Output("forecast-slider-div", "style"),
-    Input(FilePreProcessingAIO.ids.store(1), "data"),
-    Input(FilePreProcessingAIO.ids.store(2), "data"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
     Input("data-selector", "value"),
     Input("frequency-dropdown-forecast", "value"),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "store",
+            "aio_id": ALL,
+        },
+        "data",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "time_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
 )
 def update_forecast_slider(
-    dataset: str,
-    dataset_2: str,
-    time_dropdown_1: str,
-    time_dropdown_2: str,
     selected_dataset: str,
     frequency_dropdown: str,
+    dataframes: str,
+    time_dropdowns: str,
 ):
-    if (
-        dataset
-        and time_dropdown_1
-        and selected_dataset == "Dataset 1"
-        and frequency_dropdown
-    ) or (
-        dataset_2
-        and time_dropdown_2
-        and selected_dataset == "Dataset 2"
-        and frequency_dropdown
-    ):
 
-        datasets = {
-            "Dataset 1": (dataset, time_dropdown_1),
-            "Dataset 2": (dataset_2, time_dropdown_2),
-        }
+    dfs = {"Dataset 1": 0, "Dataset 2": 1}
 
-        df = pd.read_json(datasets[selected_dataset][0])
-        time_column = datasets[selected_dataset][1]
+    time_column = time_dropdowns[dfs[selected_dataset]]
+    data = dataframes[dfs[selected_dataset]]
+
+    if time_column and data and frequency_dropdown:
+
+        df = pd.read_json(data)
 
         marks = get_time_marks(df, time_column, frequency_dropdown)
 
@@ -1904,14 +1901,6 @@ def update_forecast_slider(
 @app.callback(
     Output("fit-plot-div", "children"),
     Output("trend-div", "style"),
-    Input(FilePreProcessingAIO.ids.store(1), "data"),
-    Input(FilePreProcessingAIO.ids.store(2), "data"),
-    Input(FilePreProcessingAIO.ids.feature_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.feature_dropdown(2), "value"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
     Input("data-selector", "value"),
     State("fit-plot-div", "children"),
     Input("country-dropdown-forecast", "value"),
@@ -1919,16 +1908,40 @@ def update_forecast_slider(
     Input("frequency-dropdown-forecast", "value"),
     Input("model-dropdown-forecast", "value"),
     Input("visibility-checklist", "value"),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "store",
+            "aio_id": ALL,
+        },
+        "data",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "feature_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "time_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "geo_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
 )
 def update_forecast(
-    dataset: str,
-    dataset_2: str,
-    feature_dropdown_1: str,
-    feature_dropdown_2: str,
-    geo_dropdown_1: str,
-    geo_dropdown_2: str,
-    time_dropdown_1: str,
-    time_dropdown_2: str,
     selected_dataset: str,
     fit_plot_children: list,
     country_dropdown: str,
@@ -1936,6 +1949,10 @@ def update_forecast(
     frequency_dropdown: str,
     model_dropdown: str,
     visibility_checklist: list,
+    dataframes,
+    feature_dropdowns,
+    time_dropdowns,
+    geo_dropdowns,
 ) -> tuple:
     """Creates a forecast using the Prophet model
 
@@ -1960,42 +1977,23 @@ def update_forecast(
         tuple: container with forecast plot, style component
     """
 
+    dfs = {"Dataset 1": 0, "Dataset 2": 1}
+
+    time_column = time_dropdowns[dfs[selected_dataset]]
+    feature_column = feature_dropdowns[dfs[selected_dataset]]
+    geo_column = geo_dropdowns[dfs[selected_dataset]]
+    data = dataframes[dfs[selected_dataset]]
+
     if (
-        (
-            dataset
-            and feature_dropdown_1
-            and geo_dropdown_1
-            and selected_dataset == "Dataset 1"
-            and country_dropdown
-            and frequency_dropdown
-            and model_dropdown
-        )
-        or (
-            dataset_2
-            and feature_dropdown_2
-            and geo_dropdown_2
-            and selected_dataset == "Dataset 2"
-            and country_dropdown
-            and frequency_dropdown
-            and model_dropdown
-        )
+        time_column
+        and feature_column
+        and geo_column
+        and data
+        and frequency_dropdown
+        and model_dropdown
     ) and "Forecast" in visibility_checklist:
 
-        datasets = {
-            "Dataset 1": (dataset, feature_dropdown_1, geo_dropdown_1, time_dropdown_1),
-            "Dataset 2": (
-                dataset_2,
-                feature_dropdown_2,
-                geo_dropdown_2,
-                time_dropdown_2,
-            ),
-        }
-
-        geo_column = datasets[selected_dataset][2]
-        feature_column = datasets[selected_dataset][1]
-        time_column = datasets[selected_dataset][3]
-
-        df = pd.read_json(datasets[selected_dataset][0])
+        df = pd.read_json(data)
 
         if not forecast_slider_value:
             forecast_slider_value = 1
@@ -2038,19 +2036,9 @@ def update_forecast(
         return fit_plot_children, forecast_div_style
 
     elif (
-        (
-            dataset
-            and feature_dropdown_1
-            and geo_dropdown_1
-            and selected_dataset == "Dataset 1"
-        )
-        or (
-            dataset_2
-            and feature_dropdown_2
-            and geo_dropdown_2
-            and selected_dataset == "Dataset 2"
-        )
+        feature_column and geo_column and data
     ) and "Forecast" in visibility_checklist:
+
         forecast_div_style = {"display": "block"}
 
         return fit_plot_children, forecast_div_style
@@ -2064,32 +2052,52 @@ def update_forecast(
 @app.callback(
     Output("heatmap-plot-div", "children"),
     Output("heatmap-div", "style"),
-    Input(FilePreProcessingAIO.ids.store(1), "data"),
-    Input(FilePreProcessingAIO.ids.store(2), "data"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
     Input("data-selector", "value"),
     State("heatmap-plot-div", "children"),
     Input("country-dropdown-corr", "value"),
-    Input(FilePreProcessingAIO.ids.feature_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.feature_dropdown(2), "value"),
     Input("visibility-checklist", "value"),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "store",
+            "aio_id": ALL,
+        },
+        "data",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "feature_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "time_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "geo_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
 )
 def update_heatmap(
-    dataset: str,
-    dataset_2: str,
-    time_dropdown_1: str,
-    time_dropdown_2: str,
-    geo_dropdown_1: str,
-    geo_dropdown_2: str,
     selected_dataset: str,
     heatmap_children: list,
     country_dropdown: str,
-    feature_dropdown_1: str,
-    feature_dropdown_2: str,
     visibility_checklist: list,
+    dataframes,
+    feature_dropdowns,
+    time_dropdowns,
+    geo_dropdowns,
 ):
     """Creates a heatmap from the correlation matrix of features
 
@@ -2110,41 +2118,18 @@ def update_heatmap(
     Returns:
         list: container with heatmap plot
     """
+    dfs = {"Dataset 1": 0, "Dataset 2": 1}
+
+    time_column = time_dropdowns[dfs[selected_dataset]]
+    feature_column = feature_dropdowns[dfs[selected_dataset]]
+    geo_column = geo_dropdowns[dfs[selected_dataset]]
+    data = dataframes[dfs[selected_dataset]]
 
     if (
-        (
-            dataset
-            and time_dropdown_1
-            and geo_dropdown_1
-            and feature_dropdown_1
-            and selected_dataset == "Dataset 1"
-        )
-        or (
-            dataset_2
-            and time_dropdown_2
-            and geo_dropdown_2
-            and feature_dropdown_2
-            and selected_dataset == "Dataset 2"
-        )
+        time_column and feature_column and geo_column and data
     ) and "Correlation" in visibility_checklist:
 
-        datasets = {
-            "Dataset 1": (
-                dataset,
-                time_dropdown_1,
-                geo_dropdown_1,
-            ),
-            "Dataset 2": (
-                dataset_2,
-                time_dropdown_2,
-                geo_dropdown_2,
-            ),
-        }
-
-        geo_column = datasets[selected_dataset][2]
-        time_column = datasets[selected_dataset][1]
-
-        df = pd.read_json(datasets[selected_dataset][0])
+        df = pd.read_json(data)
 
         df = df[df[geo_column] == country_dropdown]
 
@@ -2178,52 +2163,75 @@ def update_heatmap(
     Output("forecast-data-selector", "options"),
     Output("forecast-data-table", "data"),
     Output(ParameterStoreAIO.ids.container("scenario"), "style"),
-    Input(FilePreProcessingAIO.ids.store(1), "data"),
-    Input(FilePreProcessingAIO.ids.store(2), "data"),
-    Input(FilePreProcessingAIO.ids.feature_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.feature_dropdown(2), "value"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
     State("multi-fit-plot-div", "children"),
     Input("multi-frequency-dropdown-forecast", "value"),
     Input(ParameterStoreAIO.ids.store("scenario"), "data"),
     Input("country-dropdown-multi-forecast", "value"),
     Input("model-dropdown-multi-forecast", "value"),
     Input("var-forecast-slider", "value"),
-    # Input(ParameterStoreAIO.ids.input("max_lags"), "value"),
     Input(ParameterStoreAIO.ids.store("\u03B1"), "data"),
     Input(ParameterStoreAIO.ids.store("max_lags"), "data"),
-    Input(FilePreProcessingAIO.ids.file_upload(1), "filename"),
-    Input(FilePreProcessingAIO.ids.file_upload(2), "filename"),
     Input("forecast-data-selector", "options"),
     Input("forecast-data-selector", "value"),
     Input("visibility-checklist", "value"),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "store",
+            "aio_id": ALL,
+        },
+        "data",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "feature_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "time_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "geo_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "file_upload",
+            "aio_id": ALL,
+        },
+        "filename",
+    ),
 )
 def update_multivariate_forecast(
-    dataset_1: str,
-    dataset_2: str,
-    feature_dropdown_1: str,
-    feature_dropdown_2: str,
-    geo_dropdown_1: str,
-    geo_dropdown_2: str,
-    time_dropdown_1: str,
-    time_dropdown_2: str,
     multi_forecast_children: list,
     multi_frequency_dropdown: str,
     scenario_data: list,
     selected_country: str,
     selected_model: str,
     var_slider_value: int,
-    # var_maxlags_value: str,
     alpha_parameter: int,
     max_lags_parameter: int,
-    filename_1: str,
-    filename_2: str,
     forecast_data_selector_options: str,
     selected_dataset: str,
     visibility_checklist: list,
+    dataframes,
+    feature_dropdowns,
+    time_dropdowns,
+    geo_dropdowns,
+    filenames,
 ) -> tuple:
     """Performs multivariate forecast with an additional dataset and plots the result
 
@@ -2248,49 +2256,33 @@ def update_multivariate_forecast(
         tuple:
     """
 
+    dfs = {"Dataset 1": 0, "Dataset 2": 1}
+
     if (
-        dataset_1
-        and dataset_2
-        and feature_dropdown_1
-        and feature_dropdown_2
+        not any(
+            x is None
+            for x in dataframes + feature_dropdowns + time_dropdowns + geo_dropdowns
+        )
         and selected_model
         and selected_country
-        and geo_dropdown_1
-        and geo_dropdown_2
     ) and "Forecast" in visibility_checklist:
 
-        columns = {
-            "Dataset 1": (
-                dataset_1,
-                geo_dropdown_1,
-                time_dropdown_1,
-                feature_dropdown_1,
-            ),
-            "Dataset 2": (
-                dataset_2,
-                geo_dropdown_2,
-                time_dropdown_2,
-                feature_dropdown_2,
-            ),
-        }
-
         if selected_dataset and selected_model == "Prophet":
-            file_1 = [key for key in columns if key in selected_dataset][0]
-            file_2 = [key for key in columns if key not in selected_dataset][0]
+            file_1 = [dfs[key] for key in dfs if key in selected_dataset][0]
+            file_2 = [dfs[key] for key in dfs if key not in selected_dataset][0]
         else:
-            file_1 = "Dataset 1"
-            file_2 = "Dataset 2"
+            file_1 = 0
+            file_2 = 1
 
-        df_1 = pd.read_json(columns[file_1][0])
-        df_2 = pd.read_json(columns[file_2][0])
+        filtered_dfs = []
 
-        filtered_df_1 = df_1[df_1[columns[file_1][1]] == selected_country][
-            [columns[file_1][2], columns[file_1][3]]
-        ]
+        for i in (file_1, file_2):
+            df = pd.read_json(dataframes[i])
+            filtered_df = df[df[geo_dropdowns[i]] == selected_country][
+                [time_dropdowns[i], feature_dropdowns[i]]
+            ]
 
-        filtered_df_2 = df_2[df_2[columns[file_2][1]] == selected_country][
-            [columns[file_2][2], columns[file_2][3]]
-        ]
+            filtered_dfs.append(filtered_df)
 
         last_five_datapoints = no_update
 
@@ -2303,12 +2295,12 @@ def update_multivariate_forecast(
                 max_lags_parameter = 1
 
             forecast, marks = var_fit_and_predict(
-                filtered_df_1,
-                filtered_df_2,
-                time_dropdown_1,
-                time_dropdown_2,
-                feature_dropdown_1,
-                feature_dropdown_2,
+                filtered_dfs[0],
+                filtered_dfs[1],
+                time_dropdowns[file_1],
+                time_dropdowns[file_2],
+                feature_dropdowns[file_1],
+                feature_dropdowns[file_2],
                 max_lags_parameter,
                 var_slider_value,
                 multi_frequency_dropdown,
@@ -2316,9 +2308,9 @@ def update_multivariate_forecast(
 
             fig = create_var_forecast_plot(
                 forecast,
-                feature_dropdown_1,
-                feature_dropdown_2,
-                time_dropdown_1,
+                feature_dropdowns[file_1],
+                feature_dropdowns[file_2],
+                time_dropdowns[file_1],
                 var_slider_value,
             )
 
@@ -2340,6 +2332,7 @@ def update_multivariate_forecast(
             }
 
             scenario_input_style = {"display": "none"}
+
         elif selected_model == "HW Smoothing":
             if not var_slider_value:
                 var_slider_value = 1
@@ -2351,12 +2344,12 @@ def update_multivariate_forecast(
                 alpha_parameter = 0.5
 
             forecast, marks = hw_es_fit_and_predict(
-                filtered_df_1,
-                filtered_df_2,
-                time_dropdown_1,
-                time_dropdown_2,
-                feature_dropdown_1,
-                feature_dropdown_2,
+                filtered_dfs[0],
+                filtered_dfs[1],
+                time_dropdowns[file_1],
+                time_dropdowns[file_2],
+                feature_dropdowns[file_1],
+                feature_dropdowns[file_2],
                 multi_frequency_dropdown,
                 var_slider_value,
                 alpha_parameter,
@@ -2364,9 +2357,9 @@ def update_multivariate_forecast(
 
             fig = create_var_forecast_plot(
                 forecast,
-                feature_dropdown_1,
-                feature_dropdown_2,
-                time_dropdown_1,
+                feature_dropdowns[file_1],
+                feature_dropdowns[file_2],
+                time_dropdowns[file_1],
                 var_slider_value,
             )
 
@@ -2387,19 +2380,19 @@ def update_multivariate_forecast(
 
         elif selected_model == "Prophet":
             forecast_data_selector_options = {
-                "Dataset 1": f"{filename_1} ({feature_dropdown_1})",
-                "Dataset 2": f"{filename_2} ({feature_dropdown_2})",
+                "Dataset 1": f"{filenames[0]} ({feature_dropdowns[0]})",
+                "Dataset 2": f"{filenames[1]} ({feature_dropdowns[1]})",
             }
 
             marks = no_update
             if scenario_data:
                 forecast, merged_df, future_df = prophet_fit_and_predict_multi(
-                    filtered_df_1,
-                    filtered_df_2,
-                    columns[file_1][2],
-                    columns[file_2][2],
-                    columns[file_1][3],
-                    columns[file_2][3],
+                    filtered_dfs[0],
+                    filtered_dfs[1],
+                    time_dropdowns[file_1],
+                    time_dropdowns[file_2],
+                    feature_dropdowns[file_1],
+                    feature_dropdowns[file_2],
                     scenario_data,
                     multi_frequency_dropdown,
                 )
@@ -2408,15 +2401,19 @@ def update_multivariate_forecast(
                     forecast,
                     merged_df,
                     future_df,
-                    columns[file_1][3],
-                    columns[file_2][3],
+                    feature_dropdowns[file_1],
+                    feature_dropdowns[file_2],
                 )
             else:
                 merged_df, _ = merge_dataframes(
-                    filtered_df_1, filtered_df_2, columns[file_1][2], columns[file_2][2]
+                    filtered_dfs[0],
+                    filtered_dfs[1],
+                    time_dropdowns[file_1],
+                    time_dropdowns[file_2],
                 )
 
                 last_five_datapoints = merged_df.iloc[::-1].round(2).to_dict("records")
+
             var_slider_style = {"display": "none"}
             var_lags_style = {"display": "none"}
             alpha_div_style = {
@@ -2465,10 +2462,7 @@ def update_multivariate_forecast(
             scenario_input_style,
         )
     elif (
-        dataset_1
-        and dataset_2
-        and feature_dropdown_1
-        and feature_dropdown_2
+        not any(x is None for x in dataframes + feature_dropdowns)
         and "Forecast" in visibility_checklist
     ):
 
