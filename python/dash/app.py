@@ -1170,12 +1170,28 @@ app.layout = html.Div(
 @app.callback(
     Output("data-selector", "style"),
     Output("data-selector-div", "style"),
-    Input(FilePreProcessingAIO.ids.store(1), "data"),
-    Input(FilePreProcessingAIO.ids.store(2), "data"),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "store",
+            "aio_id": ALL,
+        },
+        "data",
+    ),
 )
-def update_selector_visibility(dataset_1, dataset_2):
+def update_selector_visibility(dataframes: list):
+    """Updates the dataset visibility toggle
 
-    if dataset_1 and dataset_2:
+    Args:
+        dataframes (list): All available datasets
+
+    Returns:
+        tuple: style properties for visibility selector
+    """
+
+    loaded_datasets = [True for df in dataframes if df is not None]
+
+    if len(loaded_datasets) > 1:
         radio_div_visibility = {
             "display": "block",
             "padding-bottom": "10px",
@@ -1193,40 +1209,52 @@ def update_selector_visibility(dataset_1, dataset_2):
 @app.callback(
     Output("country-dropdown", "options"),
     Output("country-dropdown", "value"),
-    Input(FilePreProcessingAIO.ids.store(1), "data"),
-    Input(FilePreProcessingAIO.ids.store(2), "data"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "store",
+            "aio_id": ALL,
+        },
+        "data",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "geo_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
 )
 def update_country_dropdown_comparison(
-    dataset_1: str, dataset_2: str, geo_dropdown_value_1: str, geo_dropdown_value_2: str
+    dataframes: list,
+    geo_dropdowns: list,
 ):
-    """Fills the dropdown in comparison section with countries that occur in both datasets
+    """Fills the dropdown in correlation section with countries that occur in both datasets
 
     Args:
-        dataset_1 (str): first dataset
-        dataset_2 (str): second dataset
-        geo_dropdown_value_1 (str): value of first geo column
-        geo_dropdown_value_2 (str): value of second geo column
+        dataframes (list): All available dataframes
+        geo_dropdowns (list): Selected geo-column values
 
     Raises:
         exceptions.PreventUpdate: Update prevented unless both datasets and geo-columns are available
 
     Returns:
-        tuple: _description_
+        tuple: country intersection
     """
-    if dataset_1 and dataset_2 and geo_dropdown_value_1 and geo_dropdown_value_2:
-        dataset_1_countries = pd.read_json(dataset_1)[geo_dropdown_value_1].unique()
 
-        dataset_2_countries = pd.read_json(dataset_2)[geo_dropdown_value_2].unique()
+    if not any(x is None for x in dataframes + geo_dropdowns):
+        countries_per_df = []
 
-        joint_countries = [
-            country
-            for country in dataset_1_countries
-            if country in set(dataset_2_countries)
-        ]
+        for i, df in enumerate(dataframes):
+            countries = pd.read_json(df)[geo_dropdowns[i]].unique()
+            countries_per_df.append(set(countries))
 
-        return joint_countries, joint_countries[0]
+        country_intersection = list(set.intersection(*countries_per_df))
+
+        country_intersection.sort()
+
+        return country_intersection, country_intersection[0]
 
     else:
         raise exceptions.PreventUpdate
@@ -1249,29 +1277,45 @@ def update_country_dropdown_comparison(
     Output("year-range-slider", "marks"),
     Output("country-dropdown-multi-forecast", "options"),
     Output("country-dropdown-multi-forecast", "value"),
-    Input(FilePreProcessingAIO.ids.store(1), "data"),
-    Input(FilePreProcessingAIO.ids.store(2), "data"),
     Input("data-selector", "value"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "store",
+            "aio_id": ALL,
+        },
+        "data",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "time_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "geo_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
 )
 def update_year_and_country_dropdown_stats(
-    dataset: str,
-    dataset_2: str,
     selected_dataset: str,
-    geo_dropdown_1: str,
-    geo_dropdown_2: str,
-    time_dropdown_1: str,
-    time_dropdown_2: str,
+    dataframes: list,
+    time_dropdowns: list,
+    geo_dropdowns: list,
 ) -> tuple:
     """Fills dropdown in stats section with available years in the selected dataset
 
     Args:
-        data (str): First dataset (JSON)
-        data_2 (str): Second dataset (JSON)
         selected_dataset (str): value of the selected dataset
+        dataframes (list): available dataframes
+        time_dropdowns (list): Selected time-column values
+        geo_dropdowns (list): Selected geo-column values
 
     Raises:
         exceptions.PreventUpdate: prevents update if no dataset is available and no dataset is selected
@@ -1280,27 +1324,15 @@ def update_year_and_country_dropdown_stats(
         tuple: available years, first year value, available countries, first country value, available years, first year value
     """
 
-    if (
-        dataset
-        and geo_dropdown_1
-        and time_dropdown_1
-        and selected_dataset == "Dataset 1"
-    ) or (
-        dataset_2
-        and geo_dropdown_2
-        and time_dropdown_2
-        and selected_dataset == "Dataset 2"
-    ):
+    dfs = {"Dataset 1": 0, "Dataset 2": 1}
 
-        datasets = {
-            "Dataset 1": (dataset, geo_dropdown_1, time_dropdown_1),
-            "Dataset 2": (dataset_2, geo_dropdown_2, time_dropdown_2),
-        }
+    time_column = time_dropdowns[dfs[selected_dataset]]
+    geo_column = geo_dropdowns[dfs[selected_dataset]]
+    data = dataframes[dfs[selected_dataset]]
 
-        time_column = datasets[selected_dataset][2]
-        geo_column = datasets[selected_dataset][1]
+    if time_column and geo_column and data:
 
-        df = pd.read_json(datasets[selected_dataset][0])
+        df = pd.read_json(data)
 
         return get_year_and_country_options_stats(
             df, geo_column=geo_column, time_column=time_column
@@ -1312,29 +1344,38 @@ def update_year_and_country_dropdown_stats(
 @app.callback(
     Output("data-table", "data"),
     Output("table-div", "style"),
-    Input(FilePreProcessingAIO.ids.store(1), "data"),
-    Input(FilePreProcessingAIO.ids.store(2), "data"),
     Input("data-selector", "value"),
-    Input(FilePreProcessingAIO.ids.file_upload(1), "contents"),
-    Input(FilePreProcessingAIO.ids.separator_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.separator_dropdown(2), "value"),
     Input("visibility-checklist", "value"),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "store",
+            "aio_id": ALL,
+        },
+        "data",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "separator_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
 )
 def update_table_content(
-    dataset_1: str,
-    dataset_2: str,
     selected_dataset: str,
-    file: str,
-    delimiter_dropdown_1: str,
-    delimiter_dropdown_2: str,
     visibility_checklist: list,
+    dataframes: list,
+    separators: list,
 ) -> pd.DataFrame:
     """Fills table section with data from the selected dataset
 
     Args:
-        dataset_1 (str): First dataset
-        dataset_2 (str): Second dataset
-        selected_dataset (str): value of selectd dataset
+        selected_dataset (str): value of selected dataset
+        visibility_checklist (list): list of displayed sections
+        dataframes (list): available dataframes
+        separators (list): selected seperators for each dataset
 
     Raises:
         exceptions.PreventUpdate: update prevented if no dataset is available
@@ -1343,13 +1384,14 @@ def update_table_content(
         pd.DataFrame: Dataframe of selected dataset
     """
 
-    if (
-        (dataset_1 and selected_dataset == "Dataset 1" and delimiter_dropdown_1)
-        or (dataset_2 and selected_dataset == "Dataset 2" and delimiter_dropdown_2)
-    ) and "Table" in visibility_checklist:
-        datasets = {"Dataset 1": dataset_1, "Dataset 2": dataset_2}
+    dfs = {"Dataset 1": 0, "Dataset 2": 1}
 
-        df = pd.read_json(datasets[selected_dataset]).round(2).to_dict("records")
+    data = dataframes[dfs[selected_dataset]]
+    sep = separators[dfs[selected_dataset]]
+
+    if (data and sep) and "Table" in visibility_checklist:
+
+        df = pd.read_json(data).round(2).to_dict("records")
 
         table_div_style = {"backroundColor": "#ffffff", "display": "block"}
 
@@ -1373,17 +1415,40 @@ def update_table_content(
     State("growth-stat", "children"),
     Input("year-dropdown-stats", "value"),
     Input("country-dropdown-stats", "value"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.geo_dropdown(2), "value"),
-    Input(FilePreProcessingAIO.ids.store(1), "data"),
-    Input(FilePreProcessingAIO.ids.store(2), "data"),
-    Input(FilePreProcessingAIO.ids.feature_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(1), "value"),
-    Input(FilePreProcessingAIO.ids.feature_dropdown(2), "value"),
-    Input(FilePreProcessingAIO.ids.time_dropdown(2), "value"),
     [Input("year-range-slider", "value")],
-    Input(FilePreProcessingAIO.ids.file_upload(1), "contents"),
     Input("visibility-checklist", "value"),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "store",
+            "aio_id": ALL,
+        },
+        "data",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "feature_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "time_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "geo_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
 )
 def update_stats(
     selected_dataset: str,
@@ -1393,17 +1458,12 @@ def update_stats(
     growth_stat_children: list,
     year_dropdown_stats: str,
     country_dropdown_stats: str,
-    geo_dropdown_1: str,
-    geo_dropdown_2: str,
-    dataset: str,
-    dataset_2: str,
-    feature_dropdown_1: str,
-    time_dropdown_1: str,
-    feature_dropdown_2: str,
-    time_dropdown_2: str,
     year_range: list,
-    file: str,
     visibility_checklist: list,
+    dataframes,
+    feature_dropdowns,
+    time_dropdowns,
+    geo_dropdowns,
 ) -> tuple:
     """Compute and display mean, max, min and growth value (per country) for selected dataset
 
@@ -1431,43 +1491,20 @@ def update_stats(
         tuple: mean stat container, max stat container, min stat container, growth stat container
     """
 
+    dfs = {"Dataset 1": 0, "Dataset 2": 1}
+
+    time_column = time_dropdowns[dfs[selected_dataset]]
+    feature_column = feature_dropdowns[dfs[selected_dataset]]
+    geo_column = geo_dropdowns[dfs[selected_dataset]]
+    data = dataframes[dfs[selected_dataset]]
+
     if (
-        (
-            dataset
-            and feature_dropdown_1
-            and time_dropdown_1
-            and geo_dropdown_1
-            and selected_dataset == "Dataset 1"
-        )
-        or (
-            dataset_2
-            and feature_dropdown_2
-            and time_dropdown_2
-            and geo_dropdown_2
-            and selected_dataset == "Dataset 2"
-        )
+        time_column and feature_column and geo_column and data
     ) and "Stats" in visibility_checklist:
-        datasets = {
-            "Dataset 1": [
-                dataset,
-                feature_dropdown_1,
-                time_dropdown_1,
-                geo_dropdown_1,
-            ],
-            "Dataset 2": [
-                dataset_2,
-                feature_dropdown_2,
-                time_dropdown_2,
-                geo_dropdown_2,
-            ],
-        }
 
-        df = pd.read_json(datasets[selected_dataset][0])
+        df = pd.read_json(data)
 
-        time_column = datasets[selected_dataset][2]
         year = year_dropdown_stats
-        geo_column = datasets[selected_dataset][3]
-        feature_column = datasets[selected_dataset][1]
 
         filtered_df = df[df[time_column] == year][[geo_column, feature_column]]
 
