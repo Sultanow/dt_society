@@ -81,11 +81,11 @@ def preprocess_dataset(
 
     if "demo-button" in changed_item:
         demo_data = {
-            "Demo 1": (
+            "Demo 0": (
                 "arbeitslosenquote_eu.tsv",
                 "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/tipsun20.tsv.gz",
             ),
-            "Demo 2": (
+            "Demo 1": (
                 "bip_europa.tsv",
                 "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/tec00001.tsv.gz",
             ),

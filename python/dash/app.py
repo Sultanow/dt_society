@@ -82,131 +82,160 @@ app.layout = html.Div(
                         html.Div(
                             [
                                 html.Div(
+                                    "Files",
+                                    style={
+                                        "padding-top": "10px",
+                                        "padding-left": "10px",
+                                        "padding-bottom": "10px",
+                                        "backgroundColor": "#111111",
+                                        "font-weight": "bold",
+                                        "textAlign": "center",
+                                        "display": "flex",
+                                        "margin": "auto",
+                                    },
+                                ),
+                                html.Div(
                                     [
-                                        html.Div(
-                                            "Files",
-                                            style={
-                                                "padding-top": "10px",
-                                                "padding-left": "10px",
-                                                "padding-bottom": "10px",
-                                                "backgroundColor": "#111111",
-                                                "font-weight": "bold",
-                                                "textAlign": "center",
-                                                "display": "flex",
-                                                "margin": "auto",
-                                            },
+                                        html.Span(
+                                            "help",
+                                            className="material-symbols-outlined",
                                         ),
-                                        html.Div(
-                                            [
-                                                html.Span(
-                                                    "help",
-                                                    className="material-symbols-outlined",
-                                                ),
-                                                html.Span(
-                                                    """File format: .csv, .tsv \n 
+                                        html.Span(
+                                            """File format: .csv, .tsv \n 
                                                     Geo column: column that contains either country names or ISO codes \n
                                                     Reshape: pivots the dataset from a wide to long format (adds new columns for unique values of selected column, if there is no additional identifier select "None") \n
                                                     Time column: column that contains time data / timestamps (represents x-axis in figures)\n
                                                     Feature: column that contains the feature of interest (represents y-axis in figures)\n
                                                     Preset: upload/download a preset file that contains pre-selected column values""",
-                                                    className="tooltiptext",
-                                                    style={
-                                                        "font-size": "10px",
-                                                        "font-weight": "normal",
-                                                        "white-space": "pre-line",
-                                                    },
-                                                ),
-                                            ],
-                                            className="tooltip",
+                                            className="tooltiptext",
                                             style={
-                                                "font-weight": "bold",
-                                                "textAlign": "center",
-                                                "display": "flex",
-                                                "margin-right": "0",
-                                                "margin-left": "auto",
-                                                "padding-top": "7px",
+                                                "font-size": "10px",
+                                                "font-weight": "normal",
+                                                "white-space": "pre-line",
                                             },
                                         ),
                                     ],
-                                    style={"display": "flex"},
-                                ),
-                                html.Hr(
+                                    className="tooltip",
                                     style={
-                                        "padding": "0px",
-                                        "margin": "0px",
-                                        "backgroundColor": "#5c6cfa",
-                                        "border-color": "#5c6cfa",
-                                    }
+                                        "font-weight": "bold",
+                                        "textAlign": "center",
+                                        "display": "flex",
+                                        "margin-right": "0",
+                                        "margin-left": "auto",
+                                        "padding-top": "7px",
+                                    },
                                 ),
-                            ]
+                            ],
+                            style={"display": "flex"},
                         ),
+                        html.Hr(
+                            style={
+                                "padding": "0px",
+                                "margin": "0px",
+                                "backgroundColor": "#5c6cfa",
+                                "border-color": "#5c6cfa",
+                            }
+                        ),
+                    ]
+                ),
+                html.Div(
+                    [
+                        FilePreProcessingAIO(0),
                         FilePreProcessingAIO(1),
-                        FilePreProcessingAIO(2),
+                    ],
+                    id="files-container",
+                ),
+                html.Div(
+                    [
                         html.Div(
                             [
                                 html.Div(
                                     [
                                         html.Div(
-                                            [
-                                                html.Div(
-                                                    "Toggle displayed data",
-                                                    style={
-                                                        "margin-left": "10px",
-                                                        "margin-bottom": "10px",
-                                                        "font-weight": "bold",
-                                                    },
-                                                ),
-                                                dcc.RadioItems(
-                                                    ["Dataset 1", "Dataset 2"],
-                                                    "Dataset 1",
-                                                    id="data-selector",
-                                                    inline=False,
-                                                    style={
-                                                        "display": "flex",
-                                                        "padding": "20px",
-                                                    },
-                                                ),
-                                            ],
-                                            id="data-selector-div",
+                                            "Visible dataset",
                                             style={
-                                                "display": "none",
+                                                "margin-left": "10px",
+                                                "margin-bottom": "10px",
+                                                "font-weight": "bold",
                                             },
                                         ),
-                                        html.Div(
-                                            [
-                                                html.Button(
-                                                    "Reset",
-                                                    id="reset-button",
-                                                    n_clicks=0,
-                                                    style={
-                                                        "border-color": "#5c6cfa",
-                                                        "width": "120px",
-                                                        "margin-right": "4px",
-                                                    },
-                                                ),
-                                                html.Button(
-                                                    "Demo",
-                                                    id="demo-button",
-                                                    n_clicks=0,
-                                                    style={
-                                                        "border-color": "#5c6cfa",
-                                                        "width": "120px",
-                                                    },
-                                                ),
+                                        dcc.RadioItems(
+                                            options=[
+                                                {
+                                                    "label": "Dataset 1",
+                                                    "value": 0,
+                                                },
+                                                {
+                                                    "label": "Dataset 2",
+                                                    "value": 1,
+                                                },
                                             ],
+                                            value=0,
+                                            id="data-selector",
+                                            inline=False,
                                             style={
-                                                "margin-right": "40px",
-                                                "float": "right",
                                                 "display": "flex",
-                                                "margin-left": "auto",
-                                                "border-color": "#5c6cfa",
+                                                "padding": "20px",
                                             },
                                         ),
                                     ],
-                                    style={"display": "flex"},
+                                    id="data-selector-div",
+                                    style={
+                                        "display": "none",
+                                    },
+                                ),
+                                html.Div(
+                                    [
+                                        html.Button(
+                                            "Add File",
+                                            id="add-file-button",
+                                            n_clicks=1,
+                                            style={
+                                                "border-color": "#5c6cfa",
+                                                "width": "120px",
+                                                "margin-right": "40px",
+                                                "float": "none",
+                                            },
+                                        ),
+                                        html.Button(
+                                            "Reset",
+                                            id="reset-button",
+                                            n_clicks=0,
+                                            style={
+                                                "border-color": "#5c6cfa",
+                                                "width": "120px",
+                                                "margin-right": "4px",
+                                            },
+                                        ),
+                                        html.Button(
+                                            "Demo",
+                                            id="demo-button",
+                                            n_clicks=0,
+                                            style={
+                                                "border-color": "#5c6cfa",
+                                                "width": "120px",
+                                            },
+                                        ),
+                                    ],
+                                    style={
+                                        "margin-right": "40px",
+                                        "float": "right",
+                                        "display": "flex",
+                                        "margin-left": "auto",
+                                        "border-color": "#5c6cfa",
+                                    },
                                 ),
                             ],
-                            style={"margin-top": "15px", "padding-bottom": "10px"},
+                            style={"display": "flex"},
+                        ),
+                    ],
+                    style={"margin-top": "15px", "padding-bottom": "10px"},
+                ),
+                html.Div(
+                    [
+                        html.Div(
+                            "Hide/show sections",
+                            style={"font-weight": "bold", "margin-left": "10px"},
                         ),
                         dcc.Checklist(
                             [
@@ -229,21 +258,18 @@ app.layout = html.Div(
                                 "margin-left": "10px",
                                 "font-weight": "lighter",
                                 "font-size": "14px",
-                                "padding-bottom": "20px",
+                                "padding-bottom": "5px",
                             },
                             inline=True,
                             id="visibility-checklist",
-                            style={"margin-bottom": "10px"},
+                            style={"padding-top": "5px", "padding-bottom": "5px"},
                         ),
                     ],
-                    style={
-                        "backgroundColor": "#111111",
-                    },
+                    style={"margin-bottom": "5px"},
                 ),
             ],
             style={
-                "backgroundColor": "#232323",
-                "height": "340px",
+                "backgroundColor": "#111111",
                 "display": "block",
             },
         ),
@@ -1168,6 +1194,32 @@ app.layout = html.Div(
 
 
 @app.callback(
+    Output("files-container", "children"),
+    Output("data-selector", "options"),
+    Input("add-file-button", "n_clicks"),
+    State("files-container", "children"),
+    State("data-selector", "options"),
+)
+def add_file(add_file_button_clicks, files_container, data_selector):
+
+    changed_item = [p["prop_id"] for p in callback_context.triggered][0]
+
+    if "add-file-button" in changed_item:
+        files_container.append(FilePreProcessingAIO(add_file_button_clicks))
+        data_selector.append(
+            {
+                "label": f"Dataset {add_file_button_clicks+1}",
+                "value": add_file_button_clicks,
+            }
+        )
+
+        return files_container, data_selector
+
+    else:
+        raise exceptions.PreventUpdate
+
+
+@app.callback(
     Output("data-selector", "style"),
     Output("data-selector-div", "style"),
     Input(
@@ -1324,11 +1376,9 @@ def update_year_and_country_dropdown_stats(
         tuple: available years, first year value, available countries, first country value, available years, first year value
     """
 
-    dfs = {"Dataset 1": 0, "Dataset 2": 1}
-
-    time_column = time_dropdowns[dfs[selected_dataset]]
-    geo_column = geo_dropdowns[dfs[selected_dataset]]
-    data = dataframes[dfs[selected_dataset]]
+    time_column = time_dropdowns[selected_dataset]
+    geo_column = geo_dropdowns[selected_dataset]
+    data = dataframes[selected_dataset]
 
     if time_column and geo_column and data:
 
@@ -1384,10 +1434,8 @@ def update_table_content(
         pd.DataFrame: Dataframe of selected dataset
     """
 
-    dfs = {"Dataset 1": 0, "Dataset 2": 1}
-
-    data = dataframes[dfs[selected_dataset]]
-    sep = separators[dfs[selected_dataset]]
+    data = dataframes[selected_dataset]
+    sep = separators[selected_dataset]
 
     if (data and sep) and "Table" in visibility_checklist:
 
@@ -1491,12 +1539,10 @@ def update_stats(
         tuple: mean stat container, max stat container, min stat container, growth stat container
     """
 
-    dfs = {"Dataset 1": 0, "Dataset 2": 1}
-
-    time_column = time_dropdowns[dfs[selected_dataset]]
-    feature_column = feature_dropdowns[dfs[selected_dataset]]
-    geo_column = geo_dropdowns[dfs[selected_dataset]]
-    data = dataframes[dfs[selected_dataset]]
+    time_column = time_dropdowns[selected_dataset]
+    feature_column = feature_dropdowns[selected_dataset]
+    geo_column = geo_dropdowns[selected_dataset]
+    data = dataframes[selected_dataset]
 
     if (
         time_column and feature_column and geo_column and data
@@ -1613,12 +1659,10 @@ def update_line_plot(
         list: container with line plot
     """
 
-    dfs = {"Dataset 1": 0, "Dataset 2": 1}
-
-    time_column = time_dropdowns[dfs[selected_dataset]]
-    feature_column = feature_dropdowns[dfs[selected_dataset]]
-    geo_column = geo_dropdowns[dfs[selected_dataset]]
-    data = dataframes[dfs[selected_dataset]]
+    time_column = time_dropdowns[selected_dataset]
+    feature_column = feature_dropdowns[selected_dataset]
+    geo_column = geo_dropdowns[selected_dataset]
+    data = dataframes[selected_dataset]
 
     if (
         time_column and feature_column and geo_column and data
@@ -1730,12 +1774,10 @@ def update_choropleth(
         list: container with choropleth mapbox
     """
 
-    dfs = {"Dataset 1": 0, "Dataset 2": 1}
-
-    time_column = time_dropdowns[dfs[selected_dataset]]
-    feature_column = feature_dropdowns[dfs[selected_dataset]]
-    geo_column = geo_dropdowns[dfs[selected_dataset]]
-    data = dataframes[dfs[selected_dataset]]
+    time_column = time_dropdowns[selected_dataset]
+    feature_column = feature_dropdowns[selected_dataset]
+    geo_column = geo_dropdowns[selected_dataset]
+    data = dataframes[selected_dataset]
 
     if (
         time_column and feature_column and geo_column and data
@@ -1916,10 +1958,8 @@ def update_forecast_slider(
     time_dropdowns: str,
 ):
 
-    dfs = {"Dataset 1": 0, "Dataset 2": 1}
-
-    time_column = time_dropdowns[dfs[selected_dataset]]
-    data = dataframes[dfs[selected_dataset]]
+    time_column = time_dropdowns[selected_dataset]
+    data = dataframes[selected_dataset]
 
     if time_column and data and frequency_dropdown:
 
@@ -2014,12 +2054,10 @@ def update_forecast(
         tuple: container with forecast plot, style component
     """
 
-    dfs = {"Dataset 1": 0, "Dataset 2": 1}
-
-    time_column = time_dropdowns[dfs[selected_dataset]]
-    feature_column = feature_dropdowns[dfs[selected_dataset]]
-    geo_column = geo_dropdowns[dfs[selected_dataset]]
-    data = dataframes[dfs[selected_dataset]]
+    time_column = time_dropdowns[selected_dataset]
+    feature_column = feature_dropdowns[selected_dataset]
+    geo_column = geo_dropdowns[selected_dataset]
+    data = dataframes[selected_dataset]
 
     if (
         time_column
@@ -2155,12 +2193,11 @@ def update_heatmap(
     Returns:
         list: container with heatmap plot
     """
-    dfs = {"Dataset 1": 0, "Dataset 2": 1}
 
-    time_column = time_dropdowns[dfs[selected_dataset]]
-    feature_column = feature_dropdowns[dfs[selected_dataset]]
-    geo_column = geo_dropdowns[dfs[selected_dataset]]
-    data = dataframes[dfs[selected_dataset]]
+    time_column = time_dropdowns[selected_dataset]
+    feature_column = feature_dropdowns[selected_dataset]
+    geo_column = geo_dropdowns[selected_dataset]
+    data = dataframes[selected_dataset]
 
     if (
         time_column and feature_column and geo_column and data
@@ -2305,8 +2342,12 @@ def update_multivariate_forecast(
     ) and "Forecast" in visibility_checklist:
 
         if selected_dataset and selected_model == "Prophet":
-            file_1 = [dfs[key] for key in dfs if key in selected_dataset][0]
-            file_2 = [dfs[key] for key in dfs if key not in selected_dataset][0]
+            # file_1 = [dfs[key] for key in dfs if key in selected_dataset][0]
+            # file_2 = [dfs[key] for key in dfs if key not in selected_dataset][0]
+
+            file_1 = [i for i in range(len(dataframes)) if i == selected_dataset][0]
+            file_2 = [i for i in range(len(dataframes)) if i != selected_dataset][0]
+
         else:
             file_1 = 0
             file_2 = 1
@@ -2416,10 +2457,10 @@ def update_multivariate_forecast(
             scenario_input_style = {"display": "none"}
 
         elif selected_model == "Prophet":
-            forecast_data_selector_options = {
-                "Dataset 1": f"{filenames[0]} ({feature_dropdowns[0]})",
-                "Dataset 2": f"{filenames[1]} ({feature_dropdowns[1]})",
-            }
+            forecast_data_selector_options = [
+                {"label": f"{filenames[0]} ({feature_dropdowns[0]})", "value": 0},
+                {"label": f"{filenames[1]} ({feature_dropdowns[1]})", "value": 1},
+            ]
 
             marks = no_update
             if scenario_data:
