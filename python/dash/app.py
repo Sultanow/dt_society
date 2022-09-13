@@ -1261,6 +1261,8 @@ def update_selector_visibility(dataframes: list):
 @app.callback(
     Output("country-dropdown", "options"),
     Output("country-dropdown", "value"),
+    Output("country-dropdown-multi-forecast", "options"),
+    Output("country-dropdown-multi-forecast", "value"),
     Input(
         {
             "component": "FilePreProcessingAIO",
@@ -1306,7 +1308,12 @@ def update_country_dropdown_comparison(
 
         country_intersection.sort()
 
-        return country_intersection, country_intersection[0]
+        return (
+            country_intersection,
+            country_intersection[0],
+            country_intersection,
+            country_intersection[0],
+        )
 
     else:
         raise exceptions.PreventUpdate
@@ -1327,8 +1334,6 @@ def update_country_dropdown_comparison(
     Output("country-dropdown-forecast", "value"),
     Output("year-range-slider", "value"),
     Output("year-range-slider", "marks"),
-    Output("country-dropdown-multi-forecast", "options"),
-    Output("country-dropdown-multi-forecast", "value"),
     Input("data-selector", "value"),
     Input(
         {
