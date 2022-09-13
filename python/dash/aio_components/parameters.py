@@ -100,7 +100,7 @@ class ParameterStoreAIO(html.Div):
             if "scenario" in changed_item:
                 scenario = parameter_input.replace(" ", "").split(",")
 
-                scenario = [int(x) for x in scenario]
+                scenario = [float(x) for x in scenario]
 
                 return scenario
 
