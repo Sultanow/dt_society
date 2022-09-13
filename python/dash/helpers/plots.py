@@ -1,4 +1,3 @@
-import datetime
 import numpy as np
 import plotly.graph_objects as go
 import pandas as pd
@@ -263,27 +262,32 @@ def create_two_line_plot(
         go.Figure: Line plot with one line per subplot
     """
 
-    fig = go.Figure(make_subplots(specs=[[{"secondary_y": True}]]))
+    rows = len(datasets) // 3 if len(datasets) // 3 >= 1 else 1
+
+    fig = go.Figure(make_subplots(rows=rows, cols=len(datasets)))
 
     for i, df in enumerate(datasets):
-        secondary_y = True if i % 2 else False
         fig.add_trace(
             go.Scatter(
                 x=df[time_columns[i]],
                 y=df[feature_columns[i]],
-                name=feature_columns[i] + "",
+                name=feature_columns[i],
                 mode="lines",
             ),
-            secondary_y=secondary_y,
+            col=i + 1,
+            row=1,
         )
+
+    yax_titles = {
+        f"yaxis{i+1}_title": feature for i, feature in enumerate(feature_columns)
+    }
 
     fig.update_layout(
         transition_duration=500,
         template=theme,
         margin={"t": 20, "b": 20},
         height=300,
-        yaxis1_title=feature_columns[0],
-        yaxis2_title=feature_columns[1],
+        **yax_titles,
     )
 
     return fig
