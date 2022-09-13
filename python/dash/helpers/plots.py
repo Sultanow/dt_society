@@ -127,7 +127,7 @@ def create_choropleth_slider_plot(
     fig_dict["layout"] = dict(
         geo=dict(
             scope="world",
-            projection={"type": "natural earth2", "scale": 3},
+            projection={"type": "natural earth2", "scale": 4.5},
             bgcolor="rgba(0,0,0,0)",
             center=dict(lat=50.5, lon=11),
         ),
