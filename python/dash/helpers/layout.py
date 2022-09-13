@@ -51,7 +51,7 @@ def preprocess_dataset(
 
     saved_preset_file = None
 
-    if "demo-button" in changed_item or "table-upload" in changed_item:
+    if "demo-button" in changed_item or "file_upload" in changed_item:
         reshape_switch_status = False
         delimiter_value = None
         geo_column_value = None
