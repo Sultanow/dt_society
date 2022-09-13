@@ -329,13 +329,17 @@ def get_year_and_country_options_stats(
     if isinstance(time_selection, np.datetime64):
         time_selection = np.datetime_as_string(time_selection)
 
+    n_chunks = 7 if len(time_options) >= 7 else 3
+
     if np.issubdtype(np.datetime64, df[time_column]):
         time_options_strp = np.sort(df[time_column].dt.strftime("%b-%d").unique())
         time_options_split = np.array(
-            np.array_split(time_options_strp, 7), dtype="object"
+            np.array_split(time_options_strp, n_chunks), dtype="object"
         )
     else:
-        time_options_split = np.array(np.array_split(time_options, 7), dtype="object")
+        time_options_split = np.array(
+            np.array_split(time_options, n_chunks), dtype="object"
+        )
 
     marks = {}
 
@@ -368,8 +372,6 @@ def get_year_and_country_options_stats(
         geo_options[0],
         time_span,
         marks,
-        geo_options,
-        geo_options[0],
     )
 
 
