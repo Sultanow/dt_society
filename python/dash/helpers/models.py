@@ -11,7 +11,7 @@ from typing import Tuple
 
 from .layout import get_time_marks
 from .smoothing import multivariate_ES
-from preprocessing.parse import merge_dataframes
+from preprocessing.parse import merge_dataframes, merge_dataframes_multi
 
 
 def prophet_fit_and_predict(
@@ -305,6 +305,104 @@ def hw_es_fit_and_predict(
 
     forecast_df[feature_column_2] = [x[0] for x in forecast]
     forecast_df[feature_column_1] = [x[1] for x in forecast]
+
+    df_final = pd.concat([merged_df, forecast_df], ignore_index=True)
+
+    return df_final, marks
+
+
+def var_fit_and_predict_multi(
+    dataframes,
+    time_columns,
+    feature_columns,
+    max_lags,
+    periods,
+    frequency,
+):
+
+    frequencies = {
+        "Yearly": ("AS", 365),
+        "Monthly": ("MS", 30),
+        "Weekly": ("W", 7),
+        "Daily": ("D", 1),
+    }
+
+    merged_df, time = merge_dataframes_multi(dataframes, time_columns)
+
+    marks = get_time_marks(merged_df, time_column=time, frequency=frequency)
+
+    merged_df[time] = pd.to_datetime(merged_df[time].astype(str))
+
+    merged_df_diff = merged_df[feature_columns].diff().astype("float32").dropna()
+
+    model = VAR(merged_df_diff)
+
+    result = model.fit(maxlags=max_lags)
+
+    forecast = result.forecast(merged_df_diff[-max_lags:].values, periods)
+
+    forecast_df = pd.DataFrame()
+
+    forecast_df[time] = pd.date_range(
+        start=marks[1], periods=periods, freq=frequencies[frequency][0]
+    )
+
+    forecast_df[feature_columns] = forecast
+
+    df_final = pd.concat([merged_df, forecast_df], ignore_index=True)
+
+    df_final.loc[len(merged_df) - 1 :, feature_columns] = df_final[feature_columns][
+        len(merged_df) - 1 :
+    ].cumsum()
+
+    return df_final, marks
+
+
+def hw_es_fit_and_predict_multi(
+    dataframes,
+    time_columns,
+    feature_columns: list,
+    frequency,
+    periods,
+    alpha,
+):
+
+    frequencies = {
+        "Yearly": ("AS", 365),
+        "Monthly": ("MS", 30),
+        "Weekly": ("W", 7),
+        "Daily": ("D", 1),
+    }
+
+    merged_df, time = merge_dataframes_multi(dataframes, time_columns)
+
+    marks = get_time_marks(merged_df, time_column=time, frequency=frequency)
+
+    merged_df[time] = pd.to_datetime(merged_df[time].astype(str))
+
+    df_features = (
+        merged_df[feature_columns]
+        .reset_index(drop=True)
+        .reindex(sorted(feature_columns), axis=1)
+        .rename(columns={feature: i for i, feature in enumerate(feature_columns)})
+    )
+
+    forecast = []
+
+    for t in range(periods):
+        test = multivariate_ES(
+            df_features, len(df_features), t + 1, len(feature_columns), alpha
+        )
+        forecast.append(test[-1])
+
+    forecast_df = pd.DataFrame()
+
+    forecast_df[time] = pd.date_range(
+        start=marks[1], periods=periods, freq=frequencies[frequency][0]
+    )
+
+    for i, feature in enumerate(sorted(feature_columns)):
+        forecast_df[feature] = [x[i] for x in forecast]
 
     df_final = pd.concat([merged_df, forecast_df], ignore_index=True)
 

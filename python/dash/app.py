@@ -13,6 +13,7 @@ from dash import (
     callback_context,
     no_update,
 )
+from numpy.core.fromnumeric import var
 import pandas as pd
 
 from aio_components.filepreprocessing import FilePreProcessingAIO
@@ -29,6 +30,7 @@ from helpers.plots import (
     create_forecast_plot,
     create_multivariate_forecast,
     create_var_forecast_plot,
+    create_var_forecast_plot_multi,
 )
 from helpers.models import (
     prophet_fit_and_predict,
@@ -36,6 +38,8 @@ from helpers.models import (
     prophet_fit_and_predict_multi,
     var_fit_and_predict,
     hw_es_fit_and_predict,
+    var_fit_and_predict_multi,
+    hw_es_fit_and_predict_multi,
 )
 from helpers.layout import (
     preprocess_dataset,
@@ -1261,6 +1265,8 @@ def update_selector_visibility(dataframes: list):
 @app.callback(
     Output("country-dropdown", "options"),
     Output("country-dropdown", "value"),
+    Output("country-dropdown-multi-forecast", "options"),
+    Output("country-dropdown-multi-forecast", "value"),
     Input(
         {
             "component": "FilePreProcessingAIO",
@@ -1306,7 +1312,12 @@ def update_country_dropdown_comparison(
 
         country_intersection.sort()
 
-        return country_intersection, country_intersection[0]
+        return (
+            country_intersection,
+            country_intersection[0],
+            country_intersection,
+            country_intersection[0],
+        )
 
     else:
         raise exceptions.PreventUpdate
@@ -1327,8 +1338,6 @@ def update_country_dropdown_comparison(
     Output("country-dropdown-forecast", "value"),
     Output("year-range-slider", "value"),
     Output("year-range-slider", "marks"),
-    Output("country-dropdown-multi-forecast", "options"),
-    Output("country-dropdown-multi-forecast", "value"),
     Input("data-selector", "value"),
     Input(
         {
@@ -2372,24 +2381,26 @@ def update_multivariate_forecast(
             if not max_lags_parameter:
                 max_lags_parameter = 1
 
-            forecast, marks = var_fit_and_predict(
-                filtered_dfs[0],
-                filtered_dfs[1],
-                time_dropdowns[file_1],
-                time_dropdowns[file_2],
-                feature_dropdowns[file_1],
-                feature_dropdowns[file_2],
-                max_lags_parameter,
-                var_slider_value,
-                multi_frequency_dropdown,
+            filtered_dfs = []
+            for i, df in enumerate(dataframes):
+                df = pd.read_json(df)
+                filtered_df = df[df[geo_dropdowns[i]] == selected_country][
+                    [time_dropdowns[i], feature_dropdowns[i]]
+                ]
+
+                filtered_dfs.append(filtered_df)
+
+            forecast, marks = var_fit_and_predict_multi(
+                filtered_dfs,
+                time_dropdowns,
+                feature_dropdowns,
+                max_lags=max_lags_parameter,
+                periods=var_slider_value,
+                frequency=multi_frequency_dropdown,
             )
 
-            fig = create_var_forecast_plot(
-                forecast,
-                feature_dropdowns[file_1],
-                feature_dropdowns[file_2],
-                time_dropdowns[file_1],
-                var_slider_value,
+            fig = create_var_forecast_plot_multi(
+                forecast, feature_dropdowns, time_dropdowns[-1], var_slider_value
             )
 
             var_slider_style = {"display": "block"}
@@ -2421,24 +2432,26 @@ def update_multivariate_forecast(
             if not alpha_parameter:
                 alpha_parameter = 0.5
 
-            forecast, marks = hw_es_fit_and_predict(
-                filtered_dfs[0],
-                filtered_dfs[1],
-                time_dropdowns[file_1],
-                time_dropdowns[file_2],
-                feature_dropdowns[file_1],
-                feature_dropdowns[file_2],
+            filtered_dfs = []
+            for i, df in enumerate(dataframes):
+                df = pd.read_json(df)
+                filtered_df = df[df[geo_dropdowns[i]] == selected_country][
+                    [time_dropdowns[i], feature_dropdowns[i]]
+                ]
+
+                filtered_dfs.append(filtered_df)
+
+            forecast, marks = hw_es_fit_and_predict_multi(
+                filtered_dfs,
+                time_dropdowns,
+                feature_dropdowns,
                 multi_frequency_dropdown,
                 var_slider_value,
                 alpha_parameter,
             )
 
-            fig = create_var_forecast_plot(
-                forecast,
-                feature_dropdowns[file_1],
-                feature_dropdowns[file_2],
-                time_dropdowns[file_1],
-                var_slider_value,
+            fig = create_var_forecast_plot_multi(
+                forecast, feature_dropdowns, time_dropdowns[-1], var_slider_value
             )
 
             var_slider_style = {"display": "block"}

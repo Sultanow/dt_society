@@ -65,3 +65,32 @@ def merge_dataframes(dataframe_1, dataframe_2, time_column_1, time_column_2):
         time = time_column_1
 
     return merged_df, time
+
+
+def merge_dataframes_multi(dataframes, time_columns):
+
+    merged_df = None
+    for i in range(len(dataframes) - 1):
+
+        if merged_df is None:
+            merged_df = pd.merge(
+                dataframes[i],
+                dataframes[i + 1],
+                left_on=[time_columns[i]],
+                right_on=[time_columns[i + 1]],
+            )
+
+        else:
+            merged_df = pd.merge(
+                merged_df,
+                dataframes[i + 1],
+                left_on=[time_columns[i]],
+                right_on=[time_columns[i + 1]],
+            )
+
+        if time_columns[i] != time_columns[i + 1]:
+            merged_df = merged_df.drop(columns=[time_columns[i]])
+
+        time_col = time_columns[i + 1]
+
+    return merged_df, time_col

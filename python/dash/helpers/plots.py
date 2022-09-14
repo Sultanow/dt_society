@@ -1,3 +1,4 @@
+import enum
 import numpy as np
 import plotly.graph_objects as go
 import pandas as pd
@@ -514,6 +515,49 @@ def create_var_forecast_plot(
         yaxis1_title=feature_column_1,
         yaxis2_title=feature_column_2,
         margin={"t": 20},
+    )
+
+    return fig
+
+
+def create_var_forecast_plot_multi(forecast, feature_columns, time_column, periods):
+    colors = ("mediumpurple", "mediumspringgreen", "hotpink", "mediumblue", "goldenrod")
+
+    fig = go.Figure(make_subplots(rows=1, cols=len(feature_columns)))
+
+    for i, feature in enumerate(feature_columns):
+        fig.add_trace(
+            go.Scatter(
+                x=forecast[time_column][:-periods],
+                y=forecast[feature][:-periods],
+                name=feature,
+                mode="lines",
+                line={"color": f"{colors[i]}"},
+            ),
+            col=i + 1,
+            row=1,
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=forecast[time_column][-periods - 1 :],
+                y=forecast[feature][-periods - 1 :],
+                name=feature + "Prediction",
+                mode="lines",
+                line={"dash": "dash", "color": f"{colors[i]}"},
+            ),
+            col=i + 1,
+            row=1,
+        )
+
+    yax_titles = {
+        f"yaxis{i+1}_title": feature for i, feature in enumerate(feature_columns)
+    }
+
+    fig.update_layout(
+        template="plotly_dark",
+        margin={"t": 20, "b": 20},
+        **yax_titles,
     )
 
     return fig
