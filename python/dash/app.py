@@ -1118,7 +1118,8 @@ app.layout = html.Div(
                                                             parameter="scenario",
                                                             type="text",
                                                         ),
-                                                    ]
+                                                    ],
+                                                    id="scenario-container",
                                                 ),
                                                 html.Div(
                                                     [
@@ -1200,11 +1201,27 @@ app.layout = html.Div(
 @app.callback(
     Output("files-container", "children"),
     Output("data-selector", "options"),
+    Output("scenario-container", "children"),
     Input("add-file-button", "n_clicks"),
     State("files-container", "children"),
     State("data-selector", "options"),
+    State("scenario-container", "children"),
+    State(
+        {
+            "component": "ParameterStoreAIO",
+            "subcomponent": "container",
+            "aio_id": "scenario",
+        },
+        "children",
+    ),
 )
-def add_file(add_file_button_clicks, files_container, data_selector):
+def add_file(
+    add_file_button_clicks,
+    files_container,
+    data_selector,
+    scenario_container: list,
+    comp,
+):
 
     changed_item = [p["prop_id"] for p in callback_context.triggered][0]
 
@@ -1217,7 +1234,44 @@ def add_file(add_file_button_clicks, files_container, data_selector):
             }
         )
 
-        return files_container, data_selector
+        store = {
+            "component": "ParameterStoreAIO",
+            "subcomponent": "store",
+            "store_no": add_file_button_clicks,
+            "aio_id": "scenario",
+        }
+
+        input = {
+            "component": "ParameterStoreAIO",
+            "subcomponent": f"input",
+            "input_no": add_file_button_clicks,
+            "aio_id": "scenario",
+        }
+
+        scenario_container.insert(
+            -1,
+            dcc.Input(
+                id=input,
+                type="text",
+                style={
+                    "backgroundColor": "#111111",
+                    "color": "#f2f2f2",
+                    "padding": "10px",
+                    "border-top": "0px",
+                    "border-left": "0px",
+                    "border-right": "0px",
+                    "border-color": "#5c6cfa",
+                    "width": "300px",
+                },
+            ),
+        )
+        scenario_container.insert(-1, dcc.Store(id=store))
+
+        # print(scenario_container)
+
+        # scenario_container[-2] = comp
+
+        return files_container, data_selector, scenario_container
 
     else:
         raise exceptions.PreventUpdate

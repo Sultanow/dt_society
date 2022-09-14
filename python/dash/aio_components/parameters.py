@@ -10,6 +10,8 @@ from dash import (
     callback_context,
     callback,
     MATCH,
+    ALL,
+    no_update,
 )
 
 
@@ -18,12 +20,14 @@ class ParameterStoreAIO(html.Div):
         store = lambda parameter: {
             "component": "ParameterStoreAIO",
             "subcomponent": "store",
+            "store_no": 1,
             "aio_id": parameter,
         }
 
         input = lambda parameter: {
             "component": "ParameterStoreAIO",
             "subcomponent": "input",
+            "input_no": 1,
             "aio_id": parameter,
         }
 
@@ -41,11 +45,21 @@ class ParameterStoreAIO(html.Div):
 
     ids = ids
 
-    def __init__(self, parameter, value=None, min=None, max=None, step=None, type=None):
+    def __init__(
+        self,
+        parameter,
+        value=None,
+        min=None,
+        max=None,
+        step=None,
+        type=None,
+        display="none",
+    ):
+
         super().__init__(
             children=[
-                dcc.Store(id=self.ids.store(parameter)),
                 html.Div(f"Set {parameter}"),
+                dcc.Store(id=self.ids.store(parameter)),
                 dcc.Input(
                     value=value,
                     min=min,
@@ -81,18 +95,37 @@ class ParameterStoreAIO(html.Div):
             ],
             id=self.ids.container(parameter),
             style={
-                "display": "none",
+                "display": display,
                 "padding-left": "10px",
                 "margin-top": "10px",
             },
         )
 
     @callback(
-        Output(ids.store(MATCH), "data"),
+        Output(
+            {
+                "component": "ParameterStoreAIO",
+                "subcomponent": "store",
+                "store_no": ALL,
+                "aio_id": MATCH,
+            },
+            "data",
+        ),
         Input(ids.input(MATCH), "value"),
+        Input(
+            {
+                "component": "ParameterStoreAIO",
+                "subcomponent": "input",
+                "input_no": ALL,
+                "aio_id": MATCH,
+            },
+            "value",
+        ),
         Input(ids.submit_button(MATCH), "n_clicks"),
     )
-    def update_parameter_store(parameter_input: str, n_clicks: int):
+    def update_parameter_store(parameter_input: str, inputs, n_clicks: int):
+
+        print(inputs)
 
         changed_item = [p["prop_id"] for p in callback_context.triggered][0]
 
@@ -102,10 +135,12 @@ class ParameterStoreAIO(html.Div):
 
                 scenario = [float(x) for x in scenario]
 
-                return scenario
+                stores = [scenario for i in range(len(inputs))]
+
+                return stores
 
             else:
-                return parameter_input
+                return inputs
 
         else:
             raise exceptions.PreventUpdate
