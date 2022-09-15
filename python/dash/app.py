@@ -13,7 +13,6 @@ from dash import (
     callback_context,
     no_update,
 )
-from numpy.core.fromnumeric import var
 import pandas as pd
 
 from aio_components.filepreprocessing import FilePreProcessingAIO
@@ -28,18 +27,15 @@ from helpers.plots import (
     create_two_line_plot,
     create_correlation_heatmap,
     create_forecast_plot,
-    create_multivariate_forecast,
-    create_var_forecast_plot,
     create_var_forecast_plot_multi,
+    create_multivariate_forecast_prophet,
 )
 from helpers.models import (
     prophet_fit_and_predict,
     fit_and_predict,
-    prophet_fit_and_predict_multi,
-    var_fit_and_predict,
-    hw_es_fit_and_predict,
     var_fit_and_predict_multi,
     hw_es_fit_and_predict_multi,
+    prophet_fit_and_predict_n,
 )
 from helpers.layout import (
     preprocess_dataset,
@@ -50,8 +46,7 @@ from helpers.layout import (
     export_settings,
 )
 
-from preprocessing.parse import merge_dataframes
-
+from preprocessing.parse import merge_dataframes_multi
 
 external_stylesheets = [
     {
@@ -1117,6 +1112,7 @@ app.layout = html.Div(
                                                         ParameterStoreAIO(
                                                             parameter="scenario",
                                                             type="text",
+                                                            display="block",
                                                         ),
                                                     ],
                                                     id="scenario-container",
@@ -1248,7 +1244,7 @@ def add_file(
             "aio_id": "scenario",
         }
 
-        scenario_container.insert(
+        comp.insert(
             -1,
             dcc.Input(
                 id=input,
@@ -1262,14 +1258,14 @@ def add_file(
                     "border-right": "0px",
                     "border-color": "#5c6cfa",
                     "width": "300px",
+                    "display": "block",
                 },
             ),
         )
-        scenario_container.insert(-1, dcc.Store(id=store))
+        comp.insert(-1, dcc.Store(id=store))
 
-        # print(scenario_container)
-
-        # scenario_container[-2] = comp
+        scenario_container.pop()
+        scenario_container.extend(comp)
 
         return files_container, data_selector, scenario_container
 
@@ -2299,7 +2295,15 @@ def update_heatmap(
     Output(ParameterStoreAIO.ids.container("\u03B1"), "style"),
     Output("forecast-data-selector", "options"),
     Output("forecast-data-table", "data"),
-    Output(ParameterStoreAIO.ids.container("scenario"), "style"),
+    Output(
+        {
+            "component": "ParameterStoreAIO",
+            "subcomponent": "input",
+            "input_no": ALL,
+            "aio_id": "scenario",
+        },
+        "placeholder",
+    ),
     State("multi-fit-plot-div", "children"),
     Input("multi-frequency-dropdown-forecast", "value"),
     Input(ParameterStoreAIO.ids.store("scenario"), "data"),
@@ -2351,6 +2355,15 @@ def update_heatmap(
         },
         "filename",
     ),
+    Input(
+        {
+            "component": "ParameterStoreAIO",
+            "subcomponent": "store",
+            "store_no": ALL,
+            "aio_id": "scenario",
+        },
+        "data",
+    ),
 )
 def update_multivariate_forecast(
     multi_forecast_children: list,
@@ -2369,6 +2382,7 @@ def update_multivariate_forecast(
     time_dropdowns,
     geo_dropdowns,
     filenames,
+    scenarios_data,
 ) -> tuple:
     """Performs multivariate forecast with an additional dataset and plots the result
 
@@ -2393,7 +2407,7 @@ def update_multivariate_forecast(
         tuple:
     """
 
-    dfs = {"Dataset 1": 0, "Dataset 2": 1}
+    placeholders = [no_update for _ in range(len(feature_dropdowns) - 1)]
 
     if (
         not any(
@@ -2404,21 +2418,9 @@ def update_multivariate_forecast(
         and selected_country
     ) and "Forecast" in visibility_checklist:
 
-        if selected_dataset and selected_model == "Prophet":
-            # file_1 = [dfs[key] for key in dfs if key in selected_dataset][0]
-            # file_2 = [dfs[key] for key in dfs if key not in selected_dataset][0]
-
-            file_1 = [i for i in range(len(dataframes)) if i == selected_dataset][0]
-            file_2 = [i for i in range(len(dataframes)) if i != selected_dataset][0]
-
-        else:
-            file_1 = 0
-            file_2 = 1
-
         filtered_dfs = []
-
-        for i in (file_1, file_2):
-            df = pd.read_json(dataframes[i])
+        for i, df in enumerate(dataframes):
+            df = pd.read_json(df)
             filtered_df = df[df[geo_dropdowns[i]] == selected_country][
                 [time_dropdowns[i], feature_dropdowns[i]]
             ]
@@ -2434,15 +2436,6 @@ def update_multivariate_forecast(
 
             if not max_lags_parameter:
                 max_lags_parameter = 1
-
-            filtered_dfs = []
-            for i, df in enumerate(dataframes):
-                df = pd.read_json(df)
-                filtered_df = df[df[geo_dropdowns[i]] == selected_country][
-                    [time_dropdowns[i], feature_dropdowns[i]]
-                ]
-
-                filtered_dfs.append(filtered_df)
 
             forecast, marks = var_fit_and_predict_multi(
                 filtered_dfs,
@@ -2474,8 +2467,6 @@ def update_multivariate_forecast(
                 "display": "none",
             }
 
-            scenario_input_style = {"display": "none"}
-
         elif selected_model == "HW Smoothing":
             if not var_slider_value:
                 var_slider_value = 1
@@ -2485,15 +2476,6 @@ def update_multivariate_forecast(
 
             if not alpha_parameter:
                 alpha_parameter = 0.5
-
-            filtered_dfs = []
-            for i, df in enumerate(dataframes):
-                df = pd.read_json(df)
-                filtered_df = df[df[geo_dropdowns[i]] == selected_country][
-                    [time_dropdowns[i], feature_dropdowns[i]]
-                ]
-
-                filtered_dfs.append(filtered_df)
 
             forecast, marks = hw_es_fit_and_predict_multi(
                 filtered_dfs,
@@ -2521,40 +2503,40 @@ def update_multivariate_forecast(
                 "display": "none",
             }
 
-            scenario_input_style = {"display": "none"}
-
         elif selected_model == "Prophet":
             forecast_data_selector_options = [
-                {"label": f"{filenames[0]} ({feature_dropdowns[0]})", "value": 0},
-                {"label": f"{filenames[1]} ({feature_dropdowns[1]})", "value": 1},
+                {"label": f"{file} ({feature})", "value": n}
+                for n, (file, feature) in enumerate(zip(filenames, feature_dropdowns))
             ]
 
+            if selected_dataset is not None:
+
+                placeholders = [
+                    feature
+                    for i, feature in enumerate(feature_dropdowns)
+                    if i != selected_dataset
+                ]
+
             marks = no_update
-            if scenario_data:
-                forecast, merged_df, future_df = prophet_fit_and_predict_multi(
-                    filtered_dfs[0],
-                    filtered_dfs[1],
-                    time_dropdowns[file_1],
-                    time_dropdowns[file_2],
-                    feature_dropdowns[file_1],
-                    feature_dropdowns[file_2],
-                    scenario_data,
-                    multi_frequency_dropdown,
+            if not any(scenario is None for scenario in scenarios_data):
+
+                forecast, merged_df, future_df, y_feature = prophet_fit_and_predict_n(
+                    filtered_dfs,
+                    time_dropdowns,
+                    feature_dropdowns,
+                    scenarios=scenarios_data,
+                    frequency=multi_frequency_dropdown,
+                    y_feature_index=selected_dataset,
                 )
 
-                fig = create_multivariate_forecast(
-                    forecast,
-                    merged_df,
-                    future_df,
-                    feature_dropdowns[file_1],
-                    feature_dropdowns[file_2],
+                fig = create_multivariate_forecast_prophet(
+                    forecast, merged_df, future_df, y_feature, feature_dropdowns
                 )
+
             else:
-                merged_df, _ = merge_dataframes(
-                    filtered_dfs[0],
-                    filtered_dfs[1],
-                    time_dropdowns[file_1],
-                    time_dropdowns[file_2],
+                merged_df, _ = merge_dataframes_multi(
+                    filtered_dfs,
+                    time_dropdowns,
                 )
 
                 last_five_datapoints = merged_df.iloc[::-1].round(2).to_dict("records")
@@ -2572,13 +2554,14 @@ def update_multivariate_forecast(
                 "display": "flex",
             }
 
-            scenario_input_style = {"display": "block"}
-
         if multi_forecast_children:
             multi_forecast_children.clear()
 
         if (
-            (selected_model == "Prophet" and scenario_data)
+            (
+                selected_model == "Prophet"
+                and not any(scenario is None for scenario in scenarios_data)
+            )
             or selected_model == "Vector AR"
             or selected_model == "HW Smoothing"
         ):
@@ -2604,7 +2587,7 @@ def update_multivariate_forecast(
             alpha_div_style,
             forecast_data_selector_options,
             last_five_datapoints,
-            scenario_input_style,
+            placeholders,
         )
     elif (
         not any(x is None for x in dataframes + feature_dropdowns)
@@ -2631,7 +2614,7 @@ def update_multivariate_forecast(
             no_update,
             no_update,
             no_update,
-            no_update,
+            placeholders,
         )
 
     else:
@@ -2648,7 +2631,7 @@ def update_multivariate_forecast(
             no_update,
             no_update,
             no_update,
-            no_update,
+            placeholders,
         )
 
 

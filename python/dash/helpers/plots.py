@@ -373,153 +373,6 @@ def create_forecast_plot(
     return fig
 
 
-def create_multivariate_forecast(
-    forecast, df, future_df, feature_column_1, feature_column_2
-):
-    if feature_column_1 == feature_column_2:
-        feature_column_1 += "_x"
-        feature_column_2 += "_y"
-
-    fig = go.Figure(make_subplots(specs=[[{"secondary_y": True}]]))
-
-    fig.add_trace(
-        go.Scatter(
-            x=df["ds"],
-            y=df["y"],
-            name=feature_column_1,
-            mode="lines",
-            line={"color": "mediumpurple"},
-        ),
-        secondary_y=False,
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=df["ds"],
-            y=df[feature_column_2],
-            name=feature_column_2,
-            mode="lines",
-            line={"color": "mediumspringgreen"},
-        ),
-        secondary_y=True,
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=future_df["ds"],
-            y=future_df[feature_column_2],
-            name=feature_column_2,
-            mode="lines",
-            line={"dash": "dash", "color": "mediumspringgreen"},
-        ),
-        secondary_y=True,
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=forecast["ds"],
-            y=forecast["yhat"],
-            name="Prediction " + feature_column_1,
-            mode="lines+markers",
-            line={"dash": "dash"},
-            marker=go.scatter.Marker(symbol="triangle-up", color="mediumpurple"),
-            error_y=go.scatter.ErrorY(
-                array=forecast["yhat_upper"] - forecast["yhat"],
-                arrayminus=forecast["yhat"] - forecast["yhat_lower"],
-            ),
-        ),
-        secondary_y=False,
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=pd.concat([df.iloc[-1], forecast.rename(columns={"yhat": "y"}).iloc[0]])[
-                "ds"
-            ],
-            y=pd.concat([df.iloc[-1], forecast.rename(columns={"yhat": "y"}).iloc[0]])[
-                "y"
-            ],
-            mode="lines",
-            line={"dash": "dash", "color": "mediumpurple"},
-            showlegend=False,
-        ),
-        secondary_y=False,
-    )
-
-    fig.update_layout(
-        template="plotly_dark",
-        yaxis1_title=feature_column_1,
-        yaxis2_title=feature_column_2,
-        margin={"t": 20},
-    )
-
-    return fig
-
-
-def create_var_forecast_plot(
-    df, feature_column_1, feature_column_2, time_column, periods
-):
-
-    if feature_column_1 == feature_column_2:
-        feature_column_1 += "_x"
-        feature_column_2 += "_y"
-
-    fig = go.Figure(make_subplots(specs=[[{"secondary_y": True}]]))
-
-    fig.add_trace(
-        go.Scatter(
-            x=df[time_column][:-periods],
-            y=df[feature_column_1][:-periods],
-            name=feature_column_1,
-            mode="lines",
-            line={"color": "mediumpurple"},
-        ),
-        secondary_y=False,
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=df[time_column][-periods - 1 :],
-            y=df[feature_column_1][-periods - 1 :],
-            name=feature_column_1 + " Prediction",
-            mode="lines",
-            line={"dash": "dash", "color": "mediumpurple"},
-        ),
-        secondary_y=False,
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=df[time_column][:-periods],
-            y=df[feature_column_2][:-periods],
-            name=feature_column_2,
-            mode="lines",
-            line={"color": "mediumspringgreen"},
-        ),
-        secondary_y=True,
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=df[time_column][-periods - 1 :],
-            y=df[feature_column_2][-periods - 1 :],
-            name=feature_column_2 + " Prediction",
-            mode="lines",
-            line={"dash": "dash", "color": "mediumspringgreen"},
-        ),
-        secondary_y=True,
-    )
-
-    fig.update_layout(
-        template="plotly_dark",
-        yaxis1_title=feature_column_1,
-        yaxis2_title=feature_column_2,
-        margin={"t": 20},
-    )
-
-    return fig
-
-
 def create_var_forecast_plot_multi(forecast, feature_columns, time_column, periods):
     colors = ("mediumpurple", "mediumspringgreen", "hotpink", "mediumblue", "goldenrod")
 
@@ -559,5 +412,106 @@ def create_var_forecast_plot_multi(forecast, feature_columns, time_column, perio
         margin={"t": 20, "b": 20},
         **yax_titles,
     )
+
+    return fig
+
+
+def create_multivariate_forecast_prophet(
+    forecast, df, future_df, y_feature, feature_columns
+):
+    # if feature_column_1 == feature_column_2:
+    #     feature_column_1 += "_x"
+    #     feature_column_2 += "_y"
+
+    colors = ("mediumspringgreen", "hotpink", "mediumblue", "goldenrod")
+
+    fig = go.Figure(
+        make_subplots(
+            rows=1,
+            cols=len(feature_columns) + 1,
+            subplot_titles=(
+                "Forecast",
+                *["Scenario" for i in range(len(feature_columns))],
+            ),
+        )
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=df["ds"],
+            y=df["y"],
+            name=y_feature,
+            mode="lines",
+            line={"color": "mediumpurple"},
+        ),
+        row=1,
+        col=1,
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=forecast["ds"],
+            y=forecast["yhat"],
+            name="Prediction " + y_feature,
+            mode="lines+markers",
+            line={"dash": "dash"},
+            marker=go.scatter.Marker(symbol="triangle-up", color="mediumpurple"),
+            error_y=go.scatter.ErrorY(
+                array=forecast["yhat_upper"] - forecast["yhat"],
+                arrayminus=forecast["yhat"] - forecast["yhat_lower"],
+            ),
+        ),
+        row=1,
+        col=1,
+    )
+
+    fig.add_trace(
+        go.Scatter(
+            x=pd.concat([df.iloc[-1], forecast.rename(columns={"yhat": "y"}).iloc[0]])[
+                "ds"
+            ],
+            y=pd.concat([df.iloc[-1], forecast.rename(columns={"yhat": "y"}).iloc[0]])[
+                "y"
+            ],
+            mode="lines",
+            line={"dash": "dash", "color": "mediumpurple"},
+            showlegend=False,
+        ),
+        row=1,
+        col=1,
+    )
+
+    for i, feature in enumerate(feature_columns):
+
+        fig.add_trace(
+            go.Scatter(
+                x=df["ds"],
+                y=df[feature],
+                name=feature,
+                mode="lines",
+                line={"color": colors[i]},
+            ),
+            row=1,
+            col=i + 2,
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=future_df["ds"],
+                y=future_df[feature],
+                name=feature,
+                mode="lines",
+                line={"dash": "dash", "color": colors[i]},
+            ),
+            row=1,
+            col=i + 2,
+        )
+
+    yax_titles = {
+        f"yaxis{i+1}_title": feature
+        for i, feature in enumerate([y_feature] + feature_columns)
+    }
+
+    fig.update_layout(template="plotly_dark", margin={"t": 20}, **yax_titles)
 
     return fig

@@ -1,4 +1,3 @@
-import dash_daq as daq
 from dash import (
     Dash,
     dcc,
@@ -11,7 +10,6 @@ from dash import (
     callback,
     MATCH,
     ALL,
-    no_update,
 )
 
 
@@ -125,19 +123,17 @@ class ParameterStoreAIO(html.Div):
     )
     def update_parameter_store(parameter_input: str, inputs, n_clicks: int):
 
-        print(inputs)
-
         changed_item = [p["prop_id"] for p in callback_context.triggered][0]
 
         if parameter_input and "submit_button" in changed_item:
             if "scenario" in changed_item:
-                scenario = parameter_input.replace(" ", "").split(",")
 
-                scenario = [float(x) for x in scenario]
+                scenarios = [
+                    [float(x) for x in scenario.replace(" ", "").split(",")]
+                    for scenario in inputs
+                ]
 
-                stores = [scenario for i in range(len(inputs))]
-
-                return stores
+                return scenarios
 
             else:
                 return inputs
