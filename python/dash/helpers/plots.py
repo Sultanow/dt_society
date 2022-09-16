@@ -1,4 +1,5 @@
 import enum
+import os
 import numpy as np
 import plotly.graph_objects as go
 import pandas as pd
@@ -110,6 +111,7 @@ def create_choropleth_slider_plot(
     geo_column: str,
     feature_column: str,
     time_column: str = None,
+    scope="Europe",
 ) -> go.Figure:
     """Creates choropleth plot with time slider and animation
 
@@ -125,13 +127,13 @@ def create_choropleth_slider_plot(
     fig_dict = {"data": [], "layout": {}, "frames": []}
 
     fig_dict["layout"] = dict(
-        geo=dict(
-            scope="world",
-            projection={"type": "natural earth2", "scale": 3},
-            bgcolor="rgba(0,0,0,0)",
-            center=dict(lat=50.5, lon=11),
-        ),
-        margin=dict(l=0, r=0, b=0, t=1, pad=0, autoexpand=True),
+        # geo=dict(
+        #     scope="world",
+        #     projection={"type": "natural earth2", "scale": 3},
+        #     bgcolor="rgba(0,0,0,0)",
+        #     center=dict(lat=50.5, lon=11),
+        # ),
+        margin=dict(l=0, r=0, b=1, t=1, pad=0, autoexpand=True),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
     )
@@ -156,7 +158,7 @@ def create_choropleth_slider_plot(
                 },
             ],
             "direction": "left",
-            "pad": {"r": 10, "t": 0},
+            "pad": {"r": 10, "t": 10},
             "showactive": False,
             "type": "buttons",
             "x": 0.1,
@@ -174,7 +176,7 @@ def create_choropleth_slider_plot(
             "visible": False,
         },
         "transition": {"duration": 300},
-        "pad": {"b": 10, "t": 0},
+        "pad": {"b": 10, "t": 5},
         "len": 0.9,
         "x": 0.1,
         "y": 0,
@@ -186,22 +188,100 @@ def create_choropleth_slider_plot(
 
     first_year = data[time_column].unique()[0]
 
+    # data_dict = dict(
+    #     type="choropleth",
+    #     locations=data[data[time_column] == first_year][geo_column],
+    #     locationmode="ISO-3",
+    #     z=data[data[time_column] == first_year][feature_column],
+    #     zmin=0,
+    #     zmax=data[feature_column].max(),
+    #     colorscale="Magma",
+    #     colorbar=go.choropleth.ColorBar(
+    #         title=go.choropleth.colorbar.Title(text=feature_column)
+    #     ),
+    #     marker_line_color="darkgray",
+    #     marker_line_width=0.5,
+    # )
+
+    geojsons = {
+        "World": {
+            "url": "https://datahub.io/core/geo-countries/r/countries.geojson",
+            "featureid": "properties.ISO_A3",
+            "zoom": 1,
+            "center": {"lat": 56.5, "lon": 11},
+        },
+        "Europe": {
+            "url": "https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSON/europe.geojson",
+            "path": "/assets/custom.geo-3.json",
+            # "featureid": "properties.ISO3",
+            "featureid": "properties.adm0_iso",
+            "zoom": 2.5,
+            "center": {"lat": 53, "lon": 11},
+        },
+        "Germany": {
+            "url": "https://raw.githubusercontent.com/isellsoap/deutschlandGeoJSON/main/2_bundeslaender/3_mittel.geo.json",
+            "path": "/assets/3_mittel.geo.json",
+            "featureid": "properties.id",
+            "zoom": 4.4,
+            "center": {"lat": 51.3, "lon": 10},
+        },
+    }
+
+    with urlopen(geojsons[scope]["url"]) as response:
+        countries = json.load(response)
+
+    # with open(os.getcwd() + geojsons[scope]["path"]) as response:
+    #     countries = json.load(response)
+
     data_dict = dict(
-        type="choropleth",
+        type="choroplethmapbox",
         locations=data[data[time_column] == first_year][geo_column],
-        locationmode="ISO-3",
+        geojson=countries,
+        # locationmode="ISO-3",
+        featureidkey=geojsons[scope]["featureid"],
         z=data[data[time_column] == first_year][feature_column],
         zmin=0,
         zmax=data[feature_column].max(),
         colorscale="Magma",
-        colorbar=go.choropleth.ColorBar(
-            title=go.choropleth.colorbar.Title(text=feature_column)
+        colorbar=go.choroplethmapbox.ColorBar(
+            title=go.choroplethmapbox.colorbar.Title(text=feature_column)
         ),
-        marker_line_color="darkgray",
-        marker_line_width=0.5,
+        marker={"opacity": 0.5}
+        # marker_line_color="darkgray",
+        # marker_line_width=0.5,
     )
 
     fig_dict["data"].append(data_dict)
+
+    # for time in data[time_column].unique():
+
+    #     df_per_year = data[data[time_column] == time]
+
+    #     fig_dict["frames"].append(
+    #         dict(
+    #             data=dict(
+    #                 type="choropleth",
+    #                 locations=df_per_year[geo_column],
+    #                 locationmode="ISO-3",
+    #                 z=df_per_year[feature_column],
+    #             ),
+    #             name=str(time),
+    #         )
+    #     )
+
+    #     slider_step = {
+    #         "args": [
+    #             [time],
+    #             {
+    #                 "frame": {"duration": 300, "redraw": True},
+    #                 "mode": "immediate",
+    #                 "transition": {"duration": 300},
+    #             },
+    #         ],
+    #         "label": str(time),
+    #         "method": "animate",
+    #     }
+    #     sliders_dict["steps"].append(slider_step)
 
     for time in data[time_column].unique():
 
@@ -210,9 +290,10 @@ def create_choropleth_slider_plot(
         fig_dict["frames"].append(
             dict(
                 data=dict(
-                    type="choropleth",
+                    type="choroplethmapbox",
                     locations=df_per_year[geo_column],
-                    locationmode="ISO-3",
+                    featureidkey=geojsons[scope]["featureid"],
+                    geojson=countries,
                     z=df_per_year[feature_column],
                 ),
                 name=str(time),
@@ -236,9 +317,14 @@ def create_choropleth_slider_plot(
     fig_dict["layout"]["sliders"] = [sliders_dict]
 
     fig_choropleth = go.Figure(fig_dict)
-    fig_choropleth.update_geos(
-        showcoastlines=True, showsubunits=True, showframe=False, resolution=50
+    fig_choropleth.update_mapboxes(
+        style="carto-positron",
+        zoom=geojsons[scope]["zoom"],
+        center=geojsons[scope]["center"],
     )
+    # fig_choropleth.update_geos(
+    #     showcoastlines=True, showsubunits=True, showframe=False, resolution=50
+    # )
     fig_choropleth.update_layout(template=theme)
 
     return fig_choropleth

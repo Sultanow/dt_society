@@ -574,6 +574,25 @@ app.layout = html.Div(
                                                 "display": "none",  # disabled
                                             },
                                         ),
+                                        dcc.Dropdown(
+                                            options=["Europe", "Germany"],
+                                            value="Europe",
+                                            placeholder="Scope",
+                                            clearable=False,
+                                            id="scope-dropdown-map",
+                                            style={
+                                                "width": "110px",
+                                                "font-size": "14px",
+                                                "border-top": "0px",
+                                                "border-left": "0px",
+                                                "border-right": "0px",
+                                                "border-bottom": "0px",
+                                                "backgroundColor": "#111111",
+                                                "border-color": "#5c6cfa",
+                                                "border-radius": "0px",
+                                                "padding-top": "1.5px",
+                                            },
+                                        ),
                                         html.Div(
                                             "Map",
                                             style={
@@ -1613,6 +1632,8 @@ def update_stats(
 
         filtered_df = df[df[time_column] == year][[geo_column, feature_column]]
 
+        print(filtered_df)
+
         filtered_df_by_country = df[(df[geo_column] == country_dropdown_stats)]
 
         mean, max, min, max_country, min_country = compute_stats(
@@ -1801,6 +1822,7 @@ def update_line_plot(
         },
         "value",
     ),
+    Input("scope-dropdown-map", "value"),
 )
 def update_choropleth(
     map_children: list,
@@ -1810,6 +1832,7 @@ def update_choropleth(
     feature_dropdowns,
     time_dropdowns,
     geo_dropdowns,
+    scope,
 ) -> list:
     """Displays choropleth mapbox in countries section
 
@@ -1856,6 +1879,7 @@ def update_choropleth(
             geo_column=geo_column,
             feature_column=feature_column,
             time_column=time_column,
+            scope=scope,
         )
 
         if map_children:
