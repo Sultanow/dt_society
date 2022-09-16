@@ -213,8 +213,8 @@ def create_choropleth_slider_plot(
         "Europe": {
             "url": "https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSON/europe.geojson",
             "path": "/assets/custom.geo-3.json",
-            # "featureid": "properties.ISO3",
-            "featureid": "properties.adm0_iso",
+            "featureid": "properties.ISO3",
+            # "featureid": "properties.adm0_iso",
             "zoom": 2.5,
             "center": {"lat": 53, "lon": 11},
         },
