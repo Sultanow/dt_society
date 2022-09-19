@@ -417,7 +417,7 @@ def compute_stats(
 
 
 def compute_growth_rate(
-    df: pd.DataFrame, feature_column: str, time_span: list
+    df: pd.DataFrame, feature_column: str, time_span: list, time_column: str
 ) -> float:
     """Computes the growth rate of a feature in a given time window
 
@@ -430,8 +430,11 @@ def compute_growth_rate(
         float: growth rate
     """
 
-    start_value = df[feature_column].sort_values().values[time_span[0]]
-    end_value = df[feature_column].sort_values().values[time_span[-1]]
+    df = df.sort_values(by=[time_column])
+
+    start_value = df[feature_column].values[time_span[0]]
+    end_value = df[feature_column].values[time_span[-1]]
+
     growth_rate = ((end_value - start_value) / end_value) * 100
 
     return round(growth_rate, 2)
