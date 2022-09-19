@@ -504,6 +504,11 @@ app.layout = html.Div(
                     style={"margin-bottom": "10px", "display": "none"},
                 ),
                 html.Div(style={"backgroundColor": "#232323", "padding": "10px"}),
+            ],
+            style={"backgroundColor": "#232323"},
+        ),
+        html.Div(
+            [
                 html.Div(
                     [
                         html.Div(
@@ -574,25 +579,6 @@ app.layout = html.Div(
                                                 "display": "none",  # disabled
                                             },
                                         ),
-                                        dcc.Dropdown(
-                                            options=["Europe", "Germany"],
-                                            value="Europe",
-                                            placeholder="Scope",
-                                            clearable=False,
-                                            id="scope-dropdown-map",
-                                            style={
-                                                "width": "110px",
-                                                "font-size": "14px",
-                                                "border-top": "0px",
-                                                "border-left": "0px",
-                                                "border-right": "0px",
-                                                "border-bottom": "0px",
-                                                "backgroundColor": "#111111",
-                                                "border-color": "#5c6cfa",
-                                                "border-radius": "0px",
-                                                "padding-top": "1.5px",
-                                            },
-                                        ),
                                         html.Div(
                                             "Map",
                                             style={
@@ -618,21 +604,69 @@ app.layout = html.Div(
                                 ),
                             ]
                         ),
-                        dcc.Loading(
-                            type="circle",
-                            children=[
-                                html.Div(
-                                    [],
-                                    id="map-div",
+                        html.Div(
+                            [
+                                dcc.RadioItems(
+                                    [
+                                        {
+                                            "label": html.Img(
+                                                src="/assets/earth-icon.svg",
+                                                height=10,
+                                                style={
+                                                    "padding-left": "5px",
+                                                    "padding-top": "5px",
+                                                },
+                                            ),
+                                            "value": "global",
+                                        },
+                                        {
+                                            "label": html.Img(
+                                                src="assets/europe-flag-icon.svg",
+                                                height=10,
+                                                style={
+                                                    "padding-left": "5px",
+                                                    "padding-top": "5px",
+                                                },
+                                            ),
+                                            "value": "europe",
+                                        },
+                                        {
+                                            "label": html.Img(
+                                                src="/assets/germany-flag-icon.svg",
+                                                height=10,
+                                                style={
+                                                    "padding-left": "5px",
+                                                    "padding-top": "5px",
+                                                },
+                                            ),
+                                            "value": "germany",
+                                        },
+                                    ],
+                                    value="europe",
+                                    labelStyle={
+                                        "align-items": "center",
+                                        "justify-content": "center",
+                                        "padding-left": "10px",
+                                    },
+                                    id="scope-selector",
                                 ),
-                            ],
+                                dcc.Loading(
+                                    type="circle",
+                                    children=[
+                                        html.Div(
+                                            [],
+                                            id="map-div",
+                                        ),
+                                    ],
+                                ),
+                            ]
                         ),
                     ],
                     id="map-plot",
                     style={"display": "none"},
                 ),
             ],
-            style={"backgroundColor": "#232323"},
+            style={"display": "flex", "backgroundColor": "#232323"},
         ),
         html.Div(
             [
@@ -1632,8 +1666,6 @@ def update_stats(
 
         filtered_df = df[df[time_column] == year][[geo_column, feature_column]]
 
-        print(filtered_df)
-
         filtered_df_by_country = df[(df[geo_column] == country_dropdown_stats)]
 
         mean, max, min, max_country, min_country = compute_stats(
@@ -1641,7 +1673,7 @@ def update_stats(
         )
 
         growth_rate = compute_growth_rate(
-            filtered_df_by_country, feature_column, year_range
+            filtered_df_by_country, feature_column, year_range, time_column
         )
 
         avg_stat_children.clear()
@@ -1822,7 +1854,7 @@ def update_line_plot(
         },
         "value",
     ),
-    Input("scope-dropdown-map", "value"),
+    Input("scope-selector", "value"),
 )
 def update_choropleth(
     map_children: list,

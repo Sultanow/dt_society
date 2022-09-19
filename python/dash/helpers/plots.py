@@ -58,7 +58,7 @@ def create_multi_line_plot(
         xaxis_title=time_column,
         yaxis_title=feature_column,
         template=theme,
-        margin={"t": 30},
+        margin={"t": 30, "autoexpand": True},
     )
 
     return fig
@@ -204,13 +204,13 @@ def create_choropleth_slider_plot(
     # )
 
     geojsons = {
-        "World": {
+        "global": {
             "url": "https://datahub.io/core/geo-countries/r/countries.geojson",
             "featureid": "properties.ISO_A3",
             "zoom": 1,
             "center": {"lat": 56.5, "lon": 11},
         },
-        "Europe": {
+        "europe": {
             "url": "https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSON/europe.geojson",
             "path": "/assets/custom.geo-3.json",
             "featureid": "properties.ISO3",
@@ -218,7 +218,7 @@ def create_choropleth_slider_plot(
             "zoom": 2.5,
             "center": {"lat": 53, "lon": 11},
         },
-        "Germany": {
+        "germany": {
             "url": "https://raw.githubusercontent.com/isellsoap/deutschlandGeoJSON/main/2_bundeslaender/3_mittel.geo.json",
             "path": "/assets/3_mittel.geo.json",
             "featureid": "properties.id",
