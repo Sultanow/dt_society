@@ -7,7 +7,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_squared_error
 from statsmodels.tsa.api import VAR
 from statsmodels.tsa.stattools import adfuller
-from typing import Tuple
+from typing import Tuple, List
 
 from .layout import get_time_marks
 from .smoothing import multivariate_ES
@@ -142,13 +142,26 @@ def fit_and_predict(
 
 
 def var_fit_and_predict_multi(
-    dataframes,
-    time_columns,
-    feature_columns,
-    max_lags,
-    periods,
-    frequency,
-):
+    dataframes: List[pd.DataFrame],
+    time_columns: List[str],
+    feature_columns: List[str],
+    max_lags: float,
+    periods: int,
+    frequency: str,
+) -> Tuple[pd.DataFrame, dict]:
+    """Fit and forecast using a Vector Auto Regression model
+
+    Args:
+        dataframes (List[pd.DataFrame]): available dataframes
+        time_columns (List[str]): selected time columns
+        feature_columns (List[str]): selected features
+        max_lags (float): number of lags to consider while forecasting (max_lags parameter)
+        periods (int): number of forecasts to perform
+        frequency (str): frequency of timestamps
+
+    Returns:
+        Tuple[pd.DataFrame, dict]: forecast data, marks dict for slider
+    """
 
     frequencies = {
         "Yearly": ("AS", 365),
@@ -189,13 +202,26 @@ def var_fit_and_predict_multi(
 
 
 def hw_es_fit_and_predict_multi(
-    dataframes,
-    time_columns,
-    feature_columns: list,
-    frequency,
-    periods,
-    alpha,
-):
+    dataframes: List[pd.DataFrame],
+    time_columns: List[str],
+    feature_columns: List[str],
+    frequency: str,
+    periods: int,
+    alpha: float,
+) -> Tuple[pd.DataFrame, dict]:
+    """Fit and forecast using the HW exponential smoothing method
+
+    Args:
+        dataframes (List[pd.DataFrame]): available dataframes
+        time_columns (List[str]): selected time columns
+        feature_columns (List[str]): selected features
+        frequency (str): frequency of time stamps
+        periods (int): number of forecasts to perform
+        alpha (float): alpha parameter
+
+    Returns:
+        Tuple[pd.DataFrame, dict]: forecast data, marks dict for slider
+    """
 
     frequencies = {
         "Yearly": ("AS", 365),
@@ -240,8 +266,26 @@ def hw_es_fit_and_predict_multi(
 
 
 def prophet_fit_and_predict_n(
-    dataframes, time_columns, feature_columns, scenarios, frequency, y_feature_index
-):
+    dataframes: List[pd.DataFrame],
+    time_columns: List[str],
+    feature_columns: List[str],
+    scenarios: List[List[float]],
+    frequency: str,
+    y_feature_index: int,
+) -> Tuple[pd.DataFrame, str]:
+    """Fit and forecast using the Prophet model with additional scenarios
+
+    Args:
+        dataframes (List[pd.DataFrame]): available dataframes
+        time_columns (List[str]): selected time columns
+        feature_columns (List[str]): selected features
+        scenarios (List[List[float]]): specified scenarios
+        frequency (str): frequency of time stamps
+        y_feature_index (int): index/id of the dependent feature
+
+    Returns:
+        Tuple[pd.DataFrame, str]: forecast, intitial and future dataframe, name of dependent feature
+    """
 
     frequencies = {
         "Yearly": ("AS", 365),

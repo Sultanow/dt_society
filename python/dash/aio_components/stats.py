@@ -1,19 +1,8 @@
-import dash_daq as daq
 from dash import (
     Dash,
     dcc,
     html,
-    Input,
-    Output,
-    exceptions,
-    State,
-    dash_table,
-    callback_context,
-    no_update,
-    callback,
-    MATCH,
 )
-import pandas as pd
 
 
 class StatAIO(html.Div):
@@ -27,6 +16,11 @@ class StatAIO(html.Div):
     ids = ids
 
     def __init__(self, aio_id: str):
+        """AIO component to display a specific statistic
+
+        Args:
+            aio_id (str): name/id of component
+        """
         super().__init__(
             children=[
                 html.Div(

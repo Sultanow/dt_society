@@ -1,3 +1,4 @@
+from dash.development.base_component import Component
 import dash_daq as daq
 from dash import (
     Dash,
@@ -12,6 +13,7 @@ from dash import (
     MATCH,
 )
 from helpers.layout import preprocess_dataset, export_settings
+from typing import List
 
 
 class FilePreProcessingAIO(html.Div):
@@ -89,7 +91,12 @@ class FilePreProcessingAIO(html.Div):
 
     ids = ids
 
-    def __init__(self, dataset_id: str):
+    def __init__(self, dataset_id: int):
+        """AIO component to upload a dataset and select columns of interest
+
+        Args:
+            dataset_id (int): id of the dataset
+        """
 
         self.demo_id = dataset_id
 
@@ -340,24 +347,26 @@ class FilePreProcessingAIO(html.Div):
         file_name: str,
         reshape_column_value: str,
         reshape_switch_status: bool,
-        file_upload_children: str,
+        file_upload_children: List[Component],
         demo_button_n_clicks: int,
         preset_file: str,
         reset_button_n_clicks: int,
         demo_id: str,
-    ):
+    ) -> tuple:
         """Handles the preprocessing of an uploaded dataset. In demo mode, a predefined dataset is loaded instead.
 
         Args:
-            delimiter_value (str): value of delimiter dropdown
-            geo_column_value (str): value of geo column
-            file_content (str): uploaded file content
-            file_name (str): uploaded file name
-            reshape_column_value (str): value of column to reshape on
-            reshape_switch_status (bool): value of reshape toggle
-            file_upload_children (str): container of file upload element
-            demo_button_n_clicks (int): number of clicks of demo button (used to listen for presses)
-            preset_file (str): content of uploaded preset file
+            delimiter_value (str): selected delimiter
+            geo_column_value (str): selected geo column
+            file_content (str): raw file content
+            file_name (str): filename
+            reshape_column_value (str): selected column to reshape on
+            reshape_switch_status (bool): state of reshape toggle
+            file_upload_children (str): container of upload element
+            demo_button_n_clicks (int): number of button clicks for demo button
+            preset_file (str): file with predetermined columns to be selected
+            reset_button_n_clicks (int): number of clicks for reset button
+            demo_id (str): id of demo dataset to use in demo mode
 
         Returns:
             tuple:
@@ -398,7 +407,25 @@ class FilePreProcessingAIO(html.Div):
         download_button_n_clicks: int,
         filename: str,
         demo_id: int,
-    ):
+    ) -> dict:
+        """Downloads a file containing all set dropdowns for a file
+
+        Args:
+            delimiter_value (str): selected delimiter value
+            geo_column_value (str): selected geo column
+            reshape_column_value (str): selected column to reshape on
+            reshape_switch_status (str): state of reshape toggle
+            time_column_value (str): selected time column
+            feature_column_value (str): selected feature column
+            download_button_n_clicks (int): number of clicks for download button
+            filename (str): name of the dataset file
+
+        Raises:
+            exceptions.PreventUpdate: Not triggered unless export button is pressed
+
+        Returns:
+            dict: key value pairs of set dropdowns
+        """
         changed_item = [p["prop_id"] for p in callback_context.triggered][0]
 
         if "preset_download_button" in changed_item:

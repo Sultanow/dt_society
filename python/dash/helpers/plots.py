@@ -9,16 +9,21 @@ from plotly.subplots import make_subplots
 from urllib.request import urlopen
 import json
 
+from typing import List
+
 theme = "plotly_dark"
 
 
 def create_multi_line_plot(
-    data: pd.DataFrame, geo_col, time_column, feature_column
+    data: pd.DataFrame, geo_col: str, time_column: str, feature_column: str
 ) -> go.Figure:
     """Creates a line plot with a line for each country
 
     Args:
-        data (pd.DataFrame): Dataset
+        data (pd.DataFrame): dataframe
+        geo_col (str): geo column value
+        time_column (str): time column value
+        feature_column (str): feature column value
 
     Returns:
         go.Figure: line plot
@@ -68,13 +73,11 @@ def create_choropleth_plot(
     data: pd.DataFrame,
     geo_column: str,
     feature_column: str,
-    facet: str = None,
-    year: str = None,
 ) -> go.Figure:
     """Creates a choropleth plot with timeline
 
     Args:
-        data (pd.DataFrame): Data
+        data (pd.DataFrame): Dataframe
 
     Returns:
         go.Figure: Choropleth plot
@@ -113,13 +116,14 @@ def create_choropleth_slider_plot(
     time_column: str = None,
     scope="Europe",
 ) -> go.Figure:
-    """Creates choropleth plot with time slider and animation
+    """Creates choropleth plot with time slider and animated transitions
 
     Args:
         data (pd.DataFrame): Data
         geo_column (str): value of geo column
         feature_column (str): value of feature column
         time_column (str, optional): value of column with time data. Defaults to None.
+        scope (str, optional): value of selected scope. Defaults to "Europe".
 
     Returns:
         go.Figure: Choropleth figure
@@ -331,22 +335,17 @@ def create_choropleth_slider_plot(
 
 
 def create_two_line_plot(
-    datasets: tuple, feature_columns: tuple, time_columns: tuple
+    datasets: List[pd.DataFrame], feature_columns: List[str], time_columns: List[str]
 ) -> go.Figure:
-    """Creates a line plot with two lines, where the second line belongs to an additional subplot
+    """Creates a line plot with n subplots divided into rows and columns
 
     Args:
-        dataset_1 (pd.DataFrame): First dataset
-        dataset_2 (pd.DataFrame): Second dataset
-        row_index_1 (int): index of the selected row in dataset_1
-        row_index_2 (int): index of the selected row in dataset_2
-        column_index_1 (int): index of first column in timeline
-        column_index_2 (int): index of second column in timeline
-        selected_unit_1 (str): selected value in the first unit dropdown
-        selected_unit_2 (str): selected value in the second unit dropdown
+        datasets (List[pd.DataFrame]): available datasets
+        feature_columns (List[str]): selected feature columns
+        time_columns (List[str]): selected time columns
 
     Returns:
-        go.Figure: Line plot with one line per subplot
+        go.Figure: line plot figure with subplots
     """
 
     rows = len(datasets) // 3 if len(datasets) // 3 >= 1 else 1
@@ -459,7 +458,23 @@ def create_forecast_plot(
     return fig
 
 
-def create_var_forecast_plot_multi(forecast, feature_columns, time_column, periods):
+def create_var_forecast_plot_multi(
+    forecast: pd.DataFrame,
+    feature_columns: List[str],
+    time_column: List[str],
+    periods: int,
+) -> go.Figure:
+    """Create multivariate forecast plot with predictions from a Vector Auto Regression/HW exponential smoothing model
+
+    Args:
+        forecast (pd.DataFrame): forecast dataframe
+        feature_columns (List[str]): selected features
+        time_column (List[str]): selected time columns
+        periods (int): number of forecasts predicted
+
+    Returns:
+        go.Figure: figure with line plot for each forecast
+    """
     colors = ("mediumpurple", "mediumspringgreen", "hotpink", "mediumblue", "goldenrod")
 
     fig = go.Figure(make_subplots(rows=1, cols=len(feature_columns)))
@@ -503,8 +518,25 @@ def create_var_forecast_plot_multi(forecast, feature_columns, time_column, perio
 
 
 def create_multivariate_forecast_prophet(
-    forecast, df, future_df, y_feature, feature_columns
-):
+    forecast: pd.DataFrame,
+    df: pd.DataFrame,
+    future_df: pd.DataFrame,
+    y_feature: str,
+    feature_columns: List[str],
+) -> go.Figure:
+    """Creates multivariate forecast plot with predictions from a Prophet model with given scenarios
+
+    Args:
+        forecast (pd.DataFrame): forecast result
+        df (pd.DataFrame): initial dataframe
+        future_df (pd.DataFrame): dataframe with future scenarios
+        y_feature (str): value of dependent feature
+        feature_columns (List[str]): list of independent feature
+
+    Returns:
+        go.Figure: figure with line plot for prophet forecast and all other future scenarios
+    """
+
     # if feature_column_1 == feature_column_2:
     #     feature_column_1 += "_x"
     #     feature_column_2 += "_y"

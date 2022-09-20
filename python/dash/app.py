@@ -1,3 +1,4 @@
+from dash.development.base_component import Component
 import dash_daq as daq
 from dash import (
     ALL,
@@ -14,6 +15,8 @@ from dash import (
     no_update,
 )
 import pandas as pd
+from typing import List
+import time
 
 from aio_components.filepreprocessing import FilePreProcessingAIO
 from aio_components.stats import StatAIO
@@ -1265,12 +1268,27 @@ app.layout = html.Div(
     ),
 )
 def add_file(
-    add_file_button_clicks,
-    files_container,
-    data_selector,
-    scenario_container: list,
-    comp,
+    add_file_button_clicks: int,
+    files_container: List[Component],
+    data_selector: List[dict | str],
+    scenario_container: List[Component],
+    param_store_container: List[Component],
 ):
+    """Adds the option to upload additional file(s)
+
+    Args:
+        add_file_button_clicks (int): tracks the number of number of total datasetst added
+        files_container (List[Component]): container with file dropdowns/upload
+        data_selector (List[dict  |  str]): dataset selection toggle
+        scenario_container (List[Component]): container holding possible scenarios for forecasting
+        param_store_container (List[Component]): container holding the scenario input storage
+
+    Raises:
+        exceptions.PreventUpdate: No update unless add file button is clicked
+
+    Returns:
+        _type_: extended files container, extended dataselector, extended scenario container
+    """
 
     changed_item = [p["prop_id"] for p in callback_context.triggered][0]
 
@@ -1283,6 +1301,7 @@ def add_file(
             }
         )
 
+        # create ID dicts for additional storage and input components inside ParameterStoreAIO("scenario")
         store = {
             "component": "ParameterStoreAIO",
             "subcomponent": "store",
@@ -1297,7 +1316,9 @@ def add_file(
             "aio_id": "scenario",
         }
 
-        comp.insert(
+        # insert Input component after previous existing Input components in ParameterStoreAIO("scenario")
+        # (Input components are stacked sequentially on top of each other in the layout)
+        param_store_container.insert(
             -1,
             dcc.Input(
                 id=input,
@@ -1315,10 +1336,14 @@ def add_file(
                 },
             ),
         )
-        comp.insert(-1, dcc.Store(id=store))
+        # add corresponding Store component (not visible in layout)
+        param_store_container.insert(-1, dcc.Store(id=store))
 
+        # remove previous ParameterStoreAIO("scenario") component
         scenario_container.pop()
-        scenario_container.extend(comp)
+
+        # add ParameterStoreAIO("scenario") with additional Input component back to the container
+        scenario_container.extend(param_store_container)
 
         return files_container, data_selector, scenario_container
 
@@ -1338,11 +1363,11 @@ def add_file(
         "data",
     ),
 )
-def update_selector_visibility(dataframes: list):
+def update_selector_visibility(dataframes: List[str]):
     """Updates the dataset visibility toggle
 
     Args:
-        dataframes (list): All available datasets
+        dataframes (List[str]): All available datasets
 
     Returns:
         tuple: style properties for visibility selector
@@ -1388,14 +1413,14 @@ def update_selector_visibility(dataframes: list):
     ),
 )
 def update_country_dropdown_comparison(
-    dataframes: list,
-    geo_dropdowns: list,
+    dataframes: List[str],
+    geo_dropdowns: List[str],
 ):
     """Fills the dropdown in correlation section with countries that occur in both datasets
 
     Args:
-        dataframes (list): All available dataframes
-        geo_dropdowns (list): Selected geo-column values
+        dataframes (List[str]): All available dataframes
+        geo_dropdowns (List[str]): Selected geo-column values
 
     Raises:
         exceptions.PreventUpdate: Update prevented unless both datasets and geo-columns are available
@@ -1468,18 +1493,18 @@ def update_country_dropdown_comparison(
     ),
 )
 def update_year_and_country_dropdown_stats(
-    selected_dataset: str,
-    dataframes: list,
-    time_dropdowns: list,
-    geo_dropdowns: list,
+    selected_dataset: int,
+    dataframes: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
 ) -> tuple:
     """Fills dropdown in stats section with available years in the selected dataset
 
     Args:
-        selected_dataset (str): value of the selected dataset
-        dataframes (list): available dataframes
-        time_dropdowns (list): Selected time-column values
-        geo_dropdowns (list): Selected geo-column values
+        selected_dataset (int): id of the selected dataset
+        dataframes (List[str]): available dataframes
+        time_dropdowns (List[str]): Selected time-column values
+        geo_dropdowns (List[str]): Selected geo-column values
 
     Raises:
         exceptions.PreventUpdate: prevents update if no dataset is available and no dataset is selected
@@ -1526,18 +1551,18 @@ def update_year_and_country_dropdown_stats(
     ),
 )
 def update_table_content(
-    selected_dataset: str,
-    visibility_checklist: list,
-    dataframes: list,
-    separators: list,
+    selected_dataset: int,
+    visibility_checklist: List[str],
+    dataframes: List[str],
+    separators: List[str],
 ) -> pd.DataFrame:
     """Fills table section with data from the selected dataset
 
     Args:
-        selected_dataset (str): value of selected dataset
-        visibility_checklist (list): list of displayed sections
-        dataframes (list): available dataframes
-        separators (list): selected seperators for each dataset
+        selected_dataset (int): value of selected dataset
+        visibility_checklist (List[str]): list of displayed sections
+        dataframes (List[str]): available dataframes
+        separators (List[str]): selected seperators for each dataset
 
     Raises:
         exceptions.PreventUpdate: update prevented if no dataset is available
@@ -1611,44 +1636,39 @@ def update_table_content(
     ),
 )
 def update_stats(
-    selected_dataset: str,
-    avg_stat_children: list,
-    max_stat_children: list,
-    min_stat_children: list,
-    growth_stat_children: list,
+    selected_dataset: int,
+    avg_stat_children: List[Component],
+    max_stat_children: List[Component],
+    min_stat_children: List[Component],
+    growth_stat_children: List[Component],
     year_dropdown_stats: str,
     country_dropdown_stats: str,
-    year_range: list,
-    visibility_checklist: list,
-    dataframes,
-    feature_dropdowns,
-    time_dropdowns,
-    geo_dropdowns,
+    year_range: List[int],
+    visibility_checklist: List[str],
+    dataframes: List[str],
+    feature_dropdowns: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
 ) -> tuple:
-    """Compute and display mean, max, min and growth value (per country) for selected dataset
+    """Update mean, min, max and change rate per country for the selected dataset
 
     Args:
-        selected_dataset (str): selected dataset
-        avg_stat_children (list): container which display mean stat
-        max_stat_children (list): container which displays max stat
-        min_stat_children (list): container which displays min stat
-        growth_stat_children (list): container which display growth stat per country
-        year_dropdown_stats (str): year selector dropdown in stats section
-        country_dropdown_stats (str): country selector in growth rate container
-        geo_dropdown_1 (str): "geo" colum selector for first dataset
-        geo_dropdown_2 (str): "geo" colum selector for second dataset
-        dataset (str): first dataset
-        dataset_2 (str): second dataset
-        selected_column (str): selected column in first dataset
-        selected_subcategory (str): selected subcategory in first dataset
-        selected_column_2 (str): selected column in second dataset
-        selected_sub_category_2 (str): selected subcategory in second dataset
-
-    Raises:
-        exceptions.PreventUpdate: prevents update when dataset, column selection, subcategory selection and "geo" column selection are empty
+        selected_dataset (int): id of selected dataset
+        avg_stat_children (List[Component]): mean stat container
+        max_stat_children (List[Component]): max stat container
+        min_stat_children (List[Component]): min stat container
+        growth_stat_children (List[Component]): growth stat container
+        year_dropdown_stats (str): selected year from dropdown
+        country_dropdown_stats (str): selected country for growth stat
+        year_range (List[int]): time span set in slider
+        visibility_checklist (List[str]): current visible sections
+        dataframes (List[str]): available dataframes
+        feature_dropdowns (List[str]): selected feature columns
+        time_dropdowns (List[str]): selected time columns
+        geo_dropdowns (List[str]): selected geo columns
 
     Returns:
-        tuple: mean stat container, max stat container, min stat container, growth stat container
+        tuple: mean stat container, max stat container, min stat container, growth stat container, stats section visibility
     """
 
     time_column = time_dropdowns[selected_dataset]
@@ -1742,33 +1762,27 @@ def update_stats(
     ),
 )
 def update_line_plot(
-    timeline_children: list,
-    selected_dataset: str,
-    visibility_checklist: list,
-    dataframes,
-    feature_dropdowns,
-    time_dropdowns,
-    geo_dropdowns,
-) -> list:
-    """Draws a line plot with the selected data specified in the dropdowns
+    timeline_children: List[Component],
+    selected_dataset: int,
+    visibility_checklist: List[str],
+    dataframes: List[str],
+    feature_dropdowns: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
+) -> tuple:
+    """Updates multi line plot
 
     Args:
-        selected_sub_category (str): first selected sub-category
-        selected_column (str): first selected column
-        dataset (str): first dataset
-        selected_sub_category_2 (str): second selected sub-category
-        selected_column_2 (str): second selected column
-        dataset_2 (str): second dataset
-        timeline_children (list): container for timeline section
-        selected_dataset (str): value of selected dataset
-        geo_dropdown_1 (str): "geo" column selector for first dataset
-        geo_dropdown_2 (str): "geo" column selector for second datset
-
-    Raises:
-        exceptions.PreventUpdate: _description_
+        timeline_children (List[Component]): container of timeline figure
+        selected_dataset (int): id of selected dataset
+        visibility_checklist (List[str]): current visible sections
+        dataframes (List[str]): available dataframes
+        feature_dropdowns (List[str]): selected feature columns
+        time_dropdowns (List[str]): selected time columns
+        geo_dropdowns (List[str]): selected geo columns
 
     Returns:
-        list: container with line plot
+        tuple: timeline figure, figure container visibility
     """
 
     time_column = time_dropdowns[selected_dataset]
@@ -1857,35 +1871,29 @@ def update_line_plot(
     Input("scope-selector", "value"),
 )
 def update_choropleth(
-    map_children: list,
-    selected_dataset: str,
-    visiblity_checklist: list,
-    dataframes,
-    feature_dropdowns,
-    time_dropdowns,
-    geo_dropdowns,
-    scope,
-) -> list:
-    """Displays choropleth mapbox in countries section
+    map_children: List[Component],
+    selected_dataset: int,
+    visiblity_checklist: List[str],
+    dataframes: List[str],
+    feature_dropdowns: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
+    scope: str,
+) -> tuple:
+    """Updates the map figure
 
     Args:
-        selected_sub_category (str): selected sub-category in first dataset
-        selected_column (str): selected column in first dataset
-        dataset (str): first dataset
-        map_children (list): container that holds the mapbox
-        selected_sub_category_2 (str): selected sub-category in second dataset
-        selected_column_2 (str): selected column in second dataset
-        dataset_2 (str): second dataset
-        geo_dropdown_2 (str): first "geo" dropdown selection
-        geo_dropdown_1 (str): second "geo" dropdown selection
-        selected_year_map (str): selected year in countries section
-        selected_dataset (str): value of selected dataset
-
-    Raises:
-        exceptions.PreventUpdate: update prevented unless atleast one dataset is uploaded
+        map_children (List[Component]): container of map figure
+        selected_dataset (int): id of selected dataset
+        visiblity_checklist (List[str]): current visible sections
+        dataframes (List[str]): available dataframes
+        feature_dropdowns (List[str]): selected features
+        time_dropdowns (List[str]): selected time columns
+        geo_dropdowns (List[str]): selected geo columns
+        scope (str): selected scope
 
     Returns:
-        list: container with choropleth mapbox
+        tuple: map figure, map container visbility
     """
 
     time_column = time_dropdowns[selected_dataset]
@@ -1974,32 +1982,26 @@ def update_choropleth(
 )
 def update_max_country_compare(
     selected_country: str,
-    comparison_children: str,
-    visibility_checklist: list,
-    dataframes,
-    feature_dropdowns,
-    time_dropdowns,
-    geo_dropdowns,
-) -> list:
-    """Creates a line plot with two subplots (one for each dataset respectively)
+    comparison_children: List[Component],
+    visibility_checklist: List[str],
+    dataframes: List[str],
+    feature_dropdowns: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
+) -> tuple:
+    """Updates correlation line plot
 
     Args:
-        selected_sub_category (str): selected sub-category in first dataset
-        selected_column (str): selected column in first dataset
-        dataset (str): first dataset
-        selected_sub_category_2 (str): selected sub-category in second dataset
-        selected_column_2 (str): selected column in second dataset
-        selected_country (str): selected country in comparison section
-        dataset_2 (str): second dataset
-        comparison_children (str): container that holds the line plot
-        geo_dropdown_2 (str): value of "geo" of first dataset
-        geo_dropdown_1 (str): value of "geo" in second dataset
-
-    Raises:
-        exceptions.PreventUpdate: update prevented until two datasets are loaded
+        selected_country (str): value of selected country
+        comparison_children (List[Component]): container of correlation line plot
+        visibility_checklist (List[str]): current visible sections
+        dataframes (List[str]): available dataframes
+        feature_dropdowns (List[str]): selected features
+        time_dropdowns (List[str]): selected time columns
+        geo_dropdowns (List[str]): selected geo columns
 
     Returns:
-        list: container with line plots
+        tuple: correlation line plot, correlation line plot container visibility
     """
 
     if (
@@ -2067,11 +2069,25 @@ def update_max_country_compare(
     ),
 )
 def update_forecast_slider(
-    selected_dataset: str,
+    selected_dataset: int,
     frequency_dropdown: str,
-    dataframes: str,
-    time_dropdowns: str,
-):
+    dataframes: List[str],
+    time_dropdowns: List[str],
+) -> tuple:
+    """Updates the forecast slider marks to match time stamps in selected dataset
+
+    Args:
+        selected_dataset (int): id of selected dataset
+        frequency_dropdown (str): selected frequency
+        dataframes (List[str]): available dataframes
+        time_dropdowns (List[str]): selected time columns
+
+    Raises:
+        exceptions.PreventUpdate: Update prevented if no time column, dataframe and frequency available
+
+    Returns:
+        tuple: time marks dict, slider visibility
+    """
 
     time_column = time_dropdowns[selected_dataset]
     data = dataframes[selected_dataset]
@@ -2134,39 +2150,35 @@ def update_forecast_slider(
     ),
 )
 def update_forecast(
-    selected_dataset: str,
-    fit_plot_children: list,
+    selected_dataset: int,
+    fit_plot_children: List[Component],
     country_dropdown: str,
-    forecast_slider_value: str,
+    forecast_slider_value: int,
     frequency_dropdown: str,
     model_dropdown: str,
-    visibility_checklist: list,
-    dataframes,
-    feature_dropdowns,
-    time_dropdowns,
-    geo_dropdowns,
+    visibility_checklist: List[str],
+    dataframes: List[str],
+    feature_dropdowns: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
 ) -> tuple:
-    """Creates a forecast using the Prophet model
+    """Create univariate forecast with Prophet or Linear Regression model
 
     Args:
-        dataset (str): First dataset
-        dataset_2 (str): Second dataset
-        feature_dropdown_1 (str): value of the first selected feature column
-        feature_dropdown_2 (str): value of the second selected feature column
-        geo_dropdown_1 (str): value of the first selected geo column
-        geo_dropdown_2 (str): value of the second selected geo column
-        time_dropdown_1 (str): value of the first selected time column
-        time_dropdown_2 (str): value of the second selected time column
-        selected_dataset (str): value of the dataset selector
-        fit_plot_children (list): container for the forecast plot
-        country_dropdown (str): selected country to forecast
-        forecast_slider_value (str): number of periods to forecast (set by slider)
-
-    Raises:
-        exceptions.PreventUpdate: update prevented if neither dataset is loaded with all columns selected
+        selected_dataset (int): id of selected dataset
+        fit_plot_children (List[Component]): container for forecast plot
+        country_dropdown (str): selected country
+        forecast_slider_value (int): number of forecast to predict
+        frequency_dropdown (str): selected time frequency
+        model_dropdown (str): selected forecasting model
+        visibility_checklist (List[str]): current visible sections
+        dataframes (List[str]): available dataframes
+        feature_dropdowns (List[str]): selected features
+        time_dropdowns (List[str]): selected time columns
+        geo_dropdowns (List[str]): selected geo columns
 
     Returns:
-        tuple: container with forecast plot, style component
+        tuple: forecast plot container, forecast plot container visibility
     """
 
     time_column = time_dropdowns[selected_dataset]
@@ -2280,33 +2292,29 @@ def update_forecast(
     ),
 )
 def update_heatmap(
-    selected_dataset: str,
-    heatmap_children: list,
+    selected_dataset: int,
+    heatmap_children: List[Component],
     country_dropdown: str,
-    visibility_checklist: list,
-    dataframes,
-    feature_dropdowns,
-    time_dropdowns,
-    geo_dropdowns,
-):
-    """Creates a heatmap from the correlation matrix of features
+    visibility_checklist: List[str],
+    dataframes: List[str],
+    feature_dropdowns: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
+) -> tuple:
+    """Update correlation heatmap
 
     Args:
-        dataset (str): First dataset
-        dataset_2 (str): Second dataset
-        time_dropdown_1 (str): value of the selected time column value of the first dataset
-        time_dropdown_2 (str): value of the selcted time column value of the second dataset
-        geo_dropdown_1 (str): value of the selected geo column value of the first dataset
-        geo_dropdown_2 (str): value of the selected geo column value of the second dataset
-        selected_dataset (str): value of the dataset selector
-        heatmap_children (list): container that holds the figure
+        selected_dataset (int): id of selected dataset
+        heatmap_children (List[Component]): correlation heatmap container
         country_dropdown (str): selected country
-
-    Raises:
-        exceptions.PreventUpdate: update prevented if neither dataset is loaded with all columns selected
+        visibility_checklist (List[str]): current visible sections
+        dataframes (List[str]): available dataframes
+        feature_dropdowns (List[str]): selected feature columns
+        time_dropdowns (List[str]): seletected time columns
+        geo_dropdowns (List[str]): selected geo columns
 
     Returns:
-        list: container with heatmap plot
+        tuple: correlation heatmap container, correlation heatmap container visibility
     """
 
     time_column = time_dropdowns[selected_dataset]
@@ -2362,7 +2370,6 @@ def update_heatmap(
     ),
     State("multi-fit-plot-div", "children"),
     Input("multi-frequency-dropdown-forecast", "value"),
-    Input(ParameterStoreAIO.ids.store("scenario"), "data"),
     Input("country-dropdown-multi-forecast", "value"),
     Input("model-dropdown-multi-forecast", "value"),
     Input("var-forecast-slider", "value"),
@@ -2422,45 +2429,45 @@ def update_heatmap(
     ),
 )
 def update_multivariate_forecast(
-    multi_forecast_children: list,
+    multi_forecast_children: List[Component],
     multi_frequency_dropdown: str,
-    scenario_data: list,
     selected_country: str,
     selected_model: str,
     var_slider_value: int,
     alpha_parameter: int,
     max_lags_parameter: int,
-    forecast_data_selector_options: str,
-    selected_dataset: str,
-    visibility_checklist: list,
-    dataframes,
-    feature_dropdowns,
-    time_dropdowns,
-    geo_dropdowns,
-    filenames,
-    scenarios_data,
+    forecast_data_selector_options: List[dict | str],
+    selected_dataset: int,
+    visibility_checklist: List[str],
+    dataframes: List[str],
+    feature_dropdowns: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
+    filenames: List[str],
+    scenarios_data: List[List[int]],
 ) -> tuple:
-    """Performs multivariate forecast with an additional dataset and plots the result
+    """Create multivariate forecast with Prophet, Vector Auto Regression or Multivariate Exponential Smoothing
 
     Args:
-        dataset_1 (str): Dataset which is forecasted for
-        dataset_2 (str): Dataset which is used as additional timeseries for the forecast
-        feature_dropdown_1 (str): selected feature column of first dataset
-        feature_dropdown_2 (str): selected feature column of second dataset
-        geo_dropdown_1 (str): selected geo column of first dataset
-        geo_dropdown_2 (str): selected geo column of second dataset
-        time_dropdown_1 (str): selected time column of first dataset
-        time_dropdown_2 (str): selected time column of second dataset
-        multi_forecast_children (list): container for the forecast figure
-        multi_frequency_dropdown (str): selected frequency value
-        scenario_data (list): artifical future data for the second dataset (needed for multivariate forecast with Prophet)
-        selected_country (str): selected country of country dropdown
-
-    Raises:
-        exceptions.PreventUpdate: Update prevented until both datasets loaded, feature columns selected and artifical data is available
+        multi_forecast_children (List[Component]): forecast figure container
+        multi_frequency_dropdown (str): selected time frequency
+        selected_country (str): value of selected country
+        selected_model (str): value of selected model
+        var_slider_value (int): number of forecast to predict
+        alpha_parameter (int): value of alpha parameter (exponential smoothing)
+        max_lags_parameter (int): max lags parameter (vector auto regression)
+        forecast_data_selector_options (List[dict | str]): selector options for dependent dataset (Prophet)
+        selected_dataset (int): id of selected dataset (Prophet)
+        visibility_checklist (List[str]): current visible sections
+        dataframes (List[str]): available dataframes
+        feature_dropdowns (List[str]): selected feature columns
+        time_dropdowns (List[str]): selected time columns
+        geo_dropdowns (List[str]): selected geo columns
+        filenames (List[str]): filenames of available dataframes
+        scenarios_data (List[List[int]]): scenario data for each independent dataset
 
     Returns:
-        tuple:
+        tuple: _description_
     """
 
     placeholders = [no_update for _ in range(len(feature_dropdowns) - 1)]
