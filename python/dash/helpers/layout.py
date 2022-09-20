@@ -402,7 +402,7 @@ def compute_stats(
     """
 
     def human_format(number: float) -> float:
-        """shortens numbers of high magnitude into readable format
+        """shortens numbers of high magnitude
 
         Args:
             number (float):
