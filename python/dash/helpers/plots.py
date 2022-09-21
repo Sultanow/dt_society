@@ -335,7 +335,10 @@ def create_choropleth_slider_plot(
 
 
 def create_two_line_plot(
-    datasets: List[pd.DataFrame], feature_columns: List[str], time_columns: List[str]
+    datasets: List[pd.DataFrame],
+    feature_columns: List[str],
+    time_columns: List[str],
+    feature_options: List[List[str]],
 ) -> go.Figure:
     """Creates a line plot with n subplots divided into rows and columns
 
@@ -350,19 +353,52 @@ def create_two_line_plot(
 
     rows = len(datasets) // 3 if len(datasets) // 3 >= 1 else 1
 
-    fig = go.Figure(make_subplots(rows=rows, cols=len(datasets)))
-
-    for i, df in enumerate(datasets):
-        fig.add_trace(
-            go.Scatter(
-                x=df[time_columns[i]],
-                y=df[feature_columns[i]],
-                name=feature_columns[i],
-                mode="lines",
-            ),
-            col=i + 1,
-            row=1,
+    fig = go.Figure(
+        make_subplots(
+            rows=rows,
+            cols=len(datasets),
+            subplot_titles=[f"Dataset {i+1}" for i in range(len(datasets))],
         )
+    )
+
+    # for i, df in enumerate(datasets):
+    #     for j, features in enumerate(feature_options):
+    #         fig.add_trace(
+    #             go.Scatter(
+    #                 x=df[time_columns[i]],
+    #                 y=df[feature_columns[i]],
+    #                 name=feature_columns[i],
+    #                 mode="lines",
+    #             ),
+    #             col=i + 1,
+    #             row=1,
+    #         )
+
+    for i, features in enumerate(feature_options):
+
+        features.remove(time_columns[i])
+        for j, feature in enumerate(features):
+
+            visibility = True if j == 0 else "legendonly"
+            legend_group_title = f"Dataset {i+1}" if j == 0 else None
+
+            # if feature == time_columns[i]:
+            #     continue
+
+            # else:
+            fig.add_trace(
+                go.Scatter(
+                    x=datasets[i][time_columns[i]],
+                    y=datasets[i][feature],
+                    name=feature,
+                    mode="lines",
+                    visible=visibility,
+                    legendgroup=f"df_{i}",
+                    legendgrouptitle_text=legend_group_title,
+                ),
+                col=i + 1,
+                row=1,
+            )
 
     yax_titles = {
         f"yaxis{i+1}_title": feature for i, feature in enumerate(feature_columns)
@@ -373,6 +409,7 @@ def create_two_line_plot(
         template=theme,
         margin={"t": 20, "b": 20},
         height=300,
+        legend={"groupclick": "toggleitem"},
         **yax_titles,
     )
 

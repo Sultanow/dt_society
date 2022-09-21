@@ -34,6 +34,7 @@ class StatAIO(html.Div):
                                 "margin-left": "auto",
                                 "margin-right": "auto",
                                 "padding": "15px",
+                                "font-size": "12px",
                             },
                         ),
                         dcc.Loading(
@@ -46,7 +47,7 @@ class StatAIO(html.Div):
                                         "margin-left": "auto",
                                         "margin-right": "auto",
                                         "textAlign": "center",
-                                        "font-size": "40px",
+                                        "font-size": "28px",
                                     },
                                     id=self.ids.stat(aio_id),
                                 ),
@@ -55,7 +56,7 @@ class StatAIO(html.Div):
                     ],
                     style={
                         "backgroundColor": "#111111",
-                        "height": "100px",
+                        "height": "90px",
                         "width": "90%",
                         # "font-size": "20px",
                     },

@@ -277,67 +277,68 @@ app.layout = html.Div(
         ),
         html.Div(
             [
-                html.Div(style={"backgroundColor": "#232323", "padding": "10px"}),
                 html.Div(
                     [
                         html.Div(
-                            "Table",
+                            [
+                                html.Div(
+                                    "Table",
+                                    style={
+                                        "padding-top": "10px",
+                                        "padding-left": "10px",
+                                        "padding-bottom": "10px",
+                                        "backgroundColor": "#111111",
+                                        "font-weight": "bold",
+                                        "textAlign": "center",
+                                    },
+                                ),
+                                html.Hr(
+                                    style={
+                                        "padding": "0px",
+                                        "margin": "0px",
+                                        "backgroundColor": "#5c6cfa",
+                                        "border-color": "#5c6cfa",
+                                    }
+                                ),
+                            ]
+                        ),
+                        html.Div(
+                            [
+                                dcc.Loading(
+                                    parent_style={"backgroundColor": "transparent"},
+                                    style={"backgroundColor": "transparent"},
+                                    children=[
+                                        dash_table.DataTable(
+                                            id="data-table",
+                                            style_data={
+                                                "backgroundColor": "#232323",
+                                                "border": "solid 1px #5c6cfa",
+                                            },
+                                            style_cell={
+                                                "padding": "5px",
+                                                "textAlign": "left",
+                                            },
+                                            style_header={
+                                                "backgroundColor": "#454545",
+                                                "border": "solid 1px #5c6cfa",
+                                            },
+                                            fixed_rows={"headers": True},
+                                            style_table={
+                                                "overflowY": "auto",
+                                                "height": "185px",
+                                            },
+                                        )
+                                    ],
+                                ),
+                            ],
                             style={
-                                "padding-top": "10px",
-                                "padding-left": "10px",
-                                "padding-bottom": "10px",
-                                "backgroundColor": "#111111",
-                                "font-weight": "bold",
-                                "textAlign": "center",
+                                "backgroundColor": "#5c6cfa",
                             },
                         ),
-                        html.Hr(
-                            style={
-                                "padding": "0px",
-                                "margin": "0px",
-                                "backgroundColor": "#5c6cfa",
-                                "border-color": "#5c6cfa",
-                            }
-                        ),
-                    ]
-                ),
-                html.Div(
-                    [
-                        dcc.Loading(
-                            parent_style={"backgroundColor": "transparent"},
-                            style={"backgroundColor": "transparent"},
-                            children=[
-                                dash_table.DataTable(
-                                    id="data-table",
-                                    style_data={
-                                        "backgroundColor": "#232323",
-                                        "border": "solid 1px #5c6cfa",
-                                    },
-                                    style_cell={"padding": "5px", "textAlign": "left"},
-                                    style_header={
-                                        "backgroundColor": "#454545",
-                                        "border": "solid 1px #5c6cfa",
-                                    },
-                                    fixed_rows={"headers": True},
-                                    style_table={
-                                        "overflowY": "auto",
-                                        "height": "250px",
-                                    },
-                                )
-                            ],
-                        ),
                     ],
-                    style={
-                        "backgroundColor": "#5c6cfa",
-                    },
+                    id="table-div",
+                    style={"backroundColor": "#ffffff", "display": "none"},
                 ),
-            ],
-            id="table-div",
-            style={"backroundColor": "#ffffff", "display": "none"},
-        ),
-        html.Div(
-            [
-                html.Div(style={"backgroundColor": "#232323", "padding": "10px"}),
                 html.Div(
                     [
                         html.Div(
@@ -415,7 +416,10 @@ app.layout = html.Div(
                             ],
                         ),
                         html.Div(
-                            style={"padding": "5px", "backgroundColor": "#232323"}
+                            style={
+                                "padding": "5px",
+                                "backgroundColor": "#232323",
+                            }
                         ),
                         html.Div(
                             "Growth rate window",
@@ -441,13 +445,16 @@ app.layout = html.Div(
                                                 html.Div(
                                                     [
                                                         dcc.Dropdown(
-                                                            options=["1111", "1111"],
+                                                            options=[
+                                                                "1111",
+                                                                "1111",
+                                                            ],
                                                             placeholder="Country",
                                                             id="country-dropdown-stats",
                                                             clearable=False,
                                                             style={
-                                                                "width": "75px",
-                                                                "font-size": "14px",
+                                                                "width": "55px",
+                                                                "font-size": "10px",
                                                                 "border-top": "0px",
                                                                 "border-left": "0px",
                                                                 "border-right": "0px",
@@ -464,8 +471,9 @@ app.layout = html.Div(
                                                                 "font-weight": "bolder",
                                                                 "textAlign": "center",
                                                                 "padding": "15px",
-                                                                "margin-left": "65px",
+                                                                "margin-left": "10px",
                                                                 "margin-right": "auto",
+                                                                "font-size": "12px",
                                                             },
                                                         ),
                                                     ],
@@ -483,7 +491,7 @@ app.layout = html.Div(
                                                             style={
                                                                 "white-space": "pre-line",
                                                                 "textAlign": "center",
-                                                                "font-size": "40px",
+                                                                "font-size": "28px",
                                                             },
                                                             id="growth-stat",
                                                         ),
@@ -492,23 +500,30 @@ app.layout = html.Div(
                                             ],
                                             style={
                                                 "backgroundColor": "#111111",
-                                                "height": "100px",
+                                                "height": "90px",
                                                 "width": "100%",
                                             },
                                         ),
                                     ],
-                                    style={"display": "inline-block", "width": "25%"},
+                                    style={
+                                        "display": "inline-block",
+                                        "width": "25%",
+                                    },
                                 ),
                             ],
-                            style={"display": "flex"},
+                            style={"display": "flex", "margin-top": "10px"},
                         ),
                     ],
                     id="stats-div",
-                    style={"margin-bottom": "10px", "display": "none"},
+                    style={"backgroundColor": "#232323", "display": "none"},
                 ),
-                html.Div(style={"backgroundColor": "#232323", "padding": "10px"}),
             ],
-            style={"backgroundColor": "#232323"},
+            style={
+                "display": "flex",
+                "backgroundColor": "#232323",
+                "margin-bottom": "15px",
+                "margin-top": "10px",
+            },
         ),
         html.Div(
             [
@@ -519,7 +534,7 @@ app.layout = html.Div(
                                 html.Div(
                                     [
                                         html.Div(
-                                            "Timeline",
+                                            "History",
                                             style={
                                                 "padding-top": "10px",
                                                 "padding-left": "10px",
@@ -669,7 +684,11 @@ app.layout = html.Div(
                     style={"display": "none"},
                 ),
             ],
-            style={"display": "flex", "backgroundColor": "#232323"},
+            style={
+                "display": "flex",
+                "backgroundColor": "#232323",
+                "margin-top": "10px",
+            },
         ),
         html.Div(
             [
@@ -682,6 +701,81 @@ app.layout = html.Div(
                 ),
                 dcc.Tabs(
                     [
+                        # older heatmap version
+                        # dcc.Tab(
+                        #     style={
+                        #         "background-color": "#111111",
+                        #         "border-left": "0px",
+                        #         "border-right": "0px",
+                        #         "border-bottom": "0px",
+                        #         "border-radius": "0px",
+                        #         "border-top": "0px",
+                        #     },
+                        #     selected_style={
+                        #         "background-color": "#111111",
+                        #         "color": "white",
+                        #         "border-left": "0px",
+                        #         "border-right": "0px",
+                        #         "border-bottom": "0px",
+                        #         "border-radius": "0px",
+                        #     },
+                        #     label="Feature correlation",
+                        #     children=[
+                        #         html.Div(
+                        #             [
+                        #                 html.Hr(
+                        #                     style={
+                        #                         "padding": "0px",
+                        #                         "margin": "0px",
+                        #                         "border-color": "#2f2f2f",
+                        #                         "backgroundColor": "#2f2f2f",
+                        #                     }
+                        #                 ),
+                        #                 html.Div(
+                        #                     [
+                        #                         html.Div(
+                        #                             "Country",
+                        #                             style={
+                        #                                 "padding-top": "15px",
+                        #                                 "padding-bottom": "15px",
+                        #                                 "padding-right": "15px",
+                        #                             },
+                        #                         ),
+                        #                         dcc.Dropdown(
+                        #                             ["none"],
+                        #                             placeholder="Select country",
+                        #                             clearable=False,
+                        #                             id="country-dropdown-corr",
+                        #                             style={
+                        #                                 "width": "140px",
+                        #                                 "font-size": "14px",
+                        #                                 "border-color": "#5c6cfa",
+                        #                                 "background-color": "#111111",
+                        #                             },
+                        #                         ),
+                        #                     ],
+                        #                     style={"margin-left": "10px"},
+                        #                 ),
+                        #             ],
+                        #             style={"margin-left": "10px"},
+                        #         ),
+                        #         dcc.Loading(
+                        #             type="circle",
+                        #             children=[
+                        #                 html.Div(
+                        #                     html.Div(
+                        #                         [],
+                        #                         id="heatmap-plot-div",
+                        #                         style={
+                        #                             "display": "inline-block",
+                        #                             "width": "100%",
+                        #                         },
+                        #                     ),
+                        #                 ),
+                        #             ],
+                        #         ),
+                        #     ],
+                        # ),
                         dcc.Tab(
                             style={
                                 "background-color": "#111111",
@@ -699,7 +793,7 @@ app.layout = html.Div(
                                 "border-bottom": "0px",
                                 "border-radius": "0px",
                             },
-                            label="Feature correlation",
+                            label="Correlation Heatmap",
                             children=[
                                 html.Div(
                                     [
@@ -725,7 +819,7 @@ app.layout = html.Div(
                                                     ["none"],
                                                     placeholder="Select country",
                                                     clearable=False,
-                                                    id="country-dropdown-corr",
+                                                    id="country-dropdown-heatmap",
                                                     style={
                                                         "width": "140px",
                                                         "font-size": "14px",
@@ -774,7 +868,7 @@ app.layout = html.Div(
                                 "border-bottom": "0px",
                                 "border-radius": "0px",
                             },
-                            label="Dataset correlation",
+                            label="Correlation line chart",
                             children=[
                                 html.Div(
                                     [
@@ -1242,7 +1336,7 @@ app.layout = html.Div(
     ],
     style={
         "fontFamily": "helvetica",
-        "backgroundColor": "#111111",
+        "backgroundColor": "#232323",
         "color": "#f2f2f2",
         "min-width": "1500px",
         "max-width": "1500px",
@@ -1395,6 +1489,8 @@ def update_selector_visibility(dataframes: List[str]):
     Output("country-dropdown", "value"),
     Output("country-dropdown-multi-forecast", "options"),
     Output("country-dropdown-multi-forecast", "value"),
+    Output("country-dropdown-heatmap", "options"),
+    Output("country-dropdown-heatmap", "value"),
     Input(
         {
             "component": "FilePreProcessingAIO",
@@ -1437,14 +1533,18 @@ def update_country_dropdown_comparison(
             countries_per_df.append(set(countries))
 
         country_intersection = list(set.intersection(*countries_per_df))
+        country_union = list(set.union(*countries_per_df))
 
         country_intersection.sort()
+        country_union.sort()
 
         return (
             country_intersection,
             country_intersection[0],
             country_intersection,
             country_intersection[0],
+            country_union,
+            country_union[0],
         )
 
     else:
@@ -1460,8 +1560,6 @@ def update_country_dropdown_comparison(
     Output("year-dropdown-map", "value"),
     Output("year-range-slider", "min"),
     Output("year-range-slider", "max"),
-    Output("country-dropdown-corr", "options"),
-    Output("country-dropdown-corr", "value"),
     Output("country-dropdown-forecast", "options"),
     Output("country-dropdown-forecast", "value"),
     Output("year-range-slider", "value"),
@@ -1578,7 +1676,12 @@ def update_table_content(
 
         df = pd.read_json(data).round(2).to_dict("records")
 
-        table_div_style = {"backroundColor": "#ffffff", "display": "block"}
+        table_div_style = {
+            "backroundColor": "#ffffff",
+            "display": "block",
+            "min-width": "49%",
+            "width": "99%",
+        }
 
         return df, table_div_style
 
@@ -1708,7 +1811,12 @@ def update_stats(
         growth_stat_children.clear()
         growth_stat_children.append(str(growth_rate) + "%")
 
-        stats_div_style = {"display": "block"}
+        stats_div_style = {
+            "display": "block",
+            "width": "49%",
+            "min-width": "49%",
+            "margin-left": "10px",
+        }
 
         return (
             avg_stat_children,
@@ -1979,6 +2087,14 @@ def update_choropleth(
         },
         "value",
     ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "feature_dropdown",
+            "aio_id": ALL,
+        },
+        "options",
+    ),
 )
 def update_max_country_compare(
     selected_country: str,
@@ -1988,6 +2104,7 @@ def update_max_country_compare(
     feature_dropdowns: List[str],
     time_dropdowns: List[str],
     geo_dropdowns: List[str],
+    feature_options: list,
 ) -> tuple:
     """Updates correlation line plot
 
@@ -2020,9 +2137,7 @@ def update_max_country_compare(
             dfs.append(df_by_country)
 
         fig = create_two_line_plot(
-            dfs,
-            feature_dropdowns,
-            time_dropdowns,
+            dfs, feature_dropdowns, time_dropdowns, feature_options
         )
 
         comparison_children.clear()
@@ -2044,6 +2159,107 @@ def update_max_country_compare(
         compare_div_style = {"display": "none"}
 
         return comparison_children, compare_div_style
+
+
+@app.callback(
+    Output("heatmap-plot-div", "children"),
+    Output("heatmap-div", "style"),
+    Input("country-dropdown-heatmap", "value"),
+    Input("visibility-checklist", "value"),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "store",
+            "aio_id": ALL,
+        },
+        "data",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "feature_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "time_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "geo_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    State("heatmap-plot-div", "children"),
+)
+def update_heatmap(
+    selected_country: str,
+    visibility_checklist: List[str],
+    dataframes: List[str],
+    feature_dropdowns: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
+    heatmap_cross_children,
+) -> tuple:
+    """Updates correlation line plot
+
+    Args:
+        selected_country (str): value of selected country
+        comparison_children (List[Component]): container of correlation line plot
+        visibility_checklist (List[str]): current visible sections
+        dataframes (List[str]): available dataframes
+        feature_dropdowns (List[str]): selected features
+        time_dropdowns (List[str]): selected time columns
+        geo_dropdowns (List[str]): selected geo columns
+
+    Returns:
+        tuple: correlation line plot, correlation line plot container visibility
+    """
+
+    if (
+        not any(
+            x is None
+            for x in dataframes + feature_dropdowns + time_dropdowns + geo_dropdowns
+        )
+    ) and "Correlation" in visibility_checklist:
+
+        dfs = []
+        time_columns = []
+
+        for i, data in enumerate(dataframes):
+            df = pd.read_json(data)
+
+            if selected_country in df[geo_dropdowns[i]].unique():
+                df_by_country = df[df[geo_dropdowns[i]] == selected_country]
+
+                dfs.append(df_by_country)
+                time_columns.append(time_dropdowns[i])
+
+        if len(dfs) > 1:
+            merged_df, time_column = merge_dataframes_multi(dfs, time_columns)
+            fig = create_correlation_heatmap(merged_df.drop(columns=time_column))
+
+        else:
+            fig = create_correlation_heatmap(dfs[0].drop(columns=time_columns))
+
+        heatmap_cross_children.clear()
+        heatmap_cross_children.append(dcc.Graph(figure=fig))
+
+        heatmap_div_style = {"display": "block", "backgroundColor": "#111111"}
+
+        return heatmap_cross_children, heatmap_div_style
+    else:
+        heatmap_div_style = {"display": "none"}
+
+        return heatmap_cross_children, heatmap_div_style
 
 
 @app.callback(
@@ -2233,7 +2449,7 @@ def update_forecast(
 
         fit_plot_children.append(dcc.Graph(figure=fig))
 
-        forecast_div_style = {"display": "block"}
+        forecast_div_style = {"display": "block", "backgroundColor": "#111111"}
 
         return fit_plot_children, forecast_div_style
 
@@ -2241,7 +2457,7 @@ def update_forecast(
         feature_column and geo_column and data
     ) and "Forecast" in visibility_checklist:
 
-        forecast_div_style = {"display": "block"}
+        forecast_div_style = {"display": "block", "backgroundColor": "#111111"}
 
         return fit_plot_children, forecast_div_style
 
@@ -2251,102 +2467,102 @@ def update_forecast(
         return fit_plot_children, forecast_div_style
 
 
-@app.callback(
-    Output("heatmap-plot-div", "children"),
-    Output("heatmap-div", "style"),
-    Input("data-selector", "value"),
-    State("heatmap-plot-div", "children"),
-    Input("country-dropdown-corr", "value"),
-    Input("visibility-checklist", "value"),
-    Input(
-        {
-            "component": "FilePreProcessingAIO",
-            "subcomponent": "store",
-            "aio_id": ALL,
-        },
-        "data",
-    ),
-    Input(
-        {
-            "component": "FilePreProcessingAIO",
-            "subcomponent": "feature_dropdown",
-            "aio_id": ALL,
-        },
-        "value",
-    ),
-    Input(
-        {
-            "component": "FilePreProcessingAIO",
-            "subcomponent": "time_dropdown",
-            "aio_id": ALL,
-        },
-        "value",
-    ),
-    Input(
-        {
-            "component": "FilePreProcessingAIO",
-            "subcomponent": "geo_dropdown",
-            "aio_id": ALL,
-        },
-        "value",
-    ),
-)
-def update_heatmap(
-    selected_dataset: int,
-    heatmap_children: List[Component],
-    country_dropdown: str,
-    visibility_checklist: List[str],
-    dataframes: List[str],
-    feature_dropdowns: List[str],
-    time_dropdowns: List[str],
-    geo_dropdowns: List[str],
-) -> tuple:
-    """Update correlation heatmap
+# @app.callback(
+#     Output("heatmap-plot-div", "children"),
+#     Output("heatmap-div", "style"),
+#     Input("data-selector", "value"),
+#     State("heatmap-plot-div", "children"),
+#     Input("country-dropdown-corr", "value"),
+#     Input("visibility-checklist", "value"),
+#     Input(
+#         {
+#             "component": "FilePreProcessingAIO",
+#             "subcomponent": "store",
+#             "aio_id": ALL,
+#         },
+#         "data",
+#     ),
+#     Input(
+#         {
+#             "component": "FilePreProcessingAIO",
+#             "subcomponent": "feature_dropdown",
+#             "aio_id": ALL,
+#         },
+#         "value",
+#     ),
+#     Input(
+#         {
+#             "component": "FilePreProcessingAIO",
+#             "subcomponent": "time_dropdown",
+#             "aio_id": ALL,
+#         },
+#         "value",
+#     ),
+#     Input(
+#         {
+#             "component": "FilePreProcessingAIO",
+#             "subcomponent": "geo_dropdown",
+#             "aio_id": ALL,
+#         },
+#         "value",
+#     ),
+# )
+# def update_heatmap(
+#     selected_dataset: int,
+#     heatmap_children: List[Component],
+#     country_dropdown: str,
+#     visibility_checklist: List[str],
+#     dataframes: List[str],
+#     feature_dropdowns: List[str],
+#     time_dropdowns: List[str],
+#     geo_dropdowns: List[str],
+# ) -> tuple:
+#     """Update correlation heatmap
 
-    Args:
-        selected_dataset (int): id of selected dataset
-        heatmap_children (List[Component]): correlation heatmap container
-        country_dropdown (str): selected country
-        visibility_checklist (List[str]): current visible sections
-        dataframes (List[str]): available dataframes
-        feature_dropdowns (List[str]): selected feature columns
-        time_dropdowns (List[str]): seletected time columns
-        geo_dropdowns (List[str]): selected geo columns
+#     Args:
+#         selected_dataset (int): id of selected dataset
+#         heatmap_children (List[Component]): correlation heatmap container
+#         country_dropdown (str): selected country
+#         visibility_checklist (List[str]): current visible sections
+#         dataframes (List[str]): available dataframes
+#         feature_dropdowns (List[str]): selected feature columns
+#         time_dropdowns (List[str]): seletected time columns
+#         geo_dropdowns (List[str]): selected geo columns
 
-    Returns:
-        tuple: correlation heatmap container, correlation heatmap container visibility
-    """
+#     Returns:
+#         tuple: correlation heatmap container, correlation heatmap container visibility
+#     """
 
-    time_column = time_dropdowns[selected_dataset]
-    feature_column = feature_dropdowns[selected_dataset]
-    geo_column = geo_dropdowns[selected_dataset]
-    data = dataframes[selected_dataset]
+#     time_column = time_dropdowns[selected_dataset]
+#     feature_column = feature_dropdowns[selected_dataset]
+#     geo_column = geo_dropdowns[selected_dataset]
+#     data = dataframes[selected_dataset]
 
-    if (
-        time_column and feature_column and geo_column and data
-    ) and "Correlation" in visibility_checklist:
+#     if (
+#         time_column and feature_column and geo_column and data
+#     ) and "Correlation" in visibility_checklist:
 
-        df = pd.read_json(data)
+#         df = pd.read_json(data)
 
-        df = df[df[geo_column] == country_dropdown]
+#         df = df[df[geo_column] == country_dropdown]
 
-        df = df.drop(columns=time_column)
+#         df = df.drop(columns=time_column)
 
-        fig = create_correlation_heatmap(df)
+#         fig = create_correlation_heatmap(df)
 
-        if heatmap_children:
-            heatmap_children.clear()
+#         if heatmap_children:
+#             heatmap_children.clear()
 
-        heatmap_children.append(dcc.Graph(figure=fig))
+#         heatmap_children.append(dcc.Graph(figure=fig))
 
-        heatmap_div_style = {"display": "block"}
+#         heatmap_div_style = {"display": "block"}
 
-        return heatmap_children, heatmap_div_style
-    else:
+#         return heatmap_children, heatmap_div_style
+#     else:
 
-        heatmap_div_style = {"display": "none"}
+#         heatmap_div_style = {"display": "none"}
 
-        return heatmap_children, heatmap_div_style
+#         return heatmap_children, heatmap_div_style
 
 
 @app.callback(
