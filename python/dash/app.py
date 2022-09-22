@@ -701,81 +701,6 @@ app.layout = html.Div(
                 ),
                 dcc.Tabs(
                     [
-                        # older heatmap version
-                        # dcc.Tab(
-                        #     style={
-                        #         "background-color": "#111111",
-                        #         "border-left": "0px",
-                        #         "border-right": "0px",
-                        #         "border-bottom": "0px",
-                        #         "border-radius": "0px",
-                        #         "border-top": "0px",
-                        #     },
-                        #     selected_style={
-                        #         "background-color": "#111111",
-                        #         "color": "white",
-                        #         "border-left": "0px",
-                        #         "border-right": "0px",
-                        #         "border-bottom": "0px",
-                        #         "border-radius": "0px",
-                        #     },
-                        #     label="Feature correlation",
-                        #     children=[
-                        #         html.Div(
-                        #             [
-                        #                 html.Hr(
-                        #                     style={
-                        #                         "padding": "0px",
-                        #                         "margin": "0px",
-                        #                         "border-color": "#2f2f2f",
-                        #                         "backgroundColor": "#2f2f2f",
-                        #                     }
-                        #                 ),
-                        #                 html.Div(
-                        #                     [
-                        #                         html.Div(
-                        #                             "Country",
-                        #                             style={
-                        #                                 "padding-top": "15px",
-                        #                                 "padding-bottom": "15px",
-                        #                                 "padding-right": "15px",
-                        #                             },
-                        #                         ),
-                        #                         dcc.Dropdown(
-                        #                             ["none"],
-                        #                             placeholder="Select country",
-                        #                             clearable=False,
-                        #                             id="country-dropdown-corr",
-                        #                             style={
-                        #                                 "width": "140px",
-                        #                                 "font-size": "14px",
-                        #                                 "border-color": "#5c6cfa",
-                        #                                 "background-color": "#111111",
-                        #                             },
-                        #                         ),
-                        #                     ],
-                        #                     style={"margin-left": "10px"},
-                        #                 ),
-                        #             ],
-                        #             style={"margin-left": "10px"},
-                        #         ),
-                        #         dcc.Loading(
-                        #             type="circle",
-                        #             children=[
-                        #                 html.Div(
-                        #                     html.Div(
-                        #                         [],
-                        #                         id="heatmap-plot-div",
-                        #                         style={
-                        #                             "display": "inline-block",
-                        #                             "width": "100%",
-                        #                         },
-                        #                     ),
-                        #                 ),
-                        #             ],
-                        #         ),
-                        #     ],
-                        # ),
                         dcc.Tab(
                             style={
                                 "background-color": "#111111",
@@ -793,7 +718,7 @@ app.layout = html.Div(
                                 "border-bottom": "0px",
                                 "border-radius": "0px",
                             },
-                            label="Correlation Heatmap",
+                            label="Correlation heatmap",
                             children=[
                                 html.Div(
                                     [
@@ -829,6 +754,34 @@ app.layout = html.Div(
                                                 ),
                                             ],
                                             style={"margin-left": "10px"},
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.Div(
+                                                    "Available features",
+                                                    style={
+                                                        "padding-top": "15px",
+                                                        "padding-bottom": "15px",
+                                                        "padding-right": "15px",
+                                                    },
+                                                ),
+                                                dcc.Dropdown(
+                                                    ["A", "b", "c"],
+                                                    placeholder="Select features",
+                                                    clearable=False,
+                                                    multi=True,
+                                                    id="multi-feature-dropdown-heatmap",
+                                                    style={
+                                                        "font-size": "14px",
+                                                        "border-color": "#5c6cfa",
+                                                        "background-color": "#111111",
+                                                    },
+                                                ),
+                                            ],
+                                            style={
+                                                "margin-left": "10px",
+                                                "width": "20%",
+                                            },
                                         ),
                                     ],
                                     style={"margin-left": "10px"},
@@ -1172,7 +1125,6 @@ app.layout = html.Div(
                                                                 "font-size": "14px",
                                                                 "border-color": "#5c6cfa",
                                                                 "background-color": "#111111",
-                                                                # "textAlign": "center",
                                                             },
                                                         ),
                                                     ],
@@ -1543,6 +1495,28 @@ def update_country_dropdown_comparison(
             country_intersection[0],
             country_intersection,
             country_intersection[0],
+            country_union,
+            country_union[0],
+        )
+    elif any(
+        df is not None and geo is not None
+        for (df, geo) in zip(dataframes, geo_dropdowns)
+    ):
+        countries_per_df = []
+        for i, (df, geo) in enumerate(zip(dataframes, geo_dropdowns)):
+            if df is not None and geo is not None:
+                countries = pd.read_json(df)[geo_dropdowns[i]].unique()
+                countries_per_df.append(set(countries))
+
+        country_union = list(set.union(*countries_per_df))
+
+        country_union.sort()
+
+        return (
+            no_update,
+            no_update,
+            no_update,
+            no_update,
             country_union,
             country_union[0],
         )
@@ -2164,6 +2138,7 @@ def update_max_country_compare(
 @app.callback(
     Output("heatmap-plot-div", "children"),
     Output("heatmap-div", "style"),
+    Output("multi-feature-dropdown-heatmap", "options"),
     Input("country-dropdown-heatmap", "value"),
     Input("visibility-checklist", "value"),
     Input(
@@ -2199,6 +2174,16 @@ def update_max_country_compare(
         "value",
     ),
     State("heatmap-plot-div", "children"),
+    Input("multi-feature-dropdown-heatmap", "value"),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "feature_dropdown",
+            "aio_id": ALL,
+        },
+        "options",
+    ),
+    prevent_initial_call=True,
 )
 def update_heatmap(
     selected_country: str,
@@ -2207,7 +2192,9 @@ def update_heatmap(
     feature_dropdowns: List[str],
     time_dropdowns: List[str],
     geo_dropdowns: List[str],
-    heatmap_cross_children,
+    heatmap_cross_children: List[Component],
+    selected_features: List[str],
+    feature_dropdown_options: List[str],
 ) -> tuple:
     """Updates correlation line plot
 
@@ -2224,42 +2211,77 @@ def update_heatmap(
         tuple: correlation line plot, correlation line plot container visibility
     """
 
-    if (
-        not any(
-            x is None
-            for x in dataframes + feature_dropdowns + time_dropdowns + geo_dropdowns
+    changed_item = [p["prop_id"] for p in callback_context.triggered][0]
+    print(changed_item)
+
+    if "store" in changed_item or "geo_dropdown" in changed_item:
+        selected_features = None
+
+    if any(
+        df is not None and feat is not None and time is not None and geo is not None
+        for (df, feat, time, geo) in zip(
+            dataframes, feature_dropdowns, time_dropdowns, geo_dropdowns
         )
-    ) and "Correlation" in visibility_checklist:
+    ):
+        if (
+            "Correlation" in visibility_checklist
+            and selected_features is not None
+            and "country-dropdown-heatmap" not in changed_item
+        ):
 
-        dfs = []
-        time_columns = []
+            dfs = []
+            time_columns = []
 
-        for i, data in enumerate(dataframes):
-            df = pd.read_json(data)
+            for i, data in enumerate(dataframes):
+                if data is not None and geo_dropdowns[i] is not None:
+                    df = pd.read_json(data)
 
-            if selected_country in df[geo_dropdowns[i]].unique():
-                df_by_country = df[df[geo_dropdowns[i]] == selected_country]
+                    if selected_country in df[geo_dropdowns[i]].unique():
+                        df_by_country = df[df[geo_dropdowns[i]] == selected_country]
 
-                dfs.append(df_by_country)
-                time_columns.append(time_dropdowns[i])
+                        dfs.append(df_by_country)
+                        time_columns.append(time_dropdowns[i])
 
-        if len(dfs) > 1:
-            merged_df, time_column = merge_dataframes_multi(dfs, time_columns)
-            fig = create_correlation_heatmap(merged_df.drop(columns=time_column))
+            if len(dfs) > 1:
+                merged_df, _ = merge_dataframes_multi(dfs, time_columns)
+                fig = create_correlation_heatmap(merged_df[selected_features])
 
-        else:
-            fig = create_correlation_heatmap(dfs[0].drop(columns=time_columns))
+            else:
+                fig = create_correlation_heatmap(dfs[0][selected_features])
 
-        heatmap_cross_children.clear()
-        heatmap_cross_children.append(dcc.Graph(figure=fig))
+            heatmap_cross_children.clear()
+            heatmap_cross_children.append(dcc.Graph(figure=fig))
 
-        heatmap_div_style = {"display": "block", "backgroundColor": "#111111"}
+            heatmap_div_style = {"display": "block", "backgroundColor": "#111111"}
 
-        return heatmap_cross_children, heatmap_div_style
+            return heatmap_cross_children, heatmap_div_style, no_update
+
+        elif selected_features is None or "country-dropdown-heatmap" in changed_item:
+            available_features = []
+            for i, data in enumerate(dataframes):
+                if data is not None and geo_dropdowns[i] is not None:
+                    df = pd.read_json(data)
+
+                    if selected_country in df[geo_dropdowns[i]].unique():
+                        available_features.append(
+                            [
+                                feature
+                                for feature in feature_dropdown_options[i]
+                                if feature != time_dropdowns[i]
+                            ]
+                        )
+
+            heatmap_div_style = {"display": "block", "backgroundColor": "#111111"}
+
+            features = [
+                feature for options in available_features for feature in options
+            ]
+
+            return heatmap_cross_children, heatmap_div_style, features
     else:
         heatmap_div_style = {"display": "none"}
 
-        return heatmap_cross_children, heatmap_div_style
+        return heatmap_cross_children, heatmap_div_style, no_update
 
 
 @app.callback(
@@ -2465,104 +2487,6 @@ def update_forecast(
         forecast_div_style = {"display": "none"}
 
         return fit_plot_children, forecast_div_style
-
-
-# @app.callback(
-#     Output("heatmap-plot-div", "children"),
-#     Output("heatmap-div", "style"),
-#     Input("data-selector", "value"),
-#     State("heatmap-plot-div", "children"),
-#     Input("country-dropdown-corr", "value"),
-#     Input("visibility-checklist", "value"),
-#     Input(
-#         {
-#             "component": "FilePreProcessingAIO",
-#             "subcomponent": "store",
-#             "aio_id": ALL,
-#         },
-#         "data",
-#     ),
-#     Input(
-#         {
-#             "component": "FilePreProcessingAIO",
-#             "subcomponent": "feature_dropdown",
-#             "aio_id": ALL,
-#         },
-#         "value",
-#     ),
-#     Input(
-#         {
-#             "component": "FilePreProcessingAIO",
-#             "subcomponent": "time_dropdown",
-#             "aio_id": ALL,
-#         },
-#         "value",
-#     ),
-#     Input(
-#         {
-#             "component": "FilePreProcessingAIO",
-#             "subcomponent": "geo_dropdown",
-#             "aio_id": ALL,
-#         },
-#         "value",
-#     ),
-# )
-# def update_heatmap(
-#     selected_dataset: int,
-#     heatmap_children: List[Component],
-#     country_dropdown: str,
-#     visibility_checklist: List[str],
-#     dataframes: List[str],
-#     feature_dropdowns: List[str],
-#     time_dropdowns: List[str],
-#     geo_dropdowns: List[str],
-# ) -> tuple:
-#     """Update correlation heatmap
-
-#     Args:
-#         selected_dataset (int): id of selected dataset
-#         heatmap_children (List[Component]): correlation heatmap container
-#         country_dropdown (str): selected country
-#         visibility_checklist (List[str]): current visible sections
-#         dataframes (List[str]): available dataframes
-#         feature_dropdowns (List[str]): selected feature columns
-#         time_dropdowns (List[str]): seletected time columns
-#         geo_dropdowns (List[str]): selected geo columns
-
-#     Returns:
-#         tuple: correlation heatmap container, correlation heatmap container visibility
-#     """
-
-#     time_column = time_dropdowns[selected_dataset]
-#     feature_column = feature_dropdowns[selected_dataset]
-#     geo_column = geo_dropdowns[selected_dataset]
-#     data = dataframes[selected_dataset]
-
-#     if (
-#         time_column and feature_column and geo_column and data
-#     ) and "Correlation" in visibility_checklist:
-
-#         df = pd.read_json(data)
-
-#         df = df[df[geo_column] == country_dropdown]
-
-#         df = df.drop(columns=time_column)
-
-#         fig = create_correlation_heatmap(df)
-
-#         if heatmap_children:
-#             heatmap_children.clear()
-
-#         heatmap_children.append(dcc.Graph(figure=fig))
-
-#         heatmap_div_style = {"display": "block"}
-
-#         return heatmap_children, heatmap_div_style
-#     else:
-
-#         heatmap_div_style = {"display": "none"}
-
-#         return heatmap_children, heatmap_div_style
 
 
 @app.callback(
