@@ -1,3 +1,4 @@
+from dash.development.base_component import Component
 import dash_daq as daq
 from dash import (
     ALL,
@@ -14,6 +15,8 @@ from dash import (
     no_update,
 )
 import pandas as pd
+from typing import List
+import time
 
 from aio_components.filepreprocessing import FilePreProcessingAIO
 from aio_components.stats import StatAIO
@@ -27,15 +30,15 @@ from helpers.plots import (
     create_two_line_plot,
     create_correlation_heatmap,
     create_forecast_plot,
-    create_multivariate_forecast,
-    create_var_forecast_plot,
+    create_var_forecast_plot_multi,
+    create_multivariate_forecast_prophet,
 )
 from helpers.models import (
     prophet_fit_and_predict,
     fit_and_predict,
-    prophet_fit_and_predict_multi,
-    var_fit_and_predict,
-    hw_es_fit_and_predict,
+    var_fit_and_predict_multi,
+    hw_es_fit_and_predict_multi,
+    prophet_fit_and_predict_n,
 )
 from helpers.layout import (
     preprocess_dataset,
@@ -46,8 +49,7 @@ from helpers.layout import (
     export_settings,
 )
 
-from preprocessing.parse import merge_dataframes
-
+from preprocessing.parse import merge_dataframes_multi
 
 external_stylesheets = [
     {
@@ -275,67 +277,68 @@ app.layout = html.Div(
         ),
         html.Div(
             [
-                html.Div(style={"backgroundColor": "#232323", "padding": "10px"}),
                 html.Div(
                     [
                         html.Div(
-                            "Table",
+                            [
+                                html.Div(
+                                    "Table",
+                                    style={
+                                        "padding-top": "10px",
+                                        "padding-left": "10px",
+                                        "padding-bottom": "10px",
+                                        "backgroundColor": "#111111",
+                                        "font-weight": "bold",
+                                        "textAlign": "center",
+                                    },
+                                ),
+                                html.Hr(
+                                    style={
+                                        "padding": "0px",
+                                        "margin": "0px",
+                                        "backgroundColor": "#5c6cfa",
+                                        "border-color": "#5c6cfa",
+                                    }
+                                ),
+                            ]
+                        ),
+                        html.Div(
+                            [
+                                dcc.Loading(
+                                    parent_style={"backgroundColor": "transparent"},
+                                    style={"backgroundColor": "transparent"},
+                                    children=[
+                                        dash_table.DataTable(
+                                            id="data-table",
+                                            style_data={
+                                                "backgroundColor": "#232323",
+                                                "border": "solid 1px #5c6cfa",
+                                            },
+                                            style_cell={
+                                                "padding": "5px",
+                                                "textAlign": "left",
+                                            },
+                                            style_header={
+                                                "backgroundColor": "#454545",
+                                                "border": "solid 1px #5c6cfa",
+                                            },
+                                            fixed_rows={"headers": True},
+                                            style_table={
+                                                "overflowY": "auto",
+                                                "height": "185px",
+                                            },
+                                        )
+                                    ],
+                                ),
+                            ],
                             style={
-                                "padding-top": "10px",
-                                "padding-left": "10px",
-                                "padding-bottom": "10px",
-                                "backgroundColor": "#111111",
-                                "font-weight": "bold",
-                                "textAlign": "center",
+                                "backgroundColor": "#5c6cfa",
                             },
                         ),
-                        html.Hr(
-                            style={
-                                "padding": "0px",
-                                "margin": "0px",
-                                "backgroundColor": "#5c6cfa",
-                                "border-color": "#5c6cfa",
-                            }
-                        ),
-                    ]
-                ),
-                html.Div(
-                    [
-                        dcc.Loading(
-                            parent_style={"backgroundColor": "transparent"},
-                            style={"backgroundColor": "transparent"},
-                            children=[
-                                dash_table.DataTable(
-                                    id="data-table",
-                                    style_data={
-                                        "backgroundColor": "#232323",
-                                        "border": "solid 1px #5c6cfa",
-                                    },
-                                    style_cell={"padding": "5px", "textAlign": "left"},
-                                    style_header={
-                                        "backgroundColor": "#454545",
-                                        "border": "solid 1px #5c6cfa",
-                                    },
-                                    fixed_rows={"headers": True},
-                                    style_table={
-                                        "overflowY": "auto",
-                                        "height": "250px",
-                                    },
-                                )
-                            ],
-                        ),
                     ],
-                    style={
-                        "backgroundColor": "#5c6cfa",
-                    },
+                    id="table-div",
+                    style={"backroundColor": "#ffffff", "display": "none"},
                 ),
-            ],
-            id="table-div",
-            style={"backroundColor": "#ffffff", "display": "none"},
-        ),
-        html.Div(
-            [
-                html.Div(style={"backgroundColor": "#232323", "padding": "10px"}),
                 html.Div(
                     [
                         html.Div(
@@ -413,7 +416,10 @@ app.layout = html.Div(
                             ],
                         ),
                         html.Div(
-                            style={"padding": "5px", "backgroundColor": "#232323"}
+                            style={
+                                "padding": "5px",
+                                "backgroundColor": "#232323",
+                            }
                         ),
                         html.Div(
                             "Growth rate window",
@@ -439,13 +445,16 @@ app.layout = html.Div(
                                                 html.Div(
                                                     [
                                                         dcc.Dropdown(
-                                                            options=["1111", "1111"],
+                                                            options=[
+                                                                "1111",
+                                                                "1111",
+                                                            ],
                                                             placeholder="Country",
                                                             id="country-dropdown-stats",
                                                             clearable=False,
                                                             style={
-                                                                "width": "75px",
-                                                                "font-size": "14px",
+                                                                "width": "55px",
+                                                                "font-size": "10px",
                                                                 "border-top": "0px",
                                                                 "border-left": "0px",
                                                                 "border-right": "0px",
@@ -462,8 +471,9 @@ app.layout = html.Div(
                                                                 "font-weight": "bolder",
                                                                 "textAlign": "center",
                                                                 "padding": "15px",
-                                                                "margin-left": "65px",
+                                                                "margin-left": "10px",
                                                                 "margin-right": "auto",
+                                                                "font-size": "12px",
                                                             },
                                                         ),
                                                     ],
@@ -481,7 +491,7 @@ app.layout = html.Div(
                                                             style={
                                                                 "white-space": "pre-line",
                                                                 "textAlign": "center",
-                                                                "font-size": "40px",
+                                                                "font-size": "28px",
                                                             },
                                                             id="growth-stat",
                                                         ),
@@ -490,21 +500,33 @@ app.layout = html.Div(
                                             ],
                                             style={
                                                 "backgroundColor": "#111111",
-                                                "height": "100px",
+                                                "height": "90px",
                                                 "width": "100%",
                                             },
                                         ),
                                     ],
-                                    style={"display": "inline-block", "width": "25%"},
+                                    style={
+                                        "display": "inline-block",
+                                        "width": "25%",
+                                    },
                                 ),
                             ],
-                            style={"display": "flex"},
+                            style={"display": "flex", "margin-top": "10px"},
                         ),
                     ],
                     id="stats-div",
-                    style={"margin-bottom": "10px", "display": "none"},
+                    style={"backgroundColor": "#232323", "display": "none"},
                 ),
-                html.Div(style={"backgroundColor": "#232323", "padding": "10px"}),
+            ],
+            style={
+                "display": "flex",
+                "backgroundColor": "#232323",
+                "margin-bottom": "15px",
+                "margin-top": "10px",
+            },
+        ),
+        html.Div(
+            [
                 html.Div(
                     [
                         html.Div(
@@ -512,7 +534,7 @@ app.layout = html.Div(
                                 html.Div(
                                     [
                                         html.Div(
-                                            "Timeline",
+                                            "History",
                                             style={
                                                 "padding-top": "10px",
                                                 "padding-left": "10px",
@@ -600,21 +622,73 @@ app.layout = html.Div(
                                 ),
                             ]
                         ),
-                        dcc.Loading(
-                            type="circle",
-                            children=[
-                                html.Div(
-                                    [],
-                                    id="map-div",
+                        html.Div(
+                            [
+                                dcc.RadioItems(
+                                    [
+                                        {
+                                            "label": html.Img(
+                                                src="/assets/earth-icon.svg",
+                                                height=10,
+                                                style={
+                                                    "padding-left": "5px",
+                                                    "padding-top": "5px",
+                                                },
+                                            ),
+                                            "value": "global",
+                                        },
+                                        {
+                                            "label": html.Img(
+                                                src="assets/europe-flag-icon.svg",
+                                                height=10,
+                                                style={
+                                                    "padding-left": "5px",
+                                                    "padding-top": "5px",
+                                                },
+                                            ),
+                                            "value": "europe",
+                                        },
+                                        {
+                                            "label": html.Img(
+                                                src="/assets/germany-flag-icon.svg",
+                                                height=10,
+                                                style={
+                                                    "padding-left": "5px",
+                                                    "padding-top": "5px",
+                                                },
+                                            ),
+                                            "value": "germany",
+                                        },
+                                    ],
+                                    value="europe",
+                                    labelStyle={
+                                        "align-items": "center",
+                                        "justify-content": "center",
+                                        "padding-left": "10px",
+                                    },
+                                    id="scope-selector",
                                 ),
-                            ],
+                                dcc.Loading(
+                                    type="circle",
+                                    children=[
+                                        html.Div(
+                                            [],
+                                            id="map-div",
+                                        ),
+                                    ],
+                                ),
+                            ]
                         ),
                     ],
                     id="map-plot",
                     style={"display": "none"},
                 ),
             ],
-            style={"backgroundColor": "#232323"},
+            style={
+                "display": "flex",
+                "backgroundColor": "#232323",
+                "margin-top": "10px",
+            },
         ),
         html.Div(
             [
@@ -644,7 +718,7 @@ app.layout = html.Div(
                                 "border-bottom": "0px",
                                 "border-radius": "0px",
                             },
-                            label="Feature correlation",
+                            label="Correlation heatmap",
                             children=[
                                 html.Div(
                                     [
@@ -670,7 +744,7 @@ app.layout = html.Div(
                                                     ["none"],
                                                     placeholder="Select country",
                                                     clearable=False,
-                                                    id="country-dropdown-corr",
+                                                    id="country-dropdown-heatmap",
                                                     style={
                                                         "width": "140px",
                                                         "font-size": "14px",
@@ -680,6 +754,35 @@ app.layout = html.Div(
                                                 ),
                                             ],
                                             style={"margin-left": "10px"},
+                                        ),
+                                        html.Div(
+                                            [
+                                                html.Div(
+                                                    "Available features",
+                                                    style={
+                                                        "padding-top": "15px",
+                                                        "padding-bottom": "15px",
+                                                        "padding-right": "15px",
+                                                    },
+                                                ),
+                                                dcc.Dropdown(
+                                                    ["A", "b", "c"],
+                                                    placeholder="Select features",
+                                                    clearable=False,
+                                                    multi=True,
+                                                    id="multi-feature-dropdown-heatmap",
+                                                    style={
+                                                        # "width": "40%",
+                                                        "font-size": "14px",
+                                                        "border-color": "#5c6cfa",
+                                                        "background-color": "#111111",
+                                                    },
+                                                ),
+                                            ],
+                                            style={
+                                                "margin-left": "10px",
+                                                "width": "20%",
+                                            },
                                         ),
                                     ],
                                     style={"margin-left": "10px"},
@@ -719,7 +822,7 @@ app.layout = html.Div(
                                 "border-bottom": "0px",
                                 "border-radius": "0px",
                             },
-                            label="Dataset correlation",
+                            label="Correlation line chart",
                             children=[
                                 html.Div(
                                     [
@@ -1113,8 +1216,10 @@ app.layout = html.Div(
                                                         ParameterStoreAIO(
                                                             parameter="scenario",
                                                             type="text",
+                                                            display="block",
                                                         ),
-                                                    ]
+                                                    ],
+                                                    id="scenario-container",
                                                 ),
                                                 html.Div(
                                                     [
@@ -1185,7 +1290,7 @@ app.layout = html.Div(
     ],
     style={
         "fontFamily": "helvetica",
-        "backgroundColor": "#111111",
+        "backgroundColor": "#232323",
         "color": "#f2f2f2",
         "min-width": "1500px",
         "max-width": "1500px",
@@ -1196,11 +1301,42 @@ app.layout = html.Div(
 @app.callback(
     Output("files-container", "children"),
     Output("data-selector", "options"),
+    Output("scenario-container", "children"),
     Input("add-file-button", "n_clicks"),
     State("files-container", "children"),
     State("data-selector", "options"),
+    State("scenario-container", "children"),
+    State(
+        {
+            "component": "ParameterStoreAIO",
+            "subcomponent": "container",
+            "aio_id": "scenario",
+        },
+        "children",
+    ),
 )
-def add_file(add_file_button_clicks, files_container, data_selector):
+def add_file(
+    add_file_button_clicks: int,
+    files_container: List[Component],
+    data_selector: List[dict | str],
+    scenario_container: List[Component],
+    param_store_container: List[Component],
+):
+    """Adds the option to upload additional file(s)
+
+    Args:
+        add_file_button_clicks (int): tracks the number of number of total datasetst added
+        files_container (List[Component]): container with file dropdowns/upload
+        data_selector (List[dict  |  str]): dataset selection toggle
+        scenario_container (List[Component]): container holding possible scenarios for forecasting
+        param_store_container (List[Component]): container holding the scenario input storage
+
+    Raises:
+        exceptions.PreventUpdate: No update unless add file button is clicked
+
+    Returns:
+        _type_: extended files container, extended dataselector, extended scenario container
+    """
 
     changed_item = [p["prop_id"] for p in callback_context.triggered][0]
 
@@ -1213,7 +1349,51 @@ def add_file(add_file_button_clicks, files_container, data_selector):
             }
         )
 
-        return files_container, data_selector
+        # create ID dicts for additional storage and input components inside ParameterStoreAIO("scenario")
+        store = {
+            "component": "ParameterStoreAIO",
+            "subcomponent": "store",
+            "store_no": add_file_button_clicks,
+            "aio_id": "scenario",
+        }
+
+        input = {
+            "component": "ParameterStoreAIO",
+            "subcomponent": f"input",
+            "input_no": add_file_button_clicks,
+            "aio_id": "scenario",
+        }
+
+        # insert Input component after previous existing Input components in ParameterStoreAIO("scenario")
+        # (Input components are stacked sequentially on top of each other in the layout)
+        param_store_container.insert(
+            -1,
+            dcc.Input(
+                id=input,
+                type="text",
+                style={
+                    "backgroundColor": "#111111",
+                    "color": "#f2f2f2",
+                    "padding": "10px",
+                    "border-top": "0px",
+                    "border-left": "0px",
+                    "border-right": "0px",
+                    "border-color": "#5c6cfa",
+                    "width": "300px",
+                    "display": "block",
+                },
+            ),
+        )
+        # add corresponding Store component (not visible in layout)
+        param_store_container.insert(-1, dcc.Store(id=store))
+
+        # remove previous ParameterStoreAIO("scenario") component
+        scenario_container.pop()
+
+        # add ParameterStoreAIO("scenario") with additional Input component back to the container
+        scenario_container.extend(param_store_container)
+
+        return files_container, data_selector, scenario_container
 
     else:
         raise exceptions.PreventUpdate
@@ -1231,11 +1411,11 @@ def add_file(add_file_button_clicks, files_container, data_selector):
         "data",
     ),
 )
-def update_selector_visibility(dataframes: list):
+def update_selector_visibility(dataframes: List[str]):
     """Updates the dataset visibility toggle
 
     Args:
-        dataframes (list): All available datasets
+        dataframes (List[str]): All available datasets
 
     Returns:
         tuple: style properties for visibility selector
@@ -1263,6 +1443,8 @@ def update_selector_visibility(dataframes: list):
     Output("country-dropdown", "value"),
     Output("country-dropdown-multi-forecast", "options"),
     Output("country-dropdown-multi-forecast", "value"),
+    Output("country-dropdown-heatmap", "options"),
+    Output("country-dropdown-heatmap", "value"),
     Input(
         {
             "component": "FilePreProcessingAIO",
@@ -1281,14 +1463,14 @@ def update_selector_visibility(dataframes: list):
     ),
 )
 def update_country_dropdown_comparison(
-    dataframes: list,
-    geo_dropdowns: list,
+    dataframes: List[str],
+    geo_dropdowns: List[str],
 ):
     """Fills the dropdown in correlation section with countries that occur in both datasets
 
     Args:
-        dataframes (list): All available dataframes
-        geo_dropdowns (list): Selected geo-column values
+        dataframes (List[str]): All available dataframes
+        geo_dropdowns (List[str]): Selected geo-column values
 
     Raises:
         exceptions.PreventUpdate: Update prevented unless both datasets and geo-columns are available
@@ -1305,14 +1487,40 @@ def update_country_dropdown_comparison(
             countries_per_df.append(set(countries))
 
         country_intersection = list(set.intersection(*countries_per_df))
+        country_union = list(set.union(*countries_per_df))
 
         country_intersection.sort()
+        country_union.sort()
 
         return (
             country_intersection,
             country_intersection[0],
             country_intersection,
             country_intersection[0],
+            country_union,
+            country_union[0],
+        )
+    elif any(
+        df is not None and geo is not None
+        for (df, geo) in zip(dataframes, geo_dropdowns)
+    ):
+        countries_per_df = []
+        for i, (df, geo) in enumerate(zip(dataframes, geo_dropdowns)):
+            if df is not None and geo is not None:
+                countries = pd.read_json(df)[geo_dropdowns[i]].unique()
+                countries_per_df.append(set(countries))
+
+        country_union = list(set.union(*countries_per_df))
+
+        country_union.sort()
+
+        return (
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            country_union,
+            country_union[0],
         )
 
     else:
@@ -1328,8 +1536,6 @@ def update_country_dropdown_comparison(
     Output("year-dropdown-map", "value"),
     Output("year-range-slider", "min"),
     Output("year-range-slider", "max"),
-    Output("country-dropdown-corr", "options"),
-    Output("country-dropdown-corr", "value"),
     Output("country-dropdown-forecast", "options"),
     Output("country-dropdown-forecast", "value"),
     Output("year-range-slider", "value"),
@@ -1361,18 +1567,18 @@ def update_country_dropdown_comparison(
     ),
 )
 def update_year_and_country_dropdown_stats(
-    selected_dataset: str,
-    dataframes: list,
-    time_dropdowns: list,
-    geo_dropdowns: list,
+    selected_dataset: int,
+    dataframes: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
 ) -> tuple:
     """Fills dropdown in stats section with available years in the selected dataset
 
     Args:
-        selected_dataset (str): value of the selected dataset
-        dataframes (list): available dataframes
-        time_dropdowns (list): Selected time-column values
-        geo_dropdowns (list): Selected geo-column values
+        selected_dataset (int): id of the selected dataset
+        dataframes (List[str]): available dataframes
+        time_dropdowns (List[str]): Selected time-column values
+        geo_dropdowns (List[str]): Selected geo-column values
 
     Raises:
         exceptions.PreventUpdate: prevents update if no dataset is available and no dataset is selected
@@ -1419,18 +1625,18 @@ def update_year_and_country_dropdown_stats(
     ),
 )
 def update_table_content(
-    selected_dataset: str,
-    visibility_checklist: list,
-    dataframes: list,
-    separators: list,
+    selected_dataset: int,
+    visibility_checklist: List[str],
+    dataframes: List[str],
+    separators: List[str],
 ) -> pd.DataFrame:
     """Fills table section with data from the selected dataset
 
     Args:
-        selected_dataset (str): value of selected dataset
-        visibility_checklist (list): list of displayed sections
-        dataframes (list): available dataframes
-        separators (list): selected seperators for each dataset
+        selected_dataset (int): value of selected dataset
+        visibility_checklist (List[str]): list of displayed sections
+        dataframes (List[str]): available dataframes
+        separators (List[str]): selected seperators for each dataset
 
     Raises:
         exceptions.PreventUpdate: update prevented if no dataset is available
@@ -1446,7 +1652,12 @@ def update_table_content(
 
         df = pd.read_json(data).round(2).to_dict("records")
 
-        table_div_style = {"backroundColor": "#ffffff", "display": "block"}
+        table_div_style = {
+            "backroundColor": "#ffffff",
+            "display": "block",
+            "min-width": "49%",
+            "width": "99%",
+        }
 
         return df, table_div_style
 
@@ -1504,44 +1715,39 @@ def update_table_content(
     ),
 )
 def update_stats(
-    selected_dataset: str,
-    avg_stat_children: list,
-    max_stat_children: list,
-    min_stat_children: list,
-    growth_stat_children: list,
+    selected_dataset: int,
+    avg_stat_children: List[Component],
+    max_stat_children: List[Component],
+    min_stat_children: List[Component],
+    growth_stat_children: List[Component],
     year_dropdown_stats: str,
     country_dropdown_stats: str,
-    year_range: list,
-    visibility_checklist: list,
-    dataframes,
-    feature_dropdowns,
-    time_dropdowns,
-    geo_dropdowns,
+    year_range: List[int],
+    visibility_checklist: List[str],
+    dataframes: List[str],
+    feature_dropdowns: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
 ) -> tuple:
-    """Compute and display mean, max, min and growth value (per country) for selected dataset
+    """Update mean, min, max and change rate per country for the selected dataset
 
     Args:
-        selected_dataset (str): selected dataset
-        avg_stat_children (list): container which display mean stat
-        max_stat_children (list): container which displays max stat
-        min_stat_children (list): container which displays min stat
-        growth_stat_children (list): container which display growth stat per country
-        year_dropdown_stats (str): year selector dropdown in stats section
-        country_dropdown_stats (str): country selector in growth rate container
-        geo_dropdown_1 (str): "geo" colum selector for first dataset
-        geo_dropdown_2 (str): "geo" colum selector for second dataset
-        dataset (str): first dataset
-        dataset_2 (str): second dataset
-        selected_column (str): selected column in first dataset
-        selected_subcategory (str): selected subcategory in first dataset
-        selected_column_2 (str): selected column in second dataset
-        selected_sub_category_2 (str): selected subcategory in second dataset
-
-    Raises:
-        exceptions.PreventUpdate: prevents update when dataset, column selection, subcategory selection and "geo" column selection are empty
+        selected_dataset (int): id of selected dataset
+        avg_stat_children (List[Component]): mean stat container
+        max_stat_children (List[Component]): max stat container
+        min_stat_children (List[Component]): min stat container
+        growth_stat_children (List[Component]): growth stat container
+        year_dropdown_stats (str): selected year from dropdown
+        country_dropdown_stats (str): selected country for growth stat
+        year_range (List[int]): time span set in slider
+        visibility_checklist (List[str]): current visible sections
+        dataframes (List[str]): available dataframes
+        feature_dropdowns (List[str]): selected feature columns
+        time_dropdowns (List[str]): selected time columns
+        geo_dropdowns (List[str]): selected geo columns
 
     Returns:
-        tuple: mean stat container, max stat container, min stat container, growth stat container
+        tuple: mean stat container, max stat container, min stat container, growth stat container, stats section visibility
     """
 
     time_column = time_dropdowns[selected_dataset]
@@ -1566,7 +1772,7 @@ def update_stats(
         )
 
         growth_rate = compute_growth_rate(
-            filtered_df_by_country, feature_column, year_range
+            filtered_df_by_country, feature_column, year_range, time_column
         )
 
         avg_stat_children.clear()
@@ -1581,7 +1787,12 @@ def update_stats(
         growth_stat_children.clear()
         growth_stat_children.append(str(growth_rate) + "%")
 
-        stats_div_style = {"display": "block"}
+        stats_div_style = {
+            "display": "block",
+            "width": "49%",
+            "min-width": "49%",
+            "margin-left": "10px",
+        }
 
         return (
             avg_stat_children,
@@ -1635,33 +1846,27 @@ def update_stats(
     ),
 )
 def update_line_plot(
-    timeline_children: list,
-    selected_dataset: str,
-    visibility_checklist: list,
-    dataframes,
-    feature_dropdowns,
-    time_dropdowns,
-    geo_dropdowns,
-) -> list:
-    """Draws a line plot with the selected data specified in the dropdowns
+    timeline_children: List[Component],
+    selected_dataset: int,
+    visibility_checklist: List[str],
+    dataframes: List[str],
+    feature_dropdowns: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
+) -> tuple:
+    """Updates multi line plot
 
     Args:
-        selected_sub_category (str): first selected sub-category
-        selected_column (str): first selected column
-        dataset (str): first dataset
-        selected_sub_category_2 (str): second selected sub-category
-        selected_column_2 (str): second selected column
-        dataset_2 (str): second dataset
-        timeline_children (list): container for timeline section
-        selected_dataset (str): value of selected dataset
-        geo_dropdown_1 (str): "geo" column selector for first dataset
-        geo_dropdown_2 (str): "geo" column selector for second datset
-
-    Raises:
-        exceptions.PreventUpdate: _description_
+        timeline_children (List[Component]): container of timeline figure
+        selected_dataset (int): id of selected dataset
+        visibility_checklist (List[str]): current visible sections
+        dataframes (List[str]): available dataframes
+        feature_dropdowns (List[str]): selected feature columns
+        time_dropdowns (List[str]): selected time columns
+        geo_dropdowns (List[str]): selected geo columns
 
     Returns:
-        list: container with line plot
+        tuple: timeline figure, figure container visibility
     """
 
     time_column = time_dropdowns[selected_dataset]
@@ -1747,36 +1952,32 @@ def update_line_plot(
         },
         "value",
     ),
+    Input("scope-selector", "value"),
 )
 def update_choropleth(
-    map_children: list,
-    selected_dataset: str,
-    visiblity_checklist: list,
-    dataframes,
-    feature_dropdowns,
-    time_dropdowns,
-    geo_dropdowns,
-) -> list:
-    """Displays choropleth mapbox in countries section
+    map_children: List[Component],
+    selected_dataset: int,
+    visiblity_checklist: List[str],
+    dataframes: List[str],
+    feature_dropdowns: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
+    scope: str,
+) -> tuple:
+    """Updates the map figure
 
     Args:
-        selected_sub_category (str): selected sub-category in first dataset
-        selected_column (str): selected column in first dataset
-        dataset (str): first dataset
-        map_children (list): container that holds the mapbox
-        selected_sub_category_2 (str): selected sub-category in second dataset
-        selected_column_2 (str): selected column in second dataset
-        dataset_2 (str): second dataset
-        geo_dropdown_2 (str): first "geo" dropdown selection
-        geo_dropdown_1 (str): second "geo" dropdown selection
-        selected_year_map (str): selected year in countries section
-        selected_dataset (str): value of selected dataset
-
-    Raises:
-        exceptions.PreventUpdate: update prevented unless atleast one dataset is uploaded
+        map_children (List[Component]): container of map figure
+        selected_dataset (int): id of selected dataset
+        visiblity_checklist (List[str]): current visible sections
+        dataframes (List[str]): available dataframes
+        feature_dropdowns (List[str]): selected features
+        time_dropdowns (List[str]): selected time columns
+        geo_dropdowns (List[str]): selected geo columns
+        scope (str): selected scope
 
     Returns:
-        list: container with choropleth mapbox
+        tuple: map figure, map container visbility
     """
 
     time_column = time_dropdowns[selected_dataset]
@@ -1802,6 +2003,7 @@ def update_choropleth(
             geo_column=geo_column,
             feature_column=feature_column,
             time_column=time_column,
+            scope=scope,
         )
 
         if map_children:
@@ -1861,35 +2063,38 @@ def update_choropleth(
         },
         "value",
     ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "feature_dropdown",
+            "aio_id": ALL,
+        },
+        "options",
+    ),
 )
 def update_max_country_compare(
     selected_country: str,
-    comparison_children: str,
-    visibility_checklist: list,
-    dataframes,
-    feature_dropdowns,
-    time_dropdowns,
-    geo_dropdowns,
-) -> list:
-    """Creates a line plot with two subplots (one for each dataset respectively)
+    comparison_children: List[Component],
+    visibility_checklist: List[str],
+    dataframes: List[str],
+    feature_dropdowns: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
+    feature_options: list,
+) -> tuple:
+    """Updates correlation line plot
 
     Args:
-        selected_sub_category (str): selected sub-category in first dataset
-        selected_column (str): selected column in first dataset
-        dataset (str): first dataset
-        selected_sub_category_2 (str): selected sub-category in second dataset
-        selected_column_2 (str): selected column in second dataset
-        selected_country (str): selected country in comparison section
-        dataset_2 (str): second dataset
-        comparison_children (str): container that holds the line plot
-        geo_dropdown_2 (str): value of "geo" of first dataset
-        geo_dropdown_1 (str): value of "geo" in second dataset
-
-    Raises:
-        exceptions.PreventUpdate: update prevented until two datasets are loaded
+        selected_country (str): value of selected country
+        comparison_children (List[Component]): container of correlation line plot
+        visibility_checklist (List[str]): current visible sections
+        dataframes (List[str]): available dataframes
+        feature_dropdowns (List[str]): selected features
+        time_dropdowns (List[str]): selected time columns
+        geo_dropdowns (List[str]): selected geo columns
 
     Returns:
-        list: container with line plots
+        tuple: correlation line plot, correlation line plot container visibility
     """
 
     if (
@@ -1908,9 +2113,7 @@ def update_max_country_compare(
             dfs.append(df_by_country)
 
         fig = create_two_line_plot(
-            dfs,
-            feature_dropdowns,
-            time_dropdowns,
+            dfs, feature_dropdowns, time_dropdowns, feature_options
         )
 
         comparison_children.clear()
@@ -1932,6 +2135,155 @@ def update_max_country_compare(
         compare_div_style = {"display": "none"}
 
         return comparison_children, compare_div_style
+
+
+@app.callback(
+    Output("heatmap-plot-div", "children"),
+    Output("heatmap-div", "style"),
+    Output("multi-feature-dropdown-heatmap", "options"),
+    Input("country-dropdown-heatmap", "value"),
+    Input("visibility-checklist", "value"),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "store",
+            "aio_id": ALL,
+        },
+        "data",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "feature_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "time_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "geo_dropdown",
+            "aio_id": ALL,
+        },
+        "value",
+    ),
+    State("heatmap-plot-div", "children"),
+    Input("multi-feature-dropdown-heatmap", "value"),
+    Input(
+        {
+            "component": "FilePreProcessingAIO",
+            "subcomponent": "feature_dropdown",
+            "aio_id": ALL,
+        },
+        "options",
+    ),
+    prevent_initial_call=True,
+)
+def update_heatmap(
+    selected_country: str,
+    visibility_checklist: List[str],
+    dataframes: List[str],
+    feature_dropdowns: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
+    heatmap_cross_children: List[Component],
+    selected_features: List[str],
+    feature_dropdown_options: List[str],
+) -> tuple:
+    """Updates correlation line plot
+
+    Args:
+        selected_country (str): value of selected country
+        comparison_children (List[Component]): container of correlation line plot
+        visibility_checklist (List[str]): current visible sections
+        dataframes (List[str]): available dataframes
+        feature_dropdowns (List[str]): selected features
+        time_dropdowns (List[str]): selected time columns
+        geo_dropdowns (List[str]): selected geo columns
+
+    Returns:
+        tuple: correlation line plot, correlation line plot container visibility
+    """
+
+    changed_item = [p["prop_id"] for p in callback_context.triggered][0]
+    print(changed_item)
+
+    if "store" in changed_item or "geo_dropdown" in changed_item:
+        selected_features = None
+
+    if any(
+        df is not None and feat is not None and time is not None and geo is not None
+        for (df, feat, time, geo) in zip(
+            dataframes, feature_dropdowns, time_dropdowns, geo_dropdowns
+        )
+    ):
+        if (
+            "Correlation" in visibility_checklist
+            and selected_features is not None
+            and "country-dropdown-heatmap" not in changed_item
+        ):
+
+            dfs = []
+            time_columns = []
+
+            for i, data in enumerate(dataframes):
+                if data is not None and geo_dropdowns[i] is not None:
+                    df = pd.read_json(data)
+
+                    if selected_country in df[geo_dropdowns[i]].unique():
+                        df_by_country = df[df[geo_dropdowns[i]] == selected_country]
+
+                        dfs.append(df_by_country)
+                        time_columns.append(time_dropdowns[i])
+
+            if len(dfs) > 1:
+                merged_df, _ = merge_dataframes_multi(dfs, time_columns)
+                fig = create_correlation_heatmap(merged_df[selected_features])
+
+            else:
+                fig = create_correlation_heatmap(dfs[0][selected_features])
+
+            heatmap_cross_children.clear()
+            heatmap_cross_children.append(dcc.Graph(figure=fig))
+
+            heatmap_div_style = {"display": "block", "backgroundColor": "#111111"}
+
+            return heatmap_cross_children, heatmap_div_style, no_update
+
+        elif selected_features is None or "country-dropdown-heatmap" in changed_item:
+            available_features = []
+            for i, data in enumerate(dataframes):
+                if data is not None and geo_dropdowns[i] is not None:
+                    df = pd.read_json(data)
+
+                    if selected_country in df[geo_dropdowns[i]].unique():
+                        available_features.append(
+                            [
+                                feature
+                                for feature in feature_dropdown_options[i]
+                                if feature != time_dropdowns[i]
+                            ]
+                        )
+
+            heatmap_div_style = {"display": "block", "backgroundColor": "#111111"}
+
+            features = [
+                feature for options in available_features for feature in options
+            ]
+
+            return heatmap_cross_children, heatmap_div_style, features
+    else:
+        heatmap_div_style = {"display": "none"}
+
+        return heatmap_cross_children, heatmap_div_style, no_update
 
 
 @app.callback(
@@ -1957,11 +2309,25 @@ def update_max_country_compare(
     ),
 )
 def update_forecast_slider(
-    selected_dataset: str,
+    selected_dataset: int,
     frequency_dropdown: str,
-    dataframes: str,
-    time_dropdowns: str,
-):
+    dataframes: List[str],
+    time_dropdowns: List[str],
+) -> tuple:
+    """Updates the forecast slider marks to match time stamps in selected dataset
+
+    Args:
+        selected_dataset (int): id of selected dataset
+        frequency_dropdown (str): selected frequency
+        dataframes (List[str]): available dataframes
+        time_dropdowns (List[str]): selected time columns
+
+    Raises:
+        exceptions.PreventUpdate: Update prevented if no time column, dataframe and frequency available
+
+    Returns:
+        tuple: time marks dict, slider visibility
+    """
 
     time_column = time_dropdowns[selected_dataset]
     data = dataframes[selected_dataset]
@@ -2024,39 +2390,35 @@ def update_forecast_slider(
     ),
 )
 def update_forecast(
-    selected_dataset: str,
-    fit_plot_children: list,
+    selected_dataset: int,
+    fit_plot_children: List[Component],
     country_dropdown: str,
-    forecast_slider_value: str,
+    forecast_slider_value: int,
     frequency_dropdown: str,
     model_dropdown: str,
-    visibility_checklist: list,
-    dataframes,
-    feature_dropdowns,
-    time_dropdowns,
-    geo_dropdowns,
+    visibility_checklist: List[str],
+    dataframes: List[str],
+    feature_dropdowns: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
 ) -> tuple:
-    """Creates a forecast using the Prophet model
+    """Create univariate forecast with Prophet or Linear Regression model
 
     Args:
-        dataset (str): First dataset
-        dataset_2 (str): Second dataset
-        feature_dropdown_1 (str): value of the first selected feature column
-        feature_dropdown_2 (str): value of the second selected feature column
-        geo_dropdown_1 (str): value of the first selected geo column
-        geo_dropdown_2 (str): value of the second selected geo column
-        time_dropdown_1 (str): value of the first selected time column
-        time_dropdown_2 (str): value of the second selected time column
-        selected_dataset (str): value of the dataset selector
-        fit_plot_children (list): container for the forecast plot
-        country_dropdown (str): selected country to forecast
-        forecast_slider_value (str): number of periods to forecast (set by slider)
-
-    Raises:
-        exceptions.PreventUpdate: update prevented if neither dataset is loaded with all columns selected
+        selected_dataset (int): id of selected dataset
+        fit_plot_children (List[Component]): container for forecast plot
+        country_dropdown (str): selected country
+        forecast_slider_value (int): number of forecast to predict
+        frequency_dropdown (str): selected time frequency
+        model_dropdown (str): selected forecasting model
+        visibility_checklist (List[str]): current visible sections
+        dataframes (List[str]): available dataframes
+        feature_dropdowns (List[str]): selected features
+        time_dropdowns (List[str]): selected time columns
+        geo_dropdowns (List[str]): selected geo columns
 
     Returns:
-        tuple: container with forecast plot, style component
+        tuple: forecast plot container, forecast plot container visibility
     """
 
     time_column = time_dropdowns[selected_dataset]
@@ -2111,7 +2473,7 @@ def update_forecast(
 
         fit_plot_children.append(dcc.Graph(figure=fig))
 
-        forecast_div_style = {"display": "block"}
+        forecast_div_style = {"display": "block", "backgroundColor": "#111111"}
 
         return fit_plot_children, forecast_div_style
 
@@ -2119,7 +2481,7 @@ def update_forecast(
         feature_column and geo_column and data
     ) and "Forecast" in visibility_checklist:
 
-        forecast_div_style = {"display": "block"}
+        forecast_div_style = {"display": "block", "backgroundColor": "#111111"}
 
         return fit_plot_children, forecast_div_style
 
@@ -2127,108 +2489,6 @@ def update_forecast(
         forecast_div_style = {"display": "none"}
 
         return fit_plot_children, forecast_div_style
-
-
-@app.callback(
-    Output("heatmap-plot-div", "children"),
-    Output("heatmap-div", "style"),
-    Input("data-selector", "value"),
-    State("heatmap-plot-div", "children"),
-    Input("country-dropdown-corr", "value"),
-    Input("visibility-checklist", "value"),
-    Input(
-        {
-            "component": "FilePreProcessingAIO",
-            "subcomponent": "store",
-            "aio_id": ALL,
-        },
-        "data",
-    ),
-    Input(
-        {
-            "component": "FilePreProcessingAIO",
-            "subcomponent": "feature_dropdown",
-            "aio_id": ALL,
-        },
-        "value",
-    ),
-    Input(
-        {
-            "component": "FilePreProcessingAIO",
-            "subcomponent": "time_dropdown",
-            "aio_id": ALL,
-        },
-        "value",
-    ),
-    Input(
-        {
-            "component": "FilePreProcessingAIO",
-            "subcomponent": "geo_dropdown",
-            "aio_id": ALL,
-        },
-        "value",
-    ),
-)
-def update_heatmap(
-    selected_dataset: str,
-    heatmap_children: list,
-    country_dropdown: str,
-    visibility_checklist: list,
-    dataframes,
-    feature_dropdowns,
-    time_dropdowns,
-    geo_dropdowns,
-):
-    """Creates a heatmap from the correlation matrix of features
-
-    Args:
-        dataset (str): First dataset
-        dataset_2 (str): Second dataset
-        time_dropdown_1 (str): value of the selected time column value of the first dataset
-        time_dropdown_2 (str): value of the selcted time column value of the second dataset
-        geo_dropdown_1 (str): value of the selected geo column value of the first dataset
-        geo_dropdown_2 (str): value of the selected geo column value of the second dataset
-        selected_dataset (str): value of the dataset selector
-        heatmap_children (list): container that holds the figure
-        country_dropdown (str): selected country
-
-    Raises:
-        exceptions.PreventUpdate: update prevented if neither dataset is loaded with all columns selected
-
-    Returns:
-        list: container with heatmap plot
-    """
-
-    time_column = time_dropdowns[selected_dataset]
-    feature_column = feature_dropdowns[selected_dataset]
-    geo_column = geo_dropdowns[selected_dataset]
-    data = dataframes[selected_dataset]
-
-    if (
-        time_column and feature_column and geo_column and data
-    ) and "Correlation" in visibility_checklist:
-
-        df = pd.read_json(data)
-
-        df = df[df[geo_column] == country_dropdown]
-
-        df = df.drop(columns=time_column)
-
-        fig = create_correlation_heatmap(df)
-
-        if heatmap_children:
-            heatmap_children.clear()
-
-        heatmap_children.append(dcc.Graph(figure=fig))
-
-        heatmap_div_style = {"display": "block"}
-
-        return heatmap_children, heatmap_div_style
-    else:
-
-        heatmap_div_style = {"display": "none"}
-
-        return heatmap_children, heatmap_div_style
 
 
 @app.callback(
@@ -2241,10 +2501,17 @@ def update_heatmap(
     Output(ParameterStoreAIO.ids.container("\u03B1"), "style"),
     Output("forecast-data-selector", "options"),
     Output("forecast-data-table", "data"),
-    Output(ParameterStoreAIO.ids.container("scenario"), "style"),
+    Output(
+        {
+            "component": "ParameterStoreAIO",
+            "subcomponent": "input",
+            "input_no": ALL,
+            "aio_id": "scenario",
+        },
+        "placeholder",
+    ),
     State("multi-fit-plot-div", "children"),
     Input("multi-frequency-dropdown-forecast", "value"),
-    Input(ParameterStoreAIO.ids.store("scenario"), "data"),
     Input("country-dropdown-multi-forecast", "value"),
     Input("model-dropdown-multi-forecast", "value"),
     Input("var-forecast-slider", "value"),
@@ -2293,49 +2560,59 @@ def update_heatmap(
         },
         "filename",
     ),
+    Input(
+        {
+            "component": "ParameterStoreAIO",
+            "subcomponent": "store",
+            "store_no": ALL,
+            "aio_id": "scenario",
+        },
+        "data",
+    ),
 )
 def update_multivariate_forecast(
-    multi_forecast_children: list,
+    multi_forecast_children: List[Component],
     multi_frequency_dropdown: str,
-    scenario_data: list,
     selected_country: str,
     selected_model: str,
     var_slider_value: int,
     alpha_parameter: int,
     max_lags_parameter: int,
-    forecast_data_selector_options: str,
-    selected_dataset: str,
-    visibility_checklist: list,
-    dataframes,
-    feature_dropdowns,
-    time_dropdowns,
-    geo_dropdowns,
-    filenames,
+    forecast_data_selector_options: List[dict | str],
+    selected_dataset: int,
+    visibility_checklist: List[str],
+    dataframes: List[str],
+    feature_dropdowns: List[str],
+    time_dropdowns: List[str],
+    geo_dropdowns: List[str],
+    filenames: List[str],
+    scenarios_data: List[List[int]],
 ) -> tuple:
-    """Performs multivariate forecast with an additional dataset and plots the result
+    """Create multivariate forecast with Prophet, Vector Auto Regression or Multivariate Exponential Smoothing
 
     Args:
-        dataset_1 (str): Dataset which is forecasted for
-        dataset_2 (str): Dataset which is used as additional timeseries for the forecast
-        feature_dropdown_1 (str): selected feature column of first dataset
-        feature_dropdown_2 (str): selected feature column of second dataset
-        geo_dropdown_1 (str): selected geo column of first dataset
-        geo_dropdown_2 (str): selected geo column of second dataset
-        time_dropdown_1 (str): selected time column of first dataset
-        time_dropdown_2 (str): selected time column of second dataset
-        multi_forecast_children (list): container for the forecast figure
-        multi_frequency_dropdown (str): selected frequency value
-        scenario_data (list): artifical future data for the second dataset (needed for multivariate forecast with Prophet)
-        selected_country (str): selected country of country dropdown
-
-    Raises:
-        exceptions.PreventUpdate: Update prevented until both datasets loaded, feature columns selected and artifical data is available
+        multi_forecast_children (List[Component]): forecast figure container
+        multi_frequency_dropdown (str): selected time frequency
+        selected_country (str): value of selected country
+        selected_model (str): value of selected model
+        var_slider_value (int): number of forecast to predict
+        alpha_parameter (int): value of alpha parameter (exponential smoothing)
+        max_lags_parameter (int): max lags parameter (vector auto regression)
+        forecast_data_selector_options (List[dict | str]): selector options for dependent dataset (Prophet)
+        selected_dataset (int): id of selected dataset (Prophet)
+        visibility_checklist (List[str]): current visible sections
+        dataframes (List[str]): available dataframes
+        feature_dropdowns (List[str]): selected feature columns
+        time_dropdowns (List[str]): selected time columns
+        geo_dropdowns (List[str]): selected geo columns
+        filenames (List[str]): filenames of available dataframes
+        scenarios_data (List[List[int]]): scenario data for each independent dataset
 
     Returns:
-        tuple:
+        tuple: _description_
     """
 
-    dfs = {"Dataset 1": 0, "Dataset 2": 1}
+    placeholders = [no_update for _ in range(len(feature_dropdowns) - 1)]
 
     if (
         not any(
@@ -2346,21 +2623,9 @@ def update_multivariate_forecast(
         and selected_country
     ) and "Forecast" in visibility_checklist:
 
-        if selected_dataset and selected_model == "Prophet":
-            # file_1 = [dfs[key] for key in dfs if key in selected_dataset][0]
-            # file_2 = [dfs[key] for key in dfs if key not in selected_dataset][0]
-
-            file_1 = [i for i in range(len(dataframes)) if i == selected_dataset][0]
-            file_2 = [i for i in range(len(dataframes)) if i != selected_dataset][0]
-
-        else:
-            file_1 = 0
-            file_2 = 1
-
         filtered_dfs = []
-
-        for i in (file_1, file_2):
-            df = pd.read_json(dataframes[i])
+        for i, df in enumerate(dataframes):
+            df = pd.read_json(df)
             filtered_df = df[df[geo_dropdowns[i]] == selected_country][
                 [time_dropdowns[i], feature_dropdowns[i]]
             ]
@@ -2377,24 +2642,17 @@ def update_multivariate_forecast(
             if not max_lags_parameter:
                 max_lags_parameter = 1
 
-            forecast, marks = var_fit_and_predict(
-                filtered_dfs[0],
-                filtered_dfs[1],
-                time_dropdowns[file_1],
-                time_dropdowns[file_2],
-                feature_dropdowns[file_1],
-                feature_dropdowns[file_2],
-                max_lags_parameter,
-                var_slider_value,
-                multi_frequency_dropdown,
+            forecast, marks = var_fit_and_predict_multi(
+                filtered_dfs,
+                time_dropdowns,
+                feature_dropdowns,
+                max_lags=max_lags_parameter,
+                periods=var_slider_value,
+                frequency=multi_frequency_dropdown,
             )
 
-            fig = create_var_forecast_plot(
-                forecast,
-                feature_dropdowns[file_1],
-                feature_dropdowns[file_2],
-                time_dropdowns[file_1],
-                var_slider_value,
+            fig = create_var_forecast_plot_multi(
+                forecast, feature_dropdowns, time_dropdowns[-1], var_slider_value
             )
 
             var_slider_style = {"display": "block"}
@@ -2414,8 +2672,6 @@ def update_multivariate_forecast(
                 "display": "none",
             }
 
-            scenario_input_style = {"display": "none"}
-
         elif selected_model == "HW Smoothing":
             if not var_slider_value:
                 var_slider_value = 1
@@ -2426,24 +2682,17 @@ def update_multivariate_forecast(
             if not alpha_parameter:
                 alpha_parameter = 0.5
 
-            forecast, marks = hw_es_fit_and_predict(
-                filtered_dfs[0],
-                filtered_dfs[1],
-                time_dropdowns[file_1],
-                time_dropdowns[file_2],
-                feature_dropdowns[file_1],
-                feature_dropdowns[file_2],
+            forecast, marks = hw_es_fit_and_predict_multi(
+                filtered_dfs,
+                time_dropdowns,
+                feature_dropdowns,
                 multi_frequency_dropdown,
                 var_slider_value,
                 alpha_parameter,
             )
 
-            fig = create_var_forecast_plot(
-                forecast,
-                feature_dropdowns[file_1],
-                feature_dropdowns[file_2],
-                time_dropdowns[file_1],
-                var_slider_value,
+            fig = create_var_forecast_plot_multi(
+                forecast, feature_dropdowns, time_dropdowns[-1], var_slider_value
             )
 
             var_slider_style = {"display": "block"}
@@ -2459,40 +2708,40 @@ def update_multivariate_forecast(
                 "display": "none",
             }
 
-            scenario_input_style = {"display": "none"}
-
         elif selected_model == "Prophet":
             forecast_data_selector_options = [
-                {"label": f"{filenames[0]} ({feature_dropdowns[0]})", "value": 0},
-                {"label": f"{filenames[1]} ({feature_dropdowns[1]})", "value": 1},
+                {"label": f"{file} ({feature})", "value": n}
+                for n, (file, feature) in enumerate(zip(filenames, feature_dropdowns))
             ]
 
+            if selected_dataset is not None:
+
+                placeholders = [
+                    feature
+                    for i, feature in enumerate(feature_dropdowns)
+                    if i != selected_dataset
+                ]
+
             marks = no_update
-            if scenario_data:
-                forecast, merged_df, future_df = prophet_fit_and_predict_multi(
-                    filtered_dfs[0],
-                    filtered_dfs[1],
-                    time_dropdowns[file_1],
-                    time_dropdowns[file_2],
-                    feature_dropdowns[file_1],
-                    feature_dropdowns[file_2],
-                    scenario_data,
-                    multi_frequency_dropdown,
+            if not any(scenario is None for scenario in scenarios_data):
+
+                forecast, merged_df, future_df, y_feature = prophet_fit_and_predict_n(
+                    filtered_dfs,
+                    time_dropdowns,
+                    feature_dropdowns,
+                    scenarios=scenarios_data,
+                    frequency=multi_frequency_dropdown,
+                    y_feature_index=selected_dataset,
                 )
 
-                fig = create_multivariate_forecast(
-                    forecast,
-                    merged_df,
-                    future_df,
-                    feature_dropdowns[file_1],
-                    feature_dropdowns[file_2],
+                fig = create_multivariate_forecast_prophet(
+                    forecast, merged_df, future_df, y_feature, feature_dropdowns
                 )
+
             else:
-                merged_df, _ = merge_dataframes(
-                    filtered_dfs[0],
-                    filtered_dfs[1],
-                    time_dropdowns[file_1],
-                    time_dropdowns[file_2],
+                merged_df, _ = merge_dataframes_multi(
+                    filtered_dfs,
+                    time_dropdowns,
                 )
 
                 last_five_datapoints = merged_df.iloc[::-1].round(2).to_dict("records")
@@ -2510,13 +2759,14 @@ def update_multivariate_forecast(
                 "display": "flex",
             }
 
-            scenario_input_style = {"display": "block"}
-
         if multi_forecast_children:
             multi_forecast_children.clear()
 
         if (
-            (selected_model == "Prophet" and scenario_data)
+            (
+                selected_model == "Prophet"
+                and not any(scenario is None for scenario in scenarios_data)
+            )
             or selected_model == "Vector AR"
             or selected_model == "HW Smoothing"
         ):
@@ -2542,7 +2792,7 @@ def update_multivariate_forecast(
             alpha_div_style,
             forecast_data_selector_options,
             last_five_datapoints,
-            scenario_input_style,
+            placeholders,
         )
     elif (
         not any(x is None for x in dataframes + feature_dropdowns)
@@ -2569,7 +2819,7 @@ def update_multivariate_forecast(
             no_update,
             no_update,
             no_update,
-            no_update,
+            placeholders,
         )
 
     else:
@@ -2586,7 +2836,7 @@ def update_multivariate_forecast(
             no_update,
             no_update,
             no_update,
-            no_update,
+            placeholders,
         )
 
 

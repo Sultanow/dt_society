@@ -1,4 +1,5 @@
-import datetime
+import enum
+import os
 import numpy as np
 import plotly.graph_objects as go
 import pandas as pd
@@ -8,16 +9,21 @@ from plotly.subplots import make_subplots
 from urllib.request import urlopen
 import json
 
+from typing import List
+
 theme = "plotly_dark"
 
 
 def create_multi_line_plot(
-    data: pd.DataFrame, geo_col, time_column, feature_column
+    data: pd.DataFrame, geo_col: str, time_column: str, feature_column: str
 ) -> go.Figure:
     """Creates a line plot with a line for each country
 
     Args:
-        data (pd.DataFrame): Dataset
+        data (pd.DataFrame): dataframe
+        geo_col (str): geo column value
+        time_column (str): time column value
+        feature_column (str): feature column value
 
     Returns:
         go.Figure: line plot
@@ -57,7 +63,7 @@ def create_multi_line_plot(
         xaxis_title=time_column,
         yaxis_title=feature_column,
         template=theme,
-        margin={"t": 30},
+        margin={"t": 30, "autoexpand": True},
     )
 
     return fig
@@ -67,13 +73,11 @@ def create_choropleth_plot(
     data: pd.DataFrame,
     geo_column: str,
     feature_column: str,
-    facet: str = None,
-    year: str = None,
 ) -> go.Figure:
     """Creates a choropleth plot with timeline
 
     Args:
-        data (pd.DataFrame): Data
+        data (pd.DataFrame): Dataframe
 
     Returns:
         go.Figure: Choropleth plot
@@ -110,14 +114,16 @@ def create_choropleth_slider_plot(
     geo_column: str,
     feature_column: str,
     time_column: str = None,
+    scope="Europe",
 ) -> go.Figure:
-    """Creates choropleth plot with time slider and animation
+    """Creates choropleth plot with time slider and animated transitions
 
     Args:
         data (pd.DataFrame): Data
         geo_column (str): value of geo column
         feature_column (str): value of feature column
         time_column (str, optional): value of column with time data. Defaults to None.
+        scope (str, optional): value of selected scope. Defaults to "Europe".
 
     Returns:
         go.Figure: Choropleth figure
@@ -125,13 +131,13 @@ def create_choropleth_slider_plot(
     fig_dict = {"data": [], "layout": {}, "frames": []}
 
     fig_dict["layout"] = dict(
-        geo=dict(
-            scope="world",
-            projection={"type": "natural earth2", "scale": 4.5},
-            bgcolor="rgba(0,0,0,0)",
-            center=dict(lat=50.5, lon=11),
-        ),
-        margin=dict(l=0, r=0, b=0, t=1, pad=0, autoexpand=True),
+        # geo=dict(
+        #     scope="world",
+        #     projection={"type": "natural earth2", "scale": 3},
+        #     bgcolor="rgba(0,0,0,0)",
+        #     center=dict(lat=50.5, lon=11),
+        # ),
+        margin=dict(l=0, r=0, b=1, t=1, pad=0, autoexpand=True),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
     )
@@ -156,7 +162,7 @@ def create_choropleth_slider_plot(
                 },
             ],
             "direction": "left",
-            "pad": {"r": 10, "t": 0},
+            "pad": {"r": 10, "t": 10},
             "showactive": False,
             "type": "buttons",
             "x": 0.1,
@@ -174,7 +180,7 @@ def create_choropleth_slider_plot(
             "visible": False,
         },
         "transition": {"duration": 300},
-        "pad": {"b": 10, "t": 0},
+        "pad": {"b": 10, "t": 5},
         "len": 0.9,
         "x": 0.1,
         "y": 0,
@@ -186,22 +192,100 @@ def create_choropleth_slider_plot(
 
     first_year = data[time_column].unique()[0]
 
+    # data_dict = dict(
+    #     type="choropleth",
+    #     locations=data[data[time_column] == first_year][geo_column],
+    #     locationmode="ISO-3",
+    #     z=data[data[time_column] == first_year][feature_column],
+    #     zmin=0,
+    #     zmax=data[feature_column].max(),
+    #     colorscale="Magma",
+    #     colorbar=go.choropleth.ColorBar(
+    #         title=go.choropleth.colorbar.Title(text=feature_column)
+    #     ),
+    #     marker_line_color="darkgray",
+    #     marker_line_width=0.5,
+    # )
+
+    geojsons = {
+        "global": {
+            "url": "https://datahub.io/core/geo-countries/r/countries.geojson",
+            "featureid": "properties.ISO_A3",
+            "zoom": 1,
+            "center": {"lat": 56.5, "lon": 11},
+        },
+        "europe": {
+            "url": "https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSON/europe.geojson",
+            "path": "/assets/custom.geo-3.json",
+            "featureid": "properties.ISO3",
+            # "featureid": "properties.adm0_iso",
+            "zoom": 2.5,
+            "center": {"lat": 53, "lon": 11},
+        },
+        "germany": {
+            "url": "https://raw.githubusercontent.com/isellsoap/deutschlandGeoJSON/main/2_bundeslaender/3_mittel.geo.json",
+            "path": "/assets/3_mittel.geo.json",
+            "featureid": "properties.id",
+            "zoom": 4.4,
+            "center": {"lat": 51.3, "lon": 10},
+        },
+    }
+
+    with urlopen(geojsons[scope]["url"]) as response:
+        countries = json.load(response)
+
+    # with open(os.getcwd() + geojsons[scope]["path"]) as response:
+    #     countries = json.load(response)
+
     data_dict = dict(
-        type="choropleth",
+        type="choroplethmapbox",
         locations=data[data[time_column] == first_year][geo_column],
-        locationmode="ISO-3",
+        geojson=countries,
+        # locationmode="ISO-3",
+        featureidkey=geojsons[scope]["featureid"],
         z=data[data[time_column] == first_year][feature_column],
         zmin=0,
         zmax=data[feature_column].max(),
         colorscale="Magma",
-        colorbar=go.choropleth.ColorBar(
-            title=go.choropleth.colorbar.Title(text=feature_column)
+        colorbar=go.choroplethmapbox.ColorBar(
+            title=go.choroplethmapbox.colorbar.Title(text=feature_column)
         ),
-        marker_line_color="darkgray",
-        marker_line_width=0.5,
+        marker={"opacity": 0.5}
+        # marker_line_color="darkgray",
+        # marker_line_width=0.5,
     )
 
     fig_dict["data"].append(data_dict)
+
+    # for time in data[time_column].unique():
+
+    #     df_per_year = data[data[time_column] == time]
+
+    #     fig_dict["frames"].append(
+    #         dict(
+    #             data=dict(
+    #                 type="choropleth",
+    #                 locations=df_per_year[geo_column],
+    #                 locationmode="ISO-3",
+    #                 z=df_per_year[feature_column],
+    #             ),
+    #             name=str(time),
+    #         )
+    #     )
+
+    #     slider_step = {
+    #         "args": [
+    #             [time],
+    #             {
+    #                 "frame": {"duration": 300, "redraw": True},
+    #                 "mode": "immediate",
+    #                 "transition": {"duration": 300},
+    #             },
+    #         ],
+    #         "label": str(time),
+    #         "method": "animate",
+    #     }
+    #     sliders_dict["steps"].append(slider_step)
 
     for time in data[time_column].unique():
 
@@ -210,9 +294,10 @@ def create_choropleth_slider_plot(
         fig_dict["frames"].append(
             dict(
                 data=dict(
-                    type="choropleth",
+                    type="choroplethmapbox",
                     locations=df_per_year[geo_column],
-                    locationmode="ISO-3",
+                    featureidkey=geojsons[scope]["featureid"],
+                    geojson=countries,
                     z=df_per_year[feature_column],
                 ),
                 name=str(time),
@@ -236,54 +321,96 @@ def create_choropleth_slider_plot(
     fig_dict["layout"]["sliders"] = [sliders_dict]
 
     fig_choropleth = go.Figure(fig_dict)
-    fig_choropleth.update_geos(
-        showcoastlines=True, showsubunits=True, showframe=False, resolution=50
+    fig_choropleth.update_mapboxes(
+        style="carto-positron",
+        zoom=geojsons[scope]["zoom"],
+        center=geojsons[scope]["center"],
     )
+    # fig_choropleth.update_geos(
+    #     showcoastlines=True, showsubunits=True, showframe=False, resolution=50
+    # )
     fig_choropleth.update_layout(template=theme)
 
     return fig_choropleth
 
 
 def create_two_line_plot(
-    datasets: tuple, feature_columns: tuple, time_columns: tuple
+    datasets: List[pd.DataFrame],
+    feature_columns: List[str],
+    time_columns: List[str],
+    feature_options: List[List[str]],
 ) -> go.Figure:
-    """Creates a line plot with two lines, where the second line belongs to an additional subplot
+    """Creates a line plot with n subplots divided into rows and columns
 
     Args:
-        dataset_1 (pd.DataFrame): First dataset
-        dataset_2 (pd.DataFrame): Second dataset
-        row_index_1 (int): index of the selected row in dataset_1
-        row_index_2 (int): index of the selected row in dataset_2
-        column_index_1 (int): index of first column in timeline
-        column_index_2 (int): index of second column in timeline
-        selected_unit_1 (str): selected value in the first unit dropdown
-        selected_unit_2 (str): selected value in the second unit dropdown
+        datasets (List[pd.DataFrame]): available datasets
+        feature_columns (List[str]): selected feature columns
+        time_columns (List[str]): selected time columns
 
     Returns:
-        go.Figure: Line plot with one line per subplot
+        go.Figure: line plot figure with subplots
     """
 
-    fig = go.Figure(make_subplots(specs=[[{"secondary_y": True}]]))
+    rows = len(datasets) // 3 if len(datasets) // 3 >= 1 else 1
 
-    for i, df in enumerate(datasets):
-        secondary_y = True if i % 2 else False
-        fig.add_trace(
-            go.Scatter(
-                x=df[time_columns[i]],
-                y=df[feature_columns[i]],
-                name=feature_columns[i] + "",
-                mode="lines",
-            ),
-            secondary_y=secondary_y,
+    fig = go.Figure(
+        make_subplots(
+            rows=rows,
+            cols=len(datasets),
+            subplot_titles=[f"Dataset {i+1}" for i in range(len(datasets))],
         )
+    )
+
+    # for i, df in enumerate(datasets):
+    #     for j, features in enumerate(feature_options):
+    #         fig.add_trace(
+    #             go.Scatter(
+    #                 x=df[time_columns[i]],
+    #                 y=df[feature_columns[i]],
+    #                 name=feature_columns[i],
+    #                 mode="lines",
+    #             ),
+    #             col=i + 1,
+    #             row=1,
+    #         )
+
+    for i, features in enumerate(feature_options):
+
+        features.remove(time_columns[i])
+        for j, feature in enumerate(features):
+
+            visibility = True if j == 0 else "legendonly"
+            legend_group_title = f"Dataset {i+1}" if j == 0 else None
+
+            # if feature == time_columns[i]:
+            #     continue
+
+            # else:
+            fig.add_trace(
+                go.Scatter(
+                    x=datasets[i][time_columns[i]],
+                    y=datasets[i][feature],
+                    name=feature,
+                    mode="lines",
+                    visible=visibility,
+                    legendgroup=f"df_{i}",
+                    legendgrouptitle_text=legend_group_title,
+                ),
+                col=i + 1,
+                row=1,
+            )
+
+    yax_titles = {
+        f"yaxis{i+1}_title": feature for i, feature in enumerate(feature_columns)
+    }
 
     fig.update_layout(
         transition_duration=500,
         template=theme,
         margin={"t": 20, "b": 20},
         height=300,
-        yaxis1_title=feature_columns[0],
-        yaxis2_title=feature_columns[1],
+        legend={"groupclick": "toggleitem"},
+        **yax_titles,
     )
 
     return fig
@@ -368,53 +495,119 @@ def create_forecast_plot(
     return fig
 
 
-def create_multivariate_forecast(
-    forecast, df, future_df, feature_column_1, feature_column_2
-):
-    if feature_column_1 == feature_column_2:
-        feature_column_1 += "_x"
-        feature_column_2 += "_y"
+def create_var_forecast_plot_multi(
+    forecast: pd.DataFrame,
+    feature_columns: List[str],
+    time_column: List[str],
+    periods: int,
+) -> go.Figure:
+    """Create multivariate forecast plot with predictions from a Vector Auto Regression/HW exponential smoothing model
 
-    fig = go.Figure(make_subplots(specs=[[{"secondary_y": True}]]))
+    Args:
+        forecast (pd.DataFrame): forecast dataframe
+        feature_columns (List[str]): selected features
+        time_column (List[str]): selected time columns
+        periods (int): number of forecasts predicted
+
+    Returns:
+        go.Figure: figure with line plot for each forecast
+    """
+    colors = ("mediumpurple", "mediumspringgreen", "hotpink", "mediumblue", "goldenrod")
+
+    fig = go.Figure(make_subplots(rows=1, cols=len(feature_columns)))
+
+    for i, feature in enumerate(feature_columns):
+        fig.add_trace(
+            go.Scatter(
+                x=forecast[time_column][:-periods],
+                y=forecast[feature][:-periods],
+                name=feature,
+                mode="lines",
+                line={"color": f"{colors[i]}"},
+            ),
+            col=i + 1,
+            row=1,
+        )
+
+        fig.add_trace(
+            go.Scatter(
+                x=forecast[time_column][-periods - 1 :],
+                y=forecast[feature][-periods - 1 :],
+                name=feature + "Prediction",
+                mode="lines",
+                line={"dash": "dash", "color": f"{colors[i]}"},
+            ),
+            col=i + 1,
+            row=1,
+        )
+
+    yax_titles = {
+        f"yaxis{i+1}_title": feature for i, feature in enumerate(feature_columns)
+    }
+
+    fig.update_layout(
+        template="plotly_dark",
+        margin={"t": 20, "b": 20},
+        **yax_titles,
+    )
+
+    return fig
+
+
+def create_multivariate_forecast_prophet(
+    forecast: pd.DataFrame,
+    df: pd.DataFrame,
+    future_df: pd.DataFrame,
+    y_feature: str,
+    feature_columns: List[str],
+) -> go.Figure:
+    """Creates multivariate forecast plot with predictions from a Prophet model with given scenarios
+
+    Args:
+        forecast (pd.DataFrame): forecast result
+        df (pd.DataFrame): initial dataframe
+        future_df (pd.DataFrame): dataframe with future scenarios
+        y_feature (str): value of dependent feature
+        feature_columns (List[str]): list of independent feature
+
+    Returns:
+        go.Figure: figure with line plot for prophet forecast and all other future scenarios
+    """
+
+    # if feature_column_1 == feature_column_2:
+    #     feature_column_1 += "_x"
+    #     feature_column_2 += "_y"
+
+    colors = ("mediumspringgreen", "hotpink", "mediumblue", "goldenrod")
+
+    fig = go.Figure(
+        make_subplots(
+            rows=1,
+            cols=len(feature_columns) + 1,
+            subplot_titles=(
+                "Forecast",
+                *["Scenario" for i in range(len(feature_columns))],
+            ),
+        )
+    )
 
     fig.add_trace(
         go.Scatter(
             x=df["ds"],
             y=df["y"],
-            name=feature_column_1,
+            name=y_feature,
             mode="lines",
             line={"color": "mediumpurple"},
         ),
-        secondary_y=False,
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=df["ds"],
-            y=df[feature_column_2],
-            name=feature_column_2,
-            mode="lines",
-            line={"color": "mediumspringgreen"},
-        ),
-        secondary_y=True,
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=future_df["ds"],
-            y=future_df[feature_column_2],
-            name=feature_column_2,
-            mode="lines",
-            line={"dash": "dash", "color": "mediumspringgreen"},
-        ),
-        secondary_y=True,
+        row=1,
+        col=1,
     )
 
     fig.add_trace(
         go.Scatter(
             x=forecast["ds"],
             y=forecast["yhat"],
-            name="Prediction " + feature_column_1,
+            name="Prediction " + y_feature,
             mode="lines+markers",
             line={"dash": "dash"},
             marker=go.scatter.Marker(symbol="triangle-up", color="mediumpurple"),
@@ -423,7 +616,8 @@ def create_multivariate_forecast(
                 arrayminus=forecast["yhat"] - forecast["yhat_lower"],
             ),
         ),
-        secondary_y=False,
+        row=1,
+        col=1,
     )
 
     fig.add_trace(
@@ -438,78 +632,41 @@ def create_multivariate_forecast(
             line={"dash": "dash", "color": "mediumpurple"},
             showlegend=False,
         ),
-        secondary_y=False,
+        row=1,
+        col=1,
     )
 
-    fig.update_layout(
-        template="plotly_dark",
-        yaxis1_title=feature_column_1,
-        yaxis2_title=feature_column_2,
-        margin={"t": 20},
-    )
+    for i, feature in enumerate(feature_columns):
 
-    return fig
+        fig.add_trace(
+            go.Scatter(
+                x=df["ds"],
+                y=df[feature],
+                name=feature,
+                mode="lines",
+                line={"color": colors[i]},
+            ),
+            row=1,
+            col=i + 2,
+        )
 
+        fig.add_trace(
+            go.Scatter(
+                x=future_df["ds"],
+                y=future_df[feature],
+                name=feature,
+                mode="lines",
+                line={"dash": "dash", "color": colors[i]},
+            ),
+            row=1,
+            col=i + 2,
+        )
 
-def create_var_forecast_plot(
-    df, feature_column_1, feature_column_2, time_column, periods
-):
+    yax_titles = {
+        f"yaxis{i+1}_title": feature
+        for i, feature in enumerate([y_feature] + feature_columns)
+    }
 
-    if feature_column_1 == feature_column_2:
-        feature_column_1 += "_x"
-        feature_column_2 += "_y"
-
-    fig = go.Figure(make_subplots(specs=[[{"secondary_y": True}]]))
-
-    fig.add_trace(
-        go.Scatter(
-            x=df[time_column][:-periods],
-            y=df[feature_column_1][:-periods],
-            name=feature_column_1,
-            mode="lines",
-            line={"color": "mediumpurple"},
-        ),
-        secondary_y=False,
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=df[time_column][-periods - 1 :],
-            y=df[feature_column_1][-periods - 1 :],
-            name=feature_column_1 + " Prediction",
-            mode="lines",
-            line={"dash": "dash", "color": "mediumpurple"},
-        ),
-        secondary_y=False,
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=df[time_column][:-periods],
-            y=df[feature_column_2][:-periods],
-            name=feature_column_2,
-            mode="lines",
-            line={"color": "mediumspringgreen"},
-        ),
-        secondary_y=True,
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=df[time_column][-periods - 1 :],
-            y=df[feature_column_2][-periods - 1 :],
-            name=feature_column_2 + " Prediction",
-            mode="lines",
-            line={"dash": "dash", "color": "mediumspringgreen"},
-        ),
-        secondary_y=True,
-    )
-
-    fig.update_layout(
-        template="plotly_dark",
-        yaxis1_title=feature_column_1,
-        yaxis2_title=feature_column_2,
-        margin={"t": 20},
-    )
+    fig.update_layout(template="plotly_dark", margin={"t": 20}, **yax_titles)
 
     return fig

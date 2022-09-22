@@ -7,11 +7,11 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_squared_error
 from statsmodels.tsa.api import VAR
 from statsmodels.tsa.stattools import adfuller
-from typing import Tuple
+from typing import Tuple, List
 
 from .layout import get_time_marks
 from .smoothing import multivariate_ES
-from preprocessing.parse import merge_dataframes
+from preprocessing.parse import merge_dataframes, merge_dataframes_multi
 
 
 def prophet_fit_and_predict(
@@ -141,16 +141,27 @@ def fit_and_predict(
     return f_df, df
 
 
-def prophet_fit_and_predict_multi(
-    df_1,
-    df_2,
-    time_column_1,
-    time_column_2,
-    feature_column_1,
-    feature_column_2,
-    artificial_future_data,
-    frequency,
-):
+def var_fit_and_predict_multi(
+    dataframes: List[pd.DataFrame],
+    time_columns: List[str],
+    feature_columns: List[str],
+    max_lags: float,
+    periods: int,
+    frequency: str,
+) -> Tuple[pd.DataFrame, dict]:
+    """Fit and forecast using a Vector Auto Regression model
+
+    Args:
+        dataframes (List[pd.DataFrame]): available dataframes
+        time_columns (List[str]): selected time columns
+        feature_columns (List[str]): selected features
+        max_lags (float): number of lags to consider while forecasting (max_lags parameter)
+        periods (int): number of forecasts to perform
+        frequency (str): frequency of timestamps
+
+    Returns:
+        Tuple[pd.DataFrame, dict]: forecast data, marks dict for slider
+    """
 
     frequencies = {
         "Yearly": ("AS", 365),
@@ -159,77 +170,13 @@ def prophet_fit_and_predict_multi(
         "Daily": ("D", 1),
     }
 
-    merged_df, time = merge_dataframes(df_1, df_2, time_column_1, time_column_2)
-
-    if feature_column_1 == feature_column_2:
-        feature_column_1 += "_x"
-        feature_column_2 += "_y"
-
-    merged_df = merged_df.rename(columns={time: "ds", feature_column_1: "y"})
-
-    merged_df["ds"] = pd.to_datetime(merged_df["ds"].astype(str))
-
-    model = Prophet()
-
-    model.add_regressor(feature_column_2)
-
-    model.fit(merged_df)
-
-    future = model.make_future_dataframe(
-        periods=len(artificial_future_data), freq=frequencies[frequency][0]
-    )
-
-    artificial_scenario = np.append(
-        merged_df[feature_column_2].values,
-        artificial_future_data,
-    )
-
-    future[feature_column_2] = artificial_scenario
-
-    predictions = model.predict(future)
-
-    forecast = predictions[len(merged_df) :][["ds", "yhat", "yhat_upper", "yhat_lower"]]
-
-    future_df = future[len(merged_df) - 1 :][["ds", feature_column_2]]
-
-    return forecast, merged_df, future_df
-
-
-def var_fit_and_predict(
-    df_1,
-    df_2,
-    time_column_1,
-    time_column_2,
-    feature_column_1,
-    feature_column_2,
-    max_lags,
-    periods,
-    frequency,
-):
-
-    frequencies = {
-        "Yearly": ("AS", 365),
-        "Monthly": ("MS", 30),
-        "Weekly": ("W", 7),
-        "Daily": ("D", 1),
-    }
-
-    merged_df, time = merge_dataframes(df_1, df_2, time_column_1, time_column_2)
-
-    if feature_column_1 == feature_column_2:
-        feature_column_1 += "_x"
-        feature_column_2 += "_y"
+    merged_df, time = merge_dataframes_multi(dataframes, time_columns)
 
     marks = get_time_marks(merged_df, time_column=time, frequency=frequency)
 
     merged_df[time] = pd.to_datetime(merged_df[time].astype(str))
 
-    merged_df_diff = (
-        merged_df[[feature_column_1, feature_column_2]]
-        .diff()
-        .astype("float32")
-        .dropna()
-    )
+    merged_df_diff = merged_df[feature_columns].diff().astype("float32").dropna()
 
     model = VAR(merged_df_diff)
 
@@ -243,29 +190,38 @@ def var_fit_and_predict(
         start=marks[1], periods=periods, freq=frequencies[frequency][0]
     )
 
-    forecast_df[feature_column_1] = forecast[:, 0]
-    forecast_df[feature_column_2] = forecast[:, 1]
+    forecast_df[feature_columns] = forecast
 
     df_final = pd.concat([merged_df, forecast_df], ignore_index=True)
 
-    df_final.loc[len(merged_df) - 1 :, [feature_column_1, feature_column_2]] = df_final[
-        [feature_column_1, feature_column_2]
-    ][len(merged_df) - 1 :].cumsum()
+    df_final.loc[len(merged_df) - 1 :, feature_columns] = df_final[feature_columns][
+        len(merged_df) - 1 :
+    ].cumsum()
 
     return df_final, marks
 
 
-def hw_es_fit_and_predict(
-    df_1,
-    df_2,
-    time_column_1,
-    time_column_2,
-    feature_column_1,
-    feature_column_2,
-    frequency,
-    periods,
-    alpha,
-):
+def hw_es_fit_and_predict_multi(
+    dataframes: List[pd.DataFrame],
+    time_columns: List[str],
+    feature_columns: List[str],
+    frequency: str,
+    periods: int,
+    alpha: float,
+) -> Tuple[pd.DataFrame, dict]:
+    """Fit and forecast using the HW exponential smoothing method
+
+    Args:
+        dataframes (List[pd.DataFrame]): available dataframes
+        time_columns (List[str]): selected time columns
+        feature_columns (List[str]): selected features
+        frequency (str): frequency of time stamps
+        periods (int): number of forecasts to perform
+        alpha (float): alpha parameter
+
+    Returns:
+        Tuple[pd.DataFrame, dict]: forecast data, marks dict for slider
+    """
 
     frequencies = {
         "Yearly": ("AS", 365),
@@ -274,27 +230,25 @@ def hw_es_fit_and_predict(
         "Daily": ("D", 1),
     }
 
-    merged_df, time = merge_dataframes(df_1, df_2, time_column_1, time_column_2)
-
-    if feature_column_1 == feature_column_2:
-        feature_column_1 += "_x"
-        feature_column_2 += "_y"
+    merged_df, time = merge_dataframes_multi(dataframes, time_columns)
 
     marks = get_time_marks(merged_df, time_column=time, frequency=frequency)
 
     merged_df[time] = pd.to_datetime(merged_df[time].astype(str))
 
     df_features = (
-        merged_df[[feature_column_1, feature_column_2]]
+        merged_df[feature_columns]
         .reset_index(drop=True)
-        .reindex(sorted([feature_column_1, feature_column_2]), axis=1)
-        .rename(columns={feature_column_1: 0, feature_column_2: 1})
+        .reindex(sorted(feature_columns), axis=1)
+        .rename(columns={feature: i for i, feature in enumerate(feature_columns)})
     )
 
     forecast = []
 
     for t in range(periods):
-        test = multivariate_ES(df_features, len(df_features), t + 1, 2, alpha)
+        test = multivariate_ES(
+            df_features, len(df_features), t + 1, len(feature_columns), alpha
+        )
         forecast.append(test[-1])
 
     forecast_df = pd.DataFrame()
@@ -303,9 +257,79 @@ def hw_es_fit_and_predict(
         start=marks[1], periods=periods, freq=frequencies[frequency][0]
     )
 
-    forecast_df[feature_column_2] = [x[0] for x in forecast]
-    forecast_df[feature_column_1] = [x[1] for x in forecast]
+    for i, feature in enumerate(sorted(feature_columns)):
+        forecast_df[feature] = [x[i] for x in forecast]
 
     df_final = pd.concat([merged_df, forecast_df], ignore_index=True)
 
     return df_final, marks
+
+
+def prophet_fit_and_predict_n(
+    dataframes: List[pd.DataFrame],
+    time_columns: List[str],
+    feature_columns: List[str],
+    scenarios: List[List[float]],
+    frequency: str,
+    y_feature_index: int,
+) -> Tuple[pd.DataFrame, str]:
+    """Fit and forecast using the Prophet model with additional scenarios
+
+    Args:
+        dataframes (List[pd.DataFrame]): available dataframes
+        time_columns (List[str]): selected time columns
+        feature_columns (List[str]): selected features
+        scenarios (List[List[float]]): specified scenarios
+        frequency (str): frequency of time stamps
+        y_feature_index (int): index/id of the dependent feature
+
+    Returns:
+        Tuple[pd.DataFrame, str]: forecast, intitial and future dataframe, name of dependent feature
+    """
+
+    frequencies = {
+        "Yearly": ("AS", 365),
+        "Monthly": ("MS", 30),
+        "Weekly": ("W", 7),
+        "Daily": ("D", 1),
+    }
+
+    merged_df, time = merge_dataframes_multi(dataframes, time_columns)
+
+    # if feature_column_1 == feature_column_2:
+    #     feature_column_1 += "_x"
+    #     feature_column_2 += "_y"
+
+    y_feature = feature_columns.pop(y_feature_index)
+
+    merged_df = merged_df.rename(columns={time: "ds", y_feature: "y"})
+
+    merged_df["ds"] = pd.to_datetime(merged_df["ds"].astype(str))
+
+    model = Prophet()
+
+    for feature in feature_columns:
+        model.add_regressor(feature)
+
+    model.fit(merged_df)
+
+    scenario_min_len = len(min(scenarios, key=len))
+    future = model.make_future_dataframe(
+        periods=scenario_min_len, freq=frequencies[frequency][0]
+    )
+
+    for feature, scenario in zip(feature_columns, scenarios):
+        artificial_scenario = np.append(
+            merged_df[feature].values,
+            scenario[:scenario_min_len],
+        )
+
+        future[feature] = artificial_scenario
+
+    predictions = model.predict(future)
+
+    forecast = predictions[len(merged_df) :][["ds", "yhat", "yhat_upper", "yhat_lower"]]
+
+    future_df = future[len(merged_df) - 1 :][["ds", *feature_columns]]
+
+    return forecast, merged_df, future_df, y_feature

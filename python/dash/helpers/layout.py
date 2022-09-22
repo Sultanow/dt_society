@@ -8,9 +8,11 @@ from dash import (
     callback_context,
 )
 import json
+from dash.development.base_component import Component
 import numpy as np
 import pandas as pd
 import time
+from typing import List
 
 from preprocessing.parse import parse_dataset
 
@@ -22,7 +24,7 @@ def preprocess_dataset(
     file_name: str,
     reshape_column_value: str,
     reshape_switch_status: bool,
-    file_upload_children: str,
+    file_upload_children: List[Component],
     demo_button_n_clicks: int,
     demo_dataset_n: str,
     preset_file: str = None,
@@ -36,7 +38,7 @@ def preprocess_dataset(
         file_name (str): name of uploaded file
         reshape_column_value (str): value of column to reshape on
         reshape_switch_status (bool): value of reshape toggle
-        file_upload_children (str): container of file uploaded element
+        file_upload_children (List[Component]): container of file upload element
         demo_button_n_clicks (int): number of demo button clicks
         demo_dataset_n (str): value of selected demo dataset
         preset_file (str, optional): content of imported preset file. Defaults to None.
@@ -52,11 +54,13 @@ def preprocess_dataset(
     saved_preset_file = None
 
     if "demo-button" in changed_item or "file_upload" in changed_item:
+        # reset reshape toggle, delimiter value and geo column value
         reshape_switch_status = False
         delimiter_value = None
         geo_column_value = None
 
     if "reset-button" in changed_item:
+        # clear reshape toggle, delimiter, geo column, file name and reshape column
         reshape_switch_status = False
         delimiter_value = None
         geo_column_value = None
@@ -64,6 +68,7 @@ def preprocess_dataset(
         reshape_column_value = None
 
     if preset_file is not None:
+        # dropdown values are retrieved from the uploaded preset file and automatically set
         _, content = preset_file.split(",")
         decoded = base64.b64decode(content)
         preset = json.loads(decoded)
@@ -80,6 +85,7 @@ def preprocess_dataset(
         feature_column_value = no_update
 
     if "demo-button" in changed_item:
+        # demo datasets (can be further extended)
         demo_data = {
             "Demo 0": (
                 "arbeitslosenquote_eu.tsv",
@@ -99,6 +105,7 @@ def preprocess_dataset(
         delimiter_value = "\t"
 
     if delimiter_value:
+        # no further processing unless delimiter is set
 
         if delimiter_value == "\\t":
             delimiter_value = "\t"
@@ -329,10 +336,13 @@ def get_year_and_country_options_stats(
     if isinstance(time_selection, np.datetime64):
         time_selection = np.datetime_as_string(time_selection)
 
+    # timestamps are split into a fixed number of chunks to always have the same amount of marks on the slider
     n_chunks = 7 if len(time_options) >= 7 else 3
 
     if np.issubdtype(np.datetime64, df[time_column]):
-        time_options_strp = np.sort(df[time_column].dt.strftime("%b-%d").unique())
+        time_options_strp = np.sort(
+            df[time_column].dt.strftime("%b-%d").unique()
+        )  # datetime timestamps are formatted to desired format
         time_options_split = np.array(
             np.array_split(time_options_strp, n_chunks), dtype="object"
         )
@@ -366,8 +376,8 @@ def get_year_and_country_options_stats(
         time_selection,
         time_min,
         time_max,
-        geo_options,
-        geo_options[0],
+        # geo_options,
+        # geo_options[0],
         geo_options,
         geo_options[0],
         time_span,
@@ -391,7 +401,15 @@ def compute_stats(
         tuple: mean, max, min, country name of max, country name of min
     """
 
-    def human_format(number):
+    def human_format(number: float) -> float:
+        """shortens numbers of high magnitude
+
+        Args:
+            number (float):
+
+        Returns:
+            _type_: _description_
+        """
         units = ["", "K", "M", "G", "T", "P"]
         k = 1000.0
         if number != 0.0 and number >= 1:
@@ -417,7 +435,7 @@ def compute_stats(
 
 
 def compute_growth_rate(
-    df: pd.DataFrame, feature_column: str, time_span: list
+    df: pd.DataFrame, feature_column: str, time_span: list, time_column: str
 ) -> float:
     """Computes the growth rate of a feature in a given time window
 
@@ -430,8 +448,11 @@ def compute_growth_rate(
         float: growth rate
     """
 
-    start_value = df[feature_column].sort_values().values[time_span[0]]
-    end_value = df[feature_column].sort_values().values[time_span[-1]]
+    df = df.sort_values(by=[time_column])
+
+    start_value = df[feature_column].values[time_span[0]]
+    end_value = df[feature_column].values[time_span[-1]]
+
     growth_rate = ((end_value - start_value) / end_value) * 100
 
     return round(growth_rate, 2)

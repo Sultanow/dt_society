@@ -101,9 +101,30 @@ class DigitalTwinTimeSeries:
         """
 
         def get_iso3(country, from_iso2: bool):
+            germany_states = {
+                "Rheinland-Pfalz": "DE-RP",
+                "Hessen": "DE-HE",
+                "Brandenburg": "DE-BB",
+                "Schleswig-Holstein": "DE-SH",
+                "Hamburg": "DE-HH",
+                "Berlin": "DE-BE",
+                "Saarland": "DE-SL",
+                "Mecklenburg-Vorpommern": "DE-MV",
+                "Baden-Württemberg": "DE-BW",
+                "Sachsen": "DE-SN",
+                "Niedersachsen": "DE-NI",
+                "Bayern": "DE-BY",
+                "Sachsen-Anhalt": "DE-ST",
+                "Nordrhein-Westfalen": "DE-NW",
+                "Bremen": "DE-HB",
+                "Thüringen": "DE-TH",
+            }
+
             if from_iso2:
                 country = pycountry.countries.get(alpha_2=country)
             else:
+                if country in germany_states.keys():
+                    return germany_states[country]
                 country = pycountry.countries.get(name=country)
 
             if country is None:

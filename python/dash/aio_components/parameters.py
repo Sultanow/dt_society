@@ -1,16 +1,15 @@
-import dash_daq as daq
 from dash import (
-    Dash,
     dcc,
     html,
     Input,
     Output,
     exceptions,
-    State,
     callback_context,
     callback,
     MATCH,
+    ALL,
 )
+from typing import List
 
 
 class ParameterStoreAIO(html.Div):
@@ -18,12 +17,14 @@ class ParameterStoreAIO(html.Div):
         store = lambda parameter: {
             "component": "ParameterStoreAIO",
             "subcomponent": "store",
+            "store_no": 1,
             "aio_id": parameter,
         }
 
         input = lambda parameter: {
             "component": "ParameterStoreAIO",
             "subcomponent": "input",
+            "input_no": 1,
             "aio_id": parameter,
         }
 
@@ -41,11 +42,32 @@ class ParameterStoreAIO(html.Div):
 
     ids = ids
 
-    def __init__(self, parameter, value=None, min=None, max=None, step=None, type=None):
+    def __init__(
+        self,
+        parameter: str,
+        value: float | str = None,
+        min: float = None,
+        max: float = None,
+        step: float = None,
+        type: str = None,
+        display: str = "none",
+    ):
+        """AIO component to store a parameter required for a multivariate forecasting model
+
+        Args:
+            parameter (str): name of the parameter
+            value (float | str, optional): Initial value. Defaults to None.
+            min (float, optional): Minimum value. Defaults to None.
+            max (float, optional): Maximum value. Defaults to None.
+            step (float, optional): Size of increment when using increase/decrease buttons. Defaults to None.
+            type (str, optional): specify type of input (text, numeric,..). Defaults to None.
+            display (str, optional): Initial visibility. Defaults to "none".
+        """
+
         super().__init__(
             children=[
-                dcc.Store(id=self.ids.store(parameter)),
                 html.Div(f"Set {parameter}"),
+                dcc.Store(id=self.ids.store(parameter)),
                 dcc.Input(
                     value=value,
                     min=min,
@@ -81,31 +103,64 @@ class ParameterStoreAIO(html.Div):
             ],
             id=self.ids.container(parameter),
             style={
-                "display": "none",
+                "display": display,
                 "padding-left": "10px",
                 "margin-top": "10px",
             },
         )
 
     @callback(
-        Output(ids.store(MATCH), "data"),
+        Output(
+            {
+                "component": "ParameterStoreAIO",
+                "subcomponent": "store",
+                "store_no": ALL,
+                "aio_id": MATCH,
+            },
+            "data",
+        ),
         Input(ids.input(MATCH), "value"),
+        Input(
+            {
+                "component": "ParameterStoreAIO",
+                "subcomponent": "input",
+                "input_no": ALL,
+                "aio_id": MATCH,
+            },
+            "value",
+        ),
         Input(ids.submit_button(MATCH), "n_clicks"),
     )
-    def update_parameter_store(parameter_input: str, n_clicks: int):
+    def update_parameter_store(
+        parameter_input: str | List[str], inputs: List[str], n_clicks: int
+    ):
+        """Save input in storage component
+
+        Args:
+            inputs (List[str]): List of inputs from each input component
+            n_clicks (int): number of clicks of submit button
+
+        Raises:
+            exceptions.PreventUpdate: No update unless submit button is clicked and inputs are modified
+
+        Returns:
+            List[float]: formatted input
+        """
 
         changed_item = [p["prop_id"] for p in callback_context.triggered][0]
 
         if parameter_input and "submit_button" in changed_item:
             if "scenario" in changed_item:
-                scenario = parameter_input.replace(" ", "").split(",")
 
-                scenario = [float(x) for x in scenario]
+                scenarios = [
+                    [float(x) for x in scenario.replace(" ", "").split(",")]
+                    for scenario in inputs
+                ]
 
-                return scenario
+                return scenarios
 
             else:
-                return parameter_input
+                return inputs
 
         else:
             raise exceptions.PreventUpdate

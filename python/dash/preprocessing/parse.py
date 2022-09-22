@@ -2,6 +2,7 @@ from typing import Tuple
 import base64
 import io
 import pandas as pd
+from typing import List
 
 from .dataset import DigitalTwinTimeSeries
 
@@ -65,3 +66,43 @@ def merge_dataframes(dataframe_1, dataframe_2, time_column_1, time_column_2):
         time = time_column_1
 
     return merged_df, time
+
+
+def merge_dataframes_multi(
+    dataframes: List[pd.DataFrame], time_columns: List[str]
+) -> Tuple[pd.DataFrame, str]:
+    """Merges all dataframes along timestamp intersection
+
+    Args:
+        dataframes (List[pd.DataFrame]): available datasets
+        time_columns (List[str]): selected time columns
+
+    Returns:
+        Tuple[pd.DataFrame, str]: merged dataframe, name of time column in merged dataframe
+    """
+
+    merged_df = None
+    for i in range(len(dataframes) - 1):
+
+        if merged_df is None:
+            merged_df = pd.merge(
+                dataframes[i],
+                dataframes[i + 1],
+                left_on=[time_columns[i]],
+                right_on=[time_columns[i + 1]],
+            )
+
+        else:
+            merged_df = pd.merge(
+                merged_df,
+                dataframes[i + 1],
+                left_on=[time_columns[i]],
+                right_on=[time_columns[i + 1]],
+            )
+
+        if time_columns[i] != time_columns[i + 1]:
+            merged_df = merged_df.drop(columns=[time_columns[i]])
+
+        time_col = time_columns[i + 1]
+
+    return merged_df, time_col
