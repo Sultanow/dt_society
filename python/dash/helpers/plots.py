@@ -131,12 +131,6 @@ def create_choropleth_slider_plot(
     fig_dict = {"data": [], "layout": {}, "frames": []}
 
     fig_dict["layout"] = dict(
-        # geo=dict(
-        #     scope="world",
-        #     projection={"type": "natural earth2", "scale": 3},
-        #     bgcolor="rgba(0,0,0,0)",
-        #     center=dict(lat=50.5, lon=11),
-        # ),
         margin=dict(l=0, r=0, b=1, t=1, pad=0, autoexpand=True),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
@@ -192,21 +186,6 @@ def create_choropleth_slider_plot(
 
     first_year = data[time_column].unique()[0]
 
-    # data_dict = dict(
-    #     type="choropleth",
-    #     locations=data[data[time_column] == first_year][geo_column],
-    #     locationmode="ISO-3",
-    #     z=data[data[time_column] == first_year][feature_column],
-    #     zmin=0,
-    #     zmax=data[feature_column].max(),
-    #     colorscale="Magma",
-    #     colorbar=go.choropleth.ColorBar(
-    #         title=go.choropleth.colorbar.Title(text=feature_column)
-    #     ),
-    #     marker_line_color="darkgray",
-    #     marker_line_width=0.5,
-    # )
-
     geojsons = {
         "global": {
             "url": "https://datahub.io/core/geo-countries/r/countries.geojson",
@@ -234,14 +213,10 @@ def create_choropleth_slider_plot(
     with urlopen(geojsons[scope]["url"]) as response:
         countries = json.load(response)
 
-    # with open(os.getcwd() + geojsons[scope]["path"]) as response:
-    #     countries = json.load(response)
-
     data_dict = dict(
         type="choroplethmapbox",
         locations=data[data[time_column] == first_year][geo_column],
         geojson=countries,
-        # locationmode="ISO-3",
         featureidkey=geojsons[scope]["featureid"],
         z=data[data[time_column] == first_year][feature_column],
         zmin=0,
@@ -250,42 +225,10 @@ def create_choropleth_slider_plot(
         colorbar=go.choroplethmapbox.ColorBar(
             title=go.choroplethmapbox.colorbar.Title(text=feature_column)
         ),
-        marker={"opacity": 0.5}
-        # marker_line_color="darkgray",
-        # marker_line_width=0.5,
+        marker={"opacity": 0.5},
     )
 
     fig_dict["data"].append(data_dict)
-
-    # for time in data[time_column].unique():
-
-    #     df_per_year = data[data[time_column] == time]
-
-    #     fig_dict["frames"].append(
-    #         dict(
-    #             data=dict(
-    #                 type="choropleth",
-    #                 locations=df_per_year[geo_column],
-    #                 locationmode="ISO-3",
-    #                 z=df_per_year[feature_column],
-    #             ),
-    #             name=str(time),
-    #         )
-    #     )
-
-    #     slider_step = {
-    #         "args": [
-    #             [time],
-    #             {
-    #                 "frame": {"duration": 300, "redraw": True},
-    #                 "mode": "immediate",
-    #                 "transition": {"duration": 300},
-    #             },
-    #         ],
-    #         "label": str(time),
-    #         "method": "animate",
-    #     }
-    #     sliders_dict["steps"].append(slider_step)
 
     for time in data[time_column].unique():
 
@@ -326,9 +269,7 @@ def create_choropleth_slider_plot(
         zoom=geojsons[scope]["zoom"],
         center=geojsons[scope]["center"],
     )
-    # fig_choropleth.update_geos(
-    #     showcoastlines=True, showsubunits=True, showframe=False, resolution=50
-    # )
+
     fig_choropleth.update_layout(template=theme)
 
     return fig_choropleth
@@ -361,20 +302,15 @@ def create_two_line_plot(
         )
     )
 
-    # for i, df in enumerate(datasets):
-    #     for j, features in enumerate(feature_options):
-    #         fig.add_trace(
-    #             go.Scatter(
-    #                 x=df[time_columns[i]],
-    #                 y=df[feature_columns[i]],
-    #                 name=feature_columns[i],
-    #                 mode="lines",
-    #             ),
-    #             col=i + 1,
-    #             row=1,
-    #         )
+    min_timestamp = None
+    max_timestamp = None
 
     for i, features in enumerate(feature_options):
+        if min_timestamp is None or min_timestamp > min(datasets[i][time_columns[i]]):
+            min_timestamp = min(datasets[i][time_columns[i]])
+
+        if max_timestamp is None or max_timestamp < max(datasets[i][time_columns[i]]):
+            max_timestamp = max(datasets[i][time_columns[i]])
 
         features.remove(time_columns[i])
         for j, feature in enumerate(features):
@@ -382,10 +318,6 @@ def create_two_line_plot(
             visibility = True if j == 0 else "legendonly"
             legend_group_title = f"Dataset {i+1}" if j == 0 else None
 
-            # if feature == time_columns[i]:
-            #     continue
-
-            # else:
             fig.add_trace(
                 go.Scatter(
                     x=datasets[i][time_columns[i]],
@@ -403,6 +335,7 @@ def create_two_line_plot(
     yax_titles = {
         f"yaxis{i+1}_title": feature for i, feature in enumerate(feature_columns)
     }
+    fig.update_xaxes(range=[min_timestamp, max_timestamp])
 
     fig.update_layout(
         transition_duration=500,
