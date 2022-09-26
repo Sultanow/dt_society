@@ -171,7 +171,7 @@ app.layout = html.Div(
                                                 "font-weight": "bold",
                                             },
                                         ),
-                                        dcc.RadioItems(
+                                        dbc.RadioItems(
                                             options=[
                                                 {
                                                     "label": "Dataset 1",
@@ -184,11 +184,7 @@ app.layout = html.Div(
                                             ],
                                             value=0,
                                             id="data-selector",
-                                            inline=False,
-                                            style={
-                                                "display": "flex",
-                                                "padding": "20px",
-                                            },
+                                            inline=True,
                                         ),
                                     ],
                                     id="data-selector-div",
@@ -230,7 +226,7 @@ app.layout = html.Div(
                                         ),
                                     ],
                                     style={
-                                        "margin-right": "40px",
+                                        "margin-right": "55px",
                                         "float": "right",
                                         "display": "flex",
                                         "margin-left": "auto",
@@ -294,7 +290,7 @@ app.layout = html.Div(
                                 "border-color": "#5c6cfa",
                                 "float": "right",
                                 "margin-left": "auto",
-                                "margin-right": "40px",
+                                "margin-right": "55px",
                             },
                         ),
                     ],
@@ -667,10 +663,10 @@ app.layout = html.Div(
                                         {
                                             "label": html.Img(
                                                 src="/assets/earth-icon.svg",
-                                                height=10,
+                                                height=15,
                                                 style={
                                                     "padding-left": "5px",
-                                                    "padding-top": "5px",
+                                                    # "padding-top": "5px",
                                                 },
                                             ),
                                             "value": "global",
@@ -678,10 +674,10 @@ app.layout = html.Div(
                                         {
                                             "label": html.Img(
                                                 src="assets/europe-flag-icon.svg",
-                                                height=10,
+                                                height=15,
                                                 style={
                                                     "padding-left": "5px",
-                                                    "padding-top": "5px",
+                                                    # "padding-top": "5px",
                                                 },
                                             ),
                                             "value": "europe",
@@ -689,10 +685,10 @@ app.layout = html.Div(
                                         {
                                             "label": html.Img(
                                                 src="/assets/germany-flag-icon.svg",
-                                                height=10,
+                                                height=15,
                                                 style={
                                                     "padding-left": "5px",
-                                                    "padding-top": "5px",
+                                                    # "padding-top": "5px",
                                                 },
                                             ),
                                             "value": "germany",
@@ -700,8 +696,8 @@ app.layout = html.Div(
                                     ],
                                     value="europe",
                                     labelStyle={
-                                        "align-items": "center",
-                                        "justify-content": "center",
+                                        # "align-items": "center",
+                                        # "justify-content": "center",
                                         "padding-left": "10px",
                                     },
                                     id="scope-selector",
@@ -1345,7 +1341,19 @@ app.layout = html.Div(
     Input("collapse-button", "n_clicks"),
     [State("collapse", "is_open")],
 )
-def toggle_collapse(n_clicks, is_open):
+def toggle_collapse(n_clicks: int, is_open: bool) -> bool:
+    """Toggles visibility of file section
+
+    Args:
+        n_clicks (int): number of clicks of collapse button
+        is_open (bool): current visibility status
+
+    Raises:
+        exceptions.PreventUpdate: Update only if collapse button is pressed
+
+    Returns:
+        bool: inverted previous status
+    """
     changed_item = [p["prop_id"] for p in callback_context.triggered][0]
 
     if "collapse-button" in changed_item:
