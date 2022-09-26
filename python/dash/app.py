@@ -1,5 +1,6 @@
 from dash.development.base_component import Component
 import dash_daq as daq
+import dash_bootstrap_components as dbc
 from dash import (
     ALL,
     MATCH,
@@ -55,9 +56,9 @@ external_stylesheets = [
     {
         "href": "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,-25",
         "rel": "stylesheet",
-    }
+    },
 ]
-app = Dash(__name__, external_stylesheets=external_stylesheets)
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP] + external_stylesheets)
 
 app.config.suppress_callback_exceptions = True
 
@@ -101,30 +102,31 @@ app.layout = html.Div(
                                         html.Span(
                                             "help",
                                             className="material-symbols-outlined",
+                                            id="file-help",
+                                            style={
+                                                "cursor": "pointer",
+                                            },
                                         ),
-                                        html.Span(
+                                        dbc.Tooltip(
                                             """File format: .csv, .tsv \n 
                                                     Geo column: column that contains either country names or ISO codes \n
                                                     Reshape: pivots the dataset from a wide to long format (adds new columns for unique values of selected column, if there is no additional identifier select "None") \n
                                                     Time column: column that contains time data / timestamps (represents x-axis in figures)\n
                                                     Feature: column that contains the feature of interest (represents y-axis in figures)\n
                                                     Preset: upload/download a preset file that contains pre-selected column values""",
-                                            className="tooltiptext",
+                                            target="file-help",
                                             style={
+                                                "white-space": "pre-line",
                                                 "font-size": "10px",
                                                 "font-weight": "normal",
-                                                "white-space": "pre-line",
                                             },
                                         ),
                                     ],
-                                    className="tooltip",
                                     style={
-                                        "font-weight": "bold",
-                                        "textAlign": "center",
+                                        "justify-content": "center",
+                                        "align-items": "center",
                                         "display": "flex",
-                                        "margin-right": "0",
-                                        "margin-left": "auto",
-                                        "padding-top": "7px",
+                                        "margin-right": "5px",
                                     },
                                 ),
                             ],
@@ -136,16 +138,24 @@ app.layout = html.Div(
                                 "margin": "0px",
                                 "backgroundColor": "#5c6cfa",
                                 "border-color": "#5c6cfa",
+                                "height": "1px",
+                                "opacity": "1",
                             }
                         ),
                     ]
                 ),
-                html.Div(
+                dbc.Collapse(
                     [
-                        FilePreProcessingAIO(0),
-                        FilePreProcessingAIO(1),
+                        html.Div(
+                            [
+                                FilePreProcessingAIO(0),
+                                FilePreProcessingAIO(1),
+                            ],
+                            id="files-container",
+                        ),
                     ],
-                    id="files-container",
+                    id="collapse",
+                    is_open=True,
                 ),
                 html.Div(
                     [
@@ -236,38 +246,59 @@ app.layout = html.Div(
                 html.Div(
                     [
                         html.Div(
-                            "Hide/show sections",
-                            style={"font-weight": "bold", "margin-left": "10px"},
-                        ),
-                        dcc.Checklist(
                             [
-                                "Table",
-                                "Stats",
-                                "Timeline",
-                                "Map",
-                                "Correlation",
-                                "Forecast",
-                            ],
-                            value=[
-                                "Table",
-                                "Stats",
-                                "Timeline",
-                                "Map",
-                                "Correlation",
-                                "Forecast",
-                            ],
-                            labelStyle={
-                                "margin-left": "10px",
-                                "font-weight": "lighter",
-                                "font-size": "14px",
-                                "padding-bottom": "5px",
+                                html.Div(
+                                    "Hide/show sections",
+                                    style={
+                                        "font-weight": "bold",
+                                        "margin-left": "10px",
+                                    },
+                                ),
+                                dcc.Checklist(
+                                    [
+                                        "Table",
+                                        "Stats",
+                                        "Timeline",
+                                        "Map",
+                                        "Correlation",
+                                        "Forecast",
+                                    ],
+                                    value=[
+                                        "Table",
+                                        "Stats",
+                                        "Timeline",
+                                        "Map",
+                                        "Correlation",
+                                        "Forecast",
+                                    ],
+                                    labelStyle={
+                                        "margin-left": "10px",
+                                        "font-weight": "lighter",
+                                        "font-size": "14px",
+                                        "padding-bottom": "5px",
+                                    },
+                                    inline=True,
+                                    id="visibility-checklist",
+                                    style={
+                                        "padding-top": "5px",
+                                        "padding-bottom": "5px",
+                                    },
+                                ),
+                            ]
+                        ),
+                        html.Button(
+                            "Collapse",
+                            id="collapse-button",
+                            n_clicks=0,
+                            style={
+                                "border-color": "#5c6cfa",
+                                "float": "right",
+                                "margin-left": "auto",
+                                "margin-right": "40px",
                             },
-                            inline=True,
-                            id="visibility-checklist",
-                            style={"padding-top": "5px", "padding-bottom": "5px"},
                         ),
                     ],
-                    style={"margin-bottom": "5px"},
+                    style={"margin-bottom": "5px", "display": "flex"},
                 ),
             ],
             style={
@@ -298,6 +329,7 @@ app.layout = html.Div(
                                         "margin": "0px",
                                         "backgroundColor": "#5c6cfa",
                                         "border-color": "#5c6cfa",
+                                        "opacity": "1",
                                     }
                                 ),
                             ]
@@ -380,10 +412,12 @@ app.layout = html.Div(
                                                 html.Span(
                                                     "help",
                                                     className="material-symbols-outlined",
+                                                    id="stats-help",
+                                                    style={"cursor": "pointer"},
                                                 ),
-                                                html.Span(
+                                                dbc.Tooltip(
                                                     "Mean, max and min are computed for complete dataset. \n The slider sets the window for the growth rate computation.",
-                                                    className="tooltiptext",
+                                                    target="stats-help",
                                                     style={
                                                         "font-size": "10px",
                                                         "font-weight": "normal",
@@ -391,18 +425,19 @@ app.layout = html.Div(
                                                     },
                                                 ),
                                             ],
-                                            className="tooltip",
                                             style={
-                                                "font-weight": "bold",
-                                                "textAlign": "center",
+                                                "justify-content": "center",
+                                                "align-items": "center",
                                                 "display": "flex",
-                                                "margin-left": "auto",
-                                                "padding-top": "7px",
-                                                "backgroundColor": "#111111",
+                                                "margin-right": "5px",
                                             },
                                         ),
                                     ],
-                                    style={"display": "flex", "width": "100%"},
+                                    style={
+                                        "display": "flex",
+                                        "width": "100%",
+                                        "backgroundColor": "#111111",
+                                    },
                                 ),
                                 html.Hr(
                                     style={
@@ -411,6 +446,7 @@ app.layout = html.Div(
                                         "backgroundColor": "#5c6cfa",
                                         "border-color": "#5c6cfa",
                                         "width": "100%",
+                                        "opacity": "1",
                                     }
                                 ),
                             ],
@@ -550,6 +586,7 @@ app.layout = html.Div(
                                                 "margin": "0px",
                                                 "border-color": "#5c6cfa",
                                                 "backgroundColor": "#5c6cfa",
+                                                "opacity": "1",
                                             }
                                         ),
                                     ]
@@ -618,6 +655,7 @@ app.layout = html.Div(
                                         "margin": "0px",
                                         "backgroundColor": "#5c6cfa",
                                         "border-color": "#5c6cfa",
+                                        "opacity": "1",
                                     }
                                 ),
                             ]
@@ -728,6 +766,7 @@ app.layout = html.Div(
                                                 "margin": "0px",
                                                 "border-color": "#2f2f2f",
                                                 "backgroundColor": "#2f2f2f",
+                                                "opacity": "1",
                                             }
                                         ),
                                         html.Div(
@@ -832,6 +871,7 @@ app.layout = html.Div(
                                                 "margin": "0px",
                                                 "border-color": "#2f2f2f",
                                                 "backgroundColor": "#2f2f2f",
+                                                "opacity": "1",
                                             }
                                         ),
                                         html.Div(
@@ -923,6 +963,7 @@ app.layout = html.Div(
                                                 "margin": "0px",
                                                 "border-color": "#2f2f2f",
                                                 "backgroundColor": "#2f2f2f",
+                                                "opacity": "1",
                                             }
                                         ),
                                     ]
@@ -1068,6 +1109,7 @@ app.layout = html.Div(
                                                 "margin": "0px",
                                                 "border-color": "#2f2f2f",
                                                 "backgroundColor": "#2f2f2f",
+                                                "opacity": "1",
                                             }
                                         ),
                                         html.Div(
@@ -1299,6 +1341,20 @@ app.layout = html.Div(
 
 
 @app.callback(
+    Output("collapse", "is_open"),
+    Input("collapse-button", "n_clicks"),
+    [State("collapse", "is_open")],
+)
+def toggle_collapse(n_clicks, is_open):
+    changed_item = [p["prop_id"] for p in callback_context.triggered][0]
+
+    if "collapse-button" in changed_item:
+        return not is_open
+    else:
+        raise exceptions.PreventUpdate
+
+
+@app.callback(
     Output("files-container", "children"),
     Output("data-selector", "options"),
     Output("scenario-container", "children"),
@@ -1366,7 +1422,7 @@ def add_file(
 
         # insert Input component after previous existing Input components in ParameterStoreAIO("scenario")
         # (Input components are stacked sequentially on top of each other in the layout)
-        param_store_container.insert(
+        scenario_container[-1]["props"]["children"].insert(
             -1,
             dcc.Input(
                 id=input,
@@ -1385,13 +1441,7 @@ def add_file(
             ),
         )
         # add corresponding Store component (not visible in layout)
-        param_store_container.insert(-1, dcc.Store(id=store))
-
-        # remove previous ParameterStoreAIO("scenario") component
-        scenario_container.pop()
-
-        # add ParameterStoreAIO("scenario") with additional Input component back to the container
-        scenario_container.extend(param_store_container)
+        scenario_container[-1]["props"]["children"].insert(-1, dcc.Store(id=store))
 
         return files_container, data_selector, scenario_container
 
@@ -2194,27 +2244,28 @@ def update_heatmap(
     feature_dropdowns: List[str],
     time_dropdowns: List[str],
     geo_dropdowns: List[str],
-    heatmap_cross_children: List[Component],
+    heatmap_children: List[Component],
     selected_features: List[str],
     feature_dropdown_options: List[str],
 ) -> tuple:
-    """Updates correlation line plot
+    """Updates heatmap plot
 
     Args:
         selected_country (str): value of selected country
-        comparison_children (List[Component]): container of correlation line plot
         visibility_checklist (List[str]): current visible sections
         dataframes (List[str]): available dataframes
-        feature_dropdowns (List[str]): selected features
+        feature_dropdowns (List[str]): selected feature columns
         time_dropdowns (List[str]): selected time columns
         geo_dropdowns (List[str]): selected geo columns
+        heatmap_children (List[Component]): container of heatmap figure
+        selected_features (List[str]): selected features from heatmap dropdown
+        feature_dropdown_options (List[str]): available feature column values
 
     Returns:
-        tuple: correlation line plot, correlation line plot container visibility
+        tuple: heatmap plot, heatmap container visibility, options for feature selector in heatmap multi dropdown
     """
 
     changed_item = [p["prop_id"] for p in callback_context.triggered][0]
-    print(changed_item)
 
     if "store" in changed_item or "geo_dropdown" in changed_item:
         selected_features = None
@@ -2251,12 +2302,12 @@ def update_heatmap(
             else:
                 fig = create_correlation_heatmap(dfs[0][selected_features])
 
-            heatmap_cross_children.clear()
-            heatmap_cross_children.append(dcc.Graph(figure=fig))
+            heatmap_children.clear()
+            heatmap_children.append(dcc.Graph(figure=fig))
 
             heatmap_div_style = {"display": "block", "backgroundColor": "#111111"}
 
-            return heatmap_cross_children, heatmap_div_style, no_update
+            return heatmap_children, heatmap_div_style, no_update
 
         elif selected_features is None or "country-dropdown-heatmap" in changed_item:
             available_features = []
@@ -2279,11 +2330,11 @@ def update_heatmap(
                 feature for options in available_features for feature in options
             ]
 
-            return heatmap_cross_children, heatmap_div_style, features
+            return heatmap_children, heatmap_div_style, features
     else:
         heatmap_div_style = {"display": "none"}
 
-        return heatmap_cross_children, heatmap_div_style, no_update
+        return heatmap_children, heatmap_div_style, no_update
 
 
 @app.callback(
