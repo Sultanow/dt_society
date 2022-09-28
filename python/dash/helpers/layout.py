@@ -182,6 +182,7 @@ def preprocess_dataset(
                 no_update,  # preset-upload-content
                 reshape_column_value,  # reshape-column-value
                 error,  # dataset-fail-message
+                no_update,
             )
 
         geo_options = columns
@@ -249,6 +250,7 @@ def preprocess_dataset(
         saved_preset_file,
         reshape_column_value,
         no_update,
+        file_name,
     )
 
 

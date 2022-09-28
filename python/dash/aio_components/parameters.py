@@ -9,6 +9,7 @@ from dash import (
     MATCH,
     ALL,
 )
+import dash_bootstrap_components as dbc
 from typing import List
 
 
@@ -37,6 +38,12 @@ class ParameterStoreAIO(html.Div):
         container = lambda parameter: {
             "component": "ParameterStoreAIO",
             "subcomponent": "container",
+            "aio_id": parameter,
+        }
+        placerholder = lambda parameter: {
+            "component": "ParameterStoreAIO",
+            "subcomponent": "placerholder",
+            "placerholder_no": 1,
             "aio_id": parameter,
         }
 
@@ -68,23 +75,38 @@ class ParameterStoreAIO(html.Div):
             children=[
                 html.Div(f"Set {parameter}"),
                 dcc.Store(id=self.ids.store(parameter)),
-                dcc.Input(
-                    value=value,
-                    min=min,
-                    max=max,
-                    step=step,
-                    id=self.ids.input(parameter),
-                    type=type,
-                    style={
-                        "backgroundColor": "#111111",
-                        "color": "#f2f2f2",
-                        "padding": "10px",
-                        "border-top": "0px",
-                        "border-left": "0px",
-                        "border-right": "0px",
-                        "border-color": "#5c6cfa",
-                        "width": "300px",
-                    },
+                dbc.FormFloating(
+                    [
+                        dbc.Input(
+                            value=value,
+                            min=min,
+                            max=max,
+                            step=step,
+                            id=self.ids.input(parameter),
+                            type=type,
+                            placeholder="placeholder",
+                            style={
+                                "backgroundColor": "#111111",
+                                "color": "#f2f2f2",
+                                # "padding": "10px",
+                                "border-top": "0px",
+                                "border-left": "0px",
+                                "border-right": "0px",
+                                "border-color": "#5c6cfa",
+                                "border-radius": "0",
+                                "width": "300px",
+                            },
+                        ),
+                        dbc.Label(
+                            children=parameter,
+                            id=self.ids.placerholder(parameter),
+                            style={
+                                "color": "#7a7a7a",
+                                "font-weight": "lighter",
+                                "font-size": "14px",
+                            },
+                        ),
+                    ]
                 ),
                 html.Div(
                     [
@@ -105,7 +127,7 @@ class ParameterStoreAIO(html.Div):
             style={
                 "display": display,
                 "padding-left": "10px",
-                "margin-top": "10px",
+                # "margin-top": "10px",
             },
         )
 

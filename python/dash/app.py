@@ -85,7 +85,7 @@ app.layout = html.Div(
                         html.Div(
                             [
                                 html.Div(
-                                    "Files",
+                                    "Data",
                                     style={
                                         "padding-top": "10px",
                                         "padding-left": "10px",
@@ -146,11 +146,26 @@ app.layout = html.Div(
                 ),
                 dbc.Collapse(
                     [
-                        html.Div(
+                        dbc.Accordion(
                             [
+                                # dbc.AccordionItem(
+                                #     FilePreProcessingAIO(0),
+                                #     title="File 1",
+                                #     style={"backgroundColor": "#111111"},
+                                # ),
+                                # dbc.AccordionItem(
+                                #     FilePreProcessingAIO(1),
+                                #     title="File 2",
+                                #     style={"backgroundColor": "#111111"},
+                                # ),
                                 FilePreProcessingAIO(0),
                                 FilePreProcessingAIO(1),
                             ],
+                            style={
+                                # "backgroundColor": "#FFF",
+                                # "border-color": "#FFF",
+                            },
+                            # flush=True,
                             id="files-container",
                         ),
                     ],
@@ -250,14 +265,17 @@ app.layout = html.Div(
                                         "margin-left": "10px",
                                     },
                                 ),
-                                dcc.Checklist(
-                                    [
-                                        "Table",
-                                        "Stats",
-                                        "Timeline",
-                                        "Map",
-                                        "Correlation",
-                                        "Forecast",
+                                dbc.Checklist(
+                                    options=[
+                                        {"label": "Table", "value": "Table"},
+                                        {"label": "Stats", "value": "Stats"},
+                                        {"label": "Timeline", "value": "Timeline"},
+                                        {"label": "Map", "value": "Map"},
+                                        {
+                                            "label": "Correlation",
+                                            "value": "Correlation",
+                                        },
+                                        {"label": "Forecast", "value": "Forecast"},
                                     ],
                                     value=[
                                         "Table",
@@ -267,17 +285,12 @@ app.layout = html.Div(
                                         "Correlation",
                                         "Forecast",
                                     ],
-                                    labelStyle={
-                                        "margin-left": "10px",
-                                        "font-weight": "lighter",
-                                        "font-size": "14px",
-                                        "padding-bottom": "5px",
-                                    },
                                     inline=True,
                                     id="visibility-checklist",
                                     style={
                                         "padding-top": "5px",
                                         "padding-bottom": "5px",
+                                        "margin-left": "10px",
                                     },
                                 ),
                             ]
@@ -768,56 +781,61 @@ app.layout = html.Div(
                                         html.Div(
                                             [
                                                 html.Div(
-                                                    "Country",
-                                                    style={
-                                                        "padding-top": "15px",
-                                                        "padding-bottom": "15px",
-                                                        "padding-right": "15px",
-                                                    },
+                                                    [
+                                                        html.Div(
+                                                            "Country",
+                                                            style={
+                                                                "padding-top": "15px",
+                                                                "padding-bottom": "15px",
+                                                                "padding-right": "15px",
+                                                            },
+                                                        ),
+                                                        dcc.Dropdown(
+                                                            ["none"],
+                                                            placeholder="Select country",
+                                                            clearable=False,
+                                                            id="country-dropdown-heatmap",
+                                                            style={
+                                                                "width": "140px",
+                                                                "font-size": "14px",
+                                                                "border-color": "#5c6cfa",
+                                                                "background-color": "#111111",
+                                                            },
+                                                        ),
+                                                    ],
+                                                    style={"margin-left": "10px"},
                                                 ),
-                                                dcc.Dropdown(
-                                                    ["none"],
-                                                    placeholder="Select country",
-                                                    clearable=False,
-                                                    id="country-dropdown-heatmap",
-                                                    style={
-                                                        "width": "140px",
-                                                        "font-size": "14px",
-                                                        "border-color": "#5c6cfa",
-                                                        "background-color": "#111111",
-                                                    },
-                                                ),
-                                            ],
-                                            style={"margin-left": "10px"},
-                                        ),
-                                        html.Div(
-                                            [
                                                 html.Div(
-                                                    "Available features",
+                                                    [
+                                                        html.Div(
+                                                            "Available features",
+                                                            style={
+                                                                "padding-top": "15px",
+                                                                "padding-bottom": "15px",
+                                                                "padding-right": "15px",
+                                                            },
+                                                        ),
+                                                        dcc.Dropdown(
+                                                            ["A", "b", "c"],
+                                                            placeholder="Select features",
+                                                            clearable=False,
+                                                            multi=True,
+                                                            id="multi-feature-dropdown-heatmap",
+                                                            style={
+                                                                # "width": "40%",
+                                                                "font-size": "14px",
+                                                                "border-color": "#5c6cfa",
+                                                                "background-color": "#111111",
+                                                            },
+                                                        ),
+                                                    ],
                                                     style={
-                                                        "padding-top": "15px",
-                                                        "padding-bottom": "15px",
-                                                        "padding-right": "15px",
-                                                    },
-                                                ),
-                                                dcc.Dropdown(
-                                                    ["A", "b", "c"],
-                                                    placeholder="Select features",
-                                                    clearable=False,
-                                                    multi=True,
-                                                    id="multi-feature-dropdown-heatmap",
-                                                    style={
-                                                        # "width": "40%",
-                                                        "font-size": "14px",
-                                                        "border-color": "#5c6cfa",
-                                                        "background-color": "#111111",
+                                                        "margin-left": "10px",
+                                                        "width": "20%",
                                                     },
                                                 ),
                                             ],
-                                            style={
-                                                "margin-left": "10px",
-                                                "width": "20%",
-                                            },
+                                            style={"display": "flex"},
                                         ),
                                     ],
                                     style={"margin-left": "10px"},
@@ -972,25 +990,41 @@ app.layout = html.Div(
                                                     "Time frequency",
                                                     style={
                                                         "padding-top": "15px",
-                                                        "padding-bottom": "15px",
+                                                        "padding-bottom": "5px",
                                                         "padding-right": "15px",
+                                                        "font-weight": "bold",
                                                     },
                                                 ),
-                                                dcc.Dropdown(
-                                                    [
-                                                        "Yearly",
-                                                        "Monthly",
-                                                        "Weekly",
-                                                        "Daily",
+                                                dbc.RadioItems(
+                                                    options=[
+                                                        {
+                                                            "label": "Yearly",
+                                                            "value": "Yearly",
+                                                        },
+                                                        {
+                                                            "label": "Monthly",
+                                                            "value": "Monthly",
+                                                        },
+                                                        {
+                                                            "label": "Weekly",
+                                                            "value": "Weekly",
+                                                        },
+                                                        {
+                                                            "label": "Daily",
+                                                            "value": "Daily",
+                                                        },
                                                     ],
-                                                    placeholder="Select frequency",
-                                                    clearable=False,
+                                                    # value="Yearly",
+                                                    # placeholder="Select frequency",
+                                                    # clearable=False,
+                                                    inline=True,
                                                     id="frequency-dropdown-forecast",
                                                     style={
-                                                        "width": "140px",
-                                                        "font-size": "14px",
-                                                        "border-color": "#5c6cfa",
-                                                        "background-color": "#111111",
+                                                        # "width": "140px",
+                                                        "font-weight": "lighter",
+                                                        "font-size": "12px",
+                                                        # "border-color": "#5c6cfa",
+                                                        # "background-color": "#111111",
                                                     },
                                                 ),
                                             ],
@@ -1002,20 +1036,32 @@ app.layout = html.Div(
                                                     "Model",
                                                     style={
                                                         "padding-top": "15px",
-                                                        "padding-bottom": "15px",
+                                                        "padding-bottom": "5px",
                                                         "padding-right": "15px",
+                                                        "font-weight": "bold",
                                                     },
                                                 ),
-                                                dcc.Dropdown(
-                                                    ["Prophet", "Regression"],
-                                                    placeholder="Select model",
-                                                    clearable=False,
+                                                dbc.RadioItems(
+                                                    options=[
+                                                        {
+                                                            "label": "Prophet",
+                                                            "value": "Prophet",
+                                                        },
+                                                        {
+                                                            "label": "Regression",
+                                                            "value": "Regression",
+                                                        },
+                                                    ],
+                                                    # placeholder="Select model",
+                                                    # clearable=False,
+                                                    inline=True,
                                                     id="model-dropdown-forecast",
                                                     style={
-                                                        "width": "140px",
-                                                        "font-size": "14px",
-                                                        "border-color": "#5c6cfa",
-                                                        "background-color": "#111111",
+                                                        # "width": "140px",
+                                                        "font-weight": "lighter",
+                                                        "font-size": "12px",
+                                                        # "border-color": "#5c6cfa",
+                                                        # "background-color": "#111111",
                                                     },
                                                 ),
                                             ],
@@ -1027,8 +1073,9 @@ app.layout = html.Div(
                                                     "Country",
                                                     style={
                                                         "padding-top": "15px",
-                                                        "padding-bottom": "15px",
+                                                        "padding-bottom": "5px",
                                                         "padding-right": "15px",
+                                                        "font-weight": "bold",
                                                     },
                                                 ),
                                                 dcc.Dropdown(
@@ -1038,7 +1085,8 @@ app.layout = html.Div(
                                                     id="country-dropdown-forecast",
                                                     style={
                                                         "width": "140px",
-                                                        "font-size": "14px",
+                                                        "height": "10px",
+                                                        "font-size": "10px",
                                                         "border-color": "#5c6cfa",
                                                         "background-color": "#111111",
                                                     },
@@ -1046,19 +1094,30 @@ app.layout = html.Div(
                                             ],
                                             style={"margin-left": "10px"},
                                         ),
-                                    ],
-                                    style={"display": "flex", "margin-left": "10px"},
-                                ),
-                                html.Div(
-                                    [
                                         html.Div(
-                                            "Set future prediction",
-                                            style={"padding": "15px"},
+                                            [
+                                                html.Div(
+                                                    "Forecast length",
+                                                    style={
+                                                        "padding-top": "15px",
+                                                        "padding-bottom": "5px",
+                                                        "padding-right": "15px",
+                                                        "font-weight": "bold",
+                                                    },
+                                                ),
+                                                dcc.Slider(
+                                                    1, 30, 1, id="forecast-slider"
+                                                ),
+                                            ],
+                                            id="forecast-slider-div",
+                                            style={"display": "none"},
                                         ),
-                                        dcc.Slider(1, 30, 1, id="forecast-slider"),
                                     ],
-                                    id="forecast-slider-div",
-                                    style={"display": "none"},
+                                    style={
+                                        "display": "flex",
+                                        "margin-left": "10px",
+                                        "width": "100%",
+                                    },
                                 ),
                                 dcc.Loading(
                                     type="circle",
@@ -1116,25 +1175,36 @@ app.layout = html.Div(
                                                             "Time frequency",
                                                             style={
                                                                 "padding-top": "15px",
-                                                                "padding-bottom": "15px",
+                                                                "padding-bottom": "5px",
                                                                 "padding-right": "15px",
+                                                                "font-weight": "bold",
                                                             },
                                                         ),
-                                                        dcc.Dropdown(
-                                                            [
-                                                                "Yearly",
-                                                                "Monthly",
-                                                                "Weekly",
-                                                                "Daily",
+                                                        dbc.RadioItems(
+                                                            options=[
+                                                                {
+                                                                    "label": "Yearly",
+                                                                    "value": "Yearly",
+                                                                },
+                                                                {
+                                                                    "label": "Monthly",
+                                                                    "value": "Monthly",
+                                                                },
+                                                                {
+                                                                    "label": "Weekly",
+                                                                    "value": "Weekly",
+                                                                },
+                                                                {
+                                                                    "label": "Daily",
+                                                                    "value": "Daily",
+                                                                },
                                                             ],
-                                                            placeholder="Select frequency",
-                                                            clearable=False,
+                                                            inline=True,
                                                             id="multi-frequency-dropdown-forecast",
                                                             style={
-                                                                "width": "140px",
-                                                                "font-size": "14px",
-                                                                "border-color": "#5c6cfa",
-                                                                "background-color": "#111111",
+                                                                "font-weight": "lighter",
+                                                                "font-size": "12px",
+                                                                # "width": "140px",
                                                             },
                                                         ),
                                                     ],
@@ -1146,25 +1216,33 @@ app.layout = html.Div(
                                                             "Model",
                                                             style={
                                                                 "padding-top": "15px",
-                                                                "padding-bottom": "15px",
+                                                                "padding-bottom": "5px",
                                                                 "padding-right": "15px",
+                                                                "font-weight": "bold",
                                                             },
                                                         ),
-                                                        dcc.Dropdown(
-                                                            [
-                                                                "Prophet",
-                                                                "Vector AR",
-                                                                "HW Smoothing",
+                                                        dbc.RadioItems(
+                                                            options=[
+                                                                {
+                                                                    "label": "Prophet",
+                                                                    "value": "Prophet",
+                                                                },
+                                                                {
+                                                                    "label": "Vector AR",
+                                                                    "value": "Vector AR",
+                                                                },
+                                                                {
+                                                                    "label": "HW Smoothing",
+                                                                    "value": "HW Smoothing",
+                                                                },
                                                             ],
-                                                            placeholder="Select model",
-                                                            clearable=False,
+                                                            inline=True,
                                                             id="model-dropdown-multi-forecast",
                                                             style={
-                                                                "width": "140px",
-                                                                "font-size": "14px",
-                                                                "border-color": "#5c6cfa",
-                                                                "background-color": "#111111",
+                                                                # "width": "140px",
                                                                 # "textAlign": "center",
+                                                                "font-weight": "lighter",
+                                                                "font-size": "12px",
                                                             },
                                                         ),
                                                     ],
@@ -1176,7 +1254,7 @@ app.layout = html.Div(
                                                             "Country",
                                                             style={
                                                                 "padding-top": "15px",
-                                                                "padding-bottom": "15px",
+                                                                "padding-bottom": "5px",
                                                                 "padding-right": "15px",
                                                             },
                                                         ),
@@ -1195,24 +1273,32 @@ app.layout = html.Div(
                                                     ],
                                                     style={"margin-left": "10px"},
                                                 ),
+                                                html.Div(
+                                                    [
+                                                        html.Div(
+                                                            "Forecast length",
+                                                            style={
+                                                                "padding-top": "15px",
+                                                                "padding-bottom": "5px",
+                                                                "padding-right": "15px",
+                                                                "font-weight": "bold",
+                                                            },
+                                                        ),
+                                                        dcc.Slider(
+                                                            1,
+                                                            30,
+                                                            1,
+                                                            id="var-forecast-slider",
+                                                        ),
+                                                    ],
+                                                    id="var-slider-div",
+                                                    style={"display": "none"},
+                                                ),
                                             ],
                                             style={
                                                 "display": "flex",
                                                 "margin-left": "10px",
                                             },
-                                        ),
-                                        html.Div(
-                                            [
-                                                html.Div(
-                                                    "Set future prediction",
-                                                    style={"padding": "15px"},
-                                                ),
-                                                dcc.Slider(
-                                                    1, 30, 1, id="var-forecast-slider"
-                                                ),
-                                            ],
-                                            id="var-slider-div",
-                                            style={"display": "none"},
                                         ),
                                         ParameterStoreAIO(
                                             parameter="max_lags",
@@ -1239,9 +1325,10 @@ app.layout = html.Div(
                                                         ),
                                                         dcc.RadioItems(
                                                             [],
+                                                            inline=True,
                                                             id="forecast-data-selector",
                                                             labelStyle={
-                                                                "display": "block",
+                                                                # "display": "flex",
                                                                 "padding": "5px",
                                                                 "font-size": "12px",
                                                                 "font-weight": "lighter",
@@ -1258,30 +1345,41 @@ app.layout = html.Div(
                                                         ),
                                                     ],
                                                     id="scenario-container",
+                                                    style={"width": "49%"},
                                                 ),
                                                 html.Div(
                                                     [
-                                                        dash_table.DataTable(
-                                                            id="forecast-data-table",
-                                                            style_data={
-                                                                "backgroundColor": "#232323",
-                                                                "border": "solid 1px #5c6cfa",
-                                                            },
-                                                            style_cell={
-                                                                "padding": "5px",
-                                                                "textAlign": "left",
-                                                            },
-                                                            style_header={
-                                                                "backgroundColor": "#454545",
-                                                                "border": "solid 1px #5c6cfa",
-                                                            },
-                                                            fixed_rows={
-                                                                "headers": True
-                                                            },
-                                                            style_table={
-                                                                "overflowY": "auto",
-                                                                "height": "175px",
-                                                            },
+                                                        dbc.Accordion(
+                                                            [
+                                                                dbc.AccordionItem(
+                                                                    dash_table.DataTable(
+                                                                        id="forecast-data-table",
+                                                                        style_data={
+                                                                            "backgroundColor": "#232323",
+                                                                            "border": "solid 1px #5c6cfa",
+                                                                        },
+                                                                        style_cell={
+                                                                            "padding": "5px",
+                                                                            "textAlign": "left",
+                                                                        },
+                                                                        style_header={
+                                                                            "backgroundColor": "#454545",
+                                                                            "border": "solid 1px #5c6cfa",
+                                                                        },
+                                                                        fixed_rows={
+                                                                            "headers": True
+                                                                        },
+                                                                        style_table={
+                                                                            "overflowY": "auto",
+                                                                            "height": "175px",
+                                                                        },
+                                                                    ),
+                                                                    title="Data",
+                                                                    style={
+                                                                        "backgroundColor": "#111111"
+                                                                    },
+                                                                )
+                                                            ],
                                                         ),
                                                     ],
                                                     style={
@@ -1295,7 +1393,7 @@ app.layout = html.Div(
                                             id="scenario-div",
                                             style={
                                                 "padding-left": "10px",
-                                                "margin-top": "10px",
+                                                # "margin-top": "10px",
                                                 "display": "none",
                                             },
                                         ),
@@ -1405,7 +1503,9 @@ def add_file(
     changed_item = [p["prop_id"] for p in callback_context.triggered][0]
 
     if "add-file-button" in changed_item:
-        files_container.append(FilePreProcessingAIO(add_file_button_clicks))
+        files_container.append(
+            FilePreProcessingAIO(add_file_button_clicks),
+        )
         data_selector.append(
             {
                 "label": f"Dataset {add_file_button_clicks+1}",
@@ -1428,24 +1528,44 @@ def add_file(
             "aio_id": "scenario",
         }
 
+        placerholder = {
+            "component": "ParameterStoreAIO",
+            "subcomponent": "placerholder",
+            "placerholder_no": add_file_button_clicks,
+            "aio_id": "scenario",
+        }
+
         # insert Input component after previous existing Input components in ParameterStoreAIO("scenario")
         # (Input components are stacked sequentially on top of each other in the layout)
         scenario_container[-1]["props"]["children"].insert(
             -1,
-            dcc.Input(
-                id=input,
-                type="text",
-                style={
-                    "backgroundColor": "#111111",
-                    "color": "#f2f2f2",
-                    "padding": "10px",
-                    "border-top": "0px",
-                    "border-left": "0px",
-                    "border-right": "0px",
-                    "border-color": "#5c6cfa",
-                    "width": "300px",
-                    "display": "block",
-                },
+            dbc.FormFloating(
+                [
+                    dbc.Input(
+                        type="text",
+                        id=input,
+                        placeholder="placeholder",
+                        style={
+                            "backgroundColor": "#111111",
+                            "color": "#f2f2f2",
+                            "border-top": "0px",
+                            "border-left": "0px",
+                            "border-right": "0px",
+                            "border-color": "#5c6cfa",
+                            "border-radius": "0",
+                            "width": "300px",
+                        },
+                    ),
+                    dbc.Label(
+                        "testlabel",
+                        id=placerholder,
+                        style={
+                            "color": "#7a7a7a",
+                            "font-weight": "lighter",
+                            "font-size": "14px",
+                        },
+                    ),
+                ]
             ),
         )
         # add corresponding Store component (not visible in layout)
@@ -2397,7 +2517,11 @@ def update_forecast_slider(
 
         marks = get_time_marks(df, time_column, frequency_dropdown)
 
-        slider_visibility = {"display": "block"}
+        slider_visibility = {
+            "display": "block",
+            "width": "800px",
+            "margin-left": "10px",
+        }
 
         return marks, slider_visibility
 
@@ -2563,11 +2687,11 @@ def update_forecast(
     Output(
         {
             "component": "ParameterStoreAIO",
-            "subcomponent": "input",
-            "input_no": ALL,
+            "subcomponent": "placerholder",
+            "placerholder_no": ALL,
             "aio_id": "scenario",
         },
-        "placeholder",
+        "children",
     ),
     State("multi-fit-plot-div", "children"),
     Input("multi-frequency-dropdown-forecast", "value"),
@@ -2714,7 +2838,7 @@ def update_multivariate_forecast(
                 forecast, feature_dropdowns, time_dropdowns[-1], var_slider_value
             )
 
-            var_slider_style = {"display": "block"}
+            var_slider_style = {"display": "block", "width": "700px"}
             var_lags_style = {
                 "padding-left": "15px",
                 "margin-top": "10px",
@@ -2727,7 +2851,7 @@ def update_multivariate_forecast(
             }
             scenario_div_style = {
                 "padding-left": "15px",
-                "margin-top": "10px",
+                # "margin-top": "10px",
                 "display": "none",
             }
 
@@ -2754,7 +2878,7 @@ def update_multivariate_forecast(
                 forecast, feature_dropdowns, time_dropdowns[-1], var_slider_value
             )
 
-            var_slider_style = {"display": "block"}
+            var_slider_style = {"display": "block", "width": "700px"}
             var_lags_style = {"display": "none"}
             alpha_div_style = {
                 "padding-left": "15px",
@@ -2763,7 +2887,7 @@ def update_multivariate_forecast(
             }
             scenario_div_style = {
                 "padding-left": "15px",
-                "margin-top": "10px",
+                # "margin-top": "10px",
                 "display": "none",
             }
 
@@ -2814,7 +2938,7 @@ def update_multivariate_forecast(
             }
             scenario_div_style = {
                 "padding-left": "15px",
-                "margin-top": "15px",
+                # "margin-top": "15px",
                 "display": "flex",
             }
 
