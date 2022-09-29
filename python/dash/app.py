@@ -69,81 +69,103 @@ df = pd.read_table(
 app.layout = html.Div(
     [
         html.Div(
-            [html.H1("Digital Twin of Society")],
+            [
+                html.Img(
+                    src=app.get_asset_url("dash-logo-white.png"),
+                    style={
+                        "float": "left",
+                        "position": "relative",
+                        "height": "35px",
+                        "margin": "0.9rem",
+                    },
+                ),
+                html.H2(
+                    "Digital Twin of Society",
+                    style={
+                        "margin-top": "auto",
+                        "margin-bottom": "auto",
+                        "font-size": "24px",
+                        "font-weight": "400",
+                        "margin-left": "5px",
+                    },
+                ),
+            ],
             style={
-                "textAlign": "center",
-                "padding-top": "10px",
-                "padding-bottom": "10px",
-                "backgroundColor": "#232323",
+                # "textAlign": "center",
+                # "padding-top": "10px",
+                # "padding-bottom": "10px",
+                "backgroundColor": "#1c1c1c",
                 "color": "#f2f2f2",
+                "margin-bottom": "5px",
+                "display": "flex",
             },
         ),
         html.Div(
             [
-                html.Div(
-                    [
-                        html.Div(
-                            [
-                                html.Div(
-                                    "Data",
-                                    style={
-                                        "padding-top": "10px",
-                                        "padding-left": "10px",
-                                        "padding-bottom": "10px",
-                                        "backgroundColor": "#111111",
-                                        "font-weight": "bold",
-                                        "textAlign": "center",
-                                        "display": "flex",
-                                        "margin": "auto",
-                                    },
-                                ),
-                                html.Div(
-                                    [
-                                        html.Span(
-                                            "help",
-                                            className="material-symbols-outlined",
-                                            id="file-help",
-                                            style={
-                                                "cursor": "pointer",
-                                            },
-                                        ),
-                                        dbc.Tooltip(
-                                            """File format: .csv, .tsv \n 
-                                                    Geo column: column that contains either country names or ISO codes \n
-                                                    Reshape: pivots the dataset from a wide to long format (adds new columns for unique values of selected column, if there is no additional identifier select "None") \n
-                                                    Time column: column that contains time data / timestamps (represents x-axis in figures)\n
-                                                    Feature: column that contains the feature of interest (represents y-axis in figures)\n
-                                                    Preset: upload/download a preset file that contains pre-selected column values""",
-                                            target="file-help",
-                                            style={
-                                                "white-space": "pre-line",
-                                                "font-size": "10px",
-                                                "font-weight": "normal",
-                                            },
-                                        ),
-                                    ],
-                                    style={
-                                        "justify-content": "center",
-                                        "align-items": "center",
-                                        "display": "flex",
-                                        "margin-right": "5px",
-                                    },
-                                ),
-                            ],
-                            style={"display": "flex"},
-                        ),
-                        html.Hr(
-                            style={
-                                "padding": "0px",
-                                "margin": "0px",
-                                "backgroundColor": "#5c6cfa",
-                                "border-color": "#5c6cfa",
-                                "height": "1px",
-                                "opacity": "1",
-                            }
-                        ),
-                    ]
-                ),
+                # html.Div(
+                #     [
+                #         html.Div(
+                #             [
+                #                 html.Div(
+                #                     "Data",
+                #                     style={
+                #                         "padding-top": "10px",
+                #                         "padding-left": "10px",
+                #                         "padding-bottom": "10px",
+                #                         "backgroundColor": "#232323",
+                #                         "font-weight": "bold",
+                #                         "textAlign": "center",
+                #                         "display": "flex",
+                #                         "margin": "auto",
+                #                     },
+                #                 ),
+                #                 html.Div(
+                #                     [
+                #                         html.Span(
+                #                             "help",
+                #                             className="material-symbols-outlined",
+                #                             id="file-help",
+                #                             style={
+                #                                 "cursor": "pointer",
+                #                             },
+                #                         ),
+                #                         dbc.Tooltip(
+                #                             """File format: .csv, .tsv \n
+                #                                     Geo column: column that contains either country names or ISO codes \n
+                #                                     Reshape: pivots the dataset from a wide to long format (adds new columns for unique values of selected column, if there is no additional identifier select "None") \n
+                #                                     Time column: column that contains time data / timestamps (represents x-axis in figures)\n
+                #                                     Feature: column that contains the feature of interest (represents y-axis in figures)\n
+                #                                     Preset: upload/download a preset file that contains pre-selected column values""",
+                #                             target="file-help",
+                #                             style={
+                #                                 "white-space": "pre-line",
+                #                                 "font-size": "10px",
+                #                                 "font-weight": "normal",
+                #                             },
+                #                         ),
+                #                     ],
+                #                     style={
+                #                         "justify-content": "center",
+                #                         "align-items": "center",
+                #                         "display": "flex",
+                #                         "margin-right": "5px",
+                #                     },
+                #                 ),
+                #             ],
+                #             style={"display": "flex"},
+                #         ),
+                #         html.Hr(
+                #             style={
+                #                 "padding": "0px",
+                #                 "margin": "0px",
+                #                 "backgroundColor": "#5c6cfa",
+                #                 "border-color": "#5c6cfa",
+                #                 "height": "1px",
+                #                 "opacity": "1",
+                #             }
+                #         ),
+                #     ]
+                # ),
                 dbc.Collapse(
                     [
                         dbc.Accordion(
@@ -162,6 +184,7 @@ app.layout = html.Div(
                                 FilePreProcessingAIO(1),
                             ],
                             style={
+                                "padding": "10px"
                                 # "backgroundColor": "#FFF",
                                 # "border-color": "#FFF",
                             },
@@ -241,11 +264,13 @@ app.layout = html.Div(
                                         ),
                                     ],
                                     style={
-                                        "margin-right": "55px",
-                                        "float": "right",
+                                        # "margin-right": "55px",
+                                        # "float": "right",
+                                        "justify-content": "flex-end",
                                         "display": "flex",
                                         "margin-left": "auto",
                                         "border-color": "#5c6cfa",
+                                        "margin-right": "10px",
                                     },
                                 ),
                             ],
@@ -304,6 +329,43 @@ app.layout = html.Div(
                                 "float": "right",
                                 "margin-left": "auto",
                                 "margin-right": "55px",
+                                "display": "none"
+                                # "background-color": "#1c1c1c",
+                            },
+                        ),
+                        html.Div(
+                            [
+                                html.Span(
+                                    "help",
+                                    className="material-symbols-outlined",
+                                    id="file-help",
+                                    style={
+                                        "cursor": "pointer",
+                                    },
+                                ),
+                                dbc.Tooltip(
+                                    """File format: .csv, .tsv \n
+                                                    Geo column: column that contains either country names or ISO codes \n
+                                                    Reshape: pivots the dataset from a wide to long format (adds new columns for unique values of selected column, if there is no additional identifier select "None") \n
+                                                    Time column: column that contains time data / timestamps (represents x-axis in figures)\n
+                                                    Feature: column that contains the feature of interest (represents y-axis in figures)\n
+                                                    Preset: upload/download a preset file that contains pre-selected column values""",
+                                    target="file-help",
+                                    style={
+                                        "white-space": "pre-line",
+                                        "font-size": "10px",
+                                        "font-weight": "normal",
+                                    },
+                                ),
+                            ],
+                            style={
+                                "justify-content": "flex-end",
+                                "align-items": "center",
+                                "display": "flex",
+                                # "margin-right": "5px",
+                                "margin-left": "auto",
+                                "padding-right": "10px",
+                                "float": "right",
                             },
                         ),
                     ],
@@ -311,8 +373,9 @@ app.layout = html.Div(
                 ),
             ],
             style={
-                "backgroundColor": "#111111",
+                "backgroundColor": "#232323",
                 "display": "block",
+                "border-radius": "5px",
             },
         ),
         html.Div(
@@ -327,7 +390,7 @@ app.layout = html.Div(
                                         "padding-top": "10px",
                                         "padding-left": "10px",
                                         "padding-bottom": "10px",
-                                        "backgroundColor": "#111111",
+                                        "backgroundColor": "#232323",
                                         "font-weight": "bold",
                                         "textAlign": "center",
                                     },
@@ -373,7 +436,7 @@ app.layout = html.Div(
                                 ),
                             ],
                             style={
-                                "backgroundColor": "#5c6cfa",
+                                "backgroundColor": "transparent",
                             },
                         ),
                     ],
@@ -398,7 +461,7 @@ app.layout = html.Div(
                                                 "border-left": "0px",
                                                 "border-right": "0px",
                                                 "border-bottom": "0px",
-                                                "backgroundColor": "#111111",
+                                                "backgroundColor": "#232323",
                                                 "border-color": "#5c6cfa",
                                                 "border-radius": "0px",
                                                 "padding": "0",
@@ -410,7 +473,7 @@ app.layout = html.Div(
                                                 "padding-top": "10px",
                                                 "padding-left": "10px",
                                                 "padding-bottom": "10px",
-                                                "backgroundColor": "#111111",
+                                                "backgroundColor": "#232323",
                                                 "font-weight": "bold",
                                                 "textAlign": "center",
                                                 "width": "100%",
@@ -445,7 +508,7 @@ app.layout = html.Div(
                                     style={
                                         "display": "flex",
                                         "width": "100%",
-                                        "backgroundColor": "#111111",
+                                        "backgroundColor": "#232323",
                                     },
                                 ),
                                 html.Hr(
@@ -463,7 +526,7 @@ app.layout = html.Div(
                         html.Div(
                             style={
                                 "padding": "5px",
-                                "backgroundColor": "#232323",
+                                "backgroundColor": "#1c1c1c",
                             }
                         ),
                         html.Div(
@@ -503,7 +566,7 @@ app.layout = html.Div(
                                                                 "border-top": "0px",
                                                                 "border-left": "0px",
                                                                 "border-right": "0px",
-                                                                "backgroundColor": "#111111",
+                                                                "backgroundColor": "#232323",
                                                                 "border-color": "#5c6cfa",
                                                                 "border-radius": "0px",
                                                                 "padding": "0",
@@ -512,7 +575,7 @@ app.layout = html.Div(
                                                         html.Div(
                                                             "Growth",
                                                             style={
-                                                                "backgroundColor": "#111111",
+                                                                "backgroundColor": "#232323",
                                                                 "font-weight": "bolder",
                                                                 "textAlign": "center",
                                                                 "padding": "15px",
@@ -544,7 +607,7 @@ app.layout = html.Div(
                                                 ),
                                             ],
                                             style={
-                                                "backgroundColor": "#111111",
+                                                "backgroundColor": "#232323",
                                                 "height": "90px",
                                                 "width": "100%",
                                             },
@@ -565,7 +628,7 @@ app.layout = html.Div(
             ],
             style={
                 "display": "flex",
-                "backgroundColor": "#232323",
+                "backgroundColor": "#1c1c1c",
                 "margin-bottom": "15px",
                 "margin-top": "10px",
             },
@@ -584,7 +647,7 @@ app.layout = html.Div(
                                                 "padding-top": "10px",
                                                 "padding-left": "10px",
                                                 "padding-bottom": "10px",
-                                                "backgroundColor": "#111111",
+                                                "backgroundColor": "#232323",
                                                 "font-weight": "bold",
                                                 "textAlign": "center",
                                             },
@@ -601,7 +664,7 @@ app.layout = html.Div(
                                     ]
                                 ),
                             ],
-                            style={"backgroundColor": "#111111"},
+                            style={"backgroundColor": "#232323"},
                         ),
                         dcc.Loading(
                             type="circle",
@@ -636,7 +699,7 @@ app.layout = html.Div(
                                                 "border-left": "0px",
                                                 "border-right": "0px",
                                                 "border-bottom": "0px",
-                                                "backgroundColor": "#111111",
+                                                "backgroundColor": "#232323",
                                                 "border-color": "#5c6cfa",
                                                 "border-radius": "0px",
                                                 "padding-top": "1.5px",
@@ -649,7 +712,7 @@ app.layout = html.Div(
                                                 "padding-top": "10px",
                                                 "padding-left": "10px",
                                                 "padding-bottom": "10px",
-                                                "backgroundColor": "#111111",
+                                                "backgroundColor": "#232323",
                                                 "font-weight": "bold",
                                                 "textAlign": "center",
                                                 "width": "100%",
@@ -733,7 +796,7 @@ app.layout = html.Div(
             ],
             style={
                 "display": "flex",
-                "backgroundColor": "#232323",
+                "backgroundColor": "#1c1c1c",
                 "margin-top": "10px",
             },
         ),
@@ -741,7 +804,7 @@ app.layout = html.Div(
             [
                 html.Div(
                     style={
-                        "backgroundColor": "#232323",
+                        "backgroundColor": "#1c1c1c",
                         "display": "block",
                         "padding": "10px",
                     }
@@ -750,7 +813,7 @@ app.layout = html.Div(
                     [
                         dcc.Tab(
                             style={
-                                "background-color": "#111111",
+                                "background-color": "#232323",
                                 "border-left": "0px",
                                 "border-right": "0px",
                                 "border-bottom": "0px",
@@ -758,7 +821,7 @@ app.layout = html.Div(
                                 "border-top": "0px",
                             },
                             selected_style={
-                                "background-color": "#111111",
+                                "background-color": "#232323",
                                 "color": "white",
                                 "border-left": "0px",
                                 "border-right": "0px",
@@ -799,7 +862,7 @@ app.layout = html.Div(
                                                                 "width": "140px",
                                                                 "font-size": "14px",
                                                                 "border-color": "#5c6cfa",
-                                                                "background-color": "#111111",
+                                                                "background-color": "#232323",
                                                             },
                                                         ),
                                                     ],
@@ -825,7 +888,7 @@ app.layout = html.Div(
                                                                 # "width": "40%",
                                                                 "font-size": "14px",
                                                                 "border-color": "#5c6cfa",
-                                                                "background-color": "#111111",
+                                                                "background-color": "#232323",
                                                             },
                                                         ),
                                                     ],
@@ -860,7 +923,7 @@ app.layout = html.Div(
                         dcc.Tab(
                             id="compare-div",
                             style={
-                                "background-color": "#111111",
+                                "background-color": "#232323",
                                 "border-left": "0px",
                                 "border-right": "0px",
                                 "border-bottom": "0px",
@@ -868,7 +931,7 @@ app.layout = html.Div(
                                 "border-top": "0px",
                             },
                             selected_style={
-                                "background-color": "#111111",
+                                "background-color": "#232323",
                                 "color": "white",
                                 "border-left": "0px",
                                 "border-right": "0px",
@@ -907,7 +970,7 @@ app.layout = html.Div(
                                                         "width": "140px",
                                                         "font-size": "14px",
                                                         "border-color": "#5c6cfa",
-                                                        "background-color": "#111111",
+                                                        "background-color": "#232323",
                                                     },
                                                 ),
                                             ],
@@ -943,7 +1006,7 @@ app.layout = html.Div(
             [
                 html.Div(
                     style={
-                        "backgroundColor": "#232323",
+                        "backgroundColor": "#1c1c1c",
                         "display": "block",
                         "padding": "10px",
                     }
@@ -952,7 +1015,7 @@ app.layout = html.Div(
                     [
                         dcc.Tab(
                             style={
-                                "background-color": "#111111",
+                                "background-color": "#232323",
                                 "border-left": "0px",
                                 "border-right": "0px",
                                 "border-bottom": "0px",
@@ -960,7 +1023,7 @@ app.layout = html.Div(
                                 "border-top": "0px",
                             },
                             selected_style={
-                                "background-color": "#111111",
+                                "background-color": "#232323",
                                 "color": "white",
                                 "border-left": "0px",
                                 "border-right": "0px",
@@ -1088,7 +1151,7 @@ app.layout = html.Div(
                                                         "height": "10px",
                                                         "font-size": "10px",
                                                         "border-color": "#5c6cfa",
-                                                        "background-color": "#111111",
+                                                        "background-color": "#232323",
                                                     },
                                                 ),
                                             ],
@@ -1139,7 +1202,7 @@ app.layout = html.Div(
                         dcc.Tab(
                             id="multi-forecast-div",
                             style={
-                                "background-color": "#111111",
+                                "background-color": "#232323",
                                 "border-left": "0px",
                                 "border-right": "0px",
                                 "border-bottom": "0px",
@@ -1147,7 +1210,7 @@ app.layout = html.Div(
                                 "border-top": "0px",
                             },
                             selected_style={
-                                "background-color": "#111111",
+                                "background-color": "#232323",
                                 "color": "white",
                                 "border-left": "0px",
                                 "border-right": "0px",
@@ -1267,7 +1330,7 @@ app.layout = html.Div(
                                                                 "width": "140px",
                                                                 "font-size": "14px",
                                                                 "border-color": "#5c6cfa",
-                                                                "background-color": "#111111",
+                                                                "background-color": "#232323",
                                                             },
                                                         ),
                                                     ],
@@ -1376,7 +1439,7 @@ app.layout = html.Div(
                                                                     ),
                                                                     title="Data",
                                                                     style={
-                                                                        "backgroundColor": "#111111"
+                                                                        "backgroundColor": "#232323"
                                                                     },
                                                                 )
                                                             ],
@@ -1426,7 +1489,7 @@ app.layout = html.Div(
     ],
     style={
         "fontFamily": "helvetica",
-        "backgroundColor": "#232323",
+        "backgroundColor": "#1c1c1c",
         "color": "#f2f2f2",
         "min-width": "1500px",
         "max-width": "1500px",
@@ -1546,7 +1609,7 @@ def add_file(
                         id=input,
                         placeholder="placeholder",
                         style={
-                            "backgroundColor": "#111111",
+                            "backgroundColor": "#232323",
                             "color": "#f2f2f2",
                             "border-top": "0px",
                             "border-left": "0px",
@@ -2300,7 +2363,7 @@ def update_max_country_compare(
 
         compare_div_style = {
             "display": "block",
-            "background-color": "#111111",
+            "background-color": "#232323",
             "border-left": "0px",
             "border-right": "0px",
             "border-bottom": "0px",
@@ -2433,7 +2496,7 @@ def update_heatmap(
             heatmap_children.clear()
             heatmap_children.append(dcc.Graph(figure=fig))
 
-            heatmap_div_style = {"display": "block", "backgroundColor": "#111111"}
+            heatmap_div_style = {"display": "block", "backgroundColor": "#232323"}
 
             return heatmap_children, heatmap_div_style, no_update
 
@@ -2452,7 +2515,7 @@ def update_heatmap(
                             ]
                         )
 
-            heatmap_div_style = {"display": "block", "backgroundColor": "#111111"}
+            heatmap_div_style = {"display": "block", "backgroundColor": "#232323"}
 
             features = [
                 feature for options in available_features for feature in options
@@ -2656,7 +2719,7 @@ def update_forecast(
 
         fit_plot_children.append(dcc.Graph(figure=fig))
 
-        forecast_div_style = {"display": "block", "backgroundColor": "#111111"}
+        forecast_div_style = {"display": "block", "backgroundColor": "#232323"}
 
         return fit_plot_children, forecast_div_style
 
@@ -2664,7 +2727,7 @@ def update_forecast(
         feature_column and geo_column and data
     ) and "Forecast" in visibility_checklist:
 
-        forecast_div_style = {"display": "block", "backgroundColor": "#111111"}
+        forecast_div_style = {"display": "block", "backgroundColor": "#232323"}
 
         return fit_plot_children, forecast_div_style
 
@@ -2957,7 +3020,7 @@ def update_multivariate_forecast(
 
         multi_forecast_div_style = {
             "display": "block",
-            "background-color": "#111111",
+            "background-color": "#232323",
             "border-left": "0px",
             "border-right": "0px",
             "border-bottom": "0px",
@@ -2984,7 +3047,7 @@ def update_multivariate_forecast(
 
         multi_forecast_div_style = {
             "display": "block",
-            "background-color": "#111111",
+            "background-color": "#232323",
             "border-left": "0px",
             "border-right": "0px",
             "border-bottom": "0px",

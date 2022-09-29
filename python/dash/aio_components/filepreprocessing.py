@@ -155,7 +155,7 @@ class FilePreProcessingAIO(dbc.AccordionItem):
                                         "margin-top": "5px",
                                         "margin-left": "0px",
                                         "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
+                                        "background-color": "#1c1c1c",
                                         "font-size": "10px",
                                         "color": "white",
                                     },
@@ -180,7 +180,7 @@ class FilePreProcessingAIO(dbc.AccordionItem):
                                     id=self.ids.geo_dropdown(dataset_id),
                                     style={
                                         "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
+                                        "background-color": "#1c1c1c",
                                     },
                                 ),
                             ],
@@ -215,7 +215,7 @@ class FilePreProcessingAIO(dbc.AccordionItem):
                                     id=self.ids.reshape_dropdown(dataset_id),
                                     style={
                                         "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
+                                        "background-color": "#1c1c1c",
                                     },
                                 ),
                             ],
@@ -238,7 +238,7 @@ class FilePreProcessingAIO(dbc.AccordionItem):
                                     id=self.ids.time_dropdown(dataset_id),
                                     style={
                                         "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
+                                        "background-color": "#1c1c1c",
                                     },
                                 ),
                             ],
@@ -261,7 +261,7 @@ class FilePreProcessingAIO(dbc.AccordionItem):
                                     id=self.ids.feature_dropdown(dataset_id),
                                     style={
                                         "border-color": "#5c6cfa",
-                                        "background-color": "#111111",
+                                        "background-color": "#1c1c1c",
                                     },
                                 ),
                                 dcc.Loading(
@@ -330,7 +330,7 @@ class FilePreProcessingAIO(dbc.AccordionItem):
                     style={"display": "flex"},
                 ),
             ],
-            style={"backgroundColor": "#111111"},
+            style={"backgroundColor": "#1c1c1c"},
         )
 
     def get_demo_id(self):
