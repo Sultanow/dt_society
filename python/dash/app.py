@@ -376,72 +376,90 @@ app.layout = html.Div(
                 "backgroundColor": "#232323",
                 "display": "block",
                 "border-radius": "5px",
+                "border": "1px solid #5c6cfa",
             },
         ),
         html.Div(
             [
                 html.Div(
                     [
-                        html.Div(
-                            [
-                                html.Div(
-                                    "Table",
-                                    style={
-                                        "padding-top": "10px",
-                                        "padding-left": "10px",
-                                        "padding-bottom": "10px",
-                                        "backgroundColor": "#232323",
-                                        "font-weight": "bold",
-                                        "textAlign": "center",
-                                    },
-                                ),
-                                html.Hr(
-                                    style={
-                                        "padding": "0px",
-                                        "margin": "0px",
-                                        "backgroundColor": "#5c6cfa",
-                                        "border-color": "#5c6cfa",
-                                        "opacity": "1",
-                                    }
-                                ),
-                            ]
-                        ),
-                        html.Div(
-                            [
-                                dcc.Loading(
-                                    parent_style={"backgroundColor": "transparent"},
-                                    style={"backgroundColor": "transparent"},
-                                    children=[
-                                        dash_table.DataTable(
-                                            id="data-table",
-                                            style_data={
-                                                "backgroundColor": "#232323",
-                                                "border": "solid 1px #5c6cfa",
-                                            },
-                                            style_cell={
-                                                "padding": "5px",
-                                                "textAlign": "left",
-                                            },
-                                            style_header={
-                                                "backgroundColor": "#454545",
-                                                "border": "solid 1px #5c6cfa",
-                                            },
-                                            fixed_rows={"headers": True},
-                                            style_table={
-                                                "overflowY": "auto",
-                                                "height": "185px",
-                                            },
-                                        )
-                                    ],
-                                ),
-                            ],
-                            style={
-                                "backgroundColor": "transparent",
+                        # html.Div(
+                        #     [
+                        #         html.Div(
+                        #             "Table",
+                        #             style={
+                        #                 "padding-top": "10px",
+                        #                 "padding-left": "10px",
+                        #                 "padding-bottom": "10px",
+                        #                 "backgroundColor": "#232323",
+                        #                 "font-weight": "bold",
+                        #                 "textAlign": "center",
+                        #             },
+                        #         ),
+                        #         html.Hr(
+                        #             style={
+                        #                 "padding": "0px",
+                        #                 "margin": "0px",
+                        #                 "backgroundColor": "#5c6cfa",
+                        #                 "border-color": "#5c6cfa",
+                        #                 "opacity": "1",
+                        #             }
+                        #         ),
+                        #     ]
+                        # ),
+                        # dcc.Loading(
+                        #     parent_style={"backgroundColor": "#232323"},
+                        #     style={"backgroundColor": "#232323"},
+                        #     children=[
+                        #         dash_table.DataTable(
+                        #             id="data-table",
+                        #             style_as_list_view=True,
+                        #             style_data={
+                        #                 "backgroundColor": "#1c1c1c",
+                        #                 "border": "solid 1px #454545",
+                        #             },
+                        #             style_cell={
+                        #                 "padding": "5px",
+                        #                 "textAlign": "left",
+                        #             },
+                        #             style_header={
+                        #                 "backgroundColor": "#454545",
+                        #                 "border": "0",
+                        #             },
+                        #             fixed_rows={"headers": True},
+                        #             style_table={
+                        #                 "overflowY": "auto",
+                        #                 "height": "185px",
+                        #                 # "border": "solid 1px white",
+                        #             },
+                        #         )
+                        #     ],
+                        # ),
+                        dash_table.DataTable(
+                            id="data-table",
+                            style_as_list_view=True,
+                            style_data={
+                                "backgroundColor": "#1c1c1c",
+                                "border": "solid 1px #454545",
                             },
-                        ),
+                            style_cell={
+                                "padding": "5px",
+                                "textAlign": "left",
+                            },
+                            style_header={
+                                "backgroundColor": "#454545",
+                                "border": "0",
+                            },
+                            fixed_rows={"headers": True},
+                            style_table={
+                                "overflowY": "auto",
+                                "height": "185px",
+                                # "border": "solid 1px white",
+                            },
+                        )
                     ],
                     id="table-div",
-                    style={"backroundColor": "#ffffff", "display": "none"},
+                    style={"display": "none"},
                 ),
                 html.Div(
                     [
@@ -1894,10 +1912,13 @@ def update_table_content(
         df = pd.read_json(data).round(2).to_dict("records")
 
         table_div_style = {
-            "backroundColor": "#ffffff",
+            "backroundColor": "#232323",
             "display": "block",
             "min-width": "49%",
             "width": "99%",
+            "padding": "10px",
+            "border": "1px solid #5c6cfa",
+            "border-radius": "5px",
         }
 
         return df, table_div_style
@@ -2033,6 +2054,9 @@ def update_stats(
             "width": "49%",
             "min-width": "49%",
             "margin-left": "10px",
+            "border": "1px solid #5c6cfa",
+            "background-color": "#232323",
+            "padding": "10px",
         }
 
         return (

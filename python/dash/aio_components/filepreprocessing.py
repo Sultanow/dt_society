@@ -171,6 +171,7 @@ class FilePreProcessingAIO(dbc.AccordionItem):
                                         "width": "200px",
                                         "textAlign": "center",
                                         "margin-bottom": "13px",
+                                        "font-weight": "bold",
                                     },
                                 ),
                                 dcc.Dropdown(
