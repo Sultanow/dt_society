@@ -4,7 +4,7 @@ from flask_session import Session
 from .preprocessing.parse import cache
 from .plots.plots import cache as plot_cache
 
-from . import graph
+from . import graph, forecast
 
 
 def create_app(test_config=None):
@@ -18,6 +18,7 @@ def create_app(test_config=None):
     app.config["SESSION_TYPE"] = "filesystem"
 
     app.register_blueprint(graph.bp)
+    app.register_blueprint(forecast.bp)
 
     app.config.from_mapping(
         SECRET_KEY="dev",

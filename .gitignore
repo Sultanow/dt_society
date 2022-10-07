@@ -161,7 +161,7 @@ cython_debug/
 
 .DS_Store
 python/dash/*.ipynb
-app/flask/static/files
+app/flask/flaskr/static/files/
 app/flask/static/files/*.tsv
 app/flask/static/files/*.csv
-app/flask/flask_session
+app/flask/flask_session/

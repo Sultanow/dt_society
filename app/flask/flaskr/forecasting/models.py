@@ -9,9 +9,8 @@ from statsmodels.tsa.api import VAR
 from statsmodels.tsa.stattools import adfuller
 from typing import Tuple, List
 
-from .layout import get_time_marks
 from .smoothing import multivariate_ES
-from preprocessing.parse import merge_dataframes, merge_dataframes_multi
+from ..preprocessing.parse import merge_dataframes, merge_dataframes_multi
 
 
 def prophet_fit_and_predict(
@@ -172,8 +171,6 @@ def var_fit_and_predict_multi(
 
     merged_df, time = merge_dataframes_multi(dataframes, time_columns)
 
-    marks = get_time_marks(merged_df, time_column=time, frequency=frequency)
-
     merged_df[time] = pd.to_datetime(merged_df[time].astype(str))
 
     merged_df_diff = merged_df[feature_columns].diff().astype("float32").dropna()
@@ -187,7 +184,7 @@ def var_fit_and_predict_multi(
     forecast_df = pd.DataFrame()
 
     forecast_df[time] = pd.date_range(
-        start=marks[1], periods=periods, freq=frequencies[frequency][0]
+        start=merged_df[time].iloc[-1], periods=periods, freq=frequencies[frequency][0]
     )
 
     forecast_df[feature_columns] = forecast
@@ -198,7 +195,7 @@ def var_fit_and_predict_multi(
         len(merged_df) - 1 :
     ].cumsum()
 
-    return df_final, marks
+    return df_final
 
 
 def hw_es_fit_and_predict_multi(
@@ -208,7 +205,7 @@ def hw_es_fit_and_predict_multi(
     frequency: str,
     periods: int,
     alpha: float,
-) -> Tuple[pd.DataFrame, dict]:
+) -> pd.DataFrame:
     """Fit and forecast using the HW exponential smoothing method
 
     Args:
@@ -232,8 +229,6 @@ def hw_es_fit_and_predict_multi(
 
     merged_df, time = merge_dataframes_multi(dataframes, time_columns)
 
-    marks = get_time_marks(merged_df, time_column=time, frequency=frequency)
-
     merged_df[time] = pd.to_datetime(merged_df[time].astype(str))
 
     df_features = (
@@ -254,7 +249,7 @@ def hw_es_fit_and_predict_multi(
     forecast_df = pd.DataFrame()
 
     forecast_df[time] = pd.date_range(
-        start=marks[1], periods=periods, freq=frequencies[frequency][0]
+        start=merged_df[time].iloc[-1], periods=periods, freq=frequencies[frequency][0]
     )
 
     for i, feature in enumerate(sorted(feature_columns)):
@@ -262,7 +257,7 @@ def hw_es_fit_and_predict_multi(
 
     df_final = pd.concat([merged_df, forecast_df], ignore_index=True)
 
-    return df_final, marks
+    return df_final
 
 
 def prophet_fit_and_predict_n(
