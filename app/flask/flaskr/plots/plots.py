@@ -10,10 +10,9 @@ from urllib.request import urlopen
 import json
 
 from typing import List
+from ..extensions import cache
 
-from flask_caching import Cache
-
-cache = Cache(config={"CACHE_TYPE": "SimpleCache"})
+# cache = Cache(config={"CACHE_TYPE": "SimpleCache"})
 
 theme = "plotly_dark"
 
@@ -217,9 +216,6 @@ def create_choropleth_slider_plot(
         },
     }
 
-    # with urlopen(geojsons[scope]["url"]) as response:
-    #     countries = json.load(response)
-
     with open(geojsons[scope]["path"]) as f:
         countries = json.load(f)
 
@@ -315,10 +311,12 @@ def create_two_line_plot(
     max_timestamp = None
 
     for i, features in enumerate(feature_options):
+        datasets[i][time_columns[i]] = pd.to_datetime(
+            datasets[i][time_columns[i]].astype("str")
+        )
 
         if min_timestamp is None or min_timestamp > min(datasets[i][time_columns[i]]):
             min_timestamp = min(datasets[i][time_columns[i]])
-            print(datasets[i][time_columns[i]])
 
         if max_timestamp is None or max_timestamp < max(datasets[i][time_columns[i]]):
             max_timestamp = max(datasets[i][time_columns[i]])
@@ -328,6 +326,8 @@ def create_two_line_plot(
 
             visibility = True if j == 0 else "legendonly"
             legend_group_title = f"Dataset {i+1}" if j == 0 else None
+
+            print(legend_group_title)
 
             fig.add_trace(
                 go.Scatter(
@@ -343,7 +343,7 @@ def create_two_line_plot(
                 row=1,
             )
 
-    # fig.update_xaxes(range=[min_timestamp, max_timestamp])
+    fig.update_xaxes(range=[min_timestamp, max_timestamp])
 
     fig.update_layout(
         transition_duration=500,
@@ -368,7 +368,6 @@ def create_correlation_heatmap(df: pd.DataFrame) -> go.Figure:
         go.Figure: Heatmap of lower triangular correlation matrix
     """
     triangular_upper_mask = np.triu(np.ones(df.corr().shape)).astype(bool)
-    print(df)
     fig = px.imshow(
         df.corr().where(~triangular_upper_mask),
         aspect="auto",

@@ -1,10 +1,9 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_session import Session
-from .preprocessing.parse import cache
-from .plots.plots import cache as plot_cache
 
 from . import graph, forecast
+from .extensions import mongo, cache
 
 
 def create_app(test_config=None):
@@ -17,12 +16,13 @@ def create_app(test_config=None):
     app.config["SESSION_PERMANENT"] = False
     app.config["SESSION_TYPE"] = "filesystem"
 
+    app.config["MONGO_URI"] = "mongodb://127.0.0.1:27017/dt_society_datasets"
+
     app.register_blueprint(graph.bp)
     app.register_blueprint(forecast.bp)
 
     app.config.from_mapping(
         SECRET_KEY="dev",
-        DATABASE=os.path.join(app.instance_path, "flaskr.sqlite"),
     )
 
     if test_config is None:
@@ -40,7 +40,7 @@ def create_app(test_config=None):
 
     Session(app)
     cache.init_app(app)
-    plot_cache.init_app(app)
+    mongo.init_app(app)
 
     @app.route("/")
     def index():
@@ -62,6 +62,8 @@ def create_app(test_config=None):
 
             elif file_path not in session["files"]:
                 session["files"].append(file_path)
+
+            data_collection = mongo.db.datasets
 
         return redirect(url_for("index"))
 

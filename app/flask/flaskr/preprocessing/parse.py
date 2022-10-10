@@ -6,15 +6,14 @@ from typing import List
 
 from .dataset import DigitalTwinTimeSeries
 
-from flask_caching import Cache
+# from flask_caching import Cache
+from ..extensions import cache
 
-cache = Cache(config={"CACHE_TYPE": "SimpleCache"})
+# cache = Cache(config={"CACHE_TYPE": "SimpleCache"})
 
 
 @cache.memoize(timeout=30)
-def parse_dataset(
-    session, geo_column, dataset_id, reshape_column=None
-) -> pd.DataFrame:
+def parse_dataset(session, geo_column, dataset_id, reshape_column=None) -> pd.DataFrame:
 
     file_path = session["files"][dataset_id]
 
