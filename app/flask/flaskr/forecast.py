@@ -6,7 +6,6 @@ from flask import (
     jsonify,
     render_template,
     request,
-    session,
 )
 from .forecasting.models import (
     var_fit_and_predict_multi,
@@ -20,6 +19,8 @@ from .plots.plots import (
 from .preprocessing.parse import parse_dataset, merge_dataframes_multi
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from .extensions import mongo
+
 bp = Blueprint("forecast", __name__, url_prefix="/forecast")
 
 
@@ -31,9 +32,9 @@ def forecastVAR():
     reshape_col = request.args.getlist("rshp")
 
     filtered_dfs = []
-    for i in range(len(session["files"])):
+    collection = mongo.db["collection_1"]
+    for i in range(collection.count_documents({})):
         df = parse_dataset(
-            session=session,
             geo_column=geo_col[i],
             dataset_id=i,
             reshape_column=reshape_col[i],
@@ -67,9 +68,9 @@ def forecastHWES():
     reshape_col = request.args.getlist("rshp")
 
     filtered_dfs = []
-    for i in range(len(session["files"])):
+    collection = mongo.db["collection_1"]
+    for i in range(collection.count_documents({})):
         df = parse_dataset(
-            session=session,
             geo_column=geo_col[i],
             dataset_id=i,
             reshape_column=reshape_col[i],
@@ -102,9 +103,9 @@ def forecastProphet():
     reshape_col = request.args.getlist("rshp")
 
     filtered_dfs = []
-    for i in range(len(session["files"])):
+    collection = mongo.db["collection_1"]
+    for i in range(collection.count_documents({})):
         df = parse_dataset(
-            session=session,
             geo_column=geo_col[i],
             dataset_id=i,
             reshape_column=reshape_col[i],

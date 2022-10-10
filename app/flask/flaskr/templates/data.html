@@ -1,9 +1,0 @@
-
-{% extends "index.html" %}
-{% block datasets%}
-    {% if "files" in session.keys()%}
-        {% for file in session["files"] %}
-            <p> {{file}}
-        {% endfor %}
-    {% endif %}
-{% endblock %}

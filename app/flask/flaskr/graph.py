@@ -7,7 +7,6 @@ from flask import (
     redirect,
     render_template,
     request,
-    session,
     url_for,
 )
 from .plots.plots import (
@@ -18,6 +17,8 @@ from .plots.plots import (
 )
 from .preprocessing.parse import parse_dataset, merge_dataframes_multi
 from werkzeug.security import check_password_hash, generate_password_hash
+
+from .extensions import mongo
 
 bp = Blueprint("graph", __name__, url_prefix="/graph")
 
@@ -31,7 +32,6 @@ def getMap():
     reshape_col = request.args.get("rshp")
 
     df = parse_dataset(
-        session=session,
         geo_column=geo_col,
         dataset_id=data_id,
         reshape_column=reshape_col,
@@ -59,7 +59,6 @@ def getHistory():
     reshape_col = request.args.get("rshp")
 
     df = parse_dataset(
-        session=session,
         geo_column=geo_col,
         dataset_id=data_id,
         reshape_column=reshape_col,
@@ -83,9 +82,10 @@ def getHeatmap():
 
     dfs = []
     time_columns = []
-    for i in range(len(session["files"])):
+
+    collection = mongo.db["collection_1"]
+    for i in range(collection.count_documents({})):
         df = parse_dataset(
-            session=session,
             geo_column=geo_col[i],
             dataset_id=i,
             reshape_column=reshape_col[i],
@@ -121,9 +121,9 @@ def getCorrLines():
     dfs = []
     feature_options = []
 
-    for i in range(len(session["files"])):
+    collection = mongo.db["collection_1"]
+    for i in range(collection.count_documents({})):
         df = parse_dataset(
-            session=session,
             geo_column=geo_col[i],
             dataset_id=i,
             reshape_column=reshape_col[i],

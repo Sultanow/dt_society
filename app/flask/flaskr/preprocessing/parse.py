@@ -8,16 +8,19 @@ from .dataset import DigitalTwinTimeSeries
 
 # from flask_caching import Cache
 from ..extensions import cache
-
-# cache = Cache(config={"CACHE_TYPE": "SimpleCache"})
+from ..extensions import mongo
 
 
 @cache.memoize(timeout=30)
-def parse_dataset(session, geo_column, dataset_id, reshape_column=None) -> pd.DataFrame:
+def parse_dataset(geo_column, dataset_id, reshape_column=None) -> pd.DataFrame:
 
-    file_path = session["files"][dataset_id]
+    collection = mongo.db["collection_1"]
 
-    df = DigitalTwinTimeSeries(file_path, geo_col=geo_column)
+    file_path = collection.find({})[dataset_id]
+
+    # file_path = session["files"][dataset_id]
+
+    df = DigitalTwinTimeSeries(file_path["data"], geo_col=geo_column, sep="dict")
 
     if reshape_column is not None:
         df = df.reshape_wide_to_long(value_id_column=reshape_column)

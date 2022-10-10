@@ -40,9 +40,11 @@ class DigitalTwinTimeSeries:
         Returns:
             pd.DataFrame: Reshaped preprocessed dataset
         """
-
-        data = pd.read_csv(path, encoding="ISO-8859–1", sep=self.sep)
-
+        if self.sep == "dict":
+            data = pd.DataFrame.from_records(path)
+        else:
+            data = pd.read_csv(path, encoding="ISO-8859–1", sep=self.sep)
+            
         columns = data.columns.tolist()
 
         fused_cols_i = None

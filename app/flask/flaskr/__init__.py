@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_session import Session
+import pandas as pd
 
 from . import graph, forecast
 from .extensions import mongo, cache
@@ -44,27 +45,31 @@ def create_app(test_config=None):
 
     @app.route("/")
     def index():
-        return render_template("data.html")
+        collection = mongo.db["collection_1"]
+        data = collection.find({})
+
+        return render_template("db_data.html", files=data)
 
     @app.route("/", methods=["POST"])
     def uploadFiles():
 
         uploaded_file = request.files["file"]
         if uploaded_file.filename != "":
-            file_path = os.path.join(
-                app.config["UPLOAD_FOLDER"], uploaded_file.filename
-            )
 
-            uploaded_file.save(file_path)
+            df = pd.read_table(uploaded_file.stream)
 
-            if "files" not in session.keys():
-                session["files"] = [file_path]
+            # create collections for each session
+            collection = mongo.db["collection_1"]
 
-            elif file_path not in session["files"]:
-                session["files"].append(file_path)
-
-            data_collection = mongo.db.datasets
+            if collection.count_documents({"filename": uploaded_file.filename}) > 0:
+                print("already in db")
+            else:
+                collection.insert_one(
+                    {"filename": uploaded_file.filename, "data": df.to_dict("records")}
+                )
+                print("added to db")
 
         return redirect(url_for("index"))
+        # return render_template("db_data.html", files=data)
 
     return app

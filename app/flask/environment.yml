@@ -1,0 +1,14 @@
+name: dt_society_app
+channels:
+  - defaults
+dependencies:
+  - python=3.10
+  - flask
+  - prophet
+  - pandas
+  - flask-caching
+  - flask-session
+  - plotly
+  - statsmodels
+  - pycountry
+  - flask-pymongo
