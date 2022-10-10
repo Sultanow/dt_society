@@ -18,8 +18,3 @@ dependencies:
   - prophet
   - openpyxl
   - dash-bootstrap-components
-  - flask=2.2.2
-  - sqlalchemy
-  - flask-session
-  - redis-py
-  - flask-caching
