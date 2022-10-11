@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_session import Session
+from flask_cors import CORS
 import pandas as pd
 
 from . import graph, forecast
@@ -40,6 +41,7 @@ def create_app(test_config=None):
         pass
 
     Session(app)
+    CORS(app)
     cache.init_app(app)
     mongo.init_app(app)
 

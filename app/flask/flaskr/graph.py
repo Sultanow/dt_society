@@ -23,13 +23,22 @@ from .extensions import mongo
 bp = Blueprint("graph", __name__, url_prefix="/graph")
 
 
-@bp.route("/map", methods=["GET"])
+@bp.route("/map", methods=["GET", "POST"])
 def getMap():
-    geo_col = request.args.get("geo")
-    time_col = request.args.get("x")
-    feature_col = request.args.get("y")
-    data_id = int(request.args.get("id"))
-    reshape_col = request.args.get("rshp")
+    if request.method == "GET":
+        geo_col = request.args.get("geo")
+        time_col = request.args.get("x")
+        feature_col = request.args.get("y")
+        data_id = int(request.args.get("id"))
+        reshape_col = request.args.get("rshp")
+
+    elif request.method == "POST":
+        data = request.get_json()
+        geo_col = data["geo"][0]
+        time_col = data["x"][0]
+        feature_col = data["y"][0]
+        data_id = int(data["id"])
+        reshape_col = data["rshp"][0]
 
     df = parse_dataset(
         geo_column=geo_col,
@@ -46,17 +55,31 @@ def getMap():
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template("figure.html", graphJSON=graphJSON)
-    # return jsonify(graphJSON)
+    response = jsonify(json.loads(graphJSON))
+
+    response.headers.add("Access-Control-Allow-Origin", "*")
+
+    # return render_template("figure.html", graphJSON=graphJSON)
+
+    return response
 
 
-@bp.route("/history", methods=["GET"])
+@bp.route("/history", methods=["GET", "POST"])
 def getHistory():
-    geo_col = request.args.get("geo")
-    time_col = request.args.get("x")
-    feature_col = request.args.get("y")
-    data_id = int(request.args.get("id"))
-    reshape_col = request.args.get("rshp")
+    if request.method == "GET":
+        geo_col = request.args.get("geo")
+        time_col = request.args.get("x")
+        feature_col = request.args.get("y")
+        data_id = int(request.args.get("id"))
+        reshape_col = request.args.get("rshp")
+
+    elif request.method == "POST":
+        data = request.get_json()
+        geo_col = data["geo"][0]
+        time_col = data["x"][0]
+        feature_col = data["y"][0]
+        data_id = int(data["id"])
+        reshape_col = data["rshp"][0]
 
     df = parse_dataset(
         geo_column=geo_col,
@@ -70,15 +93,25 @@ def getHistory():
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template("figure.html", graphJSON=graphJSON)
-    # return jsonify(graphJSON)
+    response = jsonify(json.loads(graphJSON))
+
+    response.headers.add("Access-Control-Allow-Origin", "*")
+
+    # return render_template("figure.html", graphJSON=graphJSON)
+    return response
 
 
-@bp.route("/heatmap", methods=["GET"])
+@bp.route("/heatmap", methods=["GET", "POST"])
 def getHeatmap():
-    geo_col = request.args.getlist("geo")
-    reshape_col = request.args.getlist("rshp")
-    time_col = request.args.getlist("x")
+    if request.method == "GET":
+        geo_col = request.args.getlist("geo")
+        reshape_col = request.args.getlist("rshp")
+        time_col = request.args.getlist("x")
+    elif request.method == "POST":
+        data = request.get_json()
+        geo_col = data["geo"]
+        reshape_col = data["rshp"]
+        time_col = data["x"]
 
     dfs = []
     time_columns = []
@@ -109,14 +142,26 @@ def getHeatmap():
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template("figure.html", graphJSON=graphJSON)
+    response = jsonify(json.loads(graphJSON))
+
+    response.headers.add("Access-Control-Allow-Origin", "*")
+
+    # return render_template("figure.html", graphJSON=graphJSON)
+
+    return response
 
 
-@bp.route("/corr", methods=["GET"])
+@bp.route("/corr", methods=["GET", "POST"])
 def getCorrLines():
-    geo_col = request.args.getlist("geo")
-    time_col = request.args.getlist("x")
-    reshape_col = request.args.getlist("rshp")
+    if request.method == "GET":
+        geo_col = request.args.getlist("geo")
+        time_col = request.args.getlist("x")
+        reshape_col = request.args.getlist("rshp")
+    elif request.method == "POST":
+        data = request.get_json()
+        geo_col = data["geo"]
+        time_col = data["x"]
+        reshape_col = data["rshp"]
 
     dfs = []
     feature_options = []
@@ -143,5 +188,10 @@ def getCorrLines():
 
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template("figure.html", graphJSON=graphJSON)
-    # return jsonify(graphJSON)
+    response = jsonify(json.loads(graphJSON))
+
+    response.headers.add("Access-Control-Allow-Origin", "*")
+
+    # return render_template("figure.html", graphJSON=graphJSON)
+
+    return response
