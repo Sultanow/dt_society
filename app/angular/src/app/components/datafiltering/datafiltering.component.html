@@ -1,0 +1,43 @@
+<p>datafiltering works!</p>
+<mat-accordion>
+    <ng-container *ngFor="let dataset of availableDatasets.datasets">
+        <mat-expansion-panel>
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    {{ dataset.datasetId}}
+                </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="selected-columns-container">
+                <mat-form-field appearance="fill">
+                    <mat-label>geo</mat-label>
+                    <select matNativeControl required #geoSelect
+                        (change)="updateSelectedColumns(dataset.datasetId, geoSelect.value, 'geo')">
+                        <option *ngFor="let column of dataset.columns"> {{column}}
+                        </option>
+                    </select>
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                    <mat-label>reshape</mat-label>
+                    <select matNativeControl required #reshapeSelect
+                        (change)="updateSelectedColumns(dataset.datasetId, reshapeSelect.value, 'rshp')">
+                        <option *ngFor="let column of dataset.columns"> {{column}}</option>
+                    </select>
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                    <mat-label>x</mat-label>
+                    <select matNativeControl required #xSelect
+                        (change)="updateSelectedColumns(dataset.datasetId, xSelect.value, 'x')">
+                        <option *ngFor="let column of dataset.columns"> {{column}}</option>
+                    </select>
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                    <mat-label>y</mat-label>
+                    <select matNativeControl required #ySelect
+                        (change)="updateSelectedColumns(dataset.datasetId, ySelect.value, 'y')">
+                        <option *ngFor="let column of dataset.columns"> {{column}}</option>
+                    </select>
+                </mat-form-field>
+            </div>
+        </mat-expansion-panel>
+    </ng-container>
+</mat-accordion>

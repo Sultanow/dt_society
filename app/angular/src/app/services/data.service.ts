@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { GraphData } from '../GraphData';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +12,7 @@ export class DataService {
 
   constructor(private http: HttpClient) { }
 
-  getData(columns: any, endpoint: string): Observable<Object> {
-
-    return this.http.post<Object>(this.apiUrl + endpoint, columns);
+  getData(columns: any, endpoint: string): Observable<GraphData> {
+    return this.http.post<GraphData>(this.apiUrl + endpoint, columns);
   };
 }

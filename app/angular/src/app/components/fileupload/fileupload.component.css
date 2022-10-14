@@ -1,0 +1,14 @@
+.files-container {
+    border: solid 1px black;
+    padding: 10px;
+    margin: 5px;
+}
+
+
+.selected-columns-container {
+    display: flex;
+}
+
+.mat-form-field {
+    margin: 10px
+}
