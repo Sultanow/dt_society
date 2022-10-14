@@ -57,10 +57,6 @@ def getMap():
 
     response = jsonify(json.loads(graphJSON))
 
-    response.headers.add("Access-Control-Allow-Origin", "*")
-
-    # return render_template("figure.html", graphJSON=graphJSON)
-
     return response
 
 
@@ -95,9 +91,6 @@ def getHistory():
 
     response = jsonify(json.loads(graphJSON))
 
-    response.headers.add("Access-Control-Allow-Origin", "*")
-
-    # return render_template("figure.html", graphJSON=graphJSON)
     return response
 
 
@@ -144,10 +137,6 @@ def getHeatmap():
 
     response = jsonify(json.loads(graphJSON))
 
-    response.headers.add("Access-Control-Allow-Origin", "*")
-
-    # return render_template("figure.html", graphJSON=graphJSON)
-
     return response
 
 
@@ -189,9 +178,5 @@ def getCorrLines():
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
     response = jsonify(json.loads(graphJSON))
-
-    response.headers.add("Access-Control-Allow-Origin", "*")
-
-    # return render_template("figure.html", graphJSON=graphJSON)
 
     return response

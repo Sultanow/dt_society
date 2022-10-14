@@ -13,7 +13,7 @@ class DigitalTwinTimeSeries:
         sep: str = "\t",
         to_iso3: bool = True,
         df: pd.DataFrame = None,
-        geo_col: str = "geo",
+        geo_col: str = None,
     ):
         """
         Preprocesses and stores time series data
@@ -85,7 +85,7 @@ class DigitalTwinTimeSeries:
         if unnamed_cols_i:
             data = data.drop(data.columns[unnamed_cols_i], axis=1)
 
-        if self.geo_col != "None":
+        if self.geo_col != None:
             data = self._format_country_codes(data)
 
         data = self._drop_redundant_columns(data)

@@ -1,11 +1,12 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_session import Session
 from flask_cors import CORS
 import pandas as pd
 
 from . import graph, forecast
 from .extensions import mongo, cache
+from .preprocessing.parse import parse_dataset
 
 
 def create_app(test_config=None):
@@ -41,7 +42,7 @@ def create_app(test_config=None):
         pass
 
     Session(app)
-    CORS(app)
+    CORS(app, resources={r"/*": {"origins": "http://localhost:4200"}})
     cache.init_app(app)
     mongo.init_app(app)
 
@@ -55,7 +56,8 @@ def create_app(test_config=None):
     @app.route("/", methods=["POST"])
     def uploadFiles():
 
-        uploaded_file = request.files["file"]
+        uploaded_file = request.files["upload"]
+        
         if uploaded_file.filename != "":
 
             df = pd.read_table(uploaded_file.stream)
@@ -72,6 +74,26 @@ def create_app(test_config=None):
                 print("added to db")
 
         return redirect(url_for("index"))
+    
+    @app.route("/datasets", methods=["GET"])
+    def uploadedFiles():
+
+        # create collections for each session
+        collection = mongo.db["collection_1"]
+
+        datasets = collection.find({})
+        
+        avail_columns = []
+        
+        for i, dataset in enumerate(datasets):
+            #print(dataset)
+            #columns = pd.DataFrame.from_records(dataset["data"]).columns.to_list()
+            columns = parse_dataset(geo_column=None, dataset_id=i).columns.to_list()
+            #avail_columns[dataset["filename"]]= {"geo":cols, "rshp":cols}
+            
+            avail_columns.append({"datasetId":dataset["filename"], "columns":columns})
+                        
+        return jsonify(avail_columns)
         # return render_template("db_data.html", files=data)
 
     return app
