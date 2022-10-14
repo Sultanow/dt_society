@@ -12,3 +12,5 @@ dependencies:
   - statsmodels
   - pycountry
   - flask-pymongo
+  - scikit-learn
+  - flask-cors
