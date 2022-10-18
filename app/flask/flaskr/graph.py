@@ -34,11 +34,11 @@ def getMap():
 
     elif request.method == "POST":
         data = request.get_json()
-        geo_col = data["geo"][0]
-        time_col = data["x"][0]
-        feature_col = data["y"][0]
-        data_id = int(data["id"])
-        reshape_col = data["rshp"][0]
+        geo_col = data["geoColumn"]
+        time_col = data["timeColumn"]
+        feature_col = data["featureColumn"]
+        data_id = 0
+        reshape_col = data["reshapeColumn"]
 
     df = parse_dataset(
         geo_column=geo_col,
@@ -71,11 +71,12 @@ def getHistory():
 
     elif request.method == "POST":
         data = request.get_json()
-        geo_col = data["geo"][0]
-        time_col = data["x"][0]
-        feature_col = data["y"][0]
-        data_id = int(data["id"])
-        reshape_col = data["rshp"][0]
+        print(data)
+        geo_col = data["geoColumn"]
+        time_col = data["timeColumn"]
+        feature_col = data["featureColumn"]
+        data_id = data["datasetId"]
+        reshape_col = data["reshapeColumn"]
 
     df = parse_dataset(
         geo_column=geo_col,

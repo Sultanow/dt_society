@@ -57,7 +57,7 @@ def create_app(test_config=None):
     def uploadFiles():
 
         uploaded_file = request.files["upload"]
-        
+
         if uploaded_file.filename != "":
 
             df = pd.read_table(uploaded_file.stream)
@@ -74,26 +74,57 @@ def create_app(test_config=None):
                 print("added to db")
 
         return redirect(url_for("index"))
-    
-    @app.route("/datasets", methods=["GET"])
-    def uploadedFiles():
 
-        # create collections for each session
+    @app.route("/datasets", methods=["GET", "POST"])
+    def uploadedFiles():
         collection = mongo.db["collection_1"]
 
-        datasets = collection.find({})
-        
         avail_columns = []
-        
-        for i, dataset in enumerate(datasets):
-            #print(dataset)
-            #columns = pd.DataFrame.from_records(dataset["data"]).columns.to_list()
-            columns = parse_dataset(geo_column=None, dataset_id=i).columns.to_list()
-            #avail_columns[dataset["filename"]]= {"geo":cols, "rshp":cols}
-            
-            avail_columns.append({"datasetId":dataset["filename"], "columns":columns})
-                        
-        return jsonify(avail_columns)
+
+        if request.method == "GET":
+            # create collections for each session
+
+            datasets = collection.find({})
+
+            for i, dataset in enumerate(datasets):
+                # print(dataset)
+                # columns = pd.DataFrame.from_records(dataset["data"]).columns.to_list()
+                columns = parse_dataset(geo_column=None, dataset_id=i).columns.to_list()
+                # avail_columns[dataset["filename"]]= {"geo":cols, "rshp":cols}
+
+                avail_columns.append(
+                    {"datasetId": dataset["filename"], "columns": columns}
+                )
+
+            return jsonify(avail_columns)
+
+        elif request.method == "POST":
+            payload = request.get_json()
+
+            filename = payload["datasetIdx"]
+            reshape_column = payload["reshapeColumn"]
+            geo_column = payload["geoColumn"]
+
+            print("RESHAPE: \n", reshape_column)
+            # dataset = collection.find({"filename": filename})
+
+            columns = parse_dataset(
+                geo_column=geo_column,
+                dataset_id=filename,
+                reshape_column=reshape_column,
+            ).columns.to_list()
+
+            avail_columns = {
+                "timeColumns": ["Time", "time"],
+                "featureColumns": [
+                    feature
+                    for feature in columns
+                    if feature != "Time" and feature != geo_column
+                ],
+            }
+
+            return jsonify(avail_columns)
+
         # return render_template("db_data.html", files=data)
 
     return app

@@ -16,7 +16,10 @@ def parse_dataset(geo_column, dataset_id, reshape_column=None) -> pd.DataFrame:
 
     collection = mongo.db["collection_1"]
 
-    file_path = collection.find({})[dataset_id]
+    if isinstance(dataset_id, int):
+        file_path = collection.find({})[dataset_id]
+    elif isinstance(dataset_id, str):
+        file_path = collection.find({"filename": dataset_id})[0]
 
     # file_path = session["files"][dataset_id]
 
@@ -24,6 +27,7 @@ def parse_dataset(geo_column, dataset_id, reshape_column=None) -> pd.DataFrame:
 
     if reshape_column is not None:
         df = df.reshape_wide_to_long(value_id_column=reshape_column)
+
     else:
         df = df.data
 

@@ -1,4 +1,10 @@
-<p>datafiltering works!</p>
+<div class="data-selector">
+<mat-radio-group aria-label="Select an option" [(ngModel)]="inFocus" (change)="changeFocus()">
+    <mat-radio-button *ngFor="let dataset of availableDatasets.datasets" [value]="dataset.datasetId"> {{
+        dataset.datasetId}} </mat-radio-button>
+</mat-radio-group>
+</div>
+<div class="column-selection-accordion">
 <mat-accordion>
     <ng-container *ngFor="let dataset of availableDatasets.datasets">
         <mat-expansion-panel>
@@ -8,36 +14,43 @@
                 </mat-panel-title>
             </mat-expansion-panel-header>
             <div class="selected-columns-container">
-                <mat-form-field appearance="fill">
-                    <mat-label>geo</mat-label>
-                    <select matNativeControl required #geoSelect
-                        (change)="updateSelectedColumns(dataset.datasetId, geoSelect.value, 'geo')">
-                        <option *ngFor="let column of dataset.columns"> {{column}}
-                        </option>
-                    </select>
-                </mat-form-field>
-                <mat-form-field appearance="fill">
-                    <mat-label>reshape</mat-label>
-                    <select matNativeControl required #reshapeSelect
-                        (change)="updateSelectedColumns(dataset.datasetId, reshapeSelect.value, 'rshp')">
-                        <option *ngFor="let column of dataset.columns"> {{column}}</option>
-                    </select>
-                </mat-form-field>
-                <mat-form-field appearance="fill">
-                    <mat-label>x</mat-label>
-                    <select matNativeControl required #xSelect
-                        (change)="updateSelectedColumns(dataset.datasetId, xSelect.value, 'x')">
-                        <option *ngFor="let column of dataset.columns"> {{column}}</option>
-                    </select>
-                </mat-form-field>
-                <mat-form-field appearance="fill">
-                    <mat-label>y</mat-label>
-                    <select matNativeControl required #ySelect
-                        (change)="updateSelectedColumns(dataset.datasetId, ySelect.value, 'y')">
-                        <option *ngFor="let column of dataset.columns"> {{column}}</option>
-                    </select>
-                </mat-form-field>
+                <div class="column-inputs-row">
+                    <mat-form-field appearance="fill">
+                        <mat-label>geo</mat-label>
+                        <mat-select required #geoSelect 
+                            (selectionChange)="updateSelectedColumns(dataset.datasetId, geoSelect.value, 'geo')">
+                            <mat-option *ngFor="let column of dataset.columns" [value]="column"> {{column}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="fill">
+                        <mat-label>reshape</mat-label>
+                        <mat-select required #reshapeSelect
+                            (selectionChange)="updateSelectedColumns(dataset.datasetId, reshapeSelect.value, 'rshp')">
+                            <mat-option *ngFor="let column of dataset.columns" [value]="column"> {{column}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-slide-toggle #reshapeToggle (change)="reshapeOptions(dataset.datasetId, reshapeToggle.checked)">Apply reshape
+                    </mat-slide-toggle>
+                </div>
+                <div class="column-inputs-row">
+                    <mat-form-field appearance="fill">
+                        <mat-label>x</mat-label>
+                        <mat-select required #xSelect
+                            (selectionChange)="updateSelectedColumns(dataset.datasetId, xSelect.value, 'x')">
+                            <mat-option *ngFor="let column of dataset.timeOptions" [value]="column"> {{column}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="fill">
+                        <mat-label>y</mat-label>
+                        <mat-select required #ySelect
+                            (selectionChange)="updateSelectedColumns(dataset.datasetId, ySelect.value, 'y')">
+                            <mat-option *ngFor="let column of dataset.featureOptions" [value]="column"> {{column}}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
             </div>
         </mat-expansion-panel>
     </ng-container>
 </mat-accordion>
+</div>

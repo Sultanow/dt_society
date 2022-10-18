@@ -1,8 +1,14 @@
-import { Component, Input, OnInit, OnChanges, SimpleChange } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  OnChanges,
+  SimpleChange,
+} from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
-import { Columns } from "src/app/Columns";
-import { GraphData } from 'src/app/GraphData';
-import { SelectedDatasets } from 'src/app/Datasets'
+import { GraphData } from 'src/app/types/GraphData';
+import { SelectedDatasets } from 'src/app/types/Datasets';
+import { HttpEventType } from '@angular/common/http';
 
 @Component({
   selector: 'app-history',
@@ -10,47 +16,48 @@ import { SelectedDatasets } from 'src/app/Datasets'
   styleUrls: ['./history.component.css'],
 })
 export class HistoryComponent implements OnInit {
-
-  constructor(private dataService: DataService) { }
+  constructor(private dataService: DataService) {}
 
   public data: GraphData = {
     data: [],
     layout: {},
-
   };
 
-  public columns: Columns = {
-    geo: [],
-    x: ["Time"],
-    rshp: [],
-    y: ["Y15-74"],
-    id: 0,
-
-  }
   @Input()
   public selectedDatasets: SelectedDatasets = {
-    datasets: []
-  }
+    datasets: [],
+    inFocusDataset: undefined,
+  };
 
   ngOnChanges(changes: SimpleChange) {
     if (this.selectedDatasets.datasets.length > 0) {
-      if (this.selectedDatasets.datasets[0].geoColumn != undefined &&
-        this.selectedDatasets.datasets[0].reshapeColumn != undefined
-      ) {
-        this.columns.geo[0] = this.selectedDatasets.datasets[0].geoColumn
-        this.columns.rshp[0] = this.selectedDatasets.datasets[0].reshapeColumn
-        this.dataService.getData(this.columns, "/graph/history").subscribe(data => this.data = {
-          data: data.data,
-          layout: data.layout
-        });
+      const datasetId = this.selectedDatasets.inFocusDataset;
+
+      const indexFocus = this.selectedDatasets.datasets.find(
+        (dataset) => dataset.datasetId == datasetId
+      );
+
+      if (indexFocus != undefined) {
+        if (
+          indexFocus.geoColumn != undefined &&
+          indexFocus.reshapeColumn != undefined &&
+          indexFocus.featureColumn != undefined &&
+          indexFocus.timeColumn != undefined
+        ) {
+          this.dataService
+            .getData(indexFocus, '/graph/history')
+            .subscribe((data) => {
+              if (data.type === HttpEventType.Response) {
+                if (data.body) {
+                  this.data.data = data.body.data;
+                  this.data.layout = data.body.layout;
+                }
+              }
+            });
+        }
       }
     }
-
-
   }
 
-  ngOnInit(): void {
-
-  }
-
+  ngOnInit(): void {}
 }

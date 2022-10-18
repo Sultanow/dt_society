@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule } from '@angular/common/http'
+import { HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -18,10 +18,14 @@ import { FileuploadComponent } from './components/fileupload/fileupload.componen
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatFormFieldModule } from '@angular/material/form-field'
-import { MatSelectModule } from '@angular/material/select'
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
-import { DatafilteringComponent } from './components/datafiltering/datafiltering.component'
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatRadioModule } from '@angular/material/radio';
+import { FormsModule } from '@angular/forms';
+import { DatafilteringComponent } from './components/datafiltering/datafiltering.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 PlotlyModule.plotlyjs = PlotlyJS;
 
 @NgModule({
@@ -35,7 +39,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     VectorautoregressionComponent,
     ProphetscenariosComponent,
     FileuploadComponent,
-    DatafilteringComponent
+    DatafilteringComponent,
   ],
   imports: [
     BrowserModule,
@@ -47,9 +51,13 @@ PlotlyModule.plotlyjs = PlotlyJS;
     MatExpansionModule,
     MatFormFieldModule,
     MatSelectModule,
-    MatInputModule
+    MatInputModule,
+    MatSlideToggleModule,
+    MatRadioModule,
+    FormsModule,
+    MatProgressSpinnerModule,
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

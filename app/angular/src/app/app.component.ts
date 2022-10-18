@@ -1,21 +1,23 @@
 import { Component, Output } from '@angular/core';
-import { SelectedDatasets } from './Datasets';
+import { SelectedDatasets } from './types/Datasets';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
   title = 'angular';
 
   selectedDatasets: SelectedDatasets = {
-    datasets: []
-  }
+    datasets: [],
+  };
 
   getSelection(columns: SelectedDatasets) {
+    let datasets = columns.datasets;
+    let inFocusDataset = columns.inFocusDataset;
+    this.selectedDatasets = { datasets, inFocusDataset };
 
-    let datasets = columns.datasets
-    this.selectedDatasets = { datasets }
+    console.log(this.selectedDatasets);
   }
 }

@@ -1,0 +1,19 @@
+.mat-form-field {
+    margin: 10px
+}
+
+.selected-columns-container {
+    display: block;
+}
+
+.data-selector{
+    margin:10px
+}
+
+.mat-radio-button{
+    margin:5px
+}
+
+.column-selection-accordion{
+    padding:10px
+}
