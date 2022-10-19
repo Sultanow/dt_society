@@ -4,10 +4,7 @@ import plotly
 from flask import (
     Blueprint,
     jsonify,
-    redirect,
-    render_template,
     request,
-    url_for,
 )
 from .plots.plots import (
     create_choropleth_slider_plot,
@@ -16,9 +13,9 @@ from .plots.plots import (
     create_two_line_plot,
 )
 from .preprocessing.parse import parse_dataset, merge_dataframes_multi
-from werkzeug.security import check_password_hash, generate_password_hash
 
 from .extensions import mongo
+
 
 bp = Blueprint("graph", __name__, url_prefix="/graph")
 

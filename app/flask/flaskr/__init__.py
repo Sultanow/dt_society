@@ -1,4 +1,6 @@
+from distutils.command.upload import upload
 import os
+import flask
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_session import Session
 from flask_cors import CORS
@@ -67,15 +69,18 @@ def create_app(test_config=None):
 
             if collection.count_documents({"filename": uploaded_file.filename}) > 0:
                 print("already in db")
+                # collection.delete_one({"filename": uploaded_file.filename})
+                # print("deleted")
             else:
                 collection.insert_one(
                     {"filename": uploaded_file.filename, "data": df.to_dict("records")}
                 )
-                print("added to db")
+                print(f"added {uploaded_file.filename} to db")
 
-        return redirect(url_for("index"))
+        # return redirect(url_for("index"))
+        return ("", 204)
 
-    @app.route("/datasets", methods=["GET", "POST"])
+    @app.route("/datasets", methods=["GET", "POST", "DELETE"])  # type: ignore
     def uploadedFiles():
         collection = mongo.db["collection_1"]
 
@@ -124,6 +129,17 @@ def create_app(test_config=None):
             }
 
             return jsonify(avail_columns)
+
+        elif request.method == "DELETE":
+            payload = request.get_json()
+            if payload is not None:
+                filename = payload["datasetId"]
+
+                collection.delete_one({"filename": filename})
+
+                print(f"removed dataset {filename}")
+
+                return ("", 204)
 
         # return render_template("db_data.html", files=data)
 

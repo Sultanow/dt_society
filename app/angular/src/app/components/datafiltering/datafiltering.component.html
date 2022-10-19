@@ -1,3 +1,5 @@
+
+
 <div class="data-selector">
 <mat-radio-group aria-label="Select an option" [(ngModel)]="inFocus" (change)="changeFocus()">
     <mat-radio-button *ngFor="let dataset of availableDatasets.datasets" [value]="dataset.datasetId"> {{
@@ -48,9 +50,22 @@
                             <mat-option *ngFor="let column of dataset.featureOptions" [value]="column"> {{column}}</mat-option>
                         </mat-select>
                     </mat-form-field>
+                    <button mat-icon-button color="primary" class="delete-button" (click)="onDeleteFile(dataset.datasetId)">
+                        <mat-icon>delete_forever</mat-icon>
+                    </button>
                 </div>
+                
             </div>
         </mat-expansion-panel>
     </ng-container>
 </mat-accordion>
+<input type="file" class="file-input" (change)="onFileUpload($event)" #fileUpload style="display: none;">
+<div #filesContainer class="files-container">
+    <div class="file-upload">
+
+        <button mat-mini-fab color="primary" class="upload-btn" (click)="fileUpload.value='';fileUpload.click()">
+            <mat-icon>upload_file</mat-icon>
+        </button>
+    </div>
+</div>
 </div>

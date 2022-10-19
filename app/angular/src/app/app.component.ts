@@ -17,7 +17,5 @@ export class AppComponent {
     let datasets = columns.datasets;
     let inFocusDataset = columns.inFocusDataset;
     this.selectedDatasets = { datasets, inFocusDataset };
-
-    console.log(this.selectedDatasets);
   }
 }

@@ -26,6 +26,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { FormsModule } from '@angular/forms';
 import { DatafilteringComponent } from './components/datafiltering/datafiltering.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
 PlotlyModule.plotlyjs = PlotlyJS;
 
 @NgModule({
@@ -56,6 +57,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     MatRadioModule,
     FormsModule,
     MatProgressSpinnerModule,
+    MatButtonModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

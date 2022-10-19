@@ -29,6 +29,8 @@ export class DatafilteringComponent implements OnInit {
 
   reshape: boolean = false;
 
+  fileName = '';
+
   inFocus: string | undefined;
 
   updateSelectedColumns(filename: string, value: string, column: string) {
@@ -59,6 +61,23 @@ export class DatafilteringComponent implements OnInit {
 
       this.columnsUpdatedEvent.emit(this.selectedDatasets);
     }
+  }
+
+  onFileUpload(event: any) {
+    this.dataService.uploadDataset(
+      event,
+      this.availableDatasets,
+      this.selectedDatasets,
+      this.inFocus
+    );
+  }
+
+  onDeleteFile(datasedId: string) {
+    this.dataService.deleteDataset(
+      datasedId,
+      this.availableDatasets,
+      this.selectedDatasets
+    );
   }
 
   reshapeOptions(datasetId: string, reshape: boolean): void {

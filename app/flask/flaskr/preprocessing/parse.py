@@ -1,8 +1,6 @@
-from typing import Tuple
-import base64
-import io
-import pandas as pd
 from typing import List
+from typing import Tuple
+import pandas as pd
 
 from .dataset import DigitalTwinTimeSeries
 
@@ -10,10 +8,21 @@ from .dataset import DigitalTwinTimeSeries
 from ..extensions import cache
 from ..extensions import mongo
 
+# from extensions import cache, mongo
+
 
 @cache.memoize(timeout=30)
 def parse_dataset(geo_column, dataset_id, reshape_column=None) -> pd.DataFrame:
+    """_summary_
 
+    Args:
+        geo_column (_type_): _description_
+        dataset_id (_type_): _description_
+        reshape_column (_type_, optional): _description_. Defaults to None.
+
+    Returns:
+        pd.DataFrame: _description_
+    """
     collection = mongo.db["collection_1"]
 
     if isinstance(dataset_id, int):
