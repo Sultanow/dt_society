@@ -23,6 +23,8 @@
     <app-heatmap></app-heatmap>
   </mat-tab>
   <mat-tab label="Correlation line chart">
-    <app-correlation></app-correlation>
+    <ng-template matTabContent>
+      <app-correlation></app-correlation>
+    </ng-template>
   </mat-tab>
 </mat-tab-group>

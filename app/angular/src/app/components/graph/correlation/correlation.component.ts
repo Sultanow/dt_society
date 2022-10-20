@@ -17,32 +17,44 @@ export class CorrelationComponent implements OnInit {
     layout: {},
   };
 
-  @Input()
   public selectedDatasets: SelectedDatasets = {
     datasets: [],
   };
 
-  ngOnChanges() {
-    if (this.selectedDatasets.datasets.length > 0) {
-      if (
-        !this.selectedDatasets.datasets.some(
-          (dataset) =>
-            dataset.geoColumn === undefined || dataset.timeColumn === undefined
-        )
-      ) {
-        this.dataService
-          .getData(this.selectedDatasets.datasets, '/graph/corr')
-          .subscribe((event) => {
-            if (event.type === HttpEventType.Response) {
-              if (event.body) {
-                this.data.data = event.body.data;
-                this.data.layout = event.body.layout;
+  private oldSelectedDatasets?: SelectedDatasets;
+
+  ngDoCheck() {
+    if (
+      JSON.stringify(this.selectedDatasets) !==
+      JSON.stringify(this.oldSelectedDatasets)
+    ) {
+      if (this.selectedDatasets.datasets.length > 0) {
+        if (
+          !this.selectedDatasets.datasets.some(
+            (dataset) =>
+              dataset.geoColumn === undefined ||
+              dataset.timeColumn === undefined
+          )
+        ) {
+          this.dataService
+            .getData(this.selectedDatasets.datasets, '/graph/corr')
+            .subscribe((event) => {
+              if (event.type === HttpEventType.Response) {
+                if (event.body) {
+                  this.data.data = event.body.data;
+                  this.data.layout = event.body.layout;
+                }
               }
-            }
-          });
+            });
+        }
       }
     }
+    this.oldSelectedDatasets = structuredClone(this.selectedDatasets);
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.dataService.currentSelections.subscribe((value) => {
+      this.selectedDatasets = value;
+    });
+  }
 }

@@ -35,8 +35,6 @@ export class HeatmapComponent implements OnInit {
       JSON.stringify(this.selectedDatasets) !==
       JSON.stringify(this.oldSelectedDatasets)
     ) {
-      const oldFeature = this.oldSelectedDatasets?.datasets;
-
       if (this.selectedDatasets.datasets.length > 0) {
         if (
           !this.selectedDatasets.datasets.some(
