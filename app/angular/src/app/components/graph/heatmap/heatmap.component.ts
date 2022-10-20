@@ -1,5 +1,6 @@
 import { HttpEventType } from '@angular/common/http';
 import { Component, Input, OnInit } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { DataService } from 'src/app/services/data.service';
 import { SelectedDatasets } from 'src/app/types/Datasets';
 import { GraphData } from 'src/app/types/GraphData';
@@ -22,7 +23,15 @@ export class HeatmapComponent implements OnInit {
     datasets: [],
   };
 
-  ngOnChanges() {
+  @Input()
+  public features = {
+    availableFeatures: Array(),
+  };
+
+  selectedFeatures = new FormControl('');
+
+  updateHeatmap(selectedFeatures?: string[] | string | null) {
+    console.log(selectedFeatures);
     if (this.selectedDatasets.datasets.length > 0) {
       if (
         !this.selectedDatasets.datasets.some(
@@ -44,5 +53,13 @@ export class HeatmapComponent implements OnInit {
     }
   }
 
-  ngOnInit(): void {}
+  ngOnChanges() {
+    this.updateHeatmap();
+  }
+
+  ngOnInit(): void {
+    this.selectedFeatures.valueChanges.subscribe((value) =>
+      this.updateHeatmap(value)
+    );
+  }
 }

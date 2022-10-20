@@ -59,7 +59,10 @@ export class DatafilteringComponent implements OnInit {
           this.selectedDatasets.datasets[datasetIndex].featureColumn = value;
       }
 
-      this.columnsUpdatedEvent.emit(this.selectedDatasets);
+      this.columnsUpdatedEvent.emit({
+        selected: this.selectedDatasets,
+        available: this.availableDatasets,
+      });
     }
   }
 

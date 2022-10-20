@@ -1,5 +1,18 @@
-<plotly-plot
-  *ngIf="data.data.length > 0"
-  [data]="data.data"
-  [layout]="data.layout"
-></plotly-plot>
+<div>
+  <mat-form-field appearance="fill">
+    <mat-label>Features</mat-label>
+    <mat-select [formControl]="selectedFeatures" multiple>
+      <mat-option
+        *ngFor="let feature of features.availableFeatures"
+        [value]="feature"
+      >
+        {{ feature }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <plotly-plot
+    *ngIf="data.data.length > 0"
+    [data]="data.data"
+    [layout]="data.layout"
+  ></plotly-plot>
+</div>
