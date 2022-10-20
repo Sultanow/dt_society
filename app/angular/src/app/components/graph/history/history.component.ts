@@ -29,7 +29,11 @@ export class HistoryComponent implements OnInit {
     inFocusDataset: undefined,
   };
 
-  ngOnChanges(changes: SimpleChange) {
+  private oldSelectedDatasets?: SelectedDatasets;
+
+  ngDoCheck() {
+    if( JSON.stringify(this.selectedDatasets) !== JSON.stringify(this.oldSelectedDatasets)){
+       this.oldSelectedDatasets = structuredClone(this.selectedDatasets);
     if (this.selectedDatasets.datasets.length > 0) {
       const datasetId = this.selectedDatasets.inFocusDataset;
 
@@ -53,11 +57,15 @@ export class HistoryComponent implements OnInit {
                   this.data.layout = data.body.layout;
                 }
               }
-            });
+            }); 
         }
       }
     }
+    }
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.dataService.currentSelections.subscribe((value) => { 
+    this.selectedDatasets = value;});
+  }
 }

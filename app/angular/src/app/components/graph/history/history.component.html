@@ -1,1 +1,2 @@
-<plotly-plot *ngIf="data.data.length > 0"  [data]="data.data" [layout]="data.layout"></plotly-plot>
+<plotly-plot *ngIf="data.data.length > 0; else elseBlock" [data]="data.data" [layout]="data.layout"></plotly-plot>
+<ng-template #elseBlock>No data for histogram available</ng-template>
