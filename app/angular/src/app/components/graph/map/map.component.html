@@ -1,2 +1,3 @@
-<plotly-plot *ngIf="data.data.length > 0 && showSpinner == false"  [data]="data.data" [layout]="data.layout"></plotly-plot>
+<plotly-plot *ngIf="data.data.length > 0 && showSpinner == false; else elseBlock"  [data]="data.data" [layout]="data.layout"></plotly-plot>
 <div *ngIf="showSpinner == true" class="spinner-container"><mat-spinner ></mat-spinner></div>
+<ng-template #elseBlock>No data for histogram available</ng-template>

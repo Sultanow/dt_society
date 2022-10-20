@@ -26,7 +26,11 @@ export class MapComponent implements OnInit {
 
   showSpinner: boolean = false;
 
-  ngOnChanges(changes: SimpleChange) {
+  private oldSelectedDatasets?: SelectedDatasets;
+
+  ngDoCheck() {
+    if( JSON.stringify(this.selectedDatasets) !== JSON.stringify(this.oldSelectedDatasets)){
+      this.oldSelectedDatasets = structuredClone(this.selectedDatasets);
     if (this.selectedDatasets.datasets.length > 0) {
       const datasetId = this.selectedDatasets.inFocusDataset;
 
@@ -61,7 +65,10 @@ export class MapComponent implements OnInit {
         }
       }
     }
+    }
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.dataService.currentSelections.subscribe((value) => { this.selectedDatasets = value;});
+  }
 }

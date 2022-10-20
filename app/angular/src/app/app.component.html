@@ -4,11 +4,18 @@
 <app-correlation></app-correlation>
 <app-fileupload (newSelectionEvent)="getSelection($event)"></app-fileupload>
 -->
-<app-datafiltering (columnsUpdatedEvent)="getSelection($event)"></app-datafiltering>
+
+<!-- <app-datafiltering (columnsUpdatedEvent)="getSelection($event)"></app-datafiltering>
 <div class="plot-row">
     <app-history [selectedDatasets]="selectedDatasets"></app-history>
     <div class="graph-container">
         <app-map [selectedDatasets]="selectedDatasets"></app-map>
     </div>
-    
+</div> -->
+
+
+<app-datafiltering></app-datafiltering>
+<div class="plot-row">
+    <app-history></app-history>
+    <app-map></app-map>
 </div>

@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Injectable, Input } from '@angular/core';
+import { BehaviorSubject, Observable, Subject} from 'rxjs';
 import {
   HttpClient,
   HttpEvent,
@@ -19,7 +19,19 @@ import {
 export class DataService {
   private apiUrl: string = 'http://127.0.0.1:5000/';
 
+  private selections: BehaviorSubject<SelectedDatasets> = new BehaviorSubject(<SelectedDatasets>{
+    datasets: [],
+    inFocusDataset: "arbeitslosenquote_jaehrlich_eu.tsv",
+  });
+  currentSelections = this.selections.asObservable();
+  
+
   constructor(private http: HttpClient) {}
+
+  updateSelectedDataset(newDataSel: SelectedDatasets){
+    this.selections.next(newDataSel);
+    this.currentSelections.subscribe((value)=>console.log(value));
+  }
 
   getData(columns: any, endpoint: string): Observable<HttpEvent<GraphData>> {
     const request = new HttpRequest('POST', this.apiUrl + endpoint, columns, {

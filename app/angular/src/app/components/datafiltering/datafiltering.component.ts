@@ -59,7 +59,7 @@ export class DatafilteringComponent implements OnInit {
           this.selectedDatasets.datasets[datasetIndex].featureColumn = value;
       }
 
-      this.columnsUpdatedEvent.emit(this.selectedDatasets);
+      this.dataService.updateSelectedDataset(this.selectedDatasets);
     }
   }
 
@@ -92,11 +92,16 @@ export class DatafilteringComponent implements OnInit {
 
   changeFocus() {
     this.selectedDatasets.inFocusDataset = this.inFocus;
-
-    this.columnsUpdatedEvent.emit(this.selectedDatasets);
+    this.dataService.updateSelectedDataset(this.selectedDatasets);
+    //this.columnsUpdatedEvent.emit(this.selectedDatasets);
   }
 
   ngOnInit(): void {
+
+    this.dataService.currentSelections.subscribe((value) => { this.selectedDatasets = value;});
+    console.log("DataFilter subject setup");
+    console.log(this.selectedDatasets);
+
     this.dataService.getAvailableDatasets(
       this.availableDatasets,
       this.selectedDatasets,
