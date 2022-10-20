@@ -18,48 +18,55 @@ export class HeatmapComponent implements OnInit {
     layout: {},
   };
 
-  @Input()
   public selectedDatasets: SelectedDatasets = {
     datasets: [],
   };
 
-  @Input()
   public features = {
-    availableFeatures: Array(),
+    availableFeatures: [],
   };
 
-  selectedFeatures = new FormControl('');
+  selectedFeaturesControl = new FormControl('');
+  private oldSelectedDatasets?: SelectedDatasets;
+  public selectedFeatures: string | null = null;
 
-  updateHeatmap(selectedFeatures?: string[] | string | null) {
-    console.log(selectedFeatures);
-    if (this.selectedDatasets.datasets.length > 0) {
-      if (
-        !this.selectedDatasets.datasets.some(
-          (dataset) =>
-            dataset.geoColumn === undefined || dataset.timeColumn === undefined
-        )
-      ) {
-        this.dataService
-          .getData(this.selectedDatasets.datasets, '/graph/heatmap')
-          .subscribe((event) => {
-            if (event.type === HttpEventType.Response) {
-              if (event.body) {
-                this.data.data = event.body.data;
-                this.data.layout = event.body.layout;
+  ngDoCheck() {
+    if (
+      JSON.stringify(this.selectedDatasets) !==
+      JSON.stringify(this.oldSelectedDatasets)
+    ) {
+      const oldFeature = this.oldSelectedDatasets?.datasets;
+
+      if (this.selectedDatasets.datasets.length > 0) {
+        if (
+          !this.selectedDatasets.datasets.some(
+            (dataset) =>
+              dataset.geoColumn === undefined ||
+              dataset.timeColumn === undefined
+          )
+        ) {
+          this.dataService
+            .getData(this.selectedDatasets.datasets, '/graph/heatmap')
+            .subscribe((event) => {
+              if (event.type === HttpEventType.Response) {
+                if (event.body) {
+                  this.data.data = event.body.data;
+                  this.data.layout = event.body.layout;
+                }
               }
-            }
-          });
+            });
+        }
       }
     }
-  }
-
-  ngOnChanges() {
-    this.updateHeatmap();
+    this.oldSelectedDatasets = structuredClone(this.selectedDatasets);
   }
 
   ngOnInit(): void {
-    this.selectedFeatures.valueChanges.subscribe((value) =>
-      this.updateHeatmap(value)
-    );
+    this.dataService.currentSelections.subscribe((value) => {
+      this.selectedDatasets = value;
+    });
+    this.selectedFeaturesControl.valueChanges.subscribe((value) => {
+      this.selectedFeatures = value;
+    });
   }
 }

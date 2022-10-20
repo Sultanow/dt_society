@@ -93,15 +93,12 @@ export class DatafilteringComponent implements OnInit {
   changeFocus() {
     this.selectedDatasets.inFocusDataset = this.inFocus;
     this.dataService.updateSelectedDataset(this.selectedDatasets);
-    //this.columnsUpdatedEvent.emit(this.selectedDatasets);
   }
 
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selectedDatasets = value;
     });
-    console.log('DataFilter subject setup');
-    console.log(this.selectedDatasets);
 
     this.dataService.getAvailableDatasets(
       this.availableDatasets,
