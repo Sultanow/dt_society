@@ -1,6 +1,4 @@
-from distutils.command.upload import upload
 import os
-import flask
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_session import Session
 from flask_cors import CORS
@@ -50,8 +48,9 @@ def create_app(test_config=None):
 
     @app.route("/")
     def index():
-        collection = mongo.db["collection_1"]
-        data = collection.find({})
+        if mongo.db is not None:
+            collection = mongo.db["collection_1"]
+            data = collection.find({})
 
         return render_template("db_data.html", files=data)
 
@@ -65,82 +64,86 @@ def create_app(test_config=None):
             df = pd.read_table(uploaded_file.stream)
 
             # create collections for each session
-            collection = mongo.db["collection_1"]
+            if mongo.db is not None:
+                collection = mongo.db["collection_1"]
 
-            if collection.count_documents({"filename": uploaded_file.filename}) > 0:
-                print("already in db")
-                # collection.delete_one({"filename": uploaded_file.filename})
-                # print("deleted")
-            else:
-                collection.insert_one(
-                    {"filename": uploaded_file.filename, "data": df.to_dict("records")}
-                )
-                print(f"added {uploaded_file.filename} to db")
+                if collection.count_documents({"filename": uploaded_file.filename}) > 0:
+                    print("already in db")
+                    # collection.delete_one({"filename": uploaded_file.filename})
+                    # print("deleted")
+                else:
+                    collection.insert_one(
+                        {
+                            "filename": uploaded_file.filename,
+                            "data": df.to_dict("records"),
+                        }
+                    )
+                    print(f"added {uploaded_file.filename} to db")
 
         # return redirect(url_for("index"))
         return ("", 204)
 
     @app.route("/datasets", methods=["GET", "POST", "DELETE"])  # type: ignore
     def uploadedFiles():
-        collection = mongo.db["collection_1"]
 
-        avail_columns = []
+        if mongo.db is not None:
+            collection = mongo.db["collection_1"]
 
-        if request.method == "GET":
-            # create collections for each session
+            avail_columns = []
 
-            datasets = collection.find({})
+            if request.method == "GET":
+                # create collections for each session
 
-            for i, dataset in enumerate(datasets):
-                # print(dataset)
-                # columns = pd.DataFrame.from_records(dataset["data"]).columns.to_list()
-                columns = parse_dataset(geo_column=None, dataset_id=i).columns.to_list()
-                # avail_columns[dataset["filename"]]= {"geo":cols, "rshp":cols}
+                datasets = collection.find({})
 
-                avail_columns.append(
-                    {"datasetId": dataset["filename"], "columns": columns}
-                )
+                for i, dataset in enumerate(datasets):
+                    # print(dataset)
+                    # columns = pd.DataFrame.from_records(dataset["data"]).columns.to_list()
+                    columns = parse_dataset(
+                        geo_column=None, dataset_id=i
+                    ).columns.to_list()
+                    # avail_columns[dataset["filename"]]= {"geo":cols, "rshp":cols}
+
+                    avail_columns.append(
+                        {"datasetId": dataset["filename"], "columns": columns}
+                    )
+
+            elif request.method == "POST":
+
+                payload = request.get_json()
+
+                if payload is not None:
+                    filename = payload["datasetIdx"]
+                    reshape_column = payload["reshapeColumn"]
+                    geo_column = payload["geoColumn"]
+                    # dataset = collection.find({"filename": filename})
+
+                    columns = parse_dataset(
+                        geo_column=geo_column,
+                        dataset_id=filename,
+                        reshape_column=reshape_column,
+                    ).columns.to_list()
+
+                    avail_columns = {
+                        "timeColumns": ["Time", "time"],
+                        "featureColumns": [
+                            feature
+                            for feature in columns
+                            if feature not in ("Time", geo_column)
+                        ],
+                    }
+
+            elif request.method == "DELETE":
+                payload = request.get_json()
+                if payload is not None:
+                    filename = payload["datasetId"]
+
+                    collection.delete_one({"filename": filename})
+
+                    print(f"removed dataset {filename}")
+
+                    return ("", 204)
 
             return jsonify(avail_columns)
-
-        elif request.method == "POST":
-            payload = request.get_json()
-
-            filename = payload["datasetIdx"]
-            reshape_column = payload["reshapeColumn"]
-            geo_column = payload["geoColumn"]
-
-            print("RESHAPE: \n", reshape_column)
-            # dataset = collection.find({"filename": filename})
-
-            columns = parse_dataset(
-                geo_column=geo_column,
-                dataset_id=filename,
-                reshape_column=reshape_column,
-            ).columns.to_list()
-
-            avail_columns = {
-                "timeColumns": ["Time", "time"],
-                "featureColumns": [
-                    feature
-                    for feature in columns
-                    if feature != "Time" and feature != geo_column
-                ],
-            }
-
-            return jsonify(avail_columns)
-
-        elif request.method == "DELETE":
-            payload = request.get_json()
-            if payload is not None:
-                filename = payload["datasetId"]
-
-                collection.delete_one({"filename": filename})
-
-                print(f"removed dataset {filename}")
-
-                return ("", 204)
-
-        # return render_template("db_data.html", files=data)
 
     return app
