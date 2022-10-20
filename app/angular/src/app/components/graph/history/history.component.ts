@@ -37,12 +37,12 @@ export class HistoryComponent implements OnInit {
         (dataset) => dataset.datasetId == datasetId
       );
 
-      if (indexFocus != undefined) {
+      if (indexFocus !== undefined) {
         if (
-          indexFocus.geoColumn != undefined &&
-          indexFocus.reshapeColumn != undefined &&
-          indexFocus.featureColumn != undefined &&
-          indexFocus.timeColumn != undefined
+          indexFocus.geoColumn !== undefined &&
+          indexFocus.reshapeColumn !== undefined &&
+          indexFocus.featureColumn !== undefined &&
+          indexFocus.timeColumn !== undefined
         ) {
           this.dataService
             .getData(indexFocus, '/graph/history')

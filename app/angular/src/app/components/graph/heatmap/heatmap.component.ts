@@ -33,7 +33,7 @@ export class HeatmapComponent implements OnInit {
         this.dataService
           .getData(this.selectedDatasets.datasets, '/graph/heatmap')
           .subscribe((event) => {
-            if (event.type == HttpEventType.Response) {
+            if (event.type === HttpEventType.Response) {
               if (event.body) {
                 this.data.data = event.body.data;
                 this.data.layout = event.body.layout;

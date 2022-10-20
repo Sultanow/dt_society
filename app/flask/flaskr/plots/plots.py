@@ -349,7 +349,7 @@ def create_two_line_plot(
         transition_duration=500,
         template=theme,
         margin={"t": 20, "b": 20},
-        height=300,
+        # height=300,
         legend={"groupclick": "toggleitem"},
         paper_bgcolor="#232323",
         plot_bgcolor="#232323",

@@ -1,34 +1,48 @@
-import { Component, OnInit } from '@angular/core';
+import { HttpEventType } from '@angular/common/http';
+import { Component, Input, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
-
+import { SelectedDatasets } from 'src/app/types/Datasets';
+import { GraphData } from 'src/app/types/GraphData';
 
 @Component({
   selector: 'app-correlation',
   styleUrls: ['./correlation.component.css'],
-  template: '<plotly-plot [data]="data.data" [layout]="data.layout"></plotly-plot>'
-
+  templateUrl: './correlation.component.html',
 })
 export class CorrelationComponent implements OnInit {
+  constructor(private dataService: DataService) {}
 
-  constructor(private dataService: DataService) { }
-
-  public data = {
+  public data: GraphData = {
     data: [],
     layout: {},
-
   };
 
-  public columns = {
-    geo: ["geo\\time", "geo\\time"],
-    x: ["Time", "Time"],
-    rshp: ["age", "unit"],
+  @Input()
+  public selectedDatasets: SelectedDatasets = {
+    datasets: [],
+  };
+
+  ngOnChanges() {
+    if (this.selectedDatasets.datasets.length > 0) {
+      if (
+        !this.selectedDatasets.datasets.some(
+          (dataset) =>
+            dataset.geoColumn === undefined || dataset.timeColumn === undefined
+        )
+      ) {
+        this.dataService
+          .getData(this.selectedDatasets.datasets, '/graph/corr')
+          .subscribe((event) => {
+            if (event.type === HttpEventType.Response) {
+              if (event.body) {
+                this.data.data = event.body.data;
+                this.data.layout = event.body.layout;
+              }
+            }
+          });
+      }
+    }
   }
 
-  ngOnInit(): void {
-    this.dataService.getData(this.columns, "graph/corr").subscribe(data => this.data = {
-      data: (data as any).data,
-      layout: (data as any).layout
-    });
-  }
-
+  ngOnInit(): void {}
 }

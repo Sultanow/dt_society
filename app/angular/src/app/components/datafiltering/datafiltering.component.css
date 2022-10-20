@@ -1,29 +1,29 @@
 .mat-form-field {
-    margin-right: 10px
+  margin-right: 10px;
 }
 
 .selected-columns-container {
-    display: block;
+  display: block;
 }
 
-.data-selector{
-    margin:10px
+.data-selector {
+  margin: 10px;
 }
 
-.mat-radio-button{
-    margin:5px
+.mat-radio-button {
+  margin: 5px;
 }
 
-.column-selection-accordion{
-    padding:10px
+.column-selection-accordion {
+  padding: 10px;
 }
 
-.delete-button{
-    float:right
+.delete-button {
+  float: right;
 }
 
-.files-container{
-    float:right;
-    margin-top:10px;
-    margin-right:10px
+.files-container {
+  float: right;
+  margin-top: 10px;
+  margin-right: 10px;
 }

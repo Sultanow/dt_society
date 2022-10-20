@@ -27,6 +27,7 @@ import { FormsModule } from '@angular/forms';
 import { DatafilteringComponent } from './components/datafiltering/datafiltering.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTabsModule } from '@angular/material/tabs';
 PlotlyModule.plotlyjs = PlotlyJS;
 
 @NgModule({
@@ -58,6 +59,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     FormsModule,
     MatProgressSpinnerModule,
     MatButtonModule,
+    MatTabsModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

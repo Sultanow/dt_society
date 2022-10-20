@@ -1,1 +1,5 @@
-<p>correlation works!</p>
+<plotly-plot
+  *ngIf="data.data.length > 0"
+  [data]="data.data"
+  [layout]="data.layout"
+></plotly-plot>

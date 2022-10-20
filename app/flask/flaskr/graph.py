@@ -151,9 +151,14 @@ def getCorrLines():
         reshape_col = request.args.getlist("rshp")
     elif request.method == "POST":
         data = request.get_json()
-        geo_col = data["geo"]
-        time_col = data["x"]
-        reshape_col = data["rshp"]
+        geo_col = []
+        reshape_col = []
+        time_col = []
+
+        for dataset in data:
+            geo_col.append(dataset["geoColumn"])
+            reshape_col.append(dataset["reshapeColumn"])
+            time_col.append(dataset["timeColumn"])
 
     dfs = []
     feature_options = []

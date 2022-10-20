@@ -1,2 +1,9 @@
-<plotly-plot *ngIf="data.data.length > 0 && showSpinner == false"  [data]="data.data" [layout]="data.layout"></plotly-plot>
-<div *ngIf="showSpinner == true" class="spinner-container"><mat-spinner ></mat-spinner></div>
+<plotly-plot
+  *ngIf="data.data.length > 0 && showSpinner == false"
+  [data]="data.data"
+  [layout]="data.layout"
+>
+</plotly-plot>
+<div *ngIf="showSpinner == true" class="spinner-container">
+  <mat-spinner></mat-spinner>
+</div>

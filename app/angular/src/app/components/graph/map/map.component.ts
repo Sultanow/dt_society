@@ -34,18 +34,18 @@ export class MapComponent implements OnInit {
         (dataset) => dataset.datasetId == datasetId
       );
 
-      if (indexFocus != undefined) {
+      if (indexFocus !== undefined) {
         if (
-          indexFocus.geoColumn != undefined &&
-          indexFocus.reshapeColumn != undefined &&
-          indexFocus.featureColumn != undefined &&
-          indexFocus.timeColumn != undefined
+          indexFocus.geoColumn !== undefined &&
+          indexFocus.reshapeColumn !== undefined &&
+          indexFocus.featureColumn !== undefined &&
+          indexFocus.timeColumn !== undefined
         ) {
           this.showSpinner = true;
           this.dataService
             .getData(indexFocus, '/graph/map')
             .subscribe((data) => {
-              if (data.type == HttpEventType.DownloadProgress) {
+              if (data.type === HttpEventType.DownloadProgress) {
                 console.log('downloading');
               }
 

@@ -1,11 +1,15 @@
-.plot-row{
-    display:flex;
-    margin-top:50px;
+.plot-row {
+  display: flex;
+  margin-top: 50px;
 }
 
-.graph-container{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width:50%
+.graph-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+}
+
+.app-correlation {
+  width: 600px;
 }
