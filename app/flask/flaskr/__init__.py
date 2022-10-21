@@ -96,7 +96,7 @@ def create_app(test_config=None):
         for i, dataset in enumerate(datasets):
             columns = parse_dataset(geo_column=None, dataset_id=i).columns.to_list()
 
-            avail_columns.append({"datasetId": dataset["filename"], "columns": columns})
+            avail_columns.append({"id": dataset["filename"], "columns": columns})
 
         return jsonify(avail_columns)
 
@@ -114,7 +114,6 @@ def create_app(test_config=None):
         file_idx = payload["datasetIdx"]
         reshape_column = payload["reshapeColumn"]
         geo_column = payload["geoColumn"]
-        # dataset = collection.find({"filename": filename})
 
         columns = parse_dataset(
             geo_column=geo_column,
@@ -122,14 +121,14 @@ def create_app(test_config=None):
             reshape_column=reshape_column,
         ).columns.to_list()
 
-        time_columns = ["Time"]
+        time_columns = columns if reshape_column is None else ["Time"]
         feature_columns = [
             feature for feature in columns if feature not in ("Time", geo_column)
         ]
 
         available_columns = {
-            "timeColumns": time_columns,
-            "featureColumns": feature_columns,
+            "timeOptions": time_columns,
+            "featureOptions": feature_columns,
         }
 
         return jsonify(available_columns)

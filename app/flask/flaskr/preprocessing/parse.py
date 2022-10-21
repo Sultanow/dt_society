@@ -20,6 +20,7 @@ def parse_dataset(geo_column, dataset_id, reshape_column=None) -> pd.DataFrame:
     Returns:
         pd.DataFrame: _description_
     """
+
     collection = mongo.db["collection_1"]
 
     if isinstance(dataset_id, int):

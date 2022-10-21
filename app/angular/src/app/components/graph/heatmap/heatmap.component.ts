@@ -1,8 +1,8 @@
 import { HttpEventType } from '@angular/common/http';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { DataService } from 'src/app/services/data.service';
-import { SelectedDatasets } from 'src/app/types/Datasets';
+import { Selections } from 'src/app/types/Datasets';
 import { GraphData } from 'src/app/types/GraphData';
 
 @Component({
@@ -18,8 +18,9 @@ export class HeatmapComponent implements OnInit {
     layout: {},
   };
 
-  public selectedDatasets: SelectedDatasets = {
+  public selections: Selections = {
     datasets: [],
+    selectedDataset: undefined,
   };
 
   public features = {
@@ -27,25 +28,24 @@ export class HeatmapComponent implements OnInit {
   };
 
   selectedFeaturesControl = new FormControl('');
-  private oldSelectedDatasets?: SelectedDatasets;
+
+  private oldSelections?: Selections;
   public selectedFeatures: string | null = null;
 
   ngDoCheck() {
     if (
-      JSON.stringify(this.selectedDatasets) !==
-      JSON.stringify(this.oldSelectedDatasets)
+      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
     ) {
-      if (this.selectedDatasets.datasets.length > 0) {
+      if (this.selections.datasets.length > 0) {
         if (
-          !this.selectedDatasets.datasets.some(
+          !this.selections.datasets.some(
             (dataset) =>
-              dataset.geoColumn === undefined ||
-              dataset.timeColumn === undefined
+              dataset.geoSelected === undefined ||
+              dataset.timeSelected === undefined
           )
         ) {
-          // this.selectedDatasets.datasets.forEach((dataset, idx) => {});
           this.dataService
-            .getData(this.selectedDatasets.datasets, '/graph/heatmap')
+            .getData(this.selections.datasets, '/graph/heatmap')
             .subscribe((event) => {
               if (event.type === HttpEventType.Response) {
                 if (event.body) {
@@ -57,12 +57,12 @@ export class HeatmapComponent implements OnInit {
         }
       }
     }
-    this.oldSelectedDatasets = structuredClone(this.selectedDatasets);
+    this.oldSelections = structuredClone(this.selections);
   }
 
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
-      this.selectedDatasets = value;
+      this.selections = value;
     });
     this.selectedFeaturesControl.valueChanges.subscribe((value) => {
       this.selectedFeatures = value;

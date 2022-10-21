@@ -1,24 +1,24 @@
 <div class="data-selector">
   <mat-radio-group
     aria-label="Select an option"
-    [(ngModel)]="inFocus"
+    [(ngModel)]="selections.selectedDataset"
     (change)="changeFocus()"
   >
     <mat-radio-button
-      *ngFor="let dataset of availableDatasets.datasets"
-      [value]="dataset.datasetId"
+      *ngFor="let dataset of selections.datasets"
+      [value]="dataset.id"
     >
-      {{ dataset.datasetId }}
+      {{ dataset.id }}
     </mat-radio-button>
   </mat-radio-group>
 </div>
 <div class="column-selection-accordion">
   <mat-accordion>
-    <ng-container *ngFor="let dataset of availableDatasets.datasets">
+    <ng-container *ngFor="let dataset of selections.datasets">
       <mat-expansion-panel>
         <mat-expansion-panel-header>
           <mat-panel-title>
-            {{ dataset.datasetId }}
+            {{ dataset.id }}
           </mat-panel-title>
         </mat-expansion-panel-header>
         <div class="selected-columns-container">
@@ -29,11 +29,7 @@
                 required
                 #geoSelect
                 (selectionChange)="
-                  updateSelectedColumns(
-                    dataset.datasetId,
-                    geoSelect.value,
-                    'geo'
-                  )
+                  updateSelectedColumns(dataset.id, geoSelect.value, 'geo')
                 "
               >
                 <mat-option
@@ -50,11 +46,7 @@
                 required
                 #reshapeSelect
                 (selectionChange)="
-                  updateSelectedColumns(
-                    dataset.datasetId,
-                    reshapeSelect.value,
-                    'rshp'
-                  )
+                  updateSelectedColumns(dataset.id, reshapeSelect.value, 'rshp')
                 "
               >
                 <mat-option
@@ -67,9 +59,7 @@
             </mat-form-field>
             <mat-slide-toggle
               #reshapeToggle
-              (change)="
-                reshapeOptions(dataset.datasetId, reshapeToggle.checked)
-              "
+              (change)="reshapeOptions(dataset.id, reshapeToggle.checked)"
               >Apply reshape
             </mat-slide-toggle>
           </div>
@@ -80,7 +70,7 @@
                 required
                 #xSelect
                 (selectionChange)="
-                  updateSelectedColumns(dataset.datasetId, xSelect.value, 'x')
+                  updateSelectedColumns(dataset.id, xSelect.value, 'x')
                 "
               >
                 <mat-option
@@ -97,7 +87,7 @@
                 required
                 #ySelect
                 (selectionChange)="
-                  updateSelectedColumns(dataset.datasetId, ySelect.value, 'y')
+                  updateSelectedColumns(dataset.id, ySelect.value, 'y')
                 "
               >
                 <mat-option
@@ -112,7 +102,7 @@
               mat-icon-button
               color="primary"
               class="delete-button"
-              (click)="onDeleteFile(dataset.datasetId)"
+              (click)="onDeleteFile(dataset.id)"
             >
               <mat-icon>delete_forever</mat-icon>
             </button>

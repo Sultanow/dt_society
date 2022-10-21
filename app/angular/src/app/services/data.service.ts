@@ -7,11 +7,7 @@ import {
   HttpRequest,
 } from '@angular/common/http';
 import { GraphData } from '../types/GraphData';
-import {
-  AvailableDatasets,
-  DatasetOptions,
-  SelectedDatasets,
-} from '../types/Datasets';
+import { Dataset, Selections } from '../types/Datasets';
 
 @Injectable({
   providedIn: 'root',
@@ -19,17 +15,24 @@ import {
 export class DataService {
   private apiUrl: string = 'http://127.0.0.1:5000/';
 
-  private selections: BehaviorSubject<SelectedDatasets> = new BehaviorSubject(<
-    SelectedDatasets
+  // private selections: BehaviorSubject<targetDatasetIdxs> = new BehaviorSubject(<
+  //   targetDatasetIdxs
+  // >{
+  //   datasets: [],
+  //   inFocusDataset: 'arbeitslosenquote_jaehrlich_eu.tsv',
+  // });
+
+  private selections: BehaviorSubject<Selections> = new BehaviorSubject(<
+    Selections
   >{
     datasets: [],
-    inFocusDataset: 'arbeitslosenquote_jaehrlich_eu.tsv',
+    targetDatasetIdx: undefined,
   });
   currentSelections = this.selections.asObservable();
 
   constructor(private http: HttpClient) {}
 
-  updateSelectedDataset(newDataSel: SelectedDatasets) {
+  updateDatasetsSelection(newDataSel: Selections) {
     this.selections.next(newDataSel);
   }
 
@@ -40,12 +43,7 @@ export class DataService {
     return this.http.request(request);
   }
 
-  uploadDataset(
-    event: any,
-    availableDatasets: AvailableDatasets,
-    selectedDatasets: SelectedDatasets,
-    inFocus: string | undefined
-  ): void {
+  uploadDataset(event: any, selections: Selections): void {
     const file: File = event.target.files[0];
 
     if (file) {
@@ -70,21 +68,13 @@ export class DataService {
         }
         if (event.type == HttpEventType.Response) {
           console.log('completed upload');
-          this.getAvailableDatasets(
-            availableDatasets,
-            selectedDatasets,
-            inFocus
-          );
+          this.getAvailableDatasets(selections);
         }
       });
     }
   }
 
-  deleteDataset(
-    datasetId: string,
-    availableDatasets: AvailableDatasets,
-    selectedDatasets: SelectedDatasets
-  ) {
+  deleteDataset(datasetId: string | undefined, selections: Selections) {
     const request = new HttpRequest(
       'DELETE',
       this.apiUrl + 'data/remove',
@@ -94,79 +84,68 @@ export class DataService {
       }
     );
 
-    const datasetIndex = availableDatasets.datasets
-      .map((d) => d.datasetId)
+    const selectedDatasetIndex = selections.datasets
+      .map((d) => d.id)
       .indexOf(datasetId);
 
     this.http.request(request).subscribe((event) => {
-      if (event.type == HttpEventType.Response && datasetIndex > -1) {
-        for (const collection of [availableDatasets, selectedDatasets]) {
-          collection.datasets.splice(datasetIndex);
-        }
+      if (event.type == HttpEventType.Response && selectedDatasetIndex > -1) {
+        selections.datasets.splice(selectedDatasetIndex);
       }
     });
   }
 
-  getAvailableDatasets(
-    availableDatasets: AvailableDatasets,
-    selectedDatasets: SelectedDatasets,
-    inFocus: string | undefined
-  ): void {
+  getAvailableDatasets(selections: Selections): void {
     this.http.get(this.apiUrl + 'data').subscribe((datasets) => {
-      availableDatasets.datasets = datasets as DatasetOptions[];
+      let updatedDatasets = datasets as Dataset[];
 
-      if (inFocus == undefined) {
-        inFocus = availableDatasets.datasets[0].datasetId;
-      }
-      if (selectedDatasets.datasets != undefined) {
-        for (const dataset of availableDatasets.datasets) {
+      if (selections.datasets != undefined) {
+        for (const dataset of updatedDatasets) {
           if (
-            selectedDatasets.datasets.filter(
-              (d) => d.datasetId == dataset.datasetId
-            ).length == 0
+            selections.datasets.filter((d) => d.id == dataset.id).length == 0
           ) {
-            selectedDatasets.datasets.push({
-              datasetId: dataset.datasetId,
-            });
+            selections.datasets.push(dataset);
           }
+        }
+        if (selections.selectedDataset == undefined) {
+          selections.selectedDataset = selections.datasets[0].id;
         }
       }
     });
   }
 
   getReshapedData(
-    availableDatasets: AvailableDatasets,
-    selectedDatasets: SelectedDatasets,
-    datasetId: string,
+    selections: Selections,
+    datasetId: string | undefined,
     reshape: boolean
   ) {
-    const targetIndex = availableDatasets.datasets.findIndex(
-      (dataset) => dataset.datasetId == datasetId
+    const targetDatasetIdx = selections.datasets.findIndex(
+      (dataset) => dataset.id == datasetId
     );
 
     if (
-      selectedDatasets.datasets[targetIndex].geoColumn != undefined &&
-      selectedDatasets.datasets[targetIndex].reshapeColumn != undefined
+      selections.datasets[targetDatasetIdx].geoSelected != undefined &&
+      selections.datasets[targetDatasetIdx].reshapeSelected != undefined
     ) {
       let reshapeColumn = null;
 
       if (reshape) {
-        reshapeColumn = selectedDatasets.datasets[targetIndex].reshapeColumn;
+        reshapeColumn = selections.datasets[targetDatasetIdx].reshapeSelected;
       }
 
       this.http
         .post(this.apiUrl + 'data/reshape', {
-          datasetIdx: targetIndex,
+          datasetIdx: selections.datasets[targetDatasetIdx].id,
           reshapeColumn: reshapeColumn,
-          geoColumn: selectedDatasets.datasets[targetIndex].geoColumn,
+          geoColumn: selections.datasets[targetDatasetIdx].geoSelected,
         })
         .subscribe((reshapedColumns) => {
-          availableDatasets.datasets[targetIndex].timeOptions = (
-            reshapedColumns as any
-          ).timeColumns;
-          availableDatasets.datasets[targetIndex].featureOptions = (
-            reshapedColumns as any
-          ).featureColumns;
+          selections.datasets[targetDatasetIdx].timeOptions = (
+            reshapedColumns as Dataset
+          ).timeOptions;
+          selections.datasets[targetDatasetIdx].featureOptions = (
+            reshapedColumns as Dataset
+          ).featureOptions;
         });
     }
   }

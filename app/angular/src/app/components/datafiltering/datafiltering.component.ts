@@ -1,10 +1,5 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import {
-  SelectedDatasets,
-  AvailableDatasets,
-  DatasetOptions,
-} from '../../types/Datasets';
-import { HttpClient } from '@angular/common/http';
+import { Selections } from '../../types/Datasets';
 import { DataService } from 'src/app/services/data.service';
 
 @Component({
@@ -13,97 +8,73 @@ import { DataService } from 'src/app/services/data.service';
   styleUrls: ['./datafiltering.component.css'],
 })
 export class DatafilteringComponent implements OnInit {
-  constructor(
-    private httpClient: HttpClient,
-    private dataService: DataService
-  ) {}
+  constructor(private dataService: DataService) {}
 
-  @Output() columnsUpdatedEvent = new EventEmitter<any>();
-
-  selectedDatasets: SelectedDatasets = {
+  selections: Selections = {
     datasets: [],
-  };
-  availableDatasets: AvailableDatasets = {
-    datasets: [],
+    selectedDataset: undefined,
   };
 
   reshape: boolean = false;
 
   fileName = '';
 
-  inFocus: string | undefined;
-
-  updateSelectedColumns(filename: string, value: string, column: string) {
-    if (this.selectedDatasets.datasets != undefined) {
-      const datasetIndex = this.selectedDatasets.datasets
-        .map((d) => d.datasetId)
+  updateSelectedColumns(
+    filename: string | undefined,
+    value: string,
+    column: string
+  ) {
+    if (this.selections.datasets.length > 0) {
+      const datasetIndex = this.selections.datasets
+        .map((d) => d.id)
         .indexOf(filename);
 
       switch (column) {
         case 'geo':
-          this.selectedDatasets.datasets[datasetIndex].geoColumn = value;
+          this.selections.datasets[datasetIndex].geoSelected = value;
           break;
         case 'rshp':
-          this.selectedDatasets.datasets[datasetIndex].reshapeColumn = value;
+          this.selections.datasets[datasetIndex].reshapeSelected = value;
           this.dataService.getReshapedData(
-            this.availableDatasets,
-            this.selectedDatasets,
+            this.selections,
             filename,
             this.reshape
           );
           break;
         case 'x':
-          this.selectedDatasets.datasets[datasetIndex].timeColumn = value;
+          this.selections.datasets[datasetIndex].timeSelected = value;
           break;
         case 'y':
-          this.selectedDatasets.datasets[datasetIndex].featureColumn = value;
+          this.selections.datasets[datasetIndex].featureSelected = value;
       }
 
-      this.dataService.updateSelectedDataset(this.selectedDatasets);
+      this.dataService.updateDatasetsSelection(this.selections);
     }
   }
 
   onFileUpload(event: any) {
-    this.dataService.uploadDataset(
-      event,
-      this.availableDatasets,
-      this.selectedDatasets,
-      this.inFocus
-    );
+    this.dataService.uploadDataset(event, this.selections);
   }
 
-  onDeleteFile(datasedId: string) {
-    this.dataService.deleteDataset(
-      datasedId,
-      this.availableDatasets,
-      this.selectedDatasets
-    );
+  onDeleteFile(datasedId: string | undefined) {
+    this.dataService.deleteDataset(datasedId, this.selections);
   }
 
-  reshapeOptions(datasetId: string, reshape: boolean): void {
+  reshapeOptions(datasetId: string | undefined, reshape: boolean): void {
     this.reshape = reshape;
-    this.dataService.getReshapedData(
-      this.availableDatasets,
-      this.selectedDatasets,
-      datasetId,
-      this.reshape
-    );
+    this.dataService.getReshapedData(this.selections, datasetId, this.reshape);
+    this.dataService.updateDatasetsSelection(this.selections);
   }
 
   changeFocus() {
-    this.selectedDatasets.inFocusDataset = this.inFocus;
-    this.dataService.updateSelectedDataset(this.selectedDatasets);
+    this.dataService.updateDatasetsSelection(this.selections);
   }
 
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
-      this.selectedDatasets = value;
+      this.selections = value;
     });
 
-    this.dataService.getAvailableDatasets(
-      this.availableDatasets,
-      this.selectedDatasets,
-      this.inFocus
-    );
+    this.dataService.getAvailableDatasets(this.selections);
   }
 }

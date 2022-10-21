@@ -1,7 +1,7 @@
 import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
-import { SelectedDatasets } from 'src/app/types/Datasets';
+import { Selections } from 'src/app/types/Datasets';
 import { GraphData } from 'src/app/types/GraphData';
 
 @Component({
@@ -17,27 +17,27 @@ export class CorrelationComponent implements OnInit {
     layout: {},
   };
 
-  public selectedDatasets: SelectedDatasets = {
+  public selections: Selections = {
     datasets: [],
+    selectedDataset: undefined,
   };
 
-  private oldSelectedDatasets?: SelectedDatasets;
+  private oldSelections?: Selections;
 
   ngDoCheck() {
     if (
-      JSON.stringify(this.selectedDatasets) !==
-      JSON.stringify(this.oldSelectedDatasets)
+      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
     ) {
-      if (this.selectedDatasets.datasets.length > 0) {
+      if (this.selections.datasets.length > 0) {
         if (
-          !this.selectedDatasets.datasets.some(
+          !this.selections.datasets.some(
             (dataset) =>
-              dataset.geoColumn === undefined ||
-              dataset.timeColumn === undefined
+              dataset.geoSelected === undefined ||
+              dataset.timeSelected === undefined
           )
         ) {
           this.dataService
-            .getData(this.selectedDatasets.datasets, '/graph/corr')
+            .getData(this.selections.datasets, '/graph/corr')
             .subscribe((event) => {
               if (event.type === HttpEventType.Response) {
                 if (event.body) {
@@ -49,12 +49,12 @@ export class CorrelationComponent implements OnInit {
         }
       }
     }
-    this.oldSelectedDatasets = structuredClone(this.selectedDatasets);
+    this.oldSelections = structuredClone(this.selections);
   }
 
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
-      this.selectedDatasets = value;
+      this.selections = value;
     });
   }
 }

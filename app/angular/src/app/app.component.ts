@@ -1,5 +1,5 @@
-import { Component, Output } from '@angular/core';
-import { SelectedDatasets } from './types/Datasets';
+import { Component } from '@angular/core';
+import { Selections } from './types/Datasets';
 import { DataService } from 'src/app/services/data.service';
 
 @Component({
@@ -8,19 +8,13 @@ import { DataService } from 'src/app/services/data.service';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
-  title = 'angular';
+  title = 'Digital Twin of Society';
 
   constructor(private dataService: DataService) {}
 
-  selectedDatasets: SelectedDatasets = {
+  selectedDatasets: Selections = {
     datasets: [],
   };
-
-  //  getSelection(columns: SelectedDatasets) {
-  //     let datasets = columns.datasets;
-  //     let inFocusDataset = columns.inFocusDataset;
-  //     this.selectedDatasets = { datasets, inFocusDataset };
-  //  }
 
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {

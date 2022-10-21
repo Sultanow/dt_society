@@ -1,8 +1,7 @@
-import { HttpEvent, HttpEventType } from '@angular/common/http';
-import { Component, Input, OnInit, SimpleChange } from '@angular/core';
-import { Observable } from 'rxjs';
+import { HttpEventType } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
-import { SelectedDatasets } from 'src/app/types/Datasets';
+import { Selections } from 'src/app/types/Datasets';
 import { GraphData } from 'src/app/types/GraphData';
 
 @Component({
@@ -18,49 +17,45 @@ export class MapComponent implements OnInit {
     layout: {},
   };
 
-  @Input()
-  public selectedDatasets: SelectedDatasets = {
+  public selections: Selections = {
     datasets: [],
-    inFocusDataset: undefined,
+    selectedDataset: undefined,
   };
 
   showSpinner: boolean = false;
 
-  private oldSelectedDatasets?: SelectedDatasets;
+  private oldSelections?: Selections;
 
   ngDoCheck() {
     if (
-      JSON.stringify(this.selectedDatasets) !==
-      JSON.stringify(this.oldSelectedDatasets)
+      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
     ) {
-      if (this.selectedDatasets.datasets.length > 0) {
-        const datasetId = this.selectedDatasets.inFocusDataset;
+      if (this.selections.datasets.length > 0) {
+        const datasetId = this.selections.selectedDataset;
 
-        const selectedDatasetIdx = this.selectedDatasets.datasets.findIndex(
-          (dataset) => dataset.datasetId == datasetId
+        const selectedDatasetIdx = this.selections.datasets.findIndex(
+          (dataset) => dataset.id == datasetId
         );
 
-        if (this.selectedDatasets.datasets[selectedDatasetIdx] !== undefined) {
+        if (this.selections.datasets[selectedDatasetIdx] !== undefined) {
           if (
-            this.selectedDatasets.datasets[selectedDatasetIdx].geoColumn !==
+            this.selections.datasets[selectedDatasetIdx].geoSelected !==
               undefined &&
-            this.selectedDatasets.datasets[selectedDatasetIdx].reshapeColumn !==
+            this.selections.datasets[selectedDatasetIdx].reshapeSelected !==
               undefined &&
-            this.selectedDatasets.datasets[selectedDatasetIdx].featureColumn !==
+            this.selections.datasets[selectedDatasetIdx].featureSelected !==
               undefined &&
-            this.selectedDatasets.datasets[selectedDatasetIdx].timeColumn !==
+            this.selections.datasets[selectedDatasetIdx].timeSelected !==
               undefined
           ) {
             if (
-              this.selectedDatasets.datasets[selectedDatasetIdx]
-                .featureColumn !==
-              this.oldSelectedDatasets?.datasets[selectedDatasetIdx]
-                .featureColumn
+              this.selections.datasets[selectedDatasetIdx].featureSelected !==
+              this.oldSelections?.datasets[selectedDatasetIdx].featureSelected
             ) {
               this.showSpinner = true;
               this.dataService
                 .getData(
-                  this.selectedDatasets.datasets[selectedDatasetIdx],
+                  this.selections.datasets[selectedDatasetIdx],
                   '/graph/map'
                 )
                 .subscribe((data) => {
@@ -81,13 +76,13 @@ export class MapComponent implements OnInit {
           }
         }
       }
-      this.oldSelectedDatasets = structuredClone(this.selectedDatasets);
+      this.oldSelections = structuredClone(this.selections);
     }
   }
 
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
-      this.selectedDatasets = value;
+      this.selections = value;
     });
   }
 }
