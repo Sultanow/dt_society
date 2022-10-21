@@ -98,7 +98,7 @@ def create_choropleth_plot(
         featureidkey="properties.ISO3",
         color=feature_column,
         geojson=countries,
-        zoom=2.5,
+        zoom=2.5,  # type: ignore
         center={"lat": 56.5, "lon": 11},
         mapbox_style="carto-positron",
         opacity=0.5,
@@ -119,7 +119,7 @@ def create_choropleth_slider_plot(
     data: pd.DataFrame,
     geo_column: str,
     feature_column: str,
-    time_column: str = None,
+    time_column: str | None = None,
     scope="europe",
 ) -> go.Figure:
     """Creates choropleth plot with time slider and animated transitions
@@ -142,7 +142,7 @@ def create_choropleth_slider_plot(
         plot_bgcolor="rgba(0,0,0,0)",
     )
 
-    fig_dict["layout"]["updatemenus"] = [
+    fig_dict["layout"]["updatemenus"] = [  # type: ignore
         {
             "buttons": [
                 {
@@ -187,10 +187,10 @@ def create_choropleth_slider_plot(
         "steps": [],
     }
 
-    if np.issubdtype(np.datetime64, data[time_column]):
-        data[time_column] = data[time_column].dt.strftime("%b-%d")
+    if np.issubdtype(np.datetime64, data[time_column]):  # type: ignore
+        data[time_column] = data[time_column].dt.strftime("%b-%d")  # type: ignore
 
-    first_year = data[time_column].unique()[0]
+    first_year = data[time_column].unique()[0]  # type: ignore
 
     geojsons = {
         "global": {
@@ -221,10 +221,10 @@ def create_choropleth_slider_plot(
 
     data_dict = dict(
         type="choroplethmapbox",
-        locations=data[data[time_column] == first_year][geo_column],
+        locations=data[data[time_column] == first_year][geo_column],  # type: ignore
         geojson=countries,
         featureidkey=geojsons[scope]["featureid"],
-        z=data[data[time_column] == first_year][feature_column],
+        z=data[data[time_column] == first_year][feature_column],  # type: ignore
         zmin=0,
         zmax=data[feature_column].max(),
         colorscale="Magma",
@@ -236,9 +236,9 @@ def create_choropleth_slider_plot(
 
     fig_dict["data"].append(data_dict)
 
-    for time in data[time_column].unique():
+    for time in data[time_column].unique():  # type: ignore
 
-        df_per_year = data[data[time_column] == time]
+        df_per_year = data[data[time_column] == time]  # type: ignore
 
         fig_dict["frames"].append(
             dict(
@@ -267,7 +267,7 @@ def create_choropleth_slider_plot(
         }
         sliders_dict["steps"].append(slider_step)
 
-    fig_dict["layout"]["sliders"] = [sliders_dict]
+    fig_dict["layout"]["sliders"] = [sliders_dict]  # type: ignore
 
     fig_choropleth = go.Figure(fig_dict)
     fig_choropleth.update_mapboxes(

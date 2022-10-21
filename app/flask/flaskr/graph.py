@@ -20,22 +20,19 @@ from .extensions import mongo
 bp = Blueprint("graph", __name__, url_prefix="/graph")
 
 
-@bp.route("/map", methods=["GET", "POST"])
-def getMap():
-    if request.method == "GET":
-        geo_col = request.args.get("geo")
-        time_col = request.args.get("x")
-        feature_col = request.args.get("y")
-        data_id = int(request.args.get("id"))
-        reshape_col = request.args.get("rshp")
+@bp.route("/map", methods=["POST"])
+def get_map():
 
-    elif request.method == "POST":
-        data = request.get_json()
-        geo_col = data["geoColumn"]
-        time_col = data["timeColumn"]
-        feature_col = data["featureColumn"]
-        data_id = 0
-        reshape_col = data["reshapeColumn"]
+    data = request.get_json()
+
+    if data is None:
+        return ("Empty request", 400)
+
+    geo_col = data["geoColumn"]
+    time_col = data["timeColumn"]
+    feature_col = data["featureColumn"]
+    data_id = data["datasetId"]
+    reshape_col = data["reshapeColumn"]
 
     df = parse_dataset(
         geo_column=geo_col,
@@ -58,22 +55,16 @@ def getMap():
 
 
 @bp.route("/history", methods=["GET", "POST"])
-def getHistory():
-    if request.method == "GET":
-        geo_col = request.args.get("geo")
-        time_col = request.args.get("x")
-        feature_col = request.args.get("y")
-        data_id = int(request.args.get("id"))
-        reshape_col = request.args.get("rshp")
+def get_history():
 
-    elif request.method == "POST":
-        data = request.get_json()
-        print(data)
-        geo_col = data["geoColumn"]
-        time_col = data["timeColumn"]
-        feature_col = data["featureColumn"]
-        data_id = data["datasetId"]
-        reshape_col = data["reshapeColumn"]
+    data = request.get_json()
+    if data is None:
+        return ("Empty request", 400)
+    geo_col = data["geoColumn"]
+    time_col = data["timeColumn"]
+    feature_col = data["featureColumn"]
+    data_id = data["datasetId"]
+    reshape_col = data["reshapeColumn"]
 
     df = parse_dataset(
         geo_column=geo_col,
@@ -92,22 +83,25 @@ def getHistory():
     return response
 
 
-@bp.route("/heatmap", methods=["GET", "POST"])
-def getHeatmap():
-    if request.method == "GET":
-        geo_col = request.args.getlist("geo")
-        reshape_col = request.args.getlist("rshp")
-        time_col = request.args.getlist("x")
-    elif request.method == "POST":
-        data = request.get_json()
-        geo_col = []
-        reshape_col = []
-        time_col = []
+@bp.route("/heatmap", methods=["POST"])
+def get_heatmap():
 
-        for dataset in data:
-            geo_col.append(dataset["geoColumn"])
-            reshape_col.append(dataset["reshapeColumn"])
-            time_col.append(dataset["timeColumn"])
+    if mongo.db is None:
+        return ("Database not available", 500)
+
+    data = request.get_json()
+
+    if data is None:
+        return ("Empty request", 400)
+
+    geo_col = []
+    reshape_col = []
+    time_col = []
+
+    for dataset in data:
+        geo_col.append(dataset["geoColumn"])
+        reshape_col.append(dataset["reshapeColumn"])
+        time_col.append(dataset["timeColumn"])
 
     dfs = []
     time_columns = []
@@ -143,22 +137,24 @@ def getHeatmap():
     return response
 
 
-@bp.route("/corr", methods=["GET", "POST"])
-def getCorrLines():
-    if request.method == "GET":
-        geo_col = request.args.getlist("geo")
-        time_col = request.args.getlist("x")
-        reshape_col = request.args.getlist("rshp")
-    elif request.method == "POST":
-        data = request.get_json()
-        geo_col = []
-        reshape_col = []
-        time_col = []
+@bp.route("/corr", methods=["POST"])
+def get_correlation_lines():
+    if mongo.db is None:
+        return ("Database not available", 500)
 
-        for dataset in data:
-            geo_col.append(dataset["geoColumn"])
-            reshape_col.append(dataset["reshapeColumn"])
-            time_col.append(dataset["timeColumn"])
+    data = request.get_json()
+
+    if data is None:
+        return ("Empty request", 400)
+
+    geo_col = []
+    reshape_col = []
+    time_col = []
+
+    for dataset in data:
+        geo_col.append(dataset["geoColumn"])
+        reshape_col.append(dataset["reshapeColumn"])
+        time_col.append(dataset["timeColumn"])
 
     dfs = []
     feature_options = []

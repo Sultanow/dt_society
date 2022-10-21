@@ -5,10 +5,7 @@ import pandas as pd
 from .dataset import DigitalTwinTimeSeries
 
 # from flask_caching import Cache
-from ..extensions import cache
-from ..extensions import mongo
-
-# from extensions import cache, mongo
+from ..extensions import cache, mongo
 
 
 @cache.memoize(timeout=30)
