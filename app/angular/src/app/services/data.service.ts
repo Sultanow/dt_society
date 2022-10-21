@@ -55,9 +55,14 @@ export class DataService {
 
       formData.append('upload', file);
 
-      const request = new HttpRequest('POST', this.apiUrl, formData, {
-        reportProgress: true,
-      });
+      const request = new HttpRequest(
+        'POST',
+        this.apiUrl + 'data/upload',
+        formData,
+        {
+          reportProgress: true,
+        }
+      );
 
       this.http.request(request).subscribe((event) => {
         if (event.type == HttpEventType.UploadProgress) {
@@ -82,7 +87,7 @@ export class DataService {
   ) {
     const request = new HttpRequest(
       'DELETE',
-      this.apiUrl + 'datasets',
+      this.apiUrl + 'data/remove',
       { datasetId: datasetId },
       {
         reportProgress: true,
@@ -107,7 +112,7 @@ export class DataService {
     selectedDatasets: SelectedDatasets,
     inFocus: string | undefined
   ): void {
-    this.http.get(this.apiUrl + 'datasets').subscribe((datasets) => {
+    this.http.get(this.apiUrl + 'data').subscribe((datasets) => {
       availableDatasets.datasets = datasets as DatasetOptions[];
 
       if (inFocus == undefined) {
@@ -150,7 +155,7 @@ export class DataService {
       }
 
       this.http
-        .post(this.apiUrl + 'datasets', {
+        .post(this.apiUrl + 'data/reshape', {
           datasetIdx: targetIndex,
           reshapeColumn: reshapeColumn,
           geoColumn: selectedDatasets.datasets[targetIndex].geoColumn,
