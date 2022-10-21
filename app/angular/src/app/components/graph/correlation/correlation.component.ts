@@ -1,5 +1,5 @@
 import { HttpEventType } from '@angular/common/http';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
 import { SelectedDatasets } from 'src/app/types/Datasets';
 import { GraphData } from 'src/app/types/GraphData';

@@ -35,34 +35,48 @@ export class HistoryComponent implements OnInit {
       JSON.stringify(this.selectedDatasets) !==
       JSON.stringify(this.oldSelectedDatasets)
     ) {
-      this.oldSelectedDatasets = structuredClone(this.selectedDatasets);
       if (this.selectedDatasets.datasets.length > 0) {
-        const datasetId = this.selectedDatasets.inFocusDataset;
+        const selectedDatasetId = this.selectedDatasets.inFocusDataset;
 
-        const indexFocus = this.selectedDatasets.datasets.find(
-          (dataset) => dataset.datasetId == datasetId
+        const selectedDatasetIdx = this.selectedDatasets.datasets.findIndex(
+          (dataset) => dataset.datasetId == selectedDatasetId
         );
 
-        if (indexFocus !== undefined) {
+        if (this.selectedDatasets.datasets[selectedDatasetIdx] !== undefined) {
           if (
-            indexFocus.geoColumn !== undefined &&
-            indexFocus.reshapeColumn !== undefined &&
-            indexFocus.featureColumn !== undefined &&
-            indexFocus.timeColumn !== undefined
+            this.selectedDatasets.datasets[selectedDatasetIdx].geoColumn !==
+              undefined &&
+            this.selectedDatasets.datasets[selectedDatasetIdx].reshapeColumn !==
+              undefined &&
+            this.selectedDatasets.datasets[selectedDatasetIdx].featureColumn !==
+              undefined &&
+            this.selectedDatasets.datasets[selectedDatasetIdx].timeColumn !==
+              undefined
           ) {
-            this.dataService
-              .getData(indexFocus, '/graph/history')
-              .subscribe((data) => {
-                if (data.type === HttpEventType.Response) {
-                  if (data.body) {
-                    this.data.data = data.body.data;
-                    this.data.layout = data.body.layout;
+            if (
+              this.selectedDatasets.datasets[selectedDatasetIdx]
+                .featureColumn !==
+              this.oldSelectedDatasets?.datasets[selectedDatasetIdx]
+                .featureColumn
+            ) {
+              this.dataService
+                .getData(
+                  this.selectedDatasets.datasets[selectedDatasetIdx],
+                  '/graph/history'
+                )
+                .subscribe((data) => {
+                  if (data.type === HttpEventType.Response) {
+                    if (data.body) {
+                      this.data.data = data.body.data;
+                      this.data.layout = data.body.layout;
+                    }
                   }
-                }
-              });
+                });
+            }
           }
         }
       }
+      this.oldSelectedDatasets = structuredClone(this.selectedDatasets);
     }
   }
 

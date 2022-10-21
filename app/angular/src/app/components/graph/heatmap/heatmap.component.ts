@@ -43,6 +43,7 @@ export class HeatmapComponent implements OnInit {
               dataset.timeColumn === undefined
           )
         ) {
+          // this.selectedDatasets.datasets.forEach((dataset, idx) => {});
           this.dataService
             .getData(this.selectedDatasets.datasets, '/graph/heatmap')
             .subscribe((event) => {
