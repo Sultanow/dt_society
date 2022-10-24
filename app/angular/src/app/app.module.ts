@@ -28,6 +28,7 @@ import { DatafilteringComponent } from './components/datafiltering/datafiltering
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatToolbarModule } from '@angular/material/toolbar';
 PlotlyModule.plotlyjs = PlotlyJS;
 
 @NgModule({
@@ -61,6 +62,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     MatButtonModule,
     MatTabsModule,
     ReactiveFormsModule,
+    MatToolbarModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

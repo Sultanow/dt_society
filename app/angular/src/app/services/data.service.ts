@@ -15,13 +15,6 @@ import { Dataset, Selections } from '../types/Datasets';
 export class DataService {
   private apiUrl: string = 'http://127.0.0.1:5000/';
 
-  // private selections: BehaviorSubject<targetDatasetIdxs> = new BehaviorSubject(<
-  //   targetDatasetIdxs
-  // >{
-  //   datasets: [],
-  //   inFocusDataset: 'arbeitslosenquote_jaehrlich_eu.tsv',
-  // });
-
   private selections: BehaviorSubject<Selections> = new BehaviorSubject(<
     Selections
   >{
@@ -47,8 +40,6 @@ export class DataService {
     const file: File = event.target.files[0];
 
     if (file) {
-      //this.fileName = file.name;
-
       const formData = new FormData();
 
       formData.append('upload', file);

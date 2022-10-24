@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify
 from flask_session import Session
 from flask_cors import CORS
 import pandas as pd
@@ -45,15 +45,6 @@ def create_app(test_config=None):
     CORS(app, resources={r"/*": {"origins": "http://localhost:4200"}})
     cache.init_app(app)
     mongo.init_app(app)
-
-    # @app.route("/")
-    # def index():
-    #     if mongo.db is not None:
-    #         collection = mongo.db["collection_1"]
-
-    #         data = collection.find({})
-
-    #     return render_template("db_data.html", files=data)
 
     @app.route("/data/upload", methods=["POST"])
     def upload_dataset():
