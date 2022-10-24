@@ -3,6 +3,8 @@ import { DataService } from 'src/app/services/data.service';
 import { GraphData } from 'src/app/types/GraphData';
 import { Selections } from 'src/app/types/Datasets';
 import { HttpEventType } from '@angular/common/http';
+import { time } from 'console';
+import { transcode } from 'buffer';
 
 @Component({
   selector: 'app-history',
@@ -14,7 +16,15 @@ export class HistoryComponent implements OnInit {
 
   public data: GraphData = {
     data: [],
-    layout: {},
+    layout: {
+      legend: { title: { text: 'Countries' } },
+      paper_bgcolor: '#232323',
+      plot_bgcolor: '#232323',
+      xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)' },
+      yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)' },
+      font: { color: '#f2f2f2' },
+      margin: { t: 30, r: 100 },
+    },
   };
 
   public selections: Selections = {
@@ -23,6 +33,35 @@ export class HistoryComponent implements OnInit {
   };
 
   private oldSelections?: Selections;
+
+  createHistoryPlot(data: {}, selectedIdx: number) {
+    if (this.data.data.length > 0) {
+      this.data.data = [];
+    }
+    for (const [key, value] of Object.entries(data)) {
+      let trace: any = {
+        type: 'scatter',
+        markers: 'lines+markers',
+      };
+
+      trace.name = key;
+
+      if (trace.name !== 'DEU') {
+        trace.visible = 'legendonly';
+      }
+
+      const timeSelected = this.selections.datasets[selectedIdx].timeSelected;
+      const featureSelected =
+        this.selections.datasets[selectedIdx].featureSelected;
+      if (timeSelected !== undefined && featureSelected !== undefined) {
+        trace.x = (value as any)[timeSelected];
+        trace.y = (value as any)[featureSelected];
+      }
+      this.data.layout.yaxis.title = featureSelected;
+      this.data.layout.xaxis.title = timeSelected;
+      this.data.data.push(trace);
+    }
+  }
 
   ngDoCheck() {
     if (
@@ -58,8 +97,10 @@ export class HistoryComponent implements OnInit {
                 .subscribe((data) => {
                   if (data.type === HttpEventType.Response) {
                     if (data.body) {
-                      this.data.data = data.body.data;
-                      this.data.layout = data.body.layout;
+                      // this.data.data = (data.body as any).data;
+                      // this.data.layout = data.body.layout;
+
+                      this.createHistoryPlot(data.body, selectedDatasetIdx);
                     }
                   }
                 });

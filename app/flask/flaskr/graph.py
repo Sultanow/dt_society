@@ -1,4 +1,5 @@
 import json
+from time import time_ns
 import plotly
 
 from flask import (
@@ -40,18 +41,26 @@ def get_map():
         reshape_column=reshape_col,
     )
 
-    fig = create_choropleth_slider_plot(
-        df,
-        geo_column=geo_col,
-        feature_column=feature_col,
-        time_column=time_col,
-    )
+    d = {}
 
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    for country in df[geo_col].unique().tolist():
+        d[country] = {}
 
-    response = jsonify(json.loads(graphJSON))
+        d[country][time_col] = df[df[geo_col] == country][time_col].to_list()
+        d[country][feature_col] = df[df[geo_col] == country][feature_col].to_list()
 
-    return response
+    # fig = create_choropleth_slider_plot(
+    #     df,
+    #     geo_column=geo_col,
+    #     feature_column=feature_col,
+    #     time_column=time_col,
+    # )
+
+    # graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    # response = jsonify(json.loads(graphJSON))
+
+    return d
 
 
 @bp.route("/history", methods=["GET", "POST"])
@@ -72,15 +81,25 @@ def get_history():
         reshape_column=reshape_col,
     )
 
-    fig = create_multi_line_plot(
-        df, geo_col=geo_col, time_column=time_col, feature_column=feature_col
-    )
+    d = {}
 
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    for country in df[geo_col].unique().tolist():
+        d[country] = {}
 
-    response = jsonify(json.loads(graphJSON))
+        d[country][time_col] = df[df[geo_col] == country][time_col].to_list()
+        d[country][feature_col] = df[df[geo_col] == country][feature_col].to_list()
 
-    return response
+    # fig = create_multi_line_plot(
+    #     df, geo_col=geo_col, time_column=time_col, feature_column=feature_col
+    # )
+
+    # graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    # response = jsonify(json.loads(graphJSON))
+
+    # return df.to_json(orient="records")
+    # return response
+    return d
 
 
 @bp.route("/heatmap", methods=["POST"])
