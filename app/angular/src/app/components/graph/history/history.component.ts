@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
-import { GraphData } from 'src/app/types/GraphData';
+import { Plot, ColumnValues, CountryData } from 'src/app/types/GraphData';
 import { Selections } from 'src/app/types/Datasets';
 import { HttpEventType } from '@angular/common/http';
-import { time } from 'console';
-import { transcode } from 'buffer';
 
 @Component({
   selector: 'app-history',
@@ -14,14 +12,14 @@ import { transcode } from 'buffer';
 export class HistoryComponent implements OnInit {
   constructor(private dataService: DataService) {}
 
-  public data: GraphData = {
+  public historyPlot: Plot = {
     data: [],
     layout: {
       legend: { title: { text: 'Countries' } },
       paper_bgcolor: '#232323',
       plot_bgcolor: '#232323',
-      xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)' },
-      yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)' },
+      xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
+      yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
       font: { color: '#f2f2f2' },
       margin: { t: 30, r: 100 },
     },
@@ -34,9 +32,9 @@ export class HistoryComponent implements OnInit {
 
   private oldSelections?: Selections;
 
-  createHistoryPlot(data: {}, selectedIdx: number) {
-    if (this.data.data.length > 0) {
-      this.data.data = [];
+  createHistoryPlot(data: CountryData, selectedIdx: number) {
+    if (this.historyPlot.data.length > 0) {
+      this.historyPlot.data = [];
     }
     for (const [key, value] of Object.entries(data)) {
       let trace: any = {
@@ -54,12 +52,12 @@ export class HistoryComponent implements OnInit {
       const featureSelected =
         this.selections.datasets[selectedIdx].featureSelected;
       if (timeSelected !== undefined && featureSelected !== undefined) {
-        trace.x = (value as any)[timeSelected];
-        trace.y = (value as any)[featureSelected];
+        trace.x = value[timeSelected];
+        trace.y = value[featureSelected];
       }
-      this.data.layout.yaxis.title = featureSelected;
-      this.data.layout.xaxis.title = timeSelected;
-      this.data.data.push(trace);
+      this.historyPlot.layout.yaxis.title = featureSelected;
+      this.historyPlot.layout.xaxis.title = timeSelected;
+      this.historyPlot.data.push(trace);
     }
   }
 
@@ -97,10 +95,10 @@ export class HistoryComponent implements OnInit {
                 .subscribe((data) => {
                   if (data.type === HttpEventType.Response) {
                     if (data.body) {
-                      // this.data.data = (data.body as any).data;
-                      // this.data.layout = data.body.layout;
-
-                      this.createHistoryPlot(data.body, selectedDatasetIdx);
+                      this.createHistoryPlot(
+                        data.body as any,
+                        selectedDatasetIdx
+                      );
                     }
                   }
                 });

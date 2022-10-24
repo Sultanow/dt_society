@@ -1,8 +1,9 @@
 import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { map } from 'rxjs';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
-import { GraphData } from 'src/app/types/GraphData';
+import { CountryData, GraphData, MapPlot, Plot } from 'src/app/types/GraphData';
 
 @Component({
   selector: 'app-map',
@@ -12,9 +13,11 @@ import { GraphData } from 'src/app/types/GraphData';
 export class MapComponent implements OnInit {
   constructor(private dataService: DataService) {}
 
-  public data: GraphData = {
+  public data: MapPlot = {
     data: [],
-    layout: {},
+    layout: {
+      geo: { scope: 'europe' },
+    },
   };
 
   public selections: Selections = {
@@ -25,6 +28,31 @@ export class MapComponent implements OnInit {
   showSpinner: boolean = false;
 
   private oldSelections?: Selections;
+
+  createMapPlot(data: CountryData, selectedIdx: number) {
+    if (this.data.data.length > 0) {
+      this.data.data = [];
+    }
+
+    let mapData: any = {
+      type: 'choropleth',
+      locations: [],
+      z: [],
+      autocolorscale: true,
+    };
+
+    for (const [key, value] of Object.entries(data)) {
+      const timeSelected = this.selections.datasets[selectedIdx].timeSelected;
+      const featureSelected =
+        this.selections.datasets[selectedIdx].featureSelected;
+      if (timeSelected !== undefined && featureSelected !== undefined) {
+        mapData.locations.push(key);
+        mapData.z.push(value[featureSelected][0]);
+      }
+    }
+
+    this.data.data.push(mapData);
+  }
 
   ngDoCheck() {
     if (
@@ -67,8 +95,9 @@ export class MapComponent implements OnInit {
                     console.log('completed');
                     if (data.body) {
                       this.showSpinner = false;
-                      this.data.data = data.body.data;
-                      this.data.layout = data.body.layout;
+                      // this.data.data = data.body.data;
+                      // this.data.layout = data.body.layout;
+                      this.createMapPlot(data.body as any, selectedDatasetIdx);
                     }
                   }
                 });

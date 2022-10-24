@@ -89,16 +89,6 @@ def get_history():
         d[country][time_col] = df[df[geo_col] == country][time_col].to_list()
         d[country][feature_col] = df[df[geo_col] == country][feature_col].to_list()
 
-    # fig = create_multi_line_plot(
-    #     df, geo_col=geo_col, time_column=time_col, feature_column=feature_col
-    # )
-
-    # graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-    # response = jsonify(json.loads(graphJSON))
-
-    # return df.to_json(orient="records")
-    # return response
     return d
 
 
