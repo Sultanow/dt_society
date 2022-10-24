@@ -1,0 +1,70 @@
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule } from '@angular/common/http';
+
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { HistoryComponent } from './components/graph/history/history.component';
+
+import * as PlotlyJS from 'plotly.js-dist-min';
+import { PlotlyModule } from 'angular-plotly.js';
+import { MapComponent } from './components/graph/map/map.component';
+import { HeatmapComponent } from './components/graph/heatmap/heatmap.component';
+import { CorrelationComponent } from './components/graph/correlation/correlation.component';
+import { HwsmoothingComponent } from './components/forecast/hwsmoothing/hwsmoothing.component';
+import { VectorautoregressionComponent } from './components/forecast/vectorautoregression/vectorautoregression.component';
+import { ProphetscenariosComponent } from './components/forecast/prophetscenarios/prophetscenarios.component';
+import { FileuploadComponent } from './components/fileupload/fileupload.component';
+import { MatIconModule } from '@angular/material/icon';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatRadioModule } from '@angular/material/radio';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DatafilteringComponent } from './components/datafiltering/datafiltering.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatToolbarModule } from '@angular/material/toolbar';
+PlotlyModule.plotlyjs = PlotlyJS;
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HistoryComponent,
+    MapComponent,
+    HeatmapComponent,
+    CorrelationComponent,
+    HwsmoothingComponent,
+    VectorautoregressionComponent,
+    ProphetscenariosComponent,
+    FileuploadComponent,
+    DatafilteringComponent,
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    PlotlyModule,
+    HttpClientModule,
+    BrowserAnimationsModule,
+    MatIconModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    MatSlideToggleModule,
+    MatRadioModule,
+    FormsModule,
+    MatProgressSpinnerModule,
+    MatButtonModule,
+    MatTabsModule,
+    ReactiveFormsModule,
+    MatToolbarModule,
+  ],
+  providers: [],
+  bootstrap: [AppComponent],
+})
+export class AppModule {}

@@ -1,0 +1,133 @@
+<div class="data-selector">
+  <mat-radio-group
+    aria-label="Select an option"
+    [(ngModel)]="selections.selectedDataset"
+    (change)="changeFocus()"
+  >
+    <mat-radio-button
+      *ngFor="let dataset of selections.datasets"
+      [value]="dataset.id"
+    >
+      {{ dataset.id }}
+    </mat-radio-button>
+  </mat-radio-group>
+</div>
+<div class="column-selection-accordion">
+  <mat-accordion>
+    <ng-container *ngFor="let dataset of selections.datasets">
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            {{ dataset.id }}
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="selected-columns-container">
+          <div class="column-inputs-row">
+            <mat-form-field appearance="fill">
+              <mat-label>geo</mat-label>
+              <mat-select
+                required
+                #geoSelect
+                (selectionChange)="
+                  updateSelectedColumns(dataset.id, geoSelect.value, 'geo')
+                "
+              >
+                <mat-option
+                  *ngFor="let column of dataset.columns"
+                  [value]="column"
+                >
+                  {{ column }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>reshape</mat-label>
+              <mat-select
+                required
+                #reshapeSelect
+                (selectionChange)="
+                  updateSelectedColumns(dataset.id, reshapeSelect.value, 'rshp')
+                "
+              >
+                <mat-option
+                  *ngFor="let column of dataset.columns"
+                  [value]="column"
+                >
+                  {{ column }}</mat-option
+                >
+              </mat-select>
+            </mat-form-field>
+            <mat-slide-toggle
+              #reshapeToggle
+              (change)="reshapeOptions(dataset.id, reshapeToggle.checked)"
+              >Apply reshape
+            </mat-slide-toggle>
+          </div>
+          <div class="column-inputs-row">
+            <mat-form-field appearance="fill">
+              <mat-label>x</mat-label>
+              <mat-select
+                required
+                #xSelect
+                (selectionChange)="
+                  updateSelectedColumns(dataset.id, xSelect.value, 'x')
+                "
+              >
+                <mat-option
+                  *ngFor="let column of dataset.timeOptions"
+                  [value]="column"
+                >
+                  {{ column }}</mat-option
+                >
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>y</mat-label>
+              <mat-select
+                required
+                #ySelect
+                (selectionChange)="
+                  updateSelectedColumns(dataset.id, ySelect.value, 'y')
+                "
+              >
+                <mat-option
+                  *ngFor="let column of dataset.featureOptions"
+                  [value]="column"
+                >
+                  {{ column }}</mat-option
+                >
+              </mat-select>
+            </mat-form-field>
+            <button
+              mat-icon-button
+              color="primary"
+              class="delete-button"
+              (click)="onDeleteFile(dataset.id)"
+            >
+              <mat-icon>delete_forever</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </ng-container>
+  </mat-accordion>
+  <input
+    type="file"
+    class="file-input"
+    (change)="onFileUpload($event)"
+    #fileUpload
+    style="display: none"
+  />
+  <div #filesContainer class="files-container">
+    <div class="file-upload">
+      <button
+        mat-mini-fab
+        color="primary"
+        class="upload-btn"
+        (click)="fileUpload.value = ''; fileUpload.click()"
+      >
+        <mat-icon>upload_file</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

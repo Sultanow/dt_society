@@ -1,0 +1,18 @@
+<mat-toolbar color="primary">
+  <span>Digital Twin of Society</span>
+</mat-toolbar>
+<app-datafiltering></app-datafiltering>
+<div class="plot-row">
+  <app-history></app-history>
+  <app-map></app-map>
+</div>
+<mat-tab-group mat-stretch-tabs>
+  <mat-tab label="Heatmap">
+    <app-heatmap></app-heatmap>
+  </mat-tab>
+  <mat-tab label="Correlation line chart">
+    <ng-template matTabContent>
+      <app-correlation></app-correlation>
+    </ng-template>
+  </mat-tab>
+</mat-tab-group>
