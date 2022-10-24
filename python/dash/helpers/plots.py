@@ -64,6 +64,8 @@ def create_multi_line_plot(
         yaxis_title=feature_column,
         template=theme,
         margin={"t": 30, "autoexpand": True},
+        paper_bgcolor="#232323",
+        plot_bgcolor="#232323",
     )
 
     return fig
@@ -343,6 +345,8 @@ def create_two_line_plot(
         margin={"t": 20, "b": 20},
         height=300,
         legend={"groupclick": "toggleitem"},
+        paper_bgcolor="#232323",
+        plot_bgcolor="#232323",
         **yax_titles,
     )
 
@@ -367,7 +371,12 @@ def create_correlation_heatmap(df: pd.DataFrame) -> go.Figure:
         labels={"color": "Pearson r"},
     )
 
-    fig.update_layout(template=theme, margin={"t": 20})
+    fig.update_layout(
+        template=theme,
+        margin={"t": 20},
+        paper_bgcolor="#232323",
+        plot_bgcolor="#232323",
+    )
 
     return fig
 
@@ -423,6 +432,8 @@ def create_forecast_plot(
         xaxis_title=time_column,
         yaxis_title=feature_column,
         margin={"t": 20},
+        paper_bgcolor="#232323",
+        plot_bgcolor="#232323",
     )
 
     return fig
@@ -481,6 +492,8 @@ def create_var_forecast_plot_multi(
     fig.update_layout(
         template="plotly_dark",
         margin={"t": 20, "b": 20},
+        paper_bgcolor="#232323",
+        plot_bgcolor="#232323",
         **yax_titles,
     )
 
@@ -600,6 +613,12 @@ def create_multivariate_forecast_prophet(
         for i, feature in enumerate([y_feature] + feature_columns)
     }
 
-    fig.update_layout(template="plotly_dark", margin={"t": 20}, **yax_titles)
+    fig.update_layout(
+        template="plotly_dark",
+        paper_bgcolor="#232323",
+        plot_bgcolor="#232323",
+        margin={"t": 20},
+        **yax_titles,
+    )
 
     return fig
