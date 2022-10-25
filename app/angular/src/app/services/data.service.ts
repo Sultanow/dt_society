@@ -6,7 +6,14 @@ import {
   HttpEventType,
   HttpRequest,
 } from '@angular/common/http';
-import { GraphData } from '../types/GraphData';
+import {
+  ColumnValues,
+  CorrelationMatrix,
+  CountryData,
+  GraphData,
+  MapPlot,
+  Plot,
+} from '../types/GraphData';
 import { Dataset, Selections } from '../types/Datasets';
 
 @Injectable({
@@ -29,7 +36,10 @@ export class DataService {
     this.selections.next(newDataSel);
   }
 
-  getData(columns: any, endpoint: string): Observable<HttpEvent<GraphData>> {
+  getData(
+    columns: any,
+    endpoint: string
+  ): Observable<HttpEvent<CorrelationMatrix | CountryData | ColumnValues[]>> {
     const request = new HttpRequest('POST', this.apiUrl + endpoint, columns, {
       reportProgress: true,
     });

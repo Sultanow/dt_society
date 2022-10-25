@@ -12,19 +12,26 @@ export interface CountryData {
 }
 
 export interface Plot {
-  data: CountryData[];
+  data: any[];
   layout: {
-    legend: { title: { text: string } };
+    [property: string]: any;
+    legend: { title: { text: string }; groupclick?: string };
     paper_bgcolor: string;
     plot_bgcolor: string;
     xaxis: { gridcolor: string; title: string | undefined };
     yaxis: { gridcolor: string; title: string | undefined };
     font: { color: string };
-    margin: { t: number; r: number };
+    margin?: { t: number; r: number };
+    grid?: {};
   };
 }
 
 export interface MapPlot {
   data: CountryData[];
   layout: any;
+}
+
+export interface CorrelationMatrix {
+  columns: string[];
+  matrix: [number[] | null[]];
 }

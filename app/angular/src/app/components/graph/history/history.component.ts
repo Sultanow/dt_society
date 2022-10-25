@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
-import { Plot, ColumnValues, CountryData } from 'src/app/types/GraphData';
+import { Plot, CountryData } from 'src/app/types/GraphData';
 import { Selections } from 'src/app/types/Datasets';
 import { HttpEventType } from '@angular/common/http';
 
@@ -92,11 +92,11 @@ export class HistoryComponent implements OnInit {
                   this.selections.datasets[selectedDatasetIdx],
                   '/graph/history'
                 )
-                .subscribe((data) => {
-                  if (data.type === HttpEventType.Response) {
-                    if (data.body) {
+                .subscribe((event) => {
+                  if (event.type === HttpEventType.Response) {
+                    if (event.body) {
                       this.createHistoryPlot(
-                        data.body as any,
+                        event.body as CountryData,
                         selectedDatasetIdx
                       );
                     }

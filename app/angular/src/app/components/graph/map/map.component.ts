@@ -1,9 +1,8 @@
 import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { map } from 'rxjs';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
-import { CountryData, GraphData, MapPlot, Plot } from 'src/app/types/GraphData';
+import { CountryData, MapPlot } from 'src/app/types/GraphData';
 
 @Component({
   selector: 'app-map',
@@ -16,7 +15,10 @@ export class MapComponent implements OnInit {
   public data: MapPlot = {
     data: [],
     layout: {
-      geo: { scope: 'europe' },
+      geo: {
+        scope: 'europe',
+        projection: { type: 'natural earth2', scale: 1.2 },
+      },
     },
   };
 
