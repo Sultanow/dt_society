@@ -49,6 +49,8 @@ export class MapComponent implements OnInit {
         this.selections.datasets[selectedIdx].featureSelected;
       if (timeSelected !== undefined && featureSelected !== undefined) {
         mapData.locations.push(key);
+
+        console.log(featureSelected);
         mapData.z.push(value[featureSelected][0]);
       }
     }
@@ -80,7 +82,10 @@ export class MapComponent implements OnInit {
           ) {
             if (
               this.selections.datasets[selectedDatasetIdx].featureSelected !==
-              this.oldSelections?.datasets[selectedDatasetIdx].featureSelected
+                this.oldSelections?.datasets[selectedDatasetIdx]
+                  .featureSelected ||
+              this.selections.selectedDataset !==
+                this.oldSelections?.selectedDataset
             ) {
               this.showSpinner = true;
               this.dataService

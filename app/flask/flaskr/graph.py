@@ -42,6 +42,7 @@ def get_map():
         reshape_column=reshape_col,
     )
 
+    df = df.fillna(0)
     d = {}
 
     for country in df[geo_col].unique().tolist():
@@ -49,17 +50,6 @@ def get_map():
 
         d[country][time_col] = df[df[geo_col] == country][time_col].to_list()
         d[country][feature_col] = df[df[geo_col] == country][feature_col].to_list()
-
-    # fig = create_choropleth_slider_plot(
-    #     df,
-    #     geo_column=geo_col,
-    #     feature_column=feature_col,
-    #     time_column=time_col,
-    # )
-
-    # graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-    # response = jsonify(json.loads(graphJSON))
 
     return d
 
@@ -81,6 +71,8 @@ def get_history():
         dataset_id=data_id,
         reshape_column=reshape_col,
     )
+
+    df = df.fillna(0)
 
     d = {}
 

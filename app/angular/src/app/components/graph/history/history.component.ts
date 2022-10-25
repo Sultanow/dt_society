@@ -84,8 +84,11 @@ export class HistoryComponent implements OnInit {
               undefined
           ) {
             if (
-              this.selections.datasets[selectedDatasetIdx].featureOptions !==
-              this.oldSelections?.datasets[selectedDatasetIdx].featureSelected
+              this.selections.datasets[selectedDatasetIdx].featureSelected !==
+                this.oldSelections?.datasets[selectedDatasetIdx]
+                  .featureSelected ||
+              this.selections.selectedDataset !==
+                this.oldSelections?.selectedDataset
             ) {
               this.dataService
                 .getData(
