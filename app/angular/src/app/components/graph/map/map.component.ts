@@ -2,7 +2,7 @@ import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
-import { GraphData } from 'src/app/types/GraphData';
+import { CountryData, GraphData, MapPlot } from 'src/app/types/GraphData';
 
 interface Frame {
   data: {};
@@ -45,14 +45,14 @@ export class MapComponent implements OnInit {
 
     let feature = this.selections.datasets[selectedIdx].featureSelected;
     let max_val = 0;
-    let initial_z = []
+    let initial_z = [];
 
     if (feature !== undefined) {
       for (let year in all_years) {
         let z_entries = [];
         for (let [key, value] of Object.entries(data)) {
           z_entries.push((value as any)[feature][year]);
-          if(String(year) === "0"){
+          if (String(year) === '0') {
             initial_z.push((value as any)[feature][0]);
           }
           if (max_val < Number((value as any)[feature][year])) {
@@ -143,7 +143,10 @@ export class MapComponent implements OnInit {
           ) {
             if (
               this.selections.datasets[selectedDatasetIdx].featureSelected !==
-              this.oldSelections?.datasets[selectedDatasetIdx].featureSelected
+                this.oldSelections?.datasets[selectedDatasetIdx]
+                  .featureSelected ||
+              this.selections.selectedDataset !==
+                this.oldSelections?.selectedDataset
             ) {
               this.showSpinner = true;
               this.dataService

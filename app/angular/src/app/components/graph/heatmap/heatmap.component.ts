@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
-import { GraphData } from 'src/app/types/GraphData';
+import { CorrelationMatrix, Plot } from 'src/app/types/GraphData';
 
 @Component({
   selector: 'app-heatmap',
@@ -13,9 +13,16 @@ import { GraphData } from 'src/app/types/GraphData';
 export class HeatmapComponent implements OnInit {
   constructor(private dataService: DataService) {}
 
-  public data: GraphData = {
+  public data: Plot = {
     data: [],
-    layout: {},
+    layout: {
+      legend: { title: { text: 'Pearson r' } },
+      paper_bgcolor: '#232323',
+      plot_bgcolor: '#232323',
+      xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
+      yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
+      font: { color: '#f2f2f2' },
+    },
   };
 
   public selections: Selections = {
@@ -31,6 +38,32 @@ export class HeatmapComponent implements OnInit {
 
   private oldSelections?: Selections;
   public selectedFeatures: string | null = null;
+
+  createHeatmapPlot(data: CorrelationMatrix) {
+    if (this.data.data.length > 0) {
+      this.data.data = [];
+    }
+
+    let heatmap: any = {};
+
+    let replacedZeroes = data.matrix.map((row) =>
+      row.map((value) => {
+        if (value === 0) {
+          return null;
+        }
+        return value;
+      })
+    );
+
+    heatmap.z = replacedZeroes.reverse();
+    heatmap.x = data.columns;
+    heatmap.y = data.columns.slice().reverse();
+    heatmap.type = 'heatmap';
+    heatmap.colorscale = 'Viridis';
+    heatmap.colorbar = { title: 'Pearson r' };
+
+    this.data.data.push(heatmap);
+  }
 
   ngDoCheck() {
     if (
@@ -49,8 +82,7 @@ export class HeatmapComponent implements OnInit {
             .subscribe((event) => {
               if (event.type === HttpEventType.Response) {
                 if (event.body) {
-                  this.data.data = event.body.data;
-                  this.data.layout = event.body.layout;
+                  this.createHeatmapPlot(event.body as CorrelationMatrix);
                 }
               }
             });

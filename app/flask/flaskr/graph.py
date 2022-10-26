@@ -1,6 +1,7 @@
 import json
 from time import time_ns
 import plotly
+import numpy as np
 
 from flask import (
     Blueprint,
@@ -41,6 +42,7 @@ def get_map():
         reshape_column=reshape_col,
     )
 
+    df = df.fillna(0)
     d = {}
 
     for country in df[geo_col].unique().tolist():
@@ -48,17 +50,6 @@ def get_map():
 
         d[country][time_col] = df[df[geo_col] == country][time_col].to_list()
         d[country][feature_col] = df[df[geo_col] == country][feature_col].to_list()
-
-    # fig = create_choropleth_slider_plot(
-    #     df,
-    #     geo_column=geo_col,
-    #     feature_column=feature_col,
-    #     time_column=time_col,
-    # )
-
-    # graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-    # response = jsonify(json.loads(graphJSON))
 
     return d
 
@@ -81,6 +72,8 @@ def get_history():
         reshape_column=reshape_col,
     )
 
+    df = df.fillna(0)
+
     d = {}
 
     for country in df[geo_col].unique().tolist():
@@ -89,16 +82,6 @@ def get_history():
         d[country][time_col] = df[df[geo_col] == country][time_col].to_list()
         d[country][feature_col] = df[df[geo_col] == country][feature_col].to_list()
 
-    # fig = create_multi_line_plot(
-    #     df, geo_col=geo_col, time_column=time_col, feature_column=feature_col
-    # )
-
-    # graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-    # response = jsonify(json.loads(graphJSON))
-
-    # return df.to_json(orient="records")
-    # return response
     return d
 
 
@@ -125,6 +108,8 @@ def get_heatmap():
     dfs = []
     time_columns = []
 
+    d = {}
+
     collection = mongo.db["collection_1"]
     for i in range(collection.count_documents({})):
         df = parse_dataset(
@@ -144,16 +129,21 @@ def get_heatmap():
         merged_df, merged_time_col = merge_dataframes_multi(dfs, time_columns)
 
         merged_df = merged_df.drop(columns=[merged_time_col]).infer_objects()
-        fig = create_correlation_heatmap(merged_df)
+
+        triangular_upper_mask = np.triu(np.ones(merged_df.corr().shape)).astype(bool)
+
+        correlation_matrix = merged_df.corr().where(~triangular_upper_mask).fillna(0)
 
     else:
-        fig = create_correlation_heatmap(dfs[0])
+        triangular_upper_mask = np.triu(np.ones(dfs[0].corr().shape)).astype(bool)
 
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+        correlation_matrix = dfs[0].corr().where(~triangular_upper_mask)
 
-    response = jsonify(json.loads(graphJSON))
+    d["columns"] = correlation_matrix.columns.to_list()
 
-    return response
+    d["matrix"] = correlation_matrix.values.tolist()
+
+    return jsonify(d)
 
 
 @bp.route("/corr", methods=["POST"])
@@ -178,8 +168,11 @@ def get_correlation_lines():
     dfs = []
     feature_options = []
 
+    d = []
+
     collection = mongo.db["collection_1"]
     for i in range(collection.count_documents({})):
+        f = {}
         df = parse_dataset(
             geo_column=geo_col[i],
             dataset_id=i,
@@ -196,10 +189,10 @@ def get_correlation_lines():
         feature_options.append(features)
         dfs.append(df_by_country)
 
-    fig = create_two_line_plot(dfs, time_col, feature_options)
+        f[time_col[i]] = df_by_country[time_col[i]].to_list()
+        for feature in features:
+            f[feature] = df_by_country[feature].tolist()
 
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+        d.append(f)
 
-    response = jsonify(json.loads(graphJSON))
-
-    return response
+    return d
