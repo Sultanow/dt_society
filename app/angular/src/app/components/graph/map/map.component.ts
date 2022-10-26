@@ -49,7 +49,6 @@ export class MapComponent implements OnInit {
 
     if (feature !== undefined) {
       for (let year in all_years) {
-        console.log(year);
         let z_entries = [];
         for (let [key, value] of Object.entries(data)) {
           z_entries.push((value as any)[feature][year]);
@@ -77,7 +76,6 @@ export class MapComponent implements OnInit {
           },
           name: String(all_years[year]),
         };
-        console.log(frame);
         this.frames.push(frame);
       }
 
