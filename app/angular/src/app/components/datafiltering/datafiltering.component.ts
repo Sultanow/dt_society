@@ -1,6 +1,8 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { Selections } from '../../types/Datasets';
 import { DataService } from 'src/app/services/data.service';
+import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { UploaddialogComponent } from './uploaddialog/uploaddialog.component';
 
 @Component({
   selector: 'app-datafiltering',
@@ -8,7 +10,7 @@ import { DataService } from 'src/app/services/data.service';
   styleUrls: ['./datafiltering.component.css'],
 })
 export class DatafilteringComponent implements OnInit {
-  constructor(private dataService: DataService) {}
+  constructor(private dataService: DataService, public dialog: MatDialog) {}
 
   selections: Selections = {
     datasets: [],
@@ -53,7 +55,7 @@ export class DatafilteringComponent implements OnInit {
   }
 
   onFileUpload(event: any) {
-    this.dataService.uploadDataset(event, this.selections);
+    this.dialog.open(UploaddialogComponent, { data: this.selections });
   }
 
   onDeleteFile(datasedId: string | undefined) {

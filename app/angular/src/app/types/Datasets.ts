@@ -1,5 +1,6 @@
 export interface Dataset {
   id?: string;
+  separator?: string;
   columns?: string[];
   timeOptions?: string[];
   featureOptions?: string[];

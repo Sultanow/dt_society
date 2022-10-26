@@ -29,6 +29,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatDialogModule } from '@angular/material/dialog';
+import { UploaddialogComponent } from './components/datafiltering/uploaddialog/uploaddialog.component';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 PlotlyModule.plotlyjs = PlotlyJS;
 
 @NgModule({
@@ -43,6 +47,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     ProphetscenariosComponent,
     FileuploadComponent,
     DatafilteringComponent,
+    UploaddialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -63,6 +68,9 @@ PlotlyModule.plotlyjs = PlotlyJS;
     MatTabsModule,
     ReactiveFormsModule,
     MatToolbarModule,
+    MatButtonToggleModule,
+    MatDialogModule,
+    MatSnackBarModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

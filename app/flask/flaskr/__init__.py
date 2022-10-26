@@ -1,5 +1,6 @@
 import os
-from flask import Flask, request, jsonify
+from tkinter.ttk import Separator
+from flask import Flask, request, jsonify, abort
 from flask_session import Session
 from flask_cors import CORS
 import pandas as pd
@@ -46,14 +47,23 @@ def create_app(test_config=None):
     cache.init_app(app)
     mongo.init_app(app)
 
+    @app.errorhandler(400)
+    def page_not_found(error):
+        print("Unable to read dataset.")
+        return ("", 400)
+
     @app.route("/data/upload", methods=["POST"])
     def upload_dataset():
 
         uploaded_file = request.files["upload"]
+        separator = request.form.get("separator")
 
         if uploaded_file.filename != "":
+            try:
+                df = pd.read_csv(uploaded_file.stream, sep=separator)
 
-            df = pd.read_table(uploaded_file.stream)
+            except ValueError:
+                abort(400)
 
             if mongo.db is not None:
                 collection = mongo.db["collection_1"]
@@ -83,6 +93,8 @@ def create_app(test_config=None):
         avail_columns = []
 
         datasets = collection.find({})
+
+        collection.delete_one({"filename": "broadband_data_y.csv"})
 
         for i, dataset in enumerate(datasets):
             columns = parse_dataset(geo_column=None, dataset_id=i).columns.to_list()

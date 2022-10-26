@@ -1,0 +1,33 @@
+<h1 mat-dialog-title>Upload your dataset</h1>
+<div mat-dialog-content>
+  <input
+    type="file"
+    class="file-input"
+    #fileUpload
+    style="display: none"
+    (change)="onFileSelected($event)"
+  />
+  <div class="sub-title">Separator</div>
+  <mat-button-toggle-group #sepSelect [(ngModel)]="separator">
+    <mat-button-toggle value=",">,</mat-button-toggle>
+    <mat-button-toggle value="\\t">\t</mat-button-toggle>
+  </mat-button-toggle-group>
+  <div class="sub-title">Dataset</div>
+  <div #filesContainer class="files-container">
+    <div class="file-upload">
+      {{ fileName || "No file uploaded yet." }}
+      <button
+        mat-button
+        color="primary"
+        class="upload-btn"
+        (click)="fileUpload.value = ''; fileUpload.click()"
+      >
+        Browse
+      </button>
+    </div>
+  </div>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onFileUpload()">Upload</button>
+  <button mat-button mat-dialog-close>Close</button>
+</div>

@@ -111,20 +111,13 @@
       </mat-expansion-panel>
     </ng-container>
   </mat-accordion>
-  <input
-    type="file"
-    class="file-input"
-    (change)="onFileUpload($event)"
-    #fileUpload
-    style="display: none"
-  />
   <div #filesContainer class="files-container">
     <div class="file-upload">
       <button
         mat-mini-fab
         color="primary"
         class="upload-btn"
-        (click)="fileUpload.value = ''; fileUpload.click()"
+        (click)="onFileUpload($event)"
       >
         <mat-icon>upload_file</mat-icon>
       </button>

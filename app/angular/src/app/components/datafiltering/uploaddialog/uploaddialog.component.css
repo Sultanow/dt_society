@@ -1,0 +1,10 @@
+mat-button-toggle-group {
+  height: 30px;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.sub-title {
+  font-size: large;
+  margin-bottom: 5px;
+}

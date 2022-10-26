@@ -15,6 +15,11 @@ import {
   Plot,
 } from '../types/GraphData';
 import { Dataset, Selections } from '../types/Datasets';
+import {
+  MatSnackBar,
+  MatSnackBarHorizontalPosition,
+  MatSnackBarVerticalPosition,
+} from '@angular/material/snack-bar';
 
 @Injectable({
   providedIn: 'root',
@@ -26,11 +31,10 @@ export class DataService {
     Selections
   >{
     datasets: [],
-    targetDatasetIdx: undefined,
   });
   currentSelections = this.selections.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private _snackBar: MatSnackBar) {}
 
   updateDatasetsSelection(newDataSel: Selections) {
     this.selections.next(newDataSel);
@@ -46,13 +50,16 @@ export class DataService {
     return this.http.request(request);
   }
 
-  uploadDataset(event: any, selections: Selections): void {
-    const file: File = event.target.files[0];
-
+  uploadDataset(
+    file: File | undefined,
+    separator: string,
+    selections: Selections
+  ): void {
     if (file) {
       const formData = new FormData();
 
       formData.append('upload', file);
+      formData.append('separator', separator);
 
       const request = new HttpRequest(
         'POST',
@@ -68,8 +75,18 @@ export class DataService {
           console.log('uploading');
         }
         if (event.type == HttpEventType.Response) {
-          console.log('completed upload');
-          this.getAvailableDatasets(selections);
+          if (event.status === 204) {
+            console.log('completed upload');
+            this._snackBar.open('Uploaded dataset successfully', 'Close', {
+              duration: 4000,
+              horizontalPosition: 'end',
+              verticalPosition: 'bottom',
+            });
+            this.getAvailableDatasets(selections);
+          }
+          if (event.status === 500) {
+            console.log('OOps');
+          }
         }
       });
     }
