@@ -45,12 +45,17 @@ export class MapComponent implements OnInit {
 
     let feature = this.selections.datasets[selectedIdx].featureSelected;
     let max_val = 0;
+    let initial_z = []
 
     if (feature !== undefined) {
       for (let year in all_years) {
+        console.log(year);
         let z_entries = [];
         for (let [key, value] of Object.entries(data)) {
           z_entries.push((value as any)[feature][year]);
+          if(String(year) === "0"){
+            initial_z.push((value as any)[feature][0]);
+          }
           if (max_val < Number((value as any)[feature][year])) {
             max_val = (value as any)[feature][year];
           }
@@ -80,8 +85,8 @@ export class MapComponent implements OnInit {
         data: [
           {
             type: 'choroplethmapbox',
-            locations: [],
-            z: [],
+            locations: all_keys,
+            z: initial_z,
             zmin: 0,
             zmax: max_val,
             geojson:
