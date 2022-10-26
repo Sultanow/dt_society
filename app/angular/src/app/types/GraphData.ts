@@ -35,3 +35,12 @@ export interface CorrelationMatrix {
   columns: string[];
   matrix: [number[] | null[]];
 }
+
+export interface Frame {
+  data: [
+    {
+    z: any[]
+    }
+  ];
+  name: string;
+}
