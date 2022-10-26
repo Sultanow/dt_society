@@ -4,6 +4,12 @@ import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 import { GraphData } from 'src/app/types/GraphData';
 
+interface Frame {
+  data: {};
+  layout: {};
+  name: string;
+}
+
 @Component({
   selector: 'app-map',
   styleUrls: ['./map.component.css'],
@@ -11,6 +17,8 @@ import { GraphData } from 'src/app/types/GraphData';
 })
 export class MapComponent implements OnInit {
   constructor(private dataService: DataService) {}
+
+  public frames: Frame[] = [];
 
   public data: GraphData = {
     data: [],
@@ -25,6 +33,88 @@ export class MapComponent implements OnInit {
   showSpinner: boolean = false;
 
   private oldSelections?: Selections;
+
+  createChoroplethMap(data: {}, selectedIdx: number) {
+    if (this.data.data.length > 0) {
+      this.data.data = [];
+    }
+
+    let first_year = (Object.values(data) as any)[0]['Time'][0];
+    let all_years = (Object.values(data) as any)[0]['Time'];
+    let all_keys = Object.keys(data);
+
+    let feature = this.selections.datasets[selectedIdx].featureSelected;
+    let max_val = 0;
+
+    if (feature !== undefined) {
+      for (let year in all_years) {
+        let z_entries = [];
+        for (let [key, value] of Object.entries(data)) {
+          z_entries.push((value as any)[feature][year]);
+          if (max_val < Number((value as any)[feature][year])) {
+            max_val = (value as any)[feature][year];
+          }
+        }
+        let frame: Frame = {
+          data: [
+            {
+              z: z_entries,
+              locations: all_keys,
+            },
+          ],
+          layout: {
+            title: 'Choropleth Plot',
+            paper_bgcolor: '#232323',
+            plot_bgcolor: '#232323',
+            mapbox: {
+              style: 'carto-darkmatter',
+            },
+          },
+          name: String(all_years[year]),
+        };
+        console.log(frame);
+        this.frames.push(frame);
+      }
+
+      this.data = {
+        data: [
+          {
+            type: 'choroplethmapbox',
+            locations: [],
+            z: [],
+            zmin: 0,
+            zmax: max_val,
+            geojson:
+              'https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSON/europe.geojson',
+            featureidkey: 'properties.ISO3',
+            marker: { opacity: 0.7 },
+          },
+        ],
+        layout: {
+          title: 'Choropleth Plot',
+          paper_bgcolor: '#232323',
+          plot_bgcolor: '#232323',
+          font: { color: '#f2f2f2' },
+          mapbox: {
+            style: 'carto-darkmatter',
+            center: { lat: 53, lon: 9 },
+          },
+          sliders: [
+            {
+              currentvalue: {
+                prefix: 'Year: ',
+              },
+              steps: this.frames.map((f) => ({
+                label: f.name,
+                method: 'animate',
+                args: [[f.name], { frame: { duration: 0 } }],
+              })),
+            },
+          ],
+        },
+      };
+    }
+  }
 
   ngDoCheck() {
     if (
@@ -67,8 +157,7 @@ export class MapComponent implements OnInit {
                     console.log('completed');
                     if (data.body) {
                       this.showSpinner = false;
-                      this.data.data = data.body.data;
-                      this.data.layout = data.body.layout;
+                      this.createChoroplethMap(data.body, selectedDatasetIdx);
                     }
                   }
                 });

@@ -2,6 +2,7 @@
   *ngIf="data.data.length > 0 && showSpinner == false"
   [data]="data.data"
   [layout]="data.layout"
+  [frames] = "frames"
 ></plotly-plot>
 <div *ngIf="showSpinner == true" class="spinner-container">
   <mat-spinner></mat-spinner>
