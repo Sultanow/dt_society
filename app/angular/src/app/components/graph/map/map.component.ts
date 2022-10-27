@@ -2,13 +2,7 @@ import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
-import { CountryData, GraphData, MapPlot } from 'src/app/types/GraphData';
-
-interface Frame {
-  data: {};
-  layout: {};
-  name: string;
-}
+import { GraphData, Frame } from 'src/app/types/GraphData';
 
 @Component({
   selector: 'app-map',
@@ -18,63 +12,74 @@ interface Frame {
 export class MapComponent implements OnInit {
   constructor(private dataService: DataService) {}
 
-  public frames: Frame[] = [];
+  public showSpinner: boolean = false;
 
   public data: GraphData = {
     data: [],
     layout: {},
   };
+  public frames: Frame[] = [];
 
-  public selections: Selections = {
+  private selections: Selections = {
     datasets: [],
     selectedDataset: undefined,
   };
-
-  showSpinner: boolean = false;
-
   private oldSelections?: Selections;
+
+  private geojsons = {
+    global: {
+      url: 'https://datahub.io/core/geo-countries/r/countries.geojson',
+      featureidkey: 'properties.ISO_A3',
+      center: { lat: 56.5, lon: 11 },
+      zoom: 1.0,
+    },
+    germany: {
+      url: 'https://raw.githubusercontent.com/isellsoap/deutschlandGeoJSON/main/2_bundeslaender/3_mittel.geo.json',
+      featureidkey: 'properties.id',
+      center: { lat: 51.3, lon: 10 },
+      zoom: 3.5,
+    },
+  };
 
   createChoroplethMap(data: {}, selectedIdx: number) {
     if (this.data.data.length > 0) {
       this.data.data = [];
     }
 
-    let first_year = (Object.values(data) as any)[0]['Time'][0];
-    let all_years = (Object.values(data) as any)[0]['Time'];
-    let all_keys = Object.keys(data);
+    let featureSelected = this.selections.datasets[selectedIdx].featureSelected;
+    let timeSelected = this.selections.datasets[selectedIdx].timeSelected;
 
-    let feature = this.selections.datasets[selectedIdx].featureSelected;
-    let max_val = 0;
-    let initial_z = [];
+    if (featureSelected !== undefined && timeSelected !== undefined) {
+      let first_timestamp = (Object.values(data) as any)[0][timeSelected][0];
+      let all_timestamps = (Object.values(data) as any)[0][timeSelected];
 
-    if (feature !== undefined) {
-      for (let year in all_years) {
+      let all_keys = Object.keys(data);
+      let z_min_val = 0;
+      let z_max_val = 0;
+
+      if (this.frames.length > 0) {
+        this.frames = [];
+      }
+
+      for (let timestamp in all_timestamps) {
         let z_entries = [];
         for (let [key, value] of Object.entries(data)) {
-          z_entries.push((value as any)[feature][year]);
-          if (String(year) === '0') {
-            initial_z.push((value as any)[feature][0]);
+          z_entries.push((value as any)[featureSelected][timestamp]);
+          if (z_max_val < Number((value as any)[featureSelected][timestamp])) {
+            z_max_val = (value as any)[featureSelected][timestamp];
           }
-          if (max_val < Number((value as any)[feature][year])) {
-            max_val = (value as any)[feature][year];
+          if (z_min_val > Number((value as any)[featureSelected][timestamp])) {
+            z_min_val = (value as any)[featureSelected][timestamp];
           }
         }
+
         let frame: Frame = {
           data: [
             {
               z: z_entries,
-              locations: all_keys,
             },
           ],
-          layout: {
-            title: 'Choropleth Plot',
-            paper_bgcolor: '#232323',
-            plot_bgcolor: '#232323',
-            mapbox: {
-              style: 'carto-darkmatter',
-            },
-          },
-          name: String(all_years[year]),
+          name: String(all_timestamps[timestamp]),
         };
         this.frames.push(frame);
       }
@@ -84,24 +89,66 @@ export class MapComponent implements OnInit {
           {
             type: 'choroplethmapbox',
             locations: all_keys,
-            z: initial_z,
-            zmin: 0,
-            zmax: max_val,
-            geojson:
-              'https://raw.githubusercontent.com/leakyMirror/map-of-europe/master/GeoJSON/europe.geojson',
-            featureidkey: 'properties.ISO3',
+            z: this.frames[0].data[0].z,
+            zmin: z_min_val,
+            zmax: z_max_val,
+            geojson: this.geojsons['global']['url'],
+            featureidkey: this.geojsons['global']['featureidkey'],
+            zoom: this.geojsons['global']['zoom'],
             marker: { opacity: 0.7 },
           },
         ],
         layout: {
-          title: 'Choropleth Plot',
+          title: 'Map Visualization for: ' + featureSelected,
           paper_bgcolor: '#232323',
           plot_bgcolor: '#232323',
           font: { color: '#f2f2f2' },
           mapbox: {
             style: 'carto-darkmatter',
-            center: { lat: 53, lon: 9 },
+            center: this.geojsons['global']['center'],
           },
+          updatemenus: [
+            {
+              showactive: false,
+              type: 'buttons',
+              buttons: [
+                {
+                  args: [
+                    {
+                      geojson: this.geojsons['global']['url'],
+                      featureidkey: this.geojsons['global']['featureidkey'],
+                    },
+                    {
+                      mapbox: {
+                        style: 'carto-darkmatter',
+                        center: this.geojsons['global']['center'],
+                        zoom: this.geojsons['global']['zoom'],
+                      },
+                    },
+                  ],
+                  label: 'Global',
+                  method: 'update',
+                },
+                {
+                  args: [
+                    {
+                      geojson: this.geojsons['germany']['url'],
+                      featureidkey: this.geojsons['germany']['featureidkey'],
+                    },
+                    {
+                      mapbox: {
+                        style: 'carto-darkmatter',
+                        center: this.geojsons['germany']['center'],
+                        zoom: this.geojsons['germany']['zoom'],
+                      },
+                    },
+                  ],
+                  label: 'Germany',
+                  method: 'update',
+                },
+              ],
+            },
+          ],
           sliders: [
             {
               currentvalue: {
