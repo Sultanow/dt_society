@@ -31,11 +31,13 @@ export class MapComponent implements OnInit {
       url: 'https://datahub.io/core/geo-countries/r/countries.geojson',
       featureidkey: 'properties.ISO_A3',
       center: { lat: 56.5, lon: 11 },
+      zoom: 1.0,
     },
     germany: {
       url: 'https://raw.githubusercontent.com/isellsoap/deutschlandGeoJSON/main/2_bundeslaender/3_mittel.geo.json',
       featureidkey: 'properties.id',
       center: { lat: 51.3, lon: 10 },
+      zoom: 3.5,
     },
   };
 
@@ -92,6 +94,7 @@ export class MapComponent implements OnInit {
             zmax: z_max_val,
             geojson: this.geojsons['global']['url'],
             featureidkey: this.geojsons['global']['featureidkey'],
+            zoom: this.geojsons['global']['zoom'],
             marker: { opacity: 0.7 },
           },
         ],
@@ -104,6 +107,48 @@ export class MapComponent implements OnInit {
             style: 'carto-darkmatter',
             center: this.geojsons['global']['center'],
           },
+          updatemenus: [
+            {
+              showactive: false,
+              type: 'buttons',
+              buttons: [
+                {
+                  args: [
+                    {
+                      geojson: this.geojsons['global']['url'],
+                      featureidkey: this.geojsons['global']['featureidkey'],
+                    },
+                    {
+                      mapbox: {
+                        style: 'carto-darkmatter',
+                        center: this.geojsons['global']['center'],
+                        zoom: this.geojsons['global']['zoom'],
+                      },
+                    },
+                  ],
+                  label: 'Global',
+                  method: 'update',
+                },
+                {
+                  args: [
+                    {
+                      geojson: this.geojsons['germany']['url'],
+                      featureidkey: this.geojsons['germany']['featureidkey'],
+                    },
+                    {
+                      mapbox: {
+                        style: 'carto-darkmatter',
+                        center: this.geojsons['germany']['center'],
+                        zoom: this.geojsons['germany']['zoom'],
+                      },
+                    },
+                  ],
+                  label: 'Germany',
+                  method: 'update',
+                },
+              ],
+            },
+          ],
           sliders: [
             {
               currentvalue: {
