@@ -39,7 +39,7 @@ export class HistoryComponent implements OnInit {
     for (const [key, value] of Object.entries(data)) {
       let trace: any = {
         type: 'scatter',
-        markers: 'lines+markers',
+        mode: 'lines',
       };
 
       trace.name = key;

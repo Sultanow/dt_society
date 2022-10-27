@@ -49,7 +49,7 @@ export class CorrelationComponent implements OnInit {
       for (const [key, value] of Object.entries(data[i])) {
         let trace: any = {
           type: 'scatter',
-          markers: 'lines+markers',
+          mode: 'lines',
           legendgroup: 'df' + i.toString(),
           legendgrouptitle: { text: this.selections.datasets[i].id },
         };
