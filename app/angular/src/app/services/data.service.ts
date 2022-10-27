@@ -1,5 +1,5 @@
-import { Injectable, Input } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 import {
   HttpClient,
   HttpEvent,
@@ -10,16 +10,9 @@ import {
   ColumnValues,
   CorrelationMatrix,
   CountryData,
-  GraphData,
-  MapPlot,
-  Plot,
 } from '../types/GraphData';
 import { Dataset, Selections } from '../types/Datasets';
-import {
-  MatSnackBar,
-  MatSnackBarHorizontalPosition,
-  MatSnackBarVerticalPosition,
-} from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
   providedIn: 'root',
@@ -75,18 +68,13 @@ export class DataService {
           console.log('uploading');
         }
         if (event.type == HttpEventType.Response) {
-          if (event.status === 204) {
-            console.log('completed upload');
-            this._snackBar.open('Uploaded dataset successfully', 'Close', {
-              duration: 4000,
-              horizontalPosition: 'end',
-              verticalPosition: 'bottom',
-            });
-            this.getAvailableDatasets(selections);
-          }
-          if (event.status === 500) {
-            console.log('OOps');
-          }
+          console.log('completed upload');
+          this._snackBar.open('Uploaded dataset successfully', 'Close', {
+            duration: 4000,
+            horizontalPosition: 'end',
+            verticalPosition: 'bottom',
+          });
+          this.getAvailableDatasets(selections);
         }
       });
     }

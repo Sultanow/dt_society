@@ -19,6 +19,7 @@ def create_app(test_config=None):
     app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
     app.config["SESSION_PERMANENT"] = False
     app.config["SESSION_TYPE"] = "filesystem"
+    app.config["PROPAGATE_EXCEPTIONS"] = True
 
     app.config["MONGO_URI"] = "mongodb://127.0.0.1:27017/dt_society_datasets"
 
@@ -47,25 +48,27 @@ def create_app(test_config=None):
     cache.init_app(app)
     mongo.init_app(app)
 
-    @app.errorhandler(400)
+    @app.errorhandler(ValueError)
     def page_not_found(error):
-        print("Unable to read dataset.")
-        return ("", 400)
+        print("OOps")
+
+        return "", 400
 
     @app.route("/data/upload", methods=["POST"])
     def upload_dataset():
 
         uploaded_file = request.files["upload"]
         separator = request.form.get("separator")
+        print(separator)
 
         if uploaded_file.filename != "":
-            try:
-                df = pd.read_csv(uploaded_file.stream, sep=separator)
+            # try:
+            df = pd.read_csv(uploaded_file.stream, sep=separator)
 
-            except ValueError:
-                abort(400)
+            # except Exception as e:
+            #     abort(e)
 
-            if mongo.db is not None:
+            if mongo.db is not None and df is not None:
                 collection = mongo.db["collection_1"]
 
                 if collection.count_documents({"filename": uploaded_file.filename}) > 0:
@@ -94,7 +97,7 @@ def create_app(test_config=None):
 
         datasets = collection.find({})
 
-        collection.delete_one({"filename": "broadband_data_y.csv"})
+        # collection.delete_one({"filename": "broadband_data_y.csv"})
 
         for i, dataset in enumerate(datasets):
             columns = parse_dataset(geo_column=None, dataset_id=i).columns.to_list()
