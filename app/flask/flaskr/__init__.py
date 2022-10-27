@@ -49,18 +49,11 @@ def create_app(test_config=None):
     cache.init_app(app)
     mongo.init_app(app)
 
-    @app.errorhandler(ValueError)
-    def page_not_found(error):
-        print("OOps")
-
-        return "", 400
-
     @app.route("/data/upload", methods=["POST"])
     def upload_dataset():
 
         uploaded_file = request.files["upload"]
         separator = request.form.get("separator")
-        print(separator)
 
         if uploaded_file.filename != "":
 
@@ -103,8 +96,6 @@ def create_app(test_config=None):
         avail_columns = []
 
         datasets = collection.find({})
-
-        # collection.delete_one({"filename": "broadband_data_y.csv"})
 
         for i, dataset in enumerate(datasets):
             columns = parse_dataset(geo_column=None, dataset_id=i).columns.to_list()
