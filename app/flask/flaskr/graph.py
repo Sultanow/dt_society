@@ -2,6 +2,7 @@ import json
 from time import time_ns
 import plotly
 import numpy as np
+import pandas as pd
 
 from flask import (
     Blueprint,
@@ -123,9 +124,13 @@ def get_heatmap():
         # replace "AUT" with country selection
         if "AUT" in df[geo_col[i]].unique():
             df_by_country = df[df[geo_col[i]] == "AUT"]
-            df_by_country = df_by_country.drop(columns=[geo_col[i]])
-            dfs.append(df_by_country)
 
+            df_by_country = df_by_country.drop(columns=[geo_col[i]])
+
+            df_by_country[time_col[i]] = pd.to_datetime(
+                df_by_country[time_col[i]].astype("str")
+            )
+            dfs.append(df_by_country)
             time_columns.append(time_col[i])
 
     if len(dfs) > 1:
