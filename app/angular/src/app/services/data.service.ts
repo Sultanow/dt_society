@@ -123,7 +123,7 @@ export class DataService {
   getReshapedData(
     selections: Selections,
     datasetId: string | undefined,
-    reshape: boolean
+    reshape?: boolean
   ) {
     const targetDatasetIdx = selections.datasets.findIndex(
       (dataset) => dataset.id == datasetId

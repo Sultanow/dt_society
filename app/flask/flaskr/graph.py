@@ -34,7 +34,7 @@ def get_map():
     time_col = data["timeSelected"]
     feature_col = data["featureSelected"]
     data_id = data["id"]
-    reshape_col = data["reshapeSelected"]
+    reshape_col = data["reshapeSelected"] if data["reshapeSelected"] != "N/A" else None
 
     df = parse_dataset(
         geo_column=geo_col,
@@ -64,7 +64,7 @@ def get_history():
     time_col = data["timeSelected"]
     feature_col = data["featureSelected"]
     data_id = data["id"]
-    reshape_col = data["reshapeSelected"]
+    reshape_col = data["reshapeSelected"] if data["reshapeSelected"] != "N/A" else None
 
     df = parse_dataset(
         geo_column=geo_col,
@@ -101,8 +101,11 @@ def get_heatmap():
     time_col = []
 
     for dataset in data:
+
         geo_col.append(dataset["geoSelected"])
-        reshape_col.append(dataset["reshapeSelected"])
+        reshape_col.append(
+            dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
+        )
         time_col.append(dataset["timeSelected"])
 
     dfs = []
@@ -161,8 +164,11 @@ def get_correlation_lines():
     time_col = []
 
     for dataset in data:
+
         geo_col.append(dataset["geoSelected"])
-        reshape_col.append(dataset["reshapeSelected"])
+        reshape_col.append(
+            dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
+        )
         time_col.append(dataset["timeSelected"])
 
     dfs = []

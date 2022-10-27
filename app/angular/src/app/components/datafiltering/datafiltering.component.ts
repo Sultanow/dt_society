@@ -17,14 +17,13 @@ export class DatafilteringComponent implements OnInit {
     selectedDataset: undefined,
   };
 
-  reshape: boolean = false;
-
   fileName = '';
 
   updateSelectedColumns(
     filename: string | undefined,
     value: string,
-    column: string
+    column: string,
+    reshape?: boolean
   ) {
     if (this.selections.datasets.length > 0) {
       const datasetIndex = this.selections.datasets
@@ -37,11 +36,7 @@ export class DatafilteringComponent implements OnInit {
           break;
         case 'rshp':
           this.selections.datasets[datasetIndex].reshapeSelected = value;
-          this.dataService.getReshapedData(
-            this.selections,
-            filename,
-            this.reshape
-          );
+          this.dataService.getReshapedData(this.selections, filename, reshape);
           break;
         case 'x':
           this.selections.datasets[datasetIndex].timeSelected = value;
@@ -62,9 +57,12 @@ export class DatafilteringComponent implements OnInit {
     this.dataService.deleteDataset(datasedId, this.selections);
   }
 
-  reshapeOptions(datasetId: string | undefined, reshape: boolean): void {
-    this.reshape = reshape;
-    this.dataService.getReshapedData(this.selections, datasetId, this.reshape);
+  reshapeOptions(
+    datasetId: string | undefined,
+    reshape: boolean,
+    event: any
+  ): void {
+    this.dataService.getReshapedData(this.selections, datasetId, event.checked);
     this.dataService.updateDatasetsSelection(this.selections);
   }
 

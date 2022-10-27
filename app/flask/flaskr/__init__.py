@@ -48,11 +48,11 @@ def create_app(test_config=None):
     cache.init_app(app)
     mongo.init_app(app)
 
-    @app.errorhandler(ValueError)
-    def page_not_found(error):
-        print("OOps")
+    # @app.errorhandler(ValueError)
+    # def page_not_found(error):
+    #     print("OOps")
 
-        return "", 400
+    #     return "", 400
 
     @app.route("/data/upload", methods=["POST"])
     def upload_dataset():
@@ -65,8 +65,7 @@ def create_app(test_config=None):
             # try:
             df = pd.read_csv(uploaded_file.stream, sep=separator)
 
-            # except Exception as e:
-            #     abort(e)
+            print(df)
 
             if mongo.db is not None and df is not None:
                 collection = mongo.db["collection_1"]
@@ -82,6 +81,9 @@ def create_app(test_config=None):
                         }
                     )
                     print(f"Added '{uploaded_file.filename}' to database.")
+
+        # except Exception as e:
+        #     abort(e)
 
         return ("", 204)
 
@@ -101,6 +103,8 @@ def create_app(test_config=None):
 
         for i, dataset in enumerate(datasets):
             columns = parse_dataset(geo_column=None, dataset_id=i).columns.to_list()
+
+            columns.append("N/A")
 
             avail_columns.append({"id": dataset["filename"], "columns": columns})
 

@@ -46,7 +46,12 @@
                 required
                 #reshapeSelect
                 (selectionChange)="
-                  updateSelectedColumns(dataset.id, reshapeSelect.value, 'rshp')
+                  updateSelectedColumns(
+                    dataset.id,
+                    reshapeSelect.value,
+                    'rshp',
+                    reshapeToggle.checked
+                  )
                 "
               >
                 <mat-option
@@ -59,7 +64,9 @@
             </mat-form-field>
             <mat-slide-toggle
               #reshapeToggle
-              (change)="reshapeOptions(dataset.id, reshapeToggle.checked)"
+              (change)="
+                reshapeOptions(dataset.id, reshapeToggle.checked, $event)
+              "
               >Apply reshape
             </mat-slide-toggle>
           </div>
