@@ -8,6 +8,7 @@ import pandas as pd
 from . import graph, forecast
 from .extensions import mongo, cache
 from .preprocessing.parse import parse_dataset
+from .preprocessing.dataset import DigitalTwinTimeSeries
 
 
 def create_app(test_config=None):
@@ -48,11 +49,11 @@ def create_app(test_config=None):
     cache.init_app(app)
     mongo.init_app(app)
 
-    # @app.errorhandler(ValueError)
-    # def page_not_found(error):
-    #     print("OOps")
+    @app.errorhandler(ValueError)
+    def page_not_found(error):
+        print("OOps")
 
-    #     return "", 400
+        return "", 400
 
     @app.route("/data/upload", methods=["POST"])
     def upload_dataset():
@@ -62,28 +63,32 @@ def create_app(test_config=None):
         print(separator)
 
         if uploaded_file.filename != "":
-            # try:
-            df = pd.read_csv(uploaded_file.stream, sep=separator)
 
-            print(df)
+            try:
+                df = DigitalTwinTimeSeries(uploaded_file.stream, sep=separator)
 
-            if mongo.db is not None and df is not None:
-                collection = mongo.db["collection_1"]
+                if mongo.db is not None and df is not None:
+                    collection = mongo.db["collection_1"]
 
-                if collection.count_documents({"filename": uploaded_file.filename}) > 0:
-                    print(f"Dataset '{uploaded_file.filename}' is already in database.")
+                    if (
+                        collection.count_documents({"filename": uploaded_file.filename})
+                        > 0
+                    ):
+                        print(
+                            f"Dataset '{uploaded_file.filename}' is already in database."
+                        )
 
-                else:
-                    collection.insert_one(
-                        {
-                            "filename": uploaded_file.filename,
-                            "data": df.to_dict("records"),
-                        }
-                    )
-                    print(f"Added '{uploaded_file.filename}' to database.")
+                    else:
+                        collection.insert_one(
+                            {
+                                "filename": uploaded_file.filename,
+                                "data": df.data.to_dict("records"),
+                            }
+                        )
+                        print(f"Added '{uploaded_file.filename}' to database.")
+            except Exception as e:
 
-        # except Exception as e:
-        #     abort(e)
+                return ("", 400)
 
         return ("", 204)
 
