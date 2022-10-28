@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, throwError, catchError } from 'rxjs';
 import {
   HttpClient,
   HttpEvent,
   HttpEventType,
   HttpRequest,
+  HttpErrorResponse
 } from '@angular/common/http';
 import {
   ColumnValues,
@@ -17,7 +18,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 @Injectable({
   providedIn: 'root',
 })
-export class DataService {
+export class DataService{
   private apiUrl: string = 'http://127.0.0.1:5000/';
 
   private selections: BehaviorSubject<Selections> = new BehaviorSubject(<
@@ -33,14 +34,26 @@ export class DataService {
     this.selections.next(newDataSel);
   }
 
+
+  private handleError(error: HttpErrorResponse){
+    if (error.status == 0){
+      console.error("An error occured:", error.error);
+    }else {
+      console.error(`Backend returned code ${error.status}, body was: `, error.error);
+    }
+    return throwError(() => new Error('Something bad happened; please try again later.'));
+  }
+
+
   getData(
     columns: any,
     endpoint: string
-  ): Observable<HttpEvent<CorrelationMatrix | CountryData | ColumnValues[]>> {
+  ): Observable<HttpEvent<CorrelationMatrix | CountryData | ColumnValues[] | unknown>> { 
     const request = new HttpRequest('POST', this.apiUrl + endpoint, columns, {
       reportProgress: true,
     });
-    return this.http.request(request);
+    return this.http.request(request).pipe(
+    catchError(this.handleError));
   }
 
   uploadDataset(
@@ -144,7 +157,7 @@ export class DataService {
           datasetIdx: selections.datasets[targetDatasetIdx].id,
           reshapeColumn: reshapeColumn,
           geoColumn: selections.datasets[targetDatasetIdx].geoSelected,
-        })
+        }).pipe(catchError(this.handleError))
         .subscribe((reshapedColumns) => {
           selections.datasets[targetDatasetIdx].timeOptions = (
             reshapedColumns as Dataset
