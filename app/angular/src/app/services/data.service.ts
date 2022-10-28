@@ -34,18 +34,27 @@ export class DataService {
     this.selections.next(newDataSel);
   }
 
-  private handleError(error: HttpErrorResponse) {
-    if (error.status == 0) {
-      console.error('An error occured:', error.error);
-    } else {
-      console.error(
-        `Backend returned code ${error.status}, body was: `,
-        error.error
+  private handleError(cause: string) {
+    return (error: HttpErrorResponse) => {
+      if (error.status == 0) {
+        console.error('An error occured:', error.error);
+      } else {
+        console.error(
+          `Backend returned code ${error.status}, body was: `,
+          error.error
+        );
+      }
+
+      this._snackBar.open('Something went wrong while trying to ' + cause, 'Close', {
+        duration: 4000,
+        horizontalPosition: 'end',
+        verticalPosition: 'bottom',
+      });
+
+      return throwError(
+        () => new Error('Something bad happened; please try again later.')
       );
-    }
-    return throwError(
-      () => new Error('Something bad happened; please try again later.')
-    );
+    };
   }
 
   getData(
@@ -66,7 +75,7 @@ export class DataService {
     const request = new HttpRequest('POST', this.apiUrl + endpoint, body, {
       reportProgress: true,
     });
-    return this.http.request(request).pipe(catchError(this.handleError));
+    return this.http.request(request).pipe(catchError(this.handleError("get data")));
   }
 
   uploadDataset(
@@ -91,7 +100,7 @@ export class DataService {
 
       this.http
         .request(request)
-        .pipe(catchError(this.handleError))
+        .pipe(catchError(this.handleError("upload the dataset")))
         .subscribe((event) => {
           if (event.type == HttpEventType.UploadProgress) {
             console.log('uploading');
@@ -174,7 +183,7 @@ export class DataService {
           reshapeColumn: reshapeColumn,
           geoColumn: selections.datasets[targetDatasetIdx].geoSelected,
         })
-        .pipe(catchError(this.handleError))
+        .pipe(catchError(this.handleError("reshape the dataset")))
         .subscribe((reshapedColumns) => {
           selections.datasets[targetDatasetIdx].timeOptions = (
             reshapedColumns as Dataset
