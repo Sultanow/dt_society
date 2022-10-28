@@ -84,6 +84,33 @@ export class MapComponent implements OnInit {
         this.frames.push(frame);
       }
 
+      let scope: string = 'global';
+      let federal_states_germany = [
+        'DE-BB',
+        'DE-BE',
+        'DE-BW',
+        'DE-BY',
+        'DE-HB',
+        'DE-HE',
+        'DE-HH',
+        'DE-MV',
+        'DE-NI',
+        'DE-NW',
+        'DE-RP',
+        'DE-SH',
+        'DE-SL',
+        'DE-SN',
+        'DE-ST',
+        'DE-TH',
+      ];
+
+      for(let state of federal_states_germany){
+        if (all_keys.includes(state)) {
+          scope = 'germany';
+          break;
+        }
+      }
+
       this.data = {
         data: [
           {
@@ -92,9 +119,9 @@ export class MapComponent implements OnInit {
             z: this.frames[0].data[0].z,
             zmin: z_min_val,
             zmax: z_max_val,
-            geojson: this.geojsons['global']['url'],
-            featureidkey: this.geojsons['global']['featureidkey'],
-            zoom: this.geojsons['global']['zoom'],
+            geojson: this.geojsons[scope as keyof object]['url'],
+            featureidkey: this.geojsons[scope as keyof object]['featureidkey'],
+            zoom: this.geojsons[scope as keyof object]['zoom'],
             marker: { opacity: 0.7 },
           },
         ],
@@ -105,7 +132,7 @@ export class MapComponent implements OnInit {
           font: { color: '#f2f2f2' },
           mapbox: {
             style: 'carto-darkmatter',
-            center: this.geojsons['global']['center'],
+            center: this.geojsons[scope as keyof object]['center'],
           },
           updatemenus: [
             {
