@@ -5,6 +5,7 @@ export interface Dataset {
   timeOptions?: string[];
   featureOptions?: string[];
   geoSelected?: string;
+  countryOptions?: string[];
   reshapeSelected?: string;
   timeSelected?: string;
   featureSelected?: string;

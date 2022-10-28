@@ -121,20 +121,25 @@ def create_app(test_config=None):
         reshape_column = payload["reshapeColumn"]
         geo_column = payload["geoColumn"]
 
-        columns = parse_dataset(
+        df = parse_dataset(
             geo_column=geo_column,
             dataset_id=file_idx,
             reshape_column=reshape_column,
-        ).columns.to_list()
+        )
 
-        time_columns = columns if reshape_column is None else ["Time"]
+        time_columns = df.columns.to_list() if reshape_column is None else ["Time"]
         feature_columns = [
-            feature for feature in columns if feature not in ("Time", geo_column)
+            feature
+            for feature in df.columns.to_list()
+            if feature not in ("Time", geo_column)
         ]
+
+        countries = df[geo_column].unique().tolist()
 
         available_columns = {
             "timeOptions": time_columns,
             "featureOptions": feature_columns,
+            "countryOptions": countries,
         }
 
         return jsonify(available_columns)

@@ -5,7 +5,7 @@ import {
   HttpEvent,
   HttpEventType,
   HttpRequest,
-  HttpErrorResponse
+  HttpErrorResponse,
 } from '@angular/common/http';
 import {
   ColumnValues,
@@ -18,7 +18,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 @Injectable({
   providedIn: 'root',
 })
-export class DataService{
+export class DataService {
   private apiUrl: string = 'http://127.0.0.1:5000/';
 
   private selections: BehaviorSubject<Selections> = new BehaviorSubject(<
@@ -34,26 +34,39 @@ export class DataService{
     this.selections.next(newDataSel);
   }
 
-
-  private handleError(error: HttpErrorResponse){
-    if (error.status == 0){
-      console.error("An error occured:", error.error);
-    }else {
-      console.error(`Backend returned code ${error.status}, body was: `, error.error);
+  private handleError(error: HttpErrorResponse) {
+    if (error.status == 0) {
+      console.error('An error occured:', error.error);
+    } else {
+      console.error(
+        `Backend returned code ${error.status}, body was: `,
+        error.error
+      );
     }
-    return throwError(() => new Error('Something bad happened; please try again later.'));
+    return throwError(
+      () => new Error('Something bad happened; please try again later.')
+    );
   }
-
 
   getData(
     columns: any,
-    endpoint: string
-  ): Observable<HttpEvent<CorrelationMatrix | CountryData | ColumnValues[] | unknown>> { 
-    const request = new HttpRequest('POST', this.apiUrl + endpoint, columns, {
+    endpoint: string,
+    features?: string | null
+  ): Observable<
+    HttpEvent<CorrelationMatrix | CountryData | ColumnValues[] | unknown>
+  > {
+    let body = {};
+
+    if (features !== undefined) {
+      body = { datasets: columns, features: features };
+    } else {
+      body = columns;
+    }
+
+    const request = new HttpRequest('POST', this.apiUrl + endpoint, body, {
       reportProgress: true,
     });
-    return this.http.request(request).pipe(
-    catchError(this.handleError));
+    return this.http.request(request).pipe(catchError(this.handleError));
   }
 
   uploadDataset(
@@ -76,20 +89,23 @@ export class DataService{
         }
       );
 
-      this.http.request(request).subscribe((event) => {
-        if (event.type == HttpEventType.UploadProgress) {
-          console.log('uploading');
-        }
-        if (event.type == HttpEventType.Response) {
-          console.log('completed upload');
-          this._snackBar.open('Uploaded dataset successfully', 'Close', {
-            duration: 4000,
-            horizontalPosition: 'end',
-            verticalPosition: 'bottom',
-          });
-          this.getAvailableDatasets(selections);
-        }
-      });
+      this.http
+        .request(request)
+        .pipe(catchError(this.handleError))
+        .subscribe((event) => {
+          if (event.type == HttpEventType.UploadProgress) {
+            console.log('uploading');
+          }
+          if (event.type == HttpEventType.Response) {
+            console.log('completed upload');
+            this._snackBar.open('Uploaded dataset successfully', 'Close', {
+              duration: 4000,
+              horizontalPosition: 'end',
+              verticalPosition: 'bottom',
+            });
+            this.getAvailableDatasets(selections);
+          }
+        });
     }
   }
 
@@ -157,7 +173,8 @@ export class DataService{
           datasetIdx: selections.datasets[targetDatasetIdx].id,
           reshapeColumn: reshapeColumn,
           geoColumn: selections.datasets[targetDatasetIdx].geoSelected,
-        }).pipe(catchError(this.handleError))
+        })
+        .pipe(catchError(this.handleError))
         .subscribe((reshapedColumns) => {
           selections.datasets[targetDatasetIdx].timeOptions = (
             reshapedColumns as Dataset
@@ -165,6 +182,10 @@ export class DataService{
           selections.datasets[targetDatasetIdx].featureOptions = (
             reshapedColumns as Dataset
           ).featureOptions;
+
+          selections.datasets[targetDatasetIdx].countryOptions = (
+            reshapedColumns as Dataset
+          ).countryOptions;
         });
     }
   }
