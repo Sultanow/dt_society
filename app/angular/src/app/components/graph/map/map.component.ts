@@ -2,7 +2,7 @@ import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
-import { GraphData, Frame } from 'src/app/types/GraphData';
+import { GraphData, Frame, CountryData } from 'src/app/types/GraphData';
 
 @Component({
   selector: 'app-map',
@@ -41,7 +41,7 @@ export class MapComponent implements OnInit {
     },
   };
 
-  createChoroplethMap(data: {}, selectedIdx: number) {
+  createChoroplethMap(data: CountryData, selectedIdx: number) {
     if (this.data.data.length > 0) {
       this.data.data = [];
     }
@@ -210,7 +210,7 @@ export class MapComponent implements OnInit {
                     console.log('completed');
                     if (data.body) {
                       this.showSpinner = false;
-                      this.createChoroplethMap(data.body, selectedDatasetIdx);
+                      this.createChoroplethMap(data.body as CountryData, selectedDatasetIdx);
                     }
                   }
                 });
