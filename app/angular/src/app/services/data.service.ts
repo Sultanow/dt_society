@@ -35,9 +35,18 @@ export class DataService {
 
   getData(
     columns: any,
-    endpoint: string
+    endpoint: string,
+    features?: string | null
   ): Observable<HttpEvent<CorrelationMatrix | CountryData | ColumnValues[]>> {
-    const request = new HttpRequest('POST', this.apiUrl + endpoint, columns, {
+    let body = {};
+
+    if (features !== undefined) {
+      body = { datasets: columns, features: features };
+    } else {
+      body = columns;
+    }
+
+    const request = new HttpRequest('POST', this.apiUrl + endpoint, body, {
       reportProgress: true,
     });
     return this.http.request(request);
@@ -152,6 +161,10 @@ export class DataService {
           selections.datasets[targetDatasetIdx].featureOptions = (
             reshapedColumns as Dataset
           ).featureOptions;
+
+          selections.datasets[targetDatasetIdx].countryOptions = (
+            reshapedColumns as Dataset
+          ).countryOptions;
         });
     }
   }

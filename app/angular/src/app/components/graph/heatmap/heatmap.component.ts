@@ -30,14 +30,14 @@ export class HeatmapComponent implements OnInit {
     selectedDataset: undefined,
   };
 
-  public features = {
-    availableFeatures: [],
-  };
+  public features: string[] = [];
 
   selectedFeaturesControl = new FormControl('');
 
+  countries: (undefined | string[] | string)[] = [];
+
   private oldSelections?: Selections;
-  public selectedFeatures: string | null = null;
+  public selectedFeatures?: string | null;
 
   createHeatmapPlot(data: CorrelationMatrix) {
     if (this.data.data.length > 0) {
@@ -65,29 +65,40 @@ export class HeatmapComponent implements OnInit {
     this.data.data.push(heatmap);
   }
 
+  updateHeatmap() {
+    if (
+      this.selections.datasets.length > 0 &&
+      this.selectedFeatures !== undefined
+    ) {
+      if (
+        !this.selections.datasets.some(
+          (dataset) =>
+            dataset.geoSelected === undefined ||
+            dataset.timeSelected === undefined
+        )
+      ) {
+        this.dataService
+          .getData(
+            this.selections.datasets,
+            '/graph/heatmap',
+            this.selectedFeatures
+          )
+          .subscribe((event) => {
+            if (event.type === HttpEventType.Response) {
+              if (event.body) {
+                this.createHeatmapPlot(event.body as CorrelationMatrix);
+              }
+            }
+          });
+      }
+    }
+  }
+
   ngDoCheck() {
     if (
       JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
     ) {
-      if (this.selections.datasets.length > 0) {
-        if (
-          !this.selections.datasets.some(
-            (dataset) =>
-              dataset.geoSelected === undefined ||
-              dataset.timeSelected === undefined
-          )
-        ) {
-          this.dataService
-            .getData(this.selections.datasets, '/graph/heatmap')
-            .subscribe((event) => {
-              if (event.type === HttpEventType.Response) {
-                if (event.body) {
-                  this.createHeatmapPlot(event.body as CorrelationMatrix);
-                }
-              }
-            });
-        }
-      }
+      this.updateHeatmap();
     }
     this.oldSelections = structuredClone(this.selections);
   }
@@ -95,9 +106,27 @@ export class HeatmapComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
+      if (this.features.length > 0) {
+        this.features = [];
+      }
+      var countries: string[] | undefined = [];
+      var country_union: (string | undefined | string[])[] = [];
+
+      for (const dataset of this.selections.datasets) {
+        if (dataset.featureOptions != undefined) {
+          this.features.push(...dataset.featureOptions);
+
+          var countriesConcat = [...countries, ...[dataset.countryOptions]];
+
+          country_union = [...new Set(countriesConcat)];
+        }
+      }
+      console.log(country_union[0]);
     });
-    this.selectedFeaturesControl.valueChanges.subscribe((value) => {
-      this.selectedFeatures = value;
+    this.selectedFeaturesControl.valueChanges.subscribe((selectedFeatures) => {
+      this.selectedFeatures = selectedFeatures;
+      console.log(selectedFeatures);
+      this.updateHeatmap();
     });
   }
 }

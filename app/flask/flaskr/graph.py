@@ -101,7 +101,7 @@ def get_heatmap():
     reshape_col = []
     time_col = []
 
-    for dataset in data:
+    for dataset in data["datasets"]:
 
         geo_col.append(dataset["geoSelected"])
         reshape_col.append(
@@ -136,7 +136,9 @@ def get_heatmap():
     if len(dfs) > 1:
         merged_df, merged_time_col = merge_dataframes_multi(dfs, time_columns)
 
-        merged_df = merged_df.drop(columns=[merged_time_col]).infer_objects()
+        merged_df = merged_df.drop(columns=[merged_time_col])[
+            data["features"]
+        ].infer_objects()
 
         triangular_upper_mask = np.triu(np.ones(merged_df.corr().shape)).astype(bool)
 

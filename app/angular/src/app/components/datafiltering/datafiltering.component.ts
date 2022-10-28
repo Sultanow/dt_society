@@ -40,6 +40,10 @@ export class DatafilteringComponent implements OnInit {
           break;
         case 'x':
           this.selections.datasets[datasetIndex].timeSelected = value;
+          this.selections.datasets[datasetIndex].featureOptions =
+            this.selections.datasets[datasetIndex].featureOptions?.filter(
+              (feature) => feature !== value
+            );
           break;
         case 'y':
           this.selections.datasets[datasetIndex].featureSelected = value;
