@@ -26,7 +26,7 @@ bp = Blueprint("graph", __name__, url_prefix="/graph")
 @bp.route("/map", methods=["POST"])
 def get_map():
 
-    data = request.get_json()
+    data = request.get_json()["datasets"]
 
     if data is None:
         return ("Empty request", 400)
@@ -58,7 +58,7 @@ def get_map():
 @bp.route("/history", methods=["GET", "POST"])
 def get_history():
 
-    data = request.get_json()
+    data = request.get_json()["datasets"]
     if data is None:
         return ("Empty request", 400)
     geo_col = data["geoSelected"]
@@ -161,7 +161,7 @@ def get_correlation_lines():
     if mongo.db is None:
         return ("Database not available", 500)
 
-    data = request.get_json()
+    data = request.get_json()["datasets"]
 
     if data is None:
         return ("Empty request", 400)

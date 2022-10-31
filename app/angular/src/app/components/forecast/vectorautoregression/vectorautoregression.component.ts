@@ -1,7 +1,8 @@
+import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
-import { Plot } from 'src/app/types/GraphData';
+import { ColumnValues, Plot } from 'src/app/types/GraphData';
 
 @Component({
   selector: 'app-vectorautoregression',
@@ -14,12 +15,13 @@ export class VectorautoregressionComponent implements OnInit {
   public data: Plot = {
     data: [],
     layout: {
-      legend: { title: { text: 'Pearson r' } },
+      legend: { title: { text: '' } },
       paper_bgcolor: '#232323',
       plot_bgcolor: '#232323',
       xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
       yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
       font: { color: '#f2f2f2' },
+      title: '',
     },
   };
 
@@ -32,17 +34,153 @@ export class VectorautoregressionComponent implements OnInit {
 
   public countries: string[] = [];
 
+  public selectedCountry?: string;
+
+  public predictionPeriods: number = 0;
+
+  public maxLags: number = 1;
+
+  public frequency: string = 'Yearly';
+
+  createVarForecast(data: ColumnValues) {
+    if (this.data.data.length > 0) {
+      this.data.data = [];
+    }
+    this.data.layout.title =
+      'Vector Auto Regression (' + this.selectedCountry + ')';
+    this.data.layout.grid = {
+      rows: 1,
+      columns: this.selections.datasets.length,
+      pattern: 'independent',
+    };
+
+    const colors = [
+      'mediumpurple',
+      'mediumspringgreen',
+      'hotpink',
+      'mediumblue',
+      'goldenrod',
+    ];
+    var i = 0;
+    for (const [key, value] of Object.entries(data)) {
+      if (key === 'x') {
+        continue;
+      }
+      let trace_solid: any = {
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: colors[i] },
+      };
+
+      let trace_dashed: any = {
+        type: 'scatter',
+        mode: 'lines',
+        line: { dash: 'dash', color: colors[i] },
+      };
+
+      if (this.predictionPeriods > 0) {
+        trace_solid.y = value.slice(0, -this.predictionPeriods);
+        trace_solid.x = data['x'].slice(0, -this.predictionPeriods);
+        trace_solid.name = key;
+
+        trace_dashed.y = value.slice(-this.predictionPeriods - 1);
+        trace_dashed.x = data['x'].slice(-this.predictionPeriods - 1);
+        trace_dashed.name = key + ' Prediction';
+      } else {
+        trace_solid.y = value;
+        trace_solid.x = data['x'];
+        trace_solid.name = key;
+      }
+
+      if (i > 0) {
+        trace_solid.xaxis = 'x' + (i + 1).toString();
+        trace_solid.yaxis = 'y' + (i + 1).toString();
+        trace_dashed.xaxis = 'x' + (i + 1).toString();
+        trace_dashed.yaxis = 'y' + (i + 1).toString();
+
+        this.data.layout['xaxis' + (i + 1).toString()] = {
+          gridcolor: 'rgba(80, 103, 132, 0.3)',
+          title: 'Time',
+        };
+        this.data.layout['yaxis' + (i + 1).toString()] = {
+          gridcolor: 'rgba(80, 103, 132, 0.3)',
+          title: key,
+        };
+      } else {
+        this.data.layout['xaxis'] = {
+          gridcolor: 'rgba(80, 103, 132, 0.3)',
+          title: 'Time',
+        };
+        this.data.layout['yaxis'] = {
+          gridcolor: 'rgba(80, 103, 132, 0.3)',
+          title: key,
+        };
+      }
+      i++;
+      this.data.data.push(trace_solid);
+      this.data.data.push(trace_dashed);
+
+      console.log(this.data.data);
+    }
+  }
+
+  updateVarForecast() {
+    if (
+      this.selections.datasets.length > 0 &&
+      this.selectedCountry != undefined
+    ) {
+      if (
+        !this.selections.datasets.some(
+          (dataset) =>
+            dataset.geoSelected === undefined ||
+            dataset.timeSelected === undefined ||
+            dataset.featureSelected === undefined
+        )
+      ) {
+        this.dataService
+          .getData(this.selections.datasets, '/forecast/var', {
+            country: this.selectedCountry,
+            periods: this.predictionPeriods,
+            maxLags: this.maxLags,
+            frequency: this.frequency,
+          })
+          .subscribe((event) => {
+            if (event.type === HttpEventType.Response) {
+              if (event.body) {
+                this.createVarForecast(event.body as ColumnValues);
+              }
+            }
+          });
+      }
+    }
+  }
+
+  formatLabel(value: string | number) {
+    return value;
+  }
+
+  ngDoCheck() {
+    if (
+      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
+    ) {
+      this.updateVarForecast();
+    }
+    this.oldSelections = structuredClone(this.selections);
+  }
+
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
 
       var countries: string[] | undefined = [] || undefined;
 
-      for (const data of this.selections.datasets) {
-        countries = [...countries, ...(data.countryOptions || [])];
-      }
+      if (this.selections.datasets.length > 0) {
+        for (const data of this.selections.datasets) {
+          countries = [...countries, ...(data.countryOptions || [])];
+        }
 
-      this.countries = [...new Set(countries)];
+        this.countries = [...new Set(countries)];
+      }
     });
   }
 }

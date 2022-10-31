@@ -147,7 +147,7 @@ def var_fit_and_predict_multi(
     max_lags: float,
     periods: int,
     frequency: str,
-) -> Tuple[pd.DataFrame, dict]:
+) -> pd.DataFrame:
     """Fit and forecast using a Vector Auto Regression model
 
     Args:

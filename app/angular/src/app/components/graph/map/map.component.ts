@@ -104,7 +104,7 @@ export class MapComponent implements OnInit {
         'DE-TH',
       ];
 
-      for(let state of federal_states_germany){
+      for (let state of federal_states_germany) {
         if (all_keys.includes(state)) {
           scope = 'germany';
           break;
@@ -226,7 +226,8 @@ export class MapComponent implements OnInit {
               this.dataService
                 .getData(
                   this.selections.datasets[selectedDatasetIdx],
-                  '/graph/map'
+                  '/graph/map',
+                  {}
                 )
                 .subscribe((data) => {
                   if (data.type === HttpEventType.DownloadProgress) {
@@ -237,7 +238,10 @@ export class MapComponent implements OnInit {
                     console.log('completed');
                     if (data.body) {
                       this.showSpinner = false;
-                      this.createChoroplethMap(data.body as CountryData, selectedDatasetIdx);
+                      this.createChoroplethMap(
+                        data.body as CountryData,
+                        selectedDatasetIdx
+                      );
                     }
                   }
                 });

@@ -23,6 +23,7 @@ export interface Plot {
     font: { color: string };
     margin?: { t: number; r: number };
     grid?: {};
+    title?: string;
   };
 }
 
@@ -39,8 +40,16 @@ export interface CorrelationMatrix {
 export interface Frame {
   data: [
     {
-    z: any[]
+      z: any[];
     }
   ];
   name: string;
+}
+
+export interface GraphControls {
+  country?: string;
+  features?: string | null;
+  frequency?: string;
+  periods?: number;
+  maxLags?: number;
 }

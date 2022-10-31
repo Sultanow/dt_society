@@ -93,7 +93,8 @@ export class HistoryComponent implements OnInit {
               this.dataService
                 .getData(
                   this.selections.datasets[selectedDatasetIdx],
-                  '/graph/history'
+                  '/graph/history',
+                  {}
                 )
                 .subscribe((event) => {
                   if (event.type === HttpEventType.Response) {

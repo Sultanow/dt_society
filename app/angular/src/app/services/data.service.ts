@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, throwError, catchError } from 'rxjs';
+import { BehaviorSubject, Observable, throwError, catchError, max } from 'rxjs';
 import {
   HttpClient,
   HttpEvent,
@@ -11,6 +11,7 @@ import {
   ColumnValues,
   CorrelationMatrix,
   CountryData,
+  GraphControls,
 } from '../types/GraphData';
 import { Dataset, Selections } from '../types/Datasets';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -45,11 +46,15 @@ export class DataService {
         );
       }
 
-      this._snackBar.open('Something went wrong while trying to ' + cause, 'Close', {
-        duration: 4000,
-        horizontalPosition: 'end',
-        verticalPosition: 'bottom',
-      });
+      this._snackBar.open(
+        'Something went wrong while trying to ' + cause,
+        'Close',
+        {
+          duration: 4000,
+          horizontalPosition: 'end',
+          verticalPosition: 'bottom',
+        }
+      );
 
       return throwError(
         () => new Error('Something bad happened; please try again later.')
@@ -60,22 +65,27 @@ export class DataService {
   getData(
     columns: any,
     endpoint: string,
-    features?: string | null
+    { country, features, frequency, periods, maxLags }: GraphControls
   ): Observable<
     HttpEvent<CorrelationMatrix | CountryData | ColumnValues[] | unknown>
   > {
     let body = {};
 
-    if (features !== undefined) {
-      body = { datasets: columns, features: features };
-    } else {
-      body = columns;
-    }
+    body = {
+      datasets: columns,
+      features: features,
+      country: country,
+      frequency: frequency,
+      periods: periods,
+      maxLags: maxLags,
+    };
 
     const request = new HttpRequest('POST', this.apiUrl + endpoint, body, {
       reportProgress: true,
     });
-    return this.http.request(request).pipe(catchError(this.handleError("get data")));
+    return this.http
+      .request(request)
+      .pipe(catchError(this.handleError('get data')));
   }
 
   uploadDataset(
@@ -100,7 +110,7 @@ export class DataService {
 
       this.http
         .request(request)
-        .pipe(catchError(this.handleError("upload the dataset")))
+        .pipe(catchError(this.handleError('upload the dataset')))
         .subscribe((event) => {
           if (event.type == HttpEventType.UploadProgress) {
             console.log('uploading');
@@ -134,7 +144,7 @@ export class DataService {
 
     this.http.request(request).subscribe((event) => {
       if (event.type == HttpEventType.Response && selectedDatasetIndex > -1) {
-        selections.datasets.splice(selectedDatasetIndex);
+        selections.datasets.splice(selectedDatasetIndex, 1);
       }
     });
   }
@@ -183,7 +193,7 @@ export class DataService {
           reshapeColumn: reshapeColumn,
           geoColumn: selections.datasets[targetDatasetIdx].geoSelected,
         })
-        .pipe(catchError(this.handleError("reshape the dataset")))
+        .pipe(catchError(this.handleError('reshape the dataset')))
         .subscribe((reshapedColumns) => {
           selections.datasets[targetDatasetIdx].timeOptions = (
             reshapedColumns as Dataset

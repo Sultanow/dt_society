@@ -1,3 +1,16 @@
 mat-slider {
   width: 400px;
 }
+
+.lags-slider {
+  width: 200px;
+}
+
+.toggle-container {
+  margin-top: 10px;
+  display: flex;
+}
+
+.slider-section {
+  margin-left: 10px;
+}

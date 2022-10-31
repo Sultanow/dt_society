@@ -95,7 +95,7 @@ export class CorrelationComponent implements OnInit {
           )
         ) {
           this.dataService
-            .getData(this.selections.datasets, '/graph/corr')
+            .getData(this.selections.datasets, '/graph/corr', {})
             .subscribe((event) => {
               if (event.type === HttpEventType.Response) {
                 if (event.body) {

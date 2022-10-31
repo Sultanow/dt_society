@@ -78,11 +78,9 @@ export class HeatmapComponent implements OnInit {
         )
       ) {
         this.dataService
-          .getData(
-            this.selections.datasets,
-            '/graph/heatmap',
-            this.selectedFeatures
-          )
+          .getData(this.selections.datasets, '/graph/heatmap', {
+            features: this.selectedFeatures,
+          })
           .subscribe((event) => {
             if (event.type === HttpEventType.Response) {
               if (event.body) {
