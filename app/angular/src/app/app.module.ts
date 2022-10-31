@@ -33,6 +33,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDialogModule } from '@angular/material/dialog';
 import { UploaddialogComponent } from './components/datafiltering/uploaddialog/uploaddialog.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSliderModule } from '@angular/material/slider';
 PlotlyModule.plotlyjs = PlotlyJS;
 
 @NgModule({
@@ -71,6 +72,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     MatButtonToggleModule,
     MatDialogModule,
     MatSnackBarModule,
+    MatSliderModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

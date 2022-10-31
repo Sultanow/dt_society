@@ -109,23 +109,19 @@ export class HeatmapComponent implements OnInit {
       if (this.features.length > 0) {
         this.features = [];
       }
-      var countries: string[] | undefined = [];
-      var country_union: (string | undefined | string[])[] = [];
+      var countries: string[] | undefined = [] || undefined;
 
       for (const dataset of this.selections.datasets) {
         if (dataset.featureOptions != undefined) {
           this.features.push(...dataset.featureOptions);
 
-          var countriesConcat = [...countries, ...[dataset.countryOptions]];
-
-          country_union = [...new Set(countriesConcat)];
+          countries = [...countries, ...(dataset.countryOptions || [])];
         }
       }
-      console.log(country_union[0]);
+      this.countries = [...new Set(countries)];
     });
     this.selectedFeaturesControl.valueChanges.subscribe((selectedFeatures) => {
       this.selectedFeatures = selectedFeatures;
-      console.log(selectedFeatures);
       this.updateHeatmap();
     });
   }
