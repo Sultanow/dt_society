@@ -2,7 +2,7 @@ import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
-import { ColumnValues, Plot } from 'src/app/types/GraphData';
+import { ColumnValues, Models, Plot } from 'src/app/types/GraphData';
 
 @Component({
   selector: 'app-vectorautoregression',
@@ -25,6 +25,11 @@ export class VectorautoregressionComponent implements OnInit {
     },
   };
 
+  public models: Models = {
+    var: 'Vector Auto Regression',
+    hwes: 'HW Smoothing',
+  };
+
   public selections: Selections = {
     datasets: [],
     selectedDataset: undefined,
@@ -42,12 +47,14 @@ export class VectorautoregressionComponent implements OnInit {
 
   public frequency: string = 'Yearly';
 
+  public selectedModel: string = 'var';
+
   createVarForecast(data: ColumnValues) {
     if (this.data.data.length > 0) {
       this.data.data = [];
     }
     this.data.layout.title =
-      'Vector Auto Regression (' + this.selectedCountry + ')';
+      this.models[this.selectedModel] + ' (' + this.selectedCountry + ')';
     this.data.layout.grid = {
       rows: 1,
       columns: this.selections.datasets.length,
@@ -119,8 +126,6 @@ export class VectorautoregressionComponent implements OnInit {
       i++;
       this.data.data.push(trace_solid);
       this.data.data.push(trace_dashed);
-
-      console.log(this.data.data);
     }
   }
 
@@ -138,12 +143,16 @@ export class VectorautoregressionComponent implements OnInit {
         )
       ) {
         this.dataService
-          .getData(this.selections.datasets, '/forecast/var', {
-            country: this.selectedCountry,
-            periods: this.predictionPeriods,
-            maxLags: this.maxLags,
-            frequency: this.frequency,
-          })
+          .getData(
+            this.selections.datasets,
+            '/forecast/' + this.selectedModel,
+            {
+              country: this.selectedCountry,
+              periods: this.predictionPeriods,
+              maxLags: this.maxLags,
+              frequency: this.frequency,
+            }
+          )
           .subscribe((event) => {
             if (event.type === HttpEventType.Response) {
               if (event.body) {
@@ -152,6 +161,17 @@ export class VectorautoregressionComponent implements OnInit {
             }
           });
       }
+    }
+  }
+
+  updateParameterSlider(event: any) {
+    switch (event) {
+      case 'hwes':
+        this.maxLags = 0.49;
+        break;
+      case 'var':
+        this.maxLags = 1;
+        break;
     }
   }
 

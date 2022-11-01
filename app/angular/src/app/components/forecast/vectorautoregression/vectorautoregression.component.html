@@ -1,16 +1,27 @@
 <div *ngIf="countries.length > 0">
-  <mat-button-toggle-group
-    name="frequency"
-    aria-label="Frequency"
-    [(ngModel)]="frequency"
-    (change)="updateVarForecast()"
-  >
-    <mat-button-toggle value="Yearly">Yearly</mat-button-toggle>
-    <mat-button-toggle value="Monthly">Monthly</mat-button-toggle>
-    <mat-button-toggle value="Weekly">Weekly</mat-button-toggle>
-    <mat-button-toggle value="Daily">Daily</mat-button-toggle>
-  </mat-button-toggle-group>
+  <div class="model-selector">
+    <mat-radio-group
+      aria-label="Select a model"
+      [(ngModel)]="selectedModel"
+      (change)="updateParameterSlider($event.value); updateVarForecast()"
+    >
+      <mat-radio-button value="var">Vector Auto Regression</mat-radio-button>
+      <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
+    </mat-radio-group>
+  </div>
   <div class="toggle-container">
+    <mat-button-toggle-group
+      class="freq-selector"
+      name="frequency"
+      aria-label="Frequency"
+      [(ngModel)]="frequency"
+      (change)="updateVarForecast()"
+    >
+      <mat-button-toggle value="Yearly">Yearly</mat-button-toggle>
+      <mat-button-toggle value="Monthly">Monthly</mat-button-toggle>
+      <mat-button-toggle value="Weekly">Weekly</mat-button-toggle>
+      <mat-button-toggle value="Daily">Daily</mat-button-toggle>
+    </mat-button-toggle-group>
     <mat-form-field appearance="fill">
       <mat-label>Country</mat-label>
       <mat-select
@@ -22,6 +33,9 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
+  </div>
+
+  <div class="toggle-container">
     <section class="slider-section">
       <div># of predictions</div>
       <mat-slider
@@ -34,20 +48,34 @@
         [max]="40"
       ></mat-slider>
     </section>
+    <section *ngIf="selectedModel == 'var'; else elseBlock">
+      <div>Max lags</div>
+      <mat-slider
+        class="lags-slider"
+        thumbLabel
+        [displayWith]="formatLabel"
+        [(ngModel)]="maxLags"
+        (change)="updateVarForecast()"
+        aria-label="unit(s)"
+        [min]="1"
+        [max]="8"
+      ></mat-slider>
+    </section>
+    <ng-template #elseBlock
+      ><div>&#945;-Parameter</div>
+      <mat-slider
+        class="lags-slider"
+        thumbLabel
+        [displayWith]="formatLabel"
+        [(ngModel)]="maxLags"
+        (change)="updateVarForecast()"
+        aria-label="unit(s)"
+        [step]="0.01"
+        [min]="0.01"
+        [max]="0.99"
+      ></mat-slider
+    ></ng-template>
   </div>
-  <section>
-    <div>Max lags</div>
-    <mat-slider
-      class="lags-slider"
-      thumbLabel
-      [displayWith]="formatLabel"
-      [(ngModel)]="maxLags"
-      (change)="updateVarForecast()"
-      aria-label="unit(s)"
-      [min]="1"
-      [max]="8"
-    ></mat-slider>
-  </section>
 
   <plotly-plot
     *ngIf="data.data.length > 0"

@@ -53,3 +53,7 @@ export interface GraphControls {
   periods?: number;
   maxLags?: number;
 }
+
+export interface Models {
+  [key: string]: string;
+}

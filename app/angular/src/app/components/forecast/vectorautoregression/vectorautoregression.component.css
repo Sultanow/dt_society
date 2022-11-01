@@ -14,3 +14,17 @@ mat-slider {
 .slider-section {
   margin-left: 10px;
 }
+
+.model-selector {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+mat-radio-button {
+  margin-left: 5px;
+}
+
+.freq-selector {
+  height: 50px;
+  margin-right: 10px;
+}

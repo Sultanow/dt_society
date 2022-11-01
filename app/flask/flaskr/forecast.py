@@ -74,13 +74,6 @@ def forecastVAR():
         frequency=data["frequency"],
     )
 
-    # fig = create_var_forecast_plot_multi(forecast, feature_col, time_col[-1], 5)
-
-    # graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-    # return render_template("figure.html", graphJSON=graphJSON)
-    # return jsonify(graphJSON)
-
     d["x"] = forecast[time_columns[-1]].dt.strftime("%Y-%m-%d").tolist()
     for feature in feature_columns:
         d[feature] = forecast[feature].tolist()
@@ -89,39 +82,61 @@ def forecastVAR():
     return d
 
 
-@bp.route("hwes", methods=["GET"])
+@bp.route("hwes", methods=["POST"])
 def forecastHWES():
-    geo_col = request.args.getlist("geo")
-    time_col = request.args.getlist("x")
-    feature_col = request.args.getlist("y")
-    reshape_col = request.args.getlist("rshp")
+    data = request.get_json()
 
+    print(data)
+
+    datasets = data["datasets"]
+
+    if datasets is None:
+        return ("Empty request", 400)
+
+    time_columns = []
+    feature_columns = []
     filtered_dfs = []
+
     collection = mongo.db["collection_1"]
-    for i in range(collection.count_documents({})):
+
+    d = {}
+    for dataset in datasets:
+
         df = parse_dataset(
-            geo_column=geo_col[i],
-            dataset_id=i,
-            reshape_column=reshape_col[i],
+            geo_column=dataset["geoSelected"],
+            dataset_id=dataset["id"],
+            reshape_column=dataset["reshapeSelected"]
+            if dataset["reshapeSelected"] != "N/A"
+            else None,
         )
-        filtered_df = df[df[geo_col[i]] == "AUT"][[time_col[i], feature_col[i]]]
+        filtered_df = df[df[dataset["geoSelected"]] == data["country"]][
+            [dataset["timeSelected"], dataset["featureSelected"]]
+        ]
+
+        filtered_df[dataset["timeSelected"]] = pd.to_datetime(
+            filtered_df[dataset["timeSelected"]].astype("str")
+        )
 
         filtered_dfs.append(filtered_df)
 
+        time_columns.append(dataset["timeSelected"])
+        feature_columns.append(dataset["featureSelected"])
+
     forecast = hw_es_fit_and_predict_multi(
         filtered_dfs,
-        time_col,
-        feature_col,
-        alpha=0.4,
-        periods=5,
-        frequency="Yearly",
+        time_columns,
+        feature_columns,
+        alpha=data["maxLags"],
+        periods=data["periods"],
+        frequency=data["frequency"],
     )
 
-    fig = create_var_forecast_plot_multi(forecast, feature_col, time_col[-1], 5)
+    d["x"] = forecast[time_columns[-1]].dt.strftime("%Y-%m-%d").tolist()
+    for feature in feature_columns:
+        d[feature] = forecast[feature].tolist()
 
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-    return render_template("figure.html", graphJSON=graphJSON)
+    print(d)
+    return d
 
 
 @bp.route("prophet", methods=["GET", "POST"])

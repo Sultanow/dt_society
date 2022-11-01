@@ -11,7 +11,6 @@ import { PlotlyModule } from 'angular-plotly.js';
 import { MapComponent } from './components/graph/map/map.component';
 import { HeatmapComponent } from './components/graph/heatmap/heatmap.component';
 import { CorrelationComponent } from './components/graph/correlation/correlation.component';
-import { HwsmoothingComponent } from './components/forecast/hwsmoothing/hwsmoothing.component';
 import { VectorautoregressionComponent } from './components/forecast/vectorautoregression/vectorautoregression.component';
 import { ProphetscenariosComponent } from './components/forecast/prophetscenarios/prophetscenarios.component';
 import { FileuploadComponent } from './components/fileupload/fileupload.component';
@@ -43,7 +42,6 @@ PlotlyModule.plotlyjs = PlotlyJS;
     MapComponent,
     HeatmapComponent,
     CorrelationComponent,
-    HwsmoothingComponent,
     VectorautoregressionComponent,
     ProphetscenariosComponent,
     FileuploadComponent,
