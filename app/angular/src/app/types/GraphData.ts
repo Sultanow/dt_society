@@ -52,9 +52,22 @@ export interface GraphControls {
   frequency?: string;
   periods?: number;
   maxLags?: number;
-  scenarios?: string[];
+  scenarios?: Scenarios;
 }
 
 export interface Models {
   [key: string]: string;
+}
+
+export interface Scenarios {
+  [key: string]: number[];
+}
+
+export interface Forecast {
+  [key: string]: number[];
+}
+export interface ProphetForecast {
+  merge: ColumnValues;
+  future: ColumnValues;
+  forecast: Forecast;
 }

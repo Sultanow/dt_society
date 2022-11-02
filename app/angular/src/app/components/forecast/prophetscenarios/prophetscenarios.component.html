@@ -24,7 +24,7 @@
       *ngFor="let dataset of selections.datasets"
       [value]="dataset.id"
     >
-      {{ dataset.id }}
+      {{ dataset.id }} ({{ dataset.featureSelected }})
     </mat-radio-button>
   </mat-radio-group>
 </div>
@@ -47,7 +47,25 @@
     <mat-icon>restart_alt</mat-icon>
   </button>
 </section>
-<mat-form-field class="scenario-field" *ngFor="let i of scenarioIndeces">
-  <mat-label> Scenario {{ i }}</mat-label>
-  <input matInput [(ngModel)]="scenarioValues[i]" placeholder="Scenario" />
-</mat-form-field>
+<ng-container *ngFor="let dataset of selections.datasets">
+  <div
+    *ngIf="
+      dataset.id !== selections.selectedDataset && dataset.id !== undefined
+    "
+  >
+    <div>{{ dataset.featureSelected }}</div>
+    <mat-form-field class="scenario-field" *ngFor="let i of scenarioIndeces">
+      <mat-label> Step {{ i }}</mat-label>
+      <input
+        matInput
+        [(ngModel)]="scenarios[dataset.id][i]"
+        placeholder="Scenario"
+      />
+    </mat-form-field>
+  </div>
+</ng-container>
+<plotly-plot
+  *ngIf="data.data.length > 0"
+  [data]="data.data"
+  [layout]="data.layout"
+></plotly-plot>

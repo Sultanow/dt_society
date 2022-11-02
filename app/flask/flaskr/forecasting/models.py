@@ -312,7 +312,7 @@ def prophet_fit_and_predict_n(
     future = model.make_future_dataframe(
         periods=scenario_min_len, freq=frequencies[frequency][0]
     )
-    
+
     for feature, scenario in zip(feature_columns, scenarios):
         artificial_scenario = np.append(
             merged_df[feature].values,
@@ -320,8 +320,6 @@ def prophet_fit_and_predict_n(
         )
 
         future[feature] = artificial_scenario
-        
-    print(future)
 
     predictions = model.predict(future)
 

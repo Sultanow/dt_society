@@ -143,8 +143,6 @@ def forecastHWES():
 def forecastProphet():
     data = request.get_json()
 
-    print(data)
-
     datasets = data["datasets"]
 
     if datasets is None:
@@ -179,8 +177,16 @@ def forecastProphet():
         time_columns.append(dataset["timeSelected"])
         feature_columns.append(dataset["featureSelected"])
 
-    scenarios_data = [[45000, 46000, 47000], [21.2, 30.3, 43.4]]
+    scenarios_data = [
+        [float(x) if x is not None else x for x in data["scenarios"][dataset]]
+        for dataset in data["scenarios"]
+    ]
 
+    # scenarios_data = [[45000, 46000, 47000], [21.2, 30.3, 43.4]]
+    d = {}
+    d["future"] = {}
+    d["merge"] = {}
+    d["forecast"] = {}
     forecast, merged_df, future_df, y_feature = prophet_fit_and_predict_n(
         filtered_dfs,
         time_columns,
@@ -198,4 +204,20 @@ def forecastProphet():
 
     print(forecast)
 
-    return ""
+    print(merged_df)
+
+    print(future_df)
+
+    for df_key, df in zip(d, (future_df, merged_df, forecast)):
+        for column in df.columns.tolist():
+            if column == "ds":
+                d[df_key]["x"] = df[column].to_list()
+            elif column == "y":
+
+                d[df_key][y_feature] = df[column].to_list()
+            else:
+                d[df_key][column] = df[column].to_list()
+
+    print(d)
+
+    return d

@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
-import { Plot } from 'src/app/types/GraphData';
+import { Plot, ProphetForecast, Scenarios } from 'src/app/types/GraphData';
 
 @Component({
   selector: 'app-prophetscenarios',
@@ -46,17 +46,99 @@ export class ProphetscenariosComponent implements OnInit {
 
   public frequency: string = 'Yearly';
 
+  public scenarios: Scenarios = {};
+
   updateScenarios() {
     this.scenarioIndeces = new Array(this.predictionPeriods)
       .fill(null)
-      .map((_, i) => i + 1);
+      .map((_, i) => i);
 
-    this.scenarioValues = new Array(this.predictionPeriods).fill(null);
+    //this.scenarioValues = new Array(this.predictionPeriods).fill(null);
 
-    console.log(this.scenarioValues);
+    for (const dataset of this.selections.datasets) {
+      if (
+        dataset.id !== undefined &&
+        dataset.id !== this.selections.selectedDataset
+      ) {
+        this.scenarios[dataset.id] = new Array(this.predictionPeriods).fill(
+          null
+        );
+      }
+    }
+
+    console.log(this.scenarios);
   }
 
-  createProphetForecast() {}
+  createProphetForecast(data: ProphetForecast) {
+    if (this.data.data.length > 0) {
+      this.data.data = [];
+    }
+
+    this.data.layout.grid = {
+      rows: 1,
+      columns: this.selections.datasets.length,
+      pattern: 'independent',
+    };
+
+    const colors = [
+      'mediumpurple',
+      'mediumspringgreen',
+      'hotpink',
+      'mediumblue',
+      'goldenrod',
+    ];
+
+    let forecastHistory: any = {
+      type: 'scatter',
+      mode: 'lines',
+      y: data['merge'][this.selections.datasets[0].featureSelected || ''],
+      x: data['merge']['x'],
+    };
+
+    const uncertaintyUpper = data['forecast']['yhat_upper'].map(
+      (x, i) => x - data['forecast']['yhat'][i]
+    );
+
+    const uncertaintyLower = data['forecast']['yhat'].map(
+      (x, i) => x - data['forecast']['yhat_lower'][i]
+    );
+
+    let forecastData: any = {
+      type: 'scatter',
+      mode: 'lines+markers',
+      line: { dash: 'dash' },
+      x: data['forecast']['x'],
+      y: data['forecast']['yhat'],
+      error_y: {
+        type: 'data',
+        symmetric: false,
+        array: uncertaintyUpper,
+        arrayminus: uncertaintyLower,
+      },
+    };
+
+    const fillerX = [data['merge']['x'].slice(-1)[0], data['forecast']['x'][0]];
+
+    console.log(fillerX);
+
+    let filler: any = {
+      type: 'scatter',
+      mode: 'lines+markers',
+      line: { dash: 'dash' },
+      x: fillerX,
+      y: [
+        data['merge'][this.selections.datasets[0].featureSelected || ''].slice(
+          -1
+        )[0],
+        data['forecast']['yhat'][0],
+      ],
+      showlegend: false,
+    };
+
+    this.data.data.push(forecastHistory);
+    this.data.data.push(forecastData);
+    this.data.data.push(filler);
+  }
 
   updateProphetForecast() {
     console.log('clicked');
@@ -77,12 +159,12 @@ export class ProphetscenariosComponent implements OnInit {
             country: this.selectedCountry,
             periods: this.predictionPeriods,
             frequency: this.frequency,
-            scenarios: this.scenarioValues,
+            scenarios: this.scenarios,
           })
           .subscribe((event) => {
             if (event.type === HttpEventType.Response) {
               if (event.body) {
-                this.createProphetForecast();
+                this.createProphetForecast(event.body as ProphetForecast);
               }
             }
           });
@@ -94,7 +176,7 @@ export class ProphetscenariosComponent implements OnInit {
     if (
       JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
     ) {
-      console.log(this.scenarioValues);
+      console.log(this.scenarios);
     }
     this.oldSelections = structuredClone(this.selections);
   }
