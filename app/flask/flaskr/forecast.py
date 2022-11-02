@@ -139,40 +139,63 @@ def forecastHWES():
     return d
 
 
-@bp.route("prophet", methods=["GET", "POST"])
+@bp.route("prophet", methods=["POST"])
 def forecastProphet():
-    geo_col = request.args.getlist("geo")
-    time_col = request.args.getlist("x")
-    feature_col = request.args.getlist("y")
-    reshape_col = request.args.getlist("rshp")
+    data = request.get_json()
 
+    print(data)
+
+    datasets = data["datasets"]
+
+    if datasets is None:
+        return ("Empty request", 400)
+
+    time_columns = []
+    feature_columns = []
     filtered_dfs = []
+
     collection = mongo.db["collection_1"]
-    for i in range(collection.count_documents({})):
+
+    d = {}
+    for dataset in datasets:
+
         df = parse_dataset(
-            geo_column=geo_col[i],
-            dataset_id=i,
-            reshape_column=reshape_col[i],
+            geo_column=dataset["geoSelected"],
+            dataset_id=dataset["id"],
+            reshape_column=dataset["reshapeSelected"]
+            if dataset["reshapeSelected"] != "N/A"
+            else None,
         )
-        filtered_df = df[df[geo_col[i]] == "AUT"][[time_col[i], feature_col[i]]]
+        filtered_df = df[df[dataset["geoSelected"]] == data["country"]][
+            [dataset["timeSelected"], dataset["featureSelected"]]
+        ]
+
+        filtered_df[dataset["timeSelected"]] = pd.to_datetime(
+            filtered_df[dataset["timeSelected"]].astype("str")
+        )
 
         filtered_dfs.append(filtered_df)
 
-    scenarios_data = [[45000, 46000, 47000]]
+        time_columns.append(dataset["timeSelected"])
+        feature_columns.append(dataset["featureSelected"])
+
+    scenarios_data = [[45000, 46000, 47000], [21.2, 30.3, 43.4]]
 
     forecast, merged_df, future_df, y_feature = prophet_fit_and_predict_n(
         filtered_dfs,
-        time_col,
-        feature_col,
+        time_columns,
+        feature_columns,
         scenarios=scenarios_data,
         frequency="Yearly",
         y_feature_index=0,
     )
 
-    fig = create_multivariate_forecast_prophet(
-        forecast, merged_df, future_df, y_feature, feature_col
-    )
+    # fig = create_multivariate_forecast_prophet(
+    #     forecast, merged_df, future_df, y_feature, feature_col
+    # )
 
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    # graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template("figure.html", graphJSON=graphJSON)
+    print(forecast)
+
+    return ""

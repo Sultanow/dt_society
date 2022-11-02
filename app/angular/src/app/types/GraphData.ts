@@ -52,6 +52,7 @@ export interface GraphControls {
   frequency?: string;
   periods?: number;
   maxLags?: number;
+  scenarios?: string[];
 }
 
 export interface Models {

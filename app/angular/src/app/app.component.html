@@ -16,4 +16,12 @@
     </ng-template>
   </mat-tab>
 </mat-tab-group>
-<app-vectorautoregression></app-vectorautoregression>
+
+<mat-tab-group mat-stretch-tabs style="min-height: 700px">
+  <mat-tab label="Multivariate Forecasting">
+    <app-vectorautoregression></app-vectorautoregression>
+  </mat-tab>
+  <mat-tab label="Scenario-based Forecasting">
+    <app-prophetscenarios></app-prophetscenarios>
+  </mat-tab>
+</mat-tab-group>
