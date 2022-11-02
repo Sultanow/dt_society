@@ -80,24 +80,20 @@ export class ProphetscenariosComponent implements OnInit {
       pattern: 'independent',
     };
 
-    const colors = [
-      'mediumpurple',
-      'mediumspringgreen',
-      'hotpink',
-      'mediumblue',
-      'goldenrod',
-    ];
-
     let forecastHistory: any = {
       type: 'scatter',
       mode: 'lines',
       y: data['merge'][this.selections.datasets[0].featureSelected || ''],
       x: data['merge']['x'],
+      name: this.selections.datasets[0].featureSelected,
+      line: { color: 'mediumpurple' },
     };
 
     const uncertaintyUpper = data['forecast']['yhat_upper'].map(
       (x, i) => x - data['forecast']['yhat'][i]
     );
+
+    console.log(uncertaintyUpper);
 
     const uncertaintyLower = data['forecast']['yhat'].map(
       (x, i) => x - data['forecast']['yhat_lower'][i]
@@ -106,7 +102,10 @@ export class ProphetscenariosComponent implements OnInit {
     let forecastData: any = {
       type: 'scatter',
       mode: 'lines+markers',
-      line: { dash: 'dash' },
+      marker: {
+        symbol: 'triangle-up',
+      },
+      line: { dash: 'dash', color: 'mediumpurple' },
       x: data['forecast']['x'],
       y: data['forecast']['yhat'],
       error_y: {
@@ -115,6 +114,7 @@ export class ProphetscenariosComponent implements OnInit {
         array: uncertaintyUpper,
         arrayminus: uncertaintyLower,
       },
+      name: this.selections.datasets[0].featureSelected + ' (prediction)',
     };
 
     const fillerX = [data['merge']['x'].slice(-1)[0], data['forecast']['x'][0]];
@@ -123,8 +123,8 @@ export class ProphetscenariosComponent implements OnInit {
 
     let filler: any = {
       type: 'scatter',
-      mode: 'lines+markers',
-      line: { dash: 'dash' },
+      mode: 'lines',
+      line: { dash: 'dash', color: 'mediumpurple' },
       x: fillerX,
       y: [
         data['merge'][this.selections.datasets[0].featureSelected || ''].slice(
@@ -134,14 +134,70 @@ export class ProphetscenariosComponent implements OnInit {
       ],
       showlegend: false,
     };
-
+    this.data.layout['xaxis'] = {
+      gridcolor: 'rgba(80, 103, 132, 0.3)',
+      title: 'Time',
+    };
+    this.data.layout['yaxis'] = {
+      gridcolor: 'rgba(80, 103, 132, 0.3)',
+      title: this.selections.datasets[0].featureSelected,
+    };
+    // forecast plot
     this.data.data.push(forecastHistory);
     this.data.data.push(forecastData);
     this.data.data.push(filler);
+
+    // scenario plots
+
+    const colors = ['mediumspringgreen', 'hotpink', 'mediumblue', 'goldenrod'];
+
+    var indexFeatures = 1;
+
+    for (const [key, value] of Object.entries(data['future'])) {
+      if (key === 'x') {
+        continue;
+      }
+      let trace_solid: any = {
+        type: 'scatter',
+        mode: 'lines',
+        line: { color: colors[indexFeatures - 1] },
+        name: key,
+      };
+
+      let trace_dashed: any = {
+        type: 'scatter',
+        mode: 'lines',
+        line: { dash: 'dash', color: colors[indexFeatures - 1] },
+        name: key + ' (scenario)',
+      };
+
+      trace_solid.x = data['merge']['x'];
+      trace_solid.y = data['merge'][key];
+
+      trace_dashed.x = data['future']['x'];
+      trace_dashed.y = data['future'][key];
+
+      trace_solid.xaxis = 'x' + (indexFeatures + 1).toString();
+      trace_solid.yaxis = 'y' + (indexFeatures + 1).toString();
+      trace_dashed.xaxis = 'x' + (indexFeatures + 1).toString();
+      trace_dashed.yaxis = 'y' + (indexFeatures + 1).toString();
+
+      this.data.layout['xaxis' + (indexFeatures + 1).toString()] = {
+        gridcolor: 'rgba(80, 103, 132, 0.3)',
+        title: 'Time',
+      };
+      this.data.layout['yaxis' + (indexFeatures + 1).toString()] = {
+        gridcolor: 'rgba(80, 103, 132, 0.3)',
+        title: key,
+      };
+
+      indexFeatures++;
+      this.data.data.push(trace_solid);
+      this.data.data.push(trace_dashed);
+    }
   }
 
   updateProphetForecast() {
-    console.log('clicked');
     if (
       this.selections.datasets.length > 0 &&
       this.selectedCountry != undefined
@@ -176,7 +232,6 @@ export class ProphetscenariosComponent implements OnInit {
     if (
       JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
     ) {
-      console.log(this.scenarios);
     }
     this.oldSelections = structuredClone(this.selections);
   }

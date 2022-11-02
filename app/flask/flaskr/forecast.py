@@ -211,7 +211,7 @@ def forecastProphet():
     for df_key, df in zip(d, (future_df, merged_df, forecast)):
         for column in df.columns.tolist():
             if column == "ds":
-                d[df_key]["x"] = df[column].to_list()
+                d[df_key]["x"] = df[column].dt.strftime("%Y-%m-%d").to_list()
             elif column == "y":
 
                 d[df_key][y_feature] = df[column].to_list()
