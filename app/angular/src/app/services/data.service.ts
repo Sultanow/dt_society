@@ -60,15 +60,19 @@ export class DataService {
   getData(
     columns: any,
     endpoint: string,
-    features?: string | null
+    features?: string | null,
+    country?: string | null
   ): Observable<
     HttpEvent<CorrelationMatrix | CountryData | ColumnValues[] | unknown>
   > {
     let body = {};
 
-    if (features !== undefined) {
-      body = { datasets: columns, features: features };
-    } else {
+    if (features !== undefined && country !== undefined) {
+      body = { datasets: columns, features: features, country: country };
+    } else if (features !== undefined){
+      body = { datasets: columns, features: features};
+    } 
+    else {
       body = columns;
     }
 

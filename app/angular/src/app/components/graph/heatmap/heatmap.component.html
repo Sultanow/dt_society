@@ -1,23 +1,21 @@
 <div>
-  <mat-form-field appearance="fill">
-    <mat-label>Features</mat-label>
-    <mat-select [formControl]="selectedFeaturesControl" multiple>
-      <mat-option *ngFor="let feature of features" [value]="feature">
-        {{ feature }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <mat-form-field appearance="fill">
-    <mat-label>Country</mat-label>
-    <mat-select>
-      <mat-option *ngFor="let country of countries" [value]="country">
-        {{ country }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <plotly-plot
-    *ngIf="data.data.length > 0"
-    [data]="data.data"
-    [layout]="data.layout"
-  ></plotly-plot>
+  <div [formGroup]="selectionControl">
+    <mat-form-field appearance="fill">
+      <mat-label>Country</mat-label>
+      <mat-select formControlName="selectedCountryControl">
+        <mat-option *ngFor="let country of countries" [value]="country">
+          {{ country }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>Features</mat-label>
+      <mat-select formControlName="selectedFeaturesControl" multiple>
+        <mat-option *ngFor="let feature of features" [value]="feature">
+          {{ feature }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <plotly-plot *ngIf="data.data.length > 0" [data]="data.data" [layout]="data.layout"></plotly-plot>
+  </div>
 </div>

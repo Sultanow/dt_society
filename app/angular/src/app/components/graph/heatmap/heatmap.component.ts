@@ -1,6 +1,6 @@
 import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 import { CorrelationMatrix, Plot } from 'src/app/types/GraphData';
@@ -32,12 +32,17 @@ export class HeatmapComponent implements OnInit {
 
   public features: string[] = [];
 
-  selectedFeaturesControl = new FormControl('');
+  selectionControl = new FormGroup({
+    selectedFeaturesControl: new FormControl(),
+    selectedCountryControl: new FormControl(),
+  });
 
   countries: (undefined | string[] | string)[] = [];
 
   private oldSelections?: Selections;
   public selectedFeatures?: string | null;
+  private oldSelectedCountry?: string | null;
+  public selectedCountry?: string | null;
 
   createHeatmapPlot(data: CorrelationMatrix) {
     if (this.data.data.length > 0) {
@@ -81,7 +86,8 @@ export class HeatmapComponent implements OnInit {
           .getData(
             this.selections.datasets,
             '/graph/heatmap',
-            this.selectedFeatures
+            this.selectedFeatures,
+            this.selectedCountry
           )
           .subscribe((event) => {
             if (event.type === HttpEventType.Response) {
@@ -96,11 +102,14 @@ export class HeatmapComponent implements OnInit {
 
   ngDoCheck() {
     if (
-      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
+      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections) ||
+      JSON.stringify(this.selectedCountry) !==
+        JSON.stringify(this.oldSelectedCountry)
     ) {
       this.updateHeatmap();
     }
     this.oldSelections = structuredClone(this.selections);
+    this.oldSelectedCountry = structuredClone(this.selectedCountry);
   }
 
   ngOnInit(): void {
@@ -112,17 +121,35 @@ export class HeatmapComponent implements OnInit {
       var countries: string[] | undefined = [] || undefined;
 
       for (const dataset of this.selections.datasets) {
-        if (dataset.featureOptions != undefined) {
-          this.features.push(...dataset.featureOptions);
-
+        if (dataset.featureOptions !== undefined) {
           countries = [...countries, ...(dataset.countryOptions || [])];
         }
       }
       this.countries = [...new Set(countries)];
     });
-    this.selectedFeaturesControl.valueChanges.subscribe((selectedFeatures) => {
-      this.selectedFeatures = selectedFeatures;
-      this.updateHeatmap();
-    });
+
+    this.selectionControl
+      .get('selectedFeaturesControl')!
+      .valueChanges.subscribe((selectedFeatures) => {
+        this.selectedFeatures = selectedFeatures;
+        this.updateHeatmap();
+      });
+
+    this.selectionControl
+      .get('selectedCountryControl')!
+      .valueChanges.subscribe((selectedCountry) => {
+        this.selectedCountry = selectedCountry;
+        this.features = [];
+        for (const dataset of this.selections.datasets) {
+          if (
+            selectedCountry !== null &&
+            dataset.featureOptions !== undefined &&
+            dataset.countryOptions?.includes(selectedCountry)
+          ) {
+            this.features.push(...dataset.featureOptions);
+          }
+        }
+        this.updateHeatmap();
+      });
   }
 }

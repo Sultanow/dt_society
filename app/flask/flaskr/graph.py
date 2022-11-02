@@ -121,17 +121,19 @@ def get_heatmap():
             dataset_id=i,
             reshape_column=reshape_col[i],
         )
-        # replace "AUT" with country selection
-        if "AUT" in df[geo_col[i]].unique():
-            df_by_country = df[df[geo_col[i]] == "AUT"]
 
-            df_by_country = df_by_country.drop(columns=[geo_col[i]])
+        if ("country" in data):
+            selectedcountry = data["country"]
+            if selectedcountry in df[geo_col[i]].unique():
+                df_by_country = df[df[geo_col[i]] == selectedcountry]
 
-            df_by_country[time_col[i]] = pd.to_datetime(
-                df_by_country[time_col[i]].astype("str")
-            )
-            dfs.append(df_by_country)
-            time_columns.append(time_col[i])
+                df_by_country = df_by_country.drop(columns=[geo_col[i]])
+
+                df_by_country[time_col[i]] = pd.to_datetime(
+                    df_by_country[time_col[i]].astype("str")
+                )
+                dfs.append(df_by_country)
+                time_columns.append(time_col[i])
 
     if len(dfs) > 1:
         merged_df, merged_time_col = merge_dataframes_multi(dfs, time_columns)
@@ -147,12 +149,13 @@ def get_heatmap():
     else:
         triangular_upper_mask = np.triu(np.ones(dfs[0].corr().shape)).astype(bool)
 
-        correlation_matrix = dfs[0].corr().where(~triangular_upper_mask)
+        correlation_matrix = dfs[0].corr().where(~triangular_upper_mask).fillna(0)
 
     d["columns"] = correlation_matrix.columns.to_list()
 
     d["matrix"] = correlation_matrix.values.tolist()
 
+ 
     return jsonify(d)
 
 
