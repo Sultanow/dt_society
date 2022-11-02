@@ -121,9 +121,11 @@ def get_heatmap():
             dataset_id=i,
             reshape_column=reshape_col[i],
         )
-        # replace "AUT" with country selection
-        if "AUT" in df[geo_col[i]].unique():
-            df_by_country = df[df[geo_col[i]] == "AUT"]
+
+        selectedcountry = data["country"]
+
+        if selectedcountry in df[geo_col[i]].unique():
+            df_by_country = df[df[geo_col[i]] == selectedcountry]
 
             df_by_country = df_by_country.drop(columns=[geo_col[i]])
 
@@ -147,7 +149,7 @@ def get_heatmap():
     else:
         triangular_upper_mask = np.triu(np.ones(dfs[0].corr().shape)).astype(bool)
 
-        correlation_matrix = dfs[0].corr().where(~triangular_upper_mask)
+        correlation_matrix = dfs[0].corr().where(~triangular_upper_mask).fillna(0)
 
     d["columns"] = correlation_matrix.columns.to_list()
 

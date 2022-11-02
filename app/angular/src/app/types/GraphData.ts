@@ -48,7 +48,7 @@ export interface Frame {
 
 export interface GraphControls {
   country?: string;
-  features?: string | null;
+  features?: string | null | string[];
   frequency?: string;
   periods?: number;
   maxLags?: number;
