@@ -1,3 +1,13 @@
+<div [formGroup]="selectionControl">
+  <mat-form-field appearance="fill">
+    <mat-label>Country</mat-label>
+    <mat-select formControlName="selectedCountryControl">
+      <mat-option *ngFor="let country of countries" [value]="country">
+        {{ country }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
 <plotly-plot
   *ngIf="data.data.length > 0"
   [data]="data.data"

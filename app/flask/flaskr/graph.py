@@ -164,7 +164,9 @@ def get_correlation_lines():
         return ("Database not available", 500)
 
     data = request.get_json()["datasets"]
+    selectedcountry = request.get_json()["country"]
 
+    
     if data is None:
         return ("Empty request", 400)
 
@@ -193,7 +195,7 @@ def get_correlation_lines():
             dataset_id=i,
             reshape_column=reshape_col[i],
         )
-        df_by_country = df[df[geo_col[i]] == "AUT"]
+        df_by_country = df[df[geo_col[i]] == selectedcountry]
 
         features = [
             feature
