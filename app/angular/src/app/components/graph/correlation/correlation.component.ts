@@ -137,7 +137,6 @@ export class CorrelationComponent implements OnInit {
           .subscribe((event) => {
             if (event.type === HttpEventType.Response) {
               if (event.body) {
-                console.log(event.body)
                 this.createCorrelationLines(event.body as ColumnValues[]);
               }
             }

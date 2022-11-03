@@ -195,6 +195,7 @@ def get_correlation_lines():
             dataset_id=i,
             reshape_column=reshape_col[i],
         )
+        df = df.fillna(0)
         df_by_country = df[df[geo_col[i]] == selectedcountry]
 
         features = [
