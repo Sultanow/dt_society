@@ -1,11 +1,7 @@
-import json
-import plotly
 import pandas as pd
 
 from flask import (
     Blueprint,
-    jsonify,
-    render_template,
     request,
 )
 from .forecasting.models import (
@@ -13,12 +9,7 @@ from .forecasting.models import (
     hw_es_fit_and_predict_multi,
     prophet_fit_and_predict_n,
 )
-from .plots.plots import (
-    create_var_forecast_plot_multi,
-    create_multivariate_forecast_prophet,
-)
-from .preprocessing.parse import parse_dataset, merge_dataframes_multi
-from werkzeug.security import check_password_hash, generate_password_hash
+from .preprocessing.parse import parse_dataset
 
 from .extensions import mongo
 
@@ -29,8 +20,6 @@ bp = Blueprint("forecast", __name__, url_prefix="/forecast")
 def forecastVAR():
     data = request.get_json()
 
-    print(data)
-
     datasets = data["datasets"]
 
     if datasets is None:
@@ -40,9 +29,7 @@ def forecastVAR():
     feature_columns = []
     filtered_dfs = []
 
-    collection = mongo.db["collection_1"]
-
-    d = {}
+    response_data = {}
     for dataset in datasets:
 
         df = parse_dataset(
@@ -74,19 +61,16 @@ def forecastVAR():
         frequency=data["frequency"],
     )
 
-    d["x"] = forecast[time_columns[-1]].dt.strftime("%Y-%m-%d").tolist()
+    response_data["x"] = forecast[time_columns[-1]].dt.strftime("%Y-%m-%d").tolist()
     for feature in feature_columns:
-        d[feature] = forecast[feature].tolist()
+        response_data[feature] = forecast[feature].tolist()
 
-    print(d)
-    return d
+    return response_data
 
 
 @bp.route("hwes", methods=["POST"])
 def forecastHWES():
     data = request.get_json()
-
-    print(data)
 
     datasets = data["datasets"]
 
@@ -97,9 +81,7 @@ def forecastHWES():
     feature_columns = []
     filtered_dfs = []
 
-    collection = mongo.db["collection_1"]
-
-    d = {}
+    response_data = {}
     for dataset in datasets:
 
         df = parse_dataset(
@@ -131,12 +113,11 @@ def forecastHWES():
         frequency=data["frequency"],
     )
 
-    d["x"] = forecast[time_columns[-1]].dt.strftime("%Y-%m-%d").tolist()
+    response_data["x"] = forecast[time_columns[-1]].dt.strftime("%Y-%m-%d").tolist()
     for feature in feature_columns:
-        d[feature] = forecast[feature].tolist()
+        response_data[feature] = forecast[feature].tolist()
 
-    print(d)
-    return d
+    return response_data
 
 
 @bp.route("prophet", methods=["POST"])
@@ -156,7 +137,6 @@ def forecastProphet():
 
     y_feature_index = None
 
-    d = {}
     for i, dataset in enumerate(datasets):
 
         df = parse_dataset(
@@ -188,10 +168,10 @@ def forecastProphet():
         if dataset != dependent_df
     ]
 
-    d = {}
-    d["future"] = {}
-    d["merge"] = {}
-    d["forecast"] = {}
+    response_data = {}
+    response_data["future"] = {}
+    response_data["merge"] = {}
+    response_data["forecast"] = {}
     forecast, merged_df, future_df, y_feature = prophet_fit_and_predict_n(
         filtered_dfs,
         time_columns,
@@ -201,16 +181,16 @@ def forecastProphet():
         y_feature_index=y_feature_index,
     )
 
-    for df_key, df in zip(d, (future_df, merged_df, forecast)):
+    for df_key, df in zip(response_data, (future_df, merged_df, forecast)):
         for column in df.columns.tolist():
             if column == "ds":
-                d[df_key]["x"] = df[column].dt.strftime("%Y-%m-%d").to_list()
+                response_data[df_key]["x"] = (
+                    df[column].dt.strftime("%Y-%m-%d").to_list()
+                )
             elif column == "y":
 
-                d[df_key][y_feature] = df[column].to_list()
+                response_data[df_key][y_feature] = df[column].to_list()
             else:
-                d[df_key][column] = df[column].to_list()
+                response_data[df_key][column] = df[column].to_list()
 
-    print(d)
-
-    return d
+    return response_data

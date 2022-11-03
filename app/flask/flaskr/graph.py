@@ -1,6 +1,3 @@
-import json
-from time import time_ns
-import plotly
 import numpy as np
 import pandas as pd
 
@@ -8,12 +5,6 @@ from flask import (
     Blueprint,
     jsonify,
     request,
-)
-from .plots.plots import (
-    create_choropleth_slider_plot,
-    create_multi_line_plot,
-    create_correlation_heatmap,
-    create_two_line_plot,
 )
 from .preprocessing.parse import parse_dataset, merge_dataframes_multi
 
@@ -44,15 +35,19 @@ def get_map():
     )
 
     df = df.fillna(0)
-    d = {}
+    response_data = {}
 
     for country in df[geo_col].unique().tolist():
-        d[country] = {}
+        response_data[country] = {}
 
-        d[country][time_col] = df[df[geo_col] == country][time_col].to_list()
-        d[country][feature_col] = df[df[geo_col] == country][feature_col].to_list()
+        response_data[country][time_col] = df[df[geo_col] == country][
+            time_col
+        ].to_list()
+        response_data[country][feature_col] = df[df[geo_col] == country][
+            feature_col
+        ].to_list()
 
-    return d
+    return response_data
 
 
 @bp.route("/history", methods=["GET", "POST"])
@@ -75,15 +70,19 @@ def get_history():
 
     df = df.fillna(0)
 
-    d = {}
+    response_data = {}
 
     for country in df[geo_col].unique().tolist():
-        d[country] = {}
+        response_data[country] = {}
 
-        d[country][time_col] = df[df[geo_col] == country][time_col].to_list()
-        d[country][feature_col] = df[df[geo_col] == country][feature_col].to_list()
+        response_data[country][time_col] = df[df[geo_col] == country][
+            time_col
+        ].to_list()
+        response_data[country][feature_col] = df[df[geo_col] == country][
+            feature_col
+        ].to_list()
 
-    return d
+    return response_data
 
 
 @bp.route("/heatmap", methods=["POST"])
@@ -112,7 +111,7 @@ def get_heatmap():
     dfs = []
     time_columns = []
 
-    d = {}
+    response_data = {}
 
     collection = mongo.db["collection_1"]
     for i in range(collection.count_documents({})):
@@ -151,11 +150,11 @@ def get_heatmap():
 
         correlation_matrix = dfs[0].corr().where(~triangular_upper_mask).fillna(0)
 
-    d["columns"] = correlation_matrix.columns.to_list()
+    response_data["columns"] = correlation_matrix.columns.to_list()
 
-    d["matrix"] = correlation_matrix.values.tolist()
+    response_data["matrix"] = correlation_matrix.values.tolist()
 
-    return jsonify(d)
+    return jsonify(response_data)
 
 
 @bp.route("/corr", methods=["POST"])
@@ -166,7 +165,6 @@ def get_correlation_lines():
     data = request.get_json()["datasets"]
     selectedcountry = request.get_json()["country"]
 
-    
     if data is None:
         return ("Empty request", 400)
 
@@ -185,11 +183,11 @@ def get_correlation_lines():
     dfs = []
     feature_options = []
 
-    d = []
+    response_data = []
 
     collection = mongo.db["collection_1"]
     for i in range(collection.count_documents({})):
-        f = {}
+        file_data = {}
         df = parse_dataset(
             geo_column=geo_col[i],
             dataset_id=i,
@@ -207,10 +205,10 @@ def get_correlation_lines():
         feature_options.append(features)
         dfs.append(df_by_country)
 
-        f[time_col[i]] = df_by_country[time_col[i]].to_list()
+        file_data[time_col[i]] = df_by_country[time_col[i]].to_list()
         for feature in features:
-            f[feature] = df_by_country[feature].tolist()
+            file_data[feature] = df_by_country[feature].tolist()
 
-        d.append(f)
+        response_data.append(file_data)
 
-    return d
+    return response_data

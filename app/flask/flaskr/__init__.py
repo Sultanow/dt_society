@@ -1,9 +1,7 @@
 import os
-from tkinter.ttk import Separator
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify
 from flask_session import Session
 from flask_cors import CORS
-import pandas as pd
 
 from . import graph, forecast
 from .extensions import mongo, cache
