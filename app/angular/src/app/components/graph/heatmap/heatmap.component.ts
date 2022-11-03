@@ -30,7 +30,7 @@ export class HeatmapComponent implements OnInit {
     selectedDataset: undefined,
   };
 
-  public features: string[] = [];
+  public featureOptions: string[] = [];
 
   selectionControl = new FormGroup({
     selectedFeaturesControl: new FormControl(),
@@ -41,7 +41,6 @@ export class HeatmapComponent implements OnInit {
 
   private oldSelections?: Selections;
   public selectedFeatures?: string | null;
-  private oldSelectedCountry?: string | null;
   public selectedCountry?: string;
 
   createHeatmapPlot(data: CorrelationMatrix) {
@@ -73,7 +72,8 @@ export class HeatmapComponent implements OnInit {
   updateHeatmap() {
     if (
       this.selections.datasets.length > 0 &&
-      this.selectedFeatures !== undefined
+      this.selectedFeatures !== undefined &&
+      this.selectedFeatures!.length > 1
     ) {
       if (
         !this.selections.datasets.some(
@@ -100,54 +100,77 @@ export class HeatmapComponent implements OnInit {
 
   ngDoCheck() {
     if (
-      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections) ||
-      JSON.stringify(this.selectedCountry) !==
-        JSON.stringify(this.oldSelectedCountry)
+      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
     ) {
-      this.updateHeatmap();
+      this.updateCountries();
     }
     this.oldSelections = structuredClone(this.selections);
-    this.oldSelectedCountry = structuredClone(this.selectedCountry);
   }
 
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
-      if (this.features.length > 0) {
-        this.features = [];
+      if (this.featureOptions.length > 0) {
+        this.featureOptions = [];
       }
-      var countries: string[] | undefined = [] || undefined;
-
-      for (const dataset of this.selections.datasets) {
-        if (dataset.featureOptions !== undefined) {
-          countries = [...countries, ...(dataset.countryOptions || [])];
-        }
-      }
-      this.countries = [...new Set(countries)];
+      this.updateCountries();
     });
 
     this.selectionControl
       .get('selectedFeaturesControl')!
       .valueChanges.subscribe((selectedFeatures) => {
-        this.selectedFeatures = selectedFeatures;
-        this.updateHeatmap();
+        if (
+          this.selectionControl
+            .get('selectedFeaturesControl')!
+            .getRawValue() !== ''
+        ) {
+          this.selectedFeatures = selectedFeatures;
+          this.updateHeatmap();
+        }
       });
 
     this.selectionControl
       .get('selectedCountryControl')!
       .valueChanges.subscribe((selectedCountry) => {
         this.selectedCountry = selectedCountry;
-        this.features = [];
-        for (const dataset of this.selections.datasets) {
-          if (
-            selectedCountry !== null &&
-            dataset.featureOptions !== undefined &&
-            dataset.countryOptions?.includes(selectedCountry)
-          ) {
-            this.features.push(...dataset.featureOptions);
-          }
+        this.updateFeatureOptions(selectedCountry);
+        let currentFeatureSelection = this.selectionControl
+          .get('selectedFeaturesControl')!
+          .getRawValue();
+        if (currentFeatureSelection !== null) {
+          let newSelection = currentFeatureSelection.filter((x: string) =>
+            this.featureOptions.includes(x)
+          );
+          this.selectionControl
+            .get('selectedFeaturesControl')!
+            .setValue(newSelection);
+          this.selectedFeatures = newSelection;
+          this.updateHeatmap();
         }
-        this.updateHeatmap();
       });
+  }
+
+  private updateFeatureOptions(selectedCountry: any) {
+    this.featureOptions = [];
+    for (const dataset of this.selections.datasets) {
+      if (
+        selectedCountry !== null &&
+        dataset.featureOptions !== undefined &&
+        dataset.countryOptions?.includes(selectedCountry)
+      ) {
+        this.featureOptions.push(...dataset.featureOptions);
+      }
+    }
+  }
+
+  private updateCountries() {
+    var countries: string[] | undefined = [] || undefined;
+    for (const dataset of this.selections.datasets) {
+      if (dataset.featureOptions !== undefined) {
+        countries = [...countries, ...(dataset.countryOptions || [])];
+      }
+    }
+    this.countries = [...new Set(countries)];
+    this.selectionControl.get('selectedCountryControl')!.setValue('');
   }
 }

@@ -11,7 +11,7 @@
     <mat-form-field appearance="fill">
       <mat-label>Features</mat-label>
       <mat-select formControlName="selectedFeaturesControl" multiple>
-        <mat-option *ngFor="let feature of features" [value]="feature">
+        <mat-option *ngFor="let feature of featureOptions" [value]="feature">
           {{ feature }}
         </mat-option>
       </mat-select>
