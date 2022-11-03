@@ -1,6 +1,6 @@
 <div>
   <div [formGroup]="selectionControl">
-    <mat-form-field appearance="fill">
+    <mat-form-field>
       <mat-label>Country</mat-label>
       <mat-select formControlName="selectedCountryControl">
         <mat-option *ngFor="let country of countries" [value]="country">
@@ -8,7 +8,7 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <mat-form-field appearance="fill">
+    <mat-form-field>
       <mat-label>Features</mat-label>
       <mat-select formControlName="selectedFeaturesControl" multiple>
         <mat-option *ngFor="let feature of featureOptions" [value]="feature">
@@ -17,5 +17,9 @@
       </mat-select>
     </mat-form-field>
   </div>
-  <plotly-plot *ngIf="data.data.length > 0" [data]="data.data" [layout]="data.layout"></plotly-plot>
+  <plotly-plot
+    *ngIf="data.data.length > 0"
+    [data]="data.data"
+    [layout]="data.layout"
+  ></plotly-plot>
 </div>

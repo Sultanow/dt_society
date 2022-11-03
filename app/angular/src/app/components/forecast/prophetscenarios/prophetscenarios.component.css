@@ -1,0 +1,44 @@
+mat-slider {
+  width: 400px;
+}
+
+.lags-slider {
+  width: 200px;
+}
+
+.toggle-container {
+  margin-top: 10px;
+  display: flex;
+}
+
+.slider-section {
+  margin-top: 10px;
+}
+
+.model-selector {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+mat-radio-button {
+  margin-left: 5px;
+}
+
+.freq-selector {
+  height: 50px;
+  margin-right: 10px;
+}
+
+.scenario-field {
+  width: 60px;
+  margin-right: 10px;
+}
+
+.scenario-label {
+  margin-bottom: 5px;
+}
+
+.data-selector {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
