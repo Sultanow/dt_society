@@ -3,6 +3,7 @@
     class="freq-selector"
     name="frequency"
     aria-label="Frequency"
+    [(ngModel)]="frequency"
   >
     <mat-button-toggle value="Yearly">Yearly</mat-button-toggle>
     <mat-button-toggle value="Monthly">Monthly</mat-button-toggle>
@@ -19,12 +20,15 @@
   </mat-form-field>
 </div>
 <div class="data-selector">
-  <mat-radio-group aria-label="Select an option">
+  <mat-radio-group [(ngModel)]="dependentDataset" aria-label="Select an option">
     <mat-radio-button
       *ngFor="let dataset of selections.datasets"
       [value]="dataset.id"
     >
-      {{ dataset.id }} ({{ dataset.featureSelected }})
+      {{ dataset.id }}
+      <div *ngIf="dataset.featureSelected !== undefined">
+        ({{ dataset.featureSelected }})
+      </div>
     </mat-radio-button>
   </mat-radio-group>
 </div>
@@ -50,10 +54,12 @@
 <ng-container *ngFor="let dataset of selections.datasets">
   <div
     *ngIf="
-      dataset.id !== selections.selectedDataset && dataset.id !== undefined
+      dataset.id !== dependentDataset &&
+      dataset.id !== undefined &&
+      dependentDataset !== undefined
     "
   >
-    <div>{{ dataset.featureSelected }}</div>
+    <div class="scenario-label">{{ dataset.featureSelected }}</div>
     <mat-form-field class="scenario-field" *ngFor="let i of scenarioIndeces">
       <mat-label> Step {{ i }}</mat-label>
       <input

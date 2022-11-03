@@ -48,21 +48,29 @@ export class ProphetscenariosComponent implements OnInit {
 
   public scenarios: Scenarios = {};
 
+  public dependentDataset?: string;
+
   updateScenarios() {
     this.scenarioIndeces = new Array(this.predictionPeriods)
       .fill(null)
       .map((_, i) => i);
 
-    //this.scenarioValues = new Array(this.predictionPeriods).fill(null);
-
     for (const dataset of this.selections.datasets) {
-      if (
-        dataset.id !== undefined &&
-        dataset.id !== this.selections.selectedDataset
-      ) {
-        this.scenarios[dataset.id] = new Array(this.predictionPeriods).fill(
-          null
-        );
+      if (dataset.id !== undefined) {
+        if (!(dataset.id in this.scenarios)) {
+          this.scenarios[dataset.id] = new Array(this.predictionPeriods).fill(
+            null
+          );
+        } else {
+          if (this.predictionPeriods > this.scenarios[dataset.id].length) {
+            let newScenarios = new Array(
+              this.predictionPeriods - this.scenarios[dataset.id].length
+            ).fill(null);
+            this.scenarios[dataset.id].push(...newScenarios);
+          } else {
+            this.scenarios[dataset.id].splice(this.predictionPeriods);
+          }
+        }
       }
     }
 
@@ -80,20 +88,23 @@ export class ProphetscenariosComponent implements OnInit {
       pattern: 'independent',
     };
 
+    const dependentDatasetIdx = this.selections.datasets.findIndex(
+      (dataset) => dataset.id == this.dependentDataset
+    );
     let forecastHistory: any = {
       type: 'scatter',
       mode: 'lines',
-      y: data['merge'][this.selections.datasets[0].featureSelected || ''],
+      y: data['merge'][
+        this.selections.datasets[dependentDatasetIdx].featureSelected || ''
+      ],
       x: data['merge']['x'],
-      name: this.selections.datasets[0].featureSelected,
+      name: this.selections.datasets[dependentDatasetIdx].featureSelected,
       line: { color: 'mediumpurple' },
     };
 
     const uncertaintyUpper = data['forecast']['yhat_upper'].map(
       (x, i) => x - data['forecast']['yhat'][i]
     );
-
-    console.log(uncertaintyUpper);
 
     const uncertaintyLower = data['forecast']['yhat'].map(
       (x, i) => x - data['forecast']['yhat_lower'][i]
@@ -114,7 +125,9 @@ export class ProphetscenariosComponent implements OnInit {
         array: uncertaintyUpper,
         arrayminus: uncertaintyLower,
       },
-      name: this.selections.datasets[0].featureSelected + ' (prediction)',
+      name:
+        this.selections.datasets[dependentDatasetIdx].featureSelected +
+        ' (prediction)',
     };
 
     const fillerX = [data['merge']['x'].slice(-1)[0], data['forecast']['x'][0]];
@@ -127,9 +140,9 @@ export class ProphetscenariosComponent implements OnInit {
       line: { dash: 'dash', color: 'mediumpurple' },
       x: fillerX,
       y: [
-        data['merge'][this.selections.datasets[0].featureSelected || ''].slice(
-          -1
-        )[0],
+        data['merge'][
+          this.selections.datasets[dependentDatasetIdx].featureSelected || ''
+        ].slice(-1)[0],
         data['forecast']['yhat'][0],
       ],
       showlegend: false,
@@ -140,7 +153,7 @@ export class ProphetscenariosComponent implements OnInit {
     };
     this.data.layout['yaxis'] = {
       gridcolor: 'rgba(80, 103, 132, 0.3)',
-      title: this.selections.datasets[0].featureSelected,
+      title: this.selections.datasets[dependentDatasetIdx].featureSelected,
     };
     // forecast plot
     this.data.data.push(forecastHistory);
@@ -216,6 +229,7 @@ export class ProphetscenariosComponent implements OnInit {
             periods: this.predictionPeriods,
             frequency: this.frequency,
             scenarios: this.scenarios,
+            dependentDataset: this.dependentDataset,
           })
           .subscribe((event) => {
             if (event.type === HttpEventType.Response) {

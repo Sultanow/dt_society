@@ -145,6 +145,8 @@ def forecastProphet():
 
     datasets = data["datasets"]
 
+    dependent_df = data["dependentDataset"]
+
     if datasets is None:
         return ("Empty request", 400)
 
@@ -152,10 +154,10 @@ def forecastProphet():
     feature_columns = []
     filtered_dfs = []
 
-    collection = mongo.db["collection_1"]
+    y_feature_index = None
 
     d = {}
-    for dataset in datasets:
+    for i, dataset in enumerate(datasets):
 
         df = parse_dataset(
             geo_column=dataset["geoSelected"],
@@ -177,12 +179,15 @@ def forecastProphet():
         time_columns.append(dataset["timeSelected"])
         feature_columns.append(dataset["featureSelected"])
 
+        if dataset["id"] == dependent_df:
+            y_feature_index = i
+
     scenarios_data = [
         [float(x) if x is not None else x for x in data["scenarios"][dataset]]
         for dataset in data["scenarios"]
+        if dataset != dependent_df
     ]
 
-    # scenarios_data = [[45000, 46000, 47000], [21.2, 30.3, 43.4]]
     d = {}
     d["future"] = {}
     d["merge"] = {}
@@ -192,21 +197,9 @@ def forecastProphet():
         time_columns,
         feature_columns,
         scenarios=scenarios_data,
-        frequency="Yearly",
-        y_feature_index=0,
+        frequency=data["frequency"],
+        y_feature_index=y_feature_index,
     )
-
-    # fig = create_multivariate_forecast_prophet(
-    #     forecast, merged_df, future_df, y_feature, feature_col
-    # )
-
-    # graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-    print(forecast)
-
-    print(merged_df)
-
-    print(future_df)
 
     for df_key, df in zip(d, (future_df, merged_df, forecast)):
         for column in df.columns.tolist():

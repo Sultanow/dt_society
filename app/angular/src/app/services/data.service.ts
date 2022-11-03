@@ -65,7 +65,15 @@ export class DataService {
   getData(
     columns: any,
     endpoint: string,
-    { country, features, frequency, periods, maxLags, scenarios }: GraphControls
+    {
+      country,
+      features,
+      frequency,
+      periods,
+      maxLags,
+      scenarios,
+      dependentDataset,
+    }: GraphControls
   ): Observable<
     HttpEvent<CorrelationMatrix | CountryData | ColumnValues[] | unknown>
   > {
@@ -79,6 +87,7 @@ export class DataService {
       periods: periods,
       maxLags: maxLags,
       scenarios: scenarios,
+      dependentDataset: dependentDataset,
     };
 
     const request = new HttpRequest('POST', this.apiUrl + endpoint, body, {

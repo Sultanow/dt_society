@@ -53,6 +53,7 @@ export interface GraphControls {
   periods?: number;
   maxLags?: number;
   scenarios?: Scenarios;
+  dependentDataset?: string;
 }
 
 export interface Models {
