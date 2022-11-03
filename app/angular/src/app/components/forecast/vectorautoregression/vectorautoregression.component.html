@@ -40,7 +40,6 @@
       <div># of predictions</div>
       <mat-slider
         thumbLabel
-        [displayWith]="formatLabel"
         [(ngModel)]="predictionPeriods"
         (change)="updateVarForecast()"
         aria-label="unit(s)"
@@ -53,7 +52,6 @@
       <mat-slider
         class="lags-slider"
         thumbLabel
-        [displayWith]="formatLabel"
         [(ngModel)]="maxLags"
         (change)="updateVarForecast()"
         aria-label="unit(s)"
@@ -66,7 +64,6 @@
       <mat-slider
         class="lags-slider"
         thumbLabel
-        [displayWith]="formatLabel"
         [(ngModel)]="maxLags"
         (change)="updateVarForecast()"
         aria-label="unit(s)"

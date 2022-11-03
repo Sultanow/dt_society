@@ -175,10 +175,6 @@ export class VectorautoregressionComponent implements OnInit {
     }
   }
 
-  formatLabel(value: string | number) {
-    return value;
-  }
-
   ngDoCheck() {
     if (
       JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)

@@ -1,6 +1,5 @@
 import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 import { Plot, ProphetForecast, Scenarios } from 'src/app/types/GraphData';
@@ -31,8 +30,6 @@ export class ProphetscenariosComponent implements OnInit {
     selectedDataset: undefined,
   };
 
-  selectedScenarios = new FormControl('');
-
   private oldSelections?: Selections;
 
   public countries: string[] = [];
@@ -40,7 +37,6 @@ export class ProphetscenariosComponent implements OnInit {
   public selectedCountry?: string;
 
   public scenarioIndeces: number[] = [];
-  public scenarioValues: string[] = [];
 
   public predictionPeriods: number = 0;
 
@@ -73,8 +69,6 @@ export class ProphetscenariosComponent implements OnInit {
         }
       }
     }
-
-    console.log(this.scenarios);
   }
 
   createProphetForecast(data: ProphetForecast) {
@@ -131,8 +125,6 @@ export class ProphetscenariosComponent implements OnInit {
     };
 
     const fillerX = [data['merge']['x'].slice(-1)[0], data['forecast']['x'][0]];
-
-    console.log(fillerX);
 
     let filler: any = {
       type: 'scatter',
@@ -263,10 +255,6 @@ export class ProphetscenariosComponent implements OnInit {
 
         this.countries = [...new Set(countries)];
       }
-    });
-
-    this.selectedScenarios.valueChanges.subscribe((scenarios) => {
-      console.log(scenarios);
     });
   }
 }
