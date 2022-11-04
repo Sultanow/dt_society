@@ -11,16 +11,19 @@ from .forecasting.models import (
 )
 from .preprocessing.parse import parse_dataset
 
-from .extensions import mongo
 
 bp = Blueprint("forecast", __name__, url_prefix="/forecast")
 
 
-@bp.route("/var", methods=["POST"])
-def forecastVAR():
+@bp.route("/multivariate/<model>", methods=["POST"])
+def forecastVAR(model):
+    if model not in ("var", "hwes"):
+        return ("Unknown model.", 400)
+
     data = request.get_json()
 
     datasets = data["datasets"]
+    selected_country = data["country"]
 
     if datasets is None:
         return ("Empty request", 400)
@@ -32,86 +35,50 @@ def forecastVAR():
     response_data = {}
     for dataset in datasets:
 
-        df = parse_dataset(
-            geo_column=dataset["geoSelected"],
-            dataset_id=dataset["id"],
-            reshape_column=dataset["reshapeSelected"]
-            if dataset["reshapeSelected"] != "N/A"
-            else None,
+        reshape_selected = (
+            dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
         )
-        filtered_df = df[df[dataset["geoSelected"]] == data["country"]][
-            [dataset["timeSelected"], dataset["featureSelected"]]
+        geo_selected = dataset["geoSelected"]
+        dataset_id = dataset["id"]
+        time_selected = dataset["timeSelected"]
+        feature_selected = dataset["featureSelected"]
+
+        df = parse_dataset(
+            geo_column=geo_selected,
+            dataset_id=dataset_id,
+            reshape_column=reshape_selected,
+        )
+        filtered_df = df[df[geo_selected] == selected_country][
+            [time_selected, feature_selected]
         ]
 
-        filtered_df[dataset["timeSelected"]] = pd.to_datetime(
-            filtered_df[dataset["timeSelected"]].astype("str")
+        filtered_df[time_selected] = pd.to_datetime(
+            filtered_df[time_selected].astype("str")
         )
 
         filtered_dfs.append(filtered_df)
 
-        time_columns.append(dataset["timeSelected"])
-        feature_columns.append(dataset["featureSelected"])
+        time_columns.append(time_selected)
+        feature_columns.append(feature_selected)
 
-    forecast = var_fit_and_predict_multi(
-        filtered_dfs,
-        time_columns,
-        feature_columns,
-        max_lags=data["maxLags"],
-        periods=data["periods"],
-        frequency=data["frequency"],
-    )
-
-    response_data["x"] = forecast[time_columns[-1]].dt.strftime("%Y-%m-%d").tolist()
-    for feature in feature_columns:
-        response_data[feature] = forecast[feature].tolist()
-
-    return response_data
-
-
-@bp.route("hwes", methods=["POST"])
-def forecastHWES():
-    data = request.get_json()
-
-    datasets = data["datasets"]
-
-    if datasets is None:
-        return ("Empty request", 400)
-
-    time_columns = []
-    feature_columns = []
-    filtered_dfs = []
-
-    response_data = {}
-    for dataset in datasets:
-
-        df = parse_dataset(
-            geo_column=dataset["geoSelected"],
-            dataset_id=dataset["id"],
-            reshape_column=dataset["reshapeSelected"]
-            if dataset["reshapeSelected"] != "N/A"
-            else None,
+    if model == "var":
+        forecast = var_fit_and_predict_multi(
+            filtered_dfs,
+            time_columns,
+            feature_columns,
+            max_lags=data["maxLags"],
+            periods=data["periods"],
+            frequency=data["frequency"],
         )
-        filtered_df = df[df[dataset["geoSelected"]] == data["country"]][
-            [dataset["timeSelected"], dataset["featureSelected"]]
-        ]
-
-        filtered_df[dataset["timeSelected"]] = pd.to_datetime(
-            filtered_df[dataset["timeSelected"]].astype("str")
+    elif model == "hwes":
+        forecast = hw_es_fit_and_predict_multi(
+            filtered_dfs,
+            time_columns,
+            feature_columns,
+            alpha=data["maxLags"],
+            periods=data["periods"],
+            frequency=data["frequency"],
         )
-
-        filtered_dfs.append(filtered_df)
-
-        time_columns.append(dataset["timeSelected"])
-        feature_columns.append(dataset["featureSelected"])
-
-    forecast = hw_es_fit_and_predict_multi(
-        filtered_dfs,
-        time_columns,
-        feature_columns,
-        alpha=data["maxLags"],
-        periods=data["periods"],
-        frequency=data["frequency"],
-    )
 
     response_data["x"] = forecast[time_columns[-1]].dt.strftime("%Y-%m-%d").tolist()
     for feature in feature_columns:
@@ -125,8 +92,9 @@ def forecastProphet():
     data = request.get_json()
 
     datasets = data["datasets"]
-
+    selected_country = data["country"]
     dependent_df = data["dependentDataset"]
+    scenarios = data["scenarios"]
 
     if datasets is None:
         return ("Empty request", 400)
@@ -139,31 +107,37 @@ def forecastProphet():
 
     for i, dataset in enumerate(datasets):
 
-        df = parse_dataset(
-            geo_column=dataset["geoSelected"],
-            dataset_id=dataset["id"],
-            reshape_column=dataset["reshapeSelected"]
-            if dataset["reshapeSelected"] != "N/A"
-            else None,
+        reshape_selected = (
+            dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
         )
-        filtered_df = df[df[dataset["geoSelected"]] == data["country"]][
-            [dataset["timeSelected"], dataset["featureSelected"]]
+        geo_selected = dataset["geoSelected"]
+        dataset_id = dataset["id"]
+        time_selected = dataset["timeSelected"]
+        feature_selected = dataset["featureSelected"]
+
+        df = parse_dataset(
+            geo_column=geo_selected,
+            dataset_id=dataset_id,
+            reshape_column=reshape_selected,
+        )
+        filtered_df = df[df[geo_selected] == selected_country][
+            [time_selected, feature_selected]
         ]
 
-        filtered_df[dataset["timeSelected"]] = pd.to_datetime(
-            filtered_df[dataset["timeSelected"]].astype("str")
+        filtered_df[time_selected] = pd.to_datetime(
+            filtered_df[time_selected].astype("str")
         )
 
         filtered_dfs.append(filtered_df)
 
-        time_columns.append(dataset["timeSelected"])
-        feature_columns.append(dataset["featureSelected"])
+        time_columns.append(time_selected)
+        feature_columns.append(feature_selected)
 
-        if dataset["id"] == dependent_df:
+        if dataset_id == dependent_df:
             y_feature_index = i
 
     scenarios_data = [
-        [float(x) if x is not None else x for x in data["scenarios"][dataset]]
+        [float(x) if x is not None else x for x in scenarios[dataset]]
         for dataset in data["scenarios"]
         if dataset != dependent_df
     ]

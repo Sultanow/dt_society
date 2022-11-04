@@ -1,9 +1,6 @@
 import numpy as np
 import pandas as pd
 import pycountry
-import re
-from typing import Tuple, List, Dict
-import gzip
 
 
 class DigitalTwinTimeSeries:
@@ -44,7 +41,7 @@ class DigitalTwinTimeSeries:
             data = pd.DataFrame.from_records(path)
         else:
             data = pd.read_csv(path, encoding="ISO-8859–1", sep=self.sep)
-            
+
         columns = data.columns.tolist()
 
         fused_cols_i = None

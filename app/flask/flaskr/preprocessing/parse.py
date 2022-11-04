@@ -28,8 +28,6 @@ def parse_dataset(geo_column, dataset_id, reshape_column=None) -> pd.DataFrame:
     elif isinstance(dataset_id, str):
         file_path = collection.find({"filename": dataset_id})[0]
 
-    # file_path = session["files"][dataset_id]
-
     df = DigitalTwinTimeSeries(file_path["data"], geo_col=geo_column, sep="dict")
 
     if reshape_column is not None:

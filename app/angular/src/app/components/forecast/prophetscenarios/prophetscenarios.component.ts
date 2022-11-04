@@ -2,7 +2,12 @@ import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
-import { Plot, ProphetForecast, Scenarios } from 'src/app/types/GraphData';
+import {
+  ColumnValues,
+  Plot,
+  ProphetForecast,
+  Scenarios,
+} from 'src/app/types/GraphData';
 
 @Component({
   selector: 'app-prophetscenarios',

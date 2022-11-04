@@ -145,7 +145,7 @@ export class VectorautoregressionComponent implements OnInit {
         this.dataService
           .getData(
             this.selections.datasets,
-            '/forecast/' + this.selectedModel,
+            '/forecast/multivariate/' + this.selectedModel,
             {
               country: this.selectedCountry,
               periods: this.predictionPeriods,

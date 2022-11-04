@@ -10,76 +10,42 @@ from .preprocessing.parse import parse_dataset, merge_dataframes_multi
 
 from .extensions import mongo
 
-
 bp = Blueprint("graph", __name__, url_prefix="/graph")
 
 
-@bp.route("/map", methods=["POST"])
-def get_map():
-
-    data = request.get_json()["datasets"]
-
-    if data is None:
-        return ("Empty request", 400)
-
-    geo_col = data["geoSelected"]
-    time_col = data["timeSelected"]
-    feature_col = data["featureSelected"]
-    data_id = data["id"]
-    reshape_col = data["reshapeSelected"] if data["reshapeSelected"] != "N/A" else None
-
-    df = parse_dataset(
-        geo_column=geo_col,
-        dataset_id=data_id,
-        reshape_column=reshape_col,
-    )
-
-    df = df.fillna(0)
-    response_data = {}
-
-    for country in df[geo_col].unique().tolist():
-        response_data[country] = {}
-
-        response_data[country][time_col] = df[df[geo_col] == country][
-            time_col
-        ].to_list()
-        response_data[country][feature_col] = df[df[geo_col] == country][
-            feature_col
-        ].to_list()
-
-    return response_data
-
-
 @bp.route("/history", methods=["GET", "POST"])
-def get_history():
+@bp.route("/map", methods=["GET", "POST"])
+def get_selected_feature_data():
 
     data = request.get_json()["datasets"]
+
     if data is None:
         return ("Empty request", 400)
-    geo_col = data["geoSelected"]
-    time_col = data["timeSelected"]
-    feature_col = data["featureSelected"]
-    data_id = data["id"]
+
+    geo_selected = data["geoSelected"]
+    time_selected = data["timeSelected"]
+    feature_selected = data["featureSelected"]
+    dataset_id = data["id"]
     reshape_col = data["reshapeSelected"] if data["reshapeSelected"] != "N/A" else None
 
     df = parse_dataset(
-        geo_column=geo_col,
-        dataset_id=data_id,
+        geo_column=geo_selected,
+        dataset_id=dataset_id,
         reshape_column=reshape_col,
     )
 
-    df = df.fillna(0)
+    df = df.fillna(value=0)
 
     response_data = {}
 
-    for country in df[geo_col].unique().tolist():
+    for country in df[geo_selected].unique().tolist():
         response_data[country] = {}
 
-        response_data[country][time_col] = df[df[geo_col] == country][
-            time_col
+        response_data[country][time_selected] = df[df[geo_selected] == country][
+            time_selected
         ].to_list()
-        response_data[country][feature_col] = df[df[geo_col] == country][
-            feature_col
+        response_data[country][feature_selected] = df[df[geo_selected] == country][
+            feature_selected
         ].to_list()
 
     return response_data
@@ -92,47 +58,41 @@ def get_heatmap():
         return ("Database not available", 500)
 
     data = request.get_json()
+    datasets = data["datasets"]
+    selected_country = data["country"]
 
     if data is None:
         return ("Empty request", 400)
 
-    geo_col = []
-    reshape_col = []
-    time_col = []
-
-    for dataset in data["datasets"]:
-
-        geo_col.append(dataset["geoSelected"])
-        reshape_col.append(
-            dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
-        )
-        time_col.append(dataset["timeSelected"])
-
     dfs = []
     time_columns = []
-
     response_data = {}
 
-    collection = mongo.db["collection_1"]
-    for i in range(collection.count_documents({})):
+    for dataset in datasets:
+
+        reshape_selected = (
+            dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
+        )
+        geo_selected = dataset["geoSelected"]
+        dataset_id = dataset["id"]
+        time_selected = dataset["timeSelected"]
+
         df = parse_dataset(
-            geo_column=geo_col[i],
-            dataset_id=i,
-            reshape_column=reshape_col[i],
+            geo_column=geo_selected,
+            dataset_id=dataset_id,
+            reshape_column=reshape_selected,
         )
 
-        selectedcountry = data["country"]
+        if selected_country in df[geo_selected].unique():
+            df_by_country = df[df[geo_selected] == selected_country]
 
-        if selectedcountry in df[geo_col[i]].unique():
-            df_by_country = df[df[geo_col[i]] == selectedcountry]
+            df_by_country = df_by_country.drop(columns=[geo_selected])
 
-            df_by_country = df_by_country.drop(columns=[geo_col[i]])
-
-            df_by_country[time_col[i]] = pd.to_datetime(
-                df_by_country[time_col[i]].astype("str")
+            df_by_country[time_selected] = pd.to_datetime(
+                df_by_country[time_selected].astype("str")
             )
             dfs.append(df_by_country)
-            time_columns.append(time_col[i])
+            time_columns.append(time_selected)
 
     if len(dfs) > 1:
         merged_df, merged_time_col = merge_dataframes_multi(dfs, time_columns)
@@ -162,50 +122,46 @@ def get_correlation_lines():
     if mongo.db is None:
         return ("Database not available", 500)
 
-    data = request.get_json()["datasets"]
-    selectedcountry = request.get_json()["country"]
+    data = request.get_json()
+    datasets = data["datasets"]
+    selectedcountry = data["country"]
 
     if data is None:
         return ("Empty request", 400)
-
-    geo_col = []
-    reshape_col = []
-    time_col = []
-
-    for dataset in data:
-
-        geo_col.append(dataset["geoSelected"])
-        reshape_col.append(
-            dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
-        )
-        time_col.append(dataset["timeSelected"])
 
     dfs = []
     feature_options = []
 
     response_data = []
 
-    collection = mongo.db["collection_1"]
-    for i in range(collection.count_documents({})):
+    for dataset in datasets:
         file_data = {}
+
+        reshape_selected = (
+            dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
+        )
+        geo_selected = dataset["geoSelected"]
+        dataset_id = dataset["id"]
+        time_selected = dataset["timeSelected"]
+
         df = parse_dataset(
-            geo_column=geo_col[i],
-            dataset_id=i,
-            reshape_column=reshape_col[i],
+            geo_column=geo_selected,
+            dataset_id=dataset_id,
+            reshape_column=reshape_selected,
         )
         df = df.fillna(0)
-        df_by_country = df[df[geo_col[i]] == selectedcountry]
+        df_by_country = df[df[geo_selected] == selectedcountry]
 
         features = [
             feature
             for feature in df_by_country.columns.to_list()
-            if feature not in time_col and feature not in geo_col
+            if feature not in (geo_selected)
         ]
 
         feature_options.append(features)
         dfs.append(df_by_country)
 
-        file_data[time_col[i]] = df_by_country[time_col[i]].to_list()
+        file_data[time_selected] = df_by_country[time_selected].to_list()
         for feature in features:
             file_data[feature] = df_by_country[feature].tolist()
 

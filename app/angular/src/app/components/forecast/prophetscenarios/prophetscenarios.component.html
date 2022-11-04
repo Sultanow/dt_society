@@ -32,25 +32,27 @@
     </mat-radio-button>
   </mat-radio-group>
 </div>
-<section class="slider-section">
-  <div># of predictions</div>
-  <mat-slider
-    thumbLabel
-    aria-label="unit(s)"
-    [(ngModel)]="predictionPeriods"
-    (change)="updateScenarios()"
-    [min]="0"
-    [max]="40"
-  ></mat-slider>
-  <button
-    mat-mini-fab
-    color="primary"
-    class="upload-btn"
-    (click)="updateProphetForecast()"
-  >
-    <mat-icon>restart_alt</mat-icon>
-  </button>
-</section>
+<div>
+  <section class="slider-section">
+    <div># of predictions</div>
+    <mat-slider
+      thumbLabel
+      aria-label="unit(s)"
+      [(ngModel)]="predictionPeriods"
+      (change)="updateScenarios()"
+      [min]="0"
+      [max]="40"
+    ></mat-slider>
+    <button
+      mat-mini-fab
+      color="primary"
+      class="upload-btn"
+      (click)="updateProphetForecast()"
+    >
+      <mat-icon>restart_alt</mat-icon>
+    </button>
+  </section>
+</div>
 <ng-container *ngFor="let dataset of selections.datasets">
   <div
     *ngIf="
