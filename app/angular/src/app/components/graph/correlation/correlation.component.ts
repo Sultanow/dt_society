@@ -55,6 +55,9 @@ export class CorrelationComponent implements OnInit {
       const timeSelection = this.selections.datasets[i].timeSelected;
 
       for (const [key, value] of Object.entries(data[i])) {
+        if(key === "timestamps"){
+          continue
+        }
         let trace: any = {
           type: 'scatter',
           mode: 'lines',
@@ -76,13 +79,18 @@ export class CorrelationComponent implements OnInit {
             this.data.layout['xaxis' + (i + 1).toString()] = {
               gridcolor: 'rgba(80, 103, 132, 0.3)',
               title: timeSelection,
+              range: data[i]["timestamps"] as number[]
             };
             this.data.layout['yaxis' + (i + 1).toString()] = {
               gridcolor: 'rgba(80, 103, 132, 0.3)',
               title: '',
             };
-          } else {
-            this.data.layout.xaxis.title = timeSelection;
+          } else {          
+            this.data.layout.xaxis = {
+              gridcolor: 'rgba(80, 103, 132, 0.3)',
+              title: timeSelection,
+              range: data[i]["timestamps"] as number[]
+            }
           }
           this.data.data.push(trace);
         }
@@ -124,7 +132,7 @@ export class CorrelationComponent implements OnInit {
   }
 
   private updateCorrelationPlot(){
-    if (this.selections.datasets.length > 0) {
+    if (this.selections.datasets.length > 0 && this.countries.includes(this.selectedCountry)) {
       if (
         !this.selections.datasets.some(
           (dataset) =>

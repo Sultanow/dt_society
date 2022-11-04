@@ -166,6 +166,8 @@ def get_correlation_lines():
     data = request.get_json()["datasets"]
     selectedcountry = request.get_json()["country"]
 
+    min_timestamp = None
+    max_timestamp = None
     
     if data is None:
         return ("Empty request", 400)
@@ -198,6 +200,8 @@ def get_correlation_lines():
         df = df.fillna(0)
         df_by_country = df[df[geo_col[i]] == selectedcountry]
 
+        df_by_country[time_col[i]] = pd.to_datetime(df_by_country[time_col[i]].astype("str"))
+
         features = [
             feature
             for feature in df_by_country.columns.to_list()
@@ -207,10 +211,19 @@ def get_correlation_lines():
         feature_options.append(features)
         dfs.append(df_by_country)
 
-        f[time_col[i]] = df_by_country[time_col[i]].to_list()
+        f[time_col[i]] = df_by_country[time_col[i]].dt.strftime("%Y-%m-%d").to_list()
         for feature in features:
             f[feature] = df_by_country[feature].tolist()
+            
+        if(not df_by_country[time_col[i]].empty):
+            if min_timestamp is None or min_timestamp > min(df_by_country[time_col[i]]):
+                min_timestamp = min(df_by_country[time_col[i]])
+            if max_timestamp is None or max_timestamp < max(df_by_country[time_col[i]]):
+                max_timestamp = max(df_by_country[time_col[i]])
 
-        d.append(f)
+        d.append(f)    
+
+    for dataset in d:
+        dataset["timestamps"] = [min_timestamp.strftime("%Y-%m-%d"), max_timestamp.strftime("%Y-%m-%d")]
 
     return d
