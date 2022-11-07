@@ -3,8 +3,6 @@ from typing import Tuple
 import pandas as pd
 
 from .dataset import DigitalTwinTimeSeries
-
-# from flask_caching import Cache
 from ..extensions import cache, mongo
 
 
@@ -26,9 +24,7 @@ def parse_dataset(geo_column, dataset_id, reshape_column=None) -> pd.DataFrame:
     if isinstance(dataset_id, int):
         file_path = collection.find({})[dataset_id]
     elif isinstance(dataset_id, str):
-        file_path = collection.find({"filename": dataset_id})[0]
-
-    # file_path = session["files"][dataset_id]
+        file_path = collection.find_one({"filename": dataset_id})
 
     df = DigitalTwinTimeSeries(file_path["data"], geo_col=geo_column, sep="dict")
 
@@ -67,6 +63,7 @@ def merge_dataframes(dataframe_1, dataframe_2, time_column_1, time_column_2):
     return merged_df, time
 
 
+@cache.memoize(timeout=30)
 def merge_dataframes_multi(
     dataframes: List[pd.DataFrame], time_columns: List[str]
 ) -> Tuple[pd.DataFrame, str]:

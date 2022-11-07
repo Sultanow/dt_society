@@ -123,6 +123,7 @@ export class MapComponent implements OnInit {
             featureidkey: this.geojsons[scope as keyof object]['featureidkey'],
             zoom: this.geojsons[scope as keyof object]['zoom'],
             marker: { opacity: 0.7 },
+            colorscale: 'Jet',
           },
         ],
         layout: {

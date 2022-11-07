@@ -1,12 +1,8 @@
 import os
-from tkinter.ttk import Separator
-from flask import Flask, request, jsonify, abort
-from flask_session import Session
-from flask_cors import CORS
-import pandas as pd
+from flask import Flask, request, jsonify
 
 from . import graph, forecast
-from .extensions import mongo, cache
+from .extensions import mongo, cache, cors, session
 from .preprocessing.parse import parse_dataset
 from .preprocessing.dataset import DigitalTwinTimeSeries
 
@@ -44,10 +40,10 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    Session(app)
-    CORS(app, resources={r"/*": {"origins": "http://localhost:4200"}})
+    session.init_app(app)
     cache.init_app(app)
     mongo.init_app(app)
+    cors.init_app(app)
 
     @app.route("/data/upload", methods=["POST"])
     def upload_dataset():
@@ -100,7 +96,7 @@ def create_app(test_config=None):
         for i, dataset in enumerate(datasets):
             columns = parse_dataset(geo_column=None, dataset_id=i).columns.to_list()
 
-            columns.append("N/A")
+            columns.insert(0, "N/A")
 
             avail_columns.append({"id": dataset["filename"], "columns": columns})
 
@@ -112,18 +108,18 @@ def create_app(test_config=None):
         if mongo.db is None:
             return ("Database not available.", 500)
 
-        payload = request.get_json()
+        data = request.get_json()
 
-        if payload is None:
+        if data is None:
             return ("Empty request.", 400)
 
-        file_idx = payload["datasetIdx"]
-        reshape_column = payload["reshapeColumn"]
-        geo_column = payload["geoColumn"]
+        file_id = data["datasetId"]
+        reshape_column = data["reshapeColumn"]
+        geo_column = data["geoColumn"]
 
         df = parse_dataset(
             geo_column=geo_column,
-            dataset_id=file_idx,
+            dataset_id=file_id,
             reshape_column=reshape_column,
         )
 
@@ -152,10 +148,10 @@ def create_app(test_config=None):
 
         collection = mongo.db["collection_1"]
 
-        payload = request.get_json()
-        if payload is None:
+        data = request.get_json()
+        if data is None:
             return ("Empty request.", 400)
-        filename = payload["datasetId"]
+        filename = data["datasetId"]
 
         collection.delete_one({"filename": filename})
 

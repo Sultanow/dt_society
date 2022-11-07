@@ -199,7 +199,7 @@ export class DataService {
 
       this.http
         .post(this.apiUrl + 'data/reshape', {
-          datasetIdx: selections.datasets[targetDatasetIdx].id,
+          datasetId: selections.datasets[targetDatasetIdx].id,
           reshapeColumn: reshapeColumn,
           geoColumn: selections.datasets[targetDatasetIdx].geoSelected,
         })
