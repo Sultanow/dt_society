@@ -153,40 +153,41 @@ def get_correlation_lines():
             reshape_column=reshape_selected,
         )
         df = df.fillna(0)
-        if selectedcountry in df[geo_selected].unique():
-            df_by_country = df[df[geo_selected] == selectedcountry]
+        df_by_country = df[df[geo_selected] == selectedcountry]
 
-            df_by_country[time_selected] = pd.to_datetime(
-                df_by_country[time_selected].astype("str")
-            )
+        df_by_country[time_selected] = pd.to_datetime(
+            df_by_country[time_selected].astype("str")
+        )
 
-            features = [
-                feature
-                for feature in df_by_country.columns.to_list()
-                if feature not in (geo_selected, time_selected)
-            ]
+        features = [
+            feature
+            for feature in df_by_country.columns.to_list()
+            if feature not in (geo_selected, time_selected)
+        ]
 
-            feature_options.append(features)
-            dfs.append(df_by_country)
+        feature_options.append(features)
+        dfs.append(df_by_country)
 
-            file_data[time_selected] = (
-                df_by_country[time_selected].dt.strftime("%Y-%m-%d").to_list()
-            )
+        file_data[time_selected] = (
+            df_by_country[time_selected].dt.strftime("%Y-%m-%d").to_list()
+        )
 
-            for feature in features:
-                file_data[feature] = df_by_country[feature].tolist()
+        for feature in features:
+            file_data[feature] = df_by_country[feature].tolist()
 
-            if not df_by_country[time_selected].empty:
-                if min_timestamp is None or min_timestamp > min(
-                    df_by_country[time_selected]
-                ):
-                    min_timestamp = min(df_by_country[time_selected])
-                if max_timestamp is None or max_timestamp < max(
-                    df_by_country[time_selected]
-                ):
-                    max_timestamp = max(df_by_country[time_selected])
+        if not df_by_country[time_selected].empty:
+            if min_timestamp is None or min_timestamp > min(
+                df_by_country[time_selected]
+            ):
+                min_timestamp = min(df_by_country[time_selected])
+            if max_timestamp is None or max_timestamp < max(
+                df_by_country[time_selected]
+            ):
+                max_timestamp = max(df_by_country[time_selected])
 
-            response_data.append(file_data)
+        print(file_data)        
+
+        response_data.append(file_data)
 
     for dataset in response_data:
         dataset["timestamps"] = [
