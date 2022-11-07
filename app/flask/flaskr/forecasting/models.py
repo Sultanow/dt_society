@@ -10,7 +10,7 @@ from statsmodels.tsa.stattools import adfuller
 from typing import Tuple, List
 
 from .smoothing import multivariate_ES
-from ..preprocessing.parse import merge_dataframes, merge_dataframes_multi
+from ..preprocessing.parse import merge_dataframes_multi
 
 
 def prophet_fit_and_predict(

@@ -37,32 +37,6 @@ def parse_dataset(geo_column, dataset_id, reshape_column=None) -> pd.DataFrame:
     return df
 
 
-def merge_dataframes(dataframe_1, dataframe_2, time_column_1, time_column_2):
-
-    merged_df = pd.merge(
-        dataframe_1,
-        dataframe_2,
-        left_on=[time_column_1],
-        right_on=[time_column_2],
-        how="inner",
-    )
-
-    if time_column_1 != time_column_2:
-        if len(dataframe_1[time_column_1]) > len(dataframe_2[time_column_2]):
-            column_to_drop = time_column_2
-            time = time_column_1
-
-        elif len(dataframe_1[time_column_1]) < len(dataframe_2[time_column_2]):
-            column_to_drop = time_column_1
-            time = time_column_2
-
-        merged_df = merged_df.drop(columns=[column_to_drop])
-    else:
-        time = time_column_1
-
-    return merged_df, time
-
-
 @cache.memoize(timeout=30)
 def merge_dataframes_multi(
     dataframes: List[pd.DataFrame], time_columns: List[str]
