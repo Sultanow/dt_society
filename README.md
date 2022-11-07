@@ -48,3 +48,26 @@ The backend will automatically create a new collection at the default location:
 If all requirements have been successfully installed you can start the frontend on a local development server (port 4200 as default) with the Angular CLI:  
 `$ cd app/angular`  
 `$ ng serve --open`
+
+## Application usage
+
+### File upload
+
+Currently the application supports `.tsv` and `.csv` datasets, which contain a column with country codes. You must specify the appropriate separator before uploading your dataset.
+
+### Data filtering
+
+All 4 dropdowns must be selected in order to provide visualisations. These include:
+
+- Column with country codes (geo)
+- Column with timestamps (x)
+- Columns with feature of interest (y)
+
+The reshape dropdown is optional and only necessary if your dataset has a wide format, i.e. each timestamp represents a column. Select N/A if this does not apply to your dataset.
+
+### Forecasting
+
+You can choose between multivariate and scenario-based forecasting.  
+Multivariate forecasting performs a forecast for each selected feature simultaneously while taking correlations into account.  
+Scenario-based forecasting allows you to perform a forecast for a selected feature based on artificial scenarios for each other feature, which you can specify.  
+Both of these methods can forecast up to 40 future timesteps. However, all features provided in the datasets must have the same underlying time frequency. (i.e. all timestamps must be yearly)
