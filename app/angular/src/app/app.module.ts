@@ -33,6 +33,9 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { UploaddialogComponent } from './components/datafiltering/uploaddialog/uploaddialog.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSliderModule } from '@angular/material/slider';
+import { DatatableComponent } from './components/graph/datatable/datatable.component';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
 PlotlyModule.plotlyjs = PlotlyJS;
 
 @NgModule({
@@ -47,6 +50,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     FileuploadComponent,
     DatafilteringComponent,
     UploaddialogComponent,
+    DatatableComponent,
   ],
   imports: [
     BrowserModule,
@@ -71,6 +75,8 @@ PlotlyModule.plotlyjs = PlotlyJS;
     MatDialogModule,
     MatSnackBarModule,
     MatSliderModule,
+    MatTableModule,
+    MatPaginatorModule
   ],
   providers: [],
   bootstrap: [AppComponent],

@@ -13,6 +13,30 @@ from .extensions import mongo
 bp = Blueprint("graph", __name__, url_prefix="/graph")
 
 
+@bp.route("/datatable", methods=["GET", "POST"])
+def get_selected_data():
+
+    data = request.get_json()["datasets"]
+
+    if data is None:
+        return ("Empty request", 400)
+    
+    dataset_id = data["id"]
+    
+    geo_selected = data["geoSelected"] if "geoSelected" in data else None
+        
+    reshape_col = (data["reshapeSelected"] if data["reshapeSelected"] != "N/A" else None) if "reshapeSelected" in data else None
+   
+    
+    df = parse_dataset(geo_column=geo_selected, dataset_id=dataset_id, reshape_column=reshape_col)
+    df.fillna(value=0)
+
+    response_data = df.to_json(orient="records")
+
+    return response_data
+    
+
+
 @bp.route("/history", methods=["GET", "POST"])
 @bp.route("/map", methods=["GET", "POST"])
 def get_selected_feature_data():

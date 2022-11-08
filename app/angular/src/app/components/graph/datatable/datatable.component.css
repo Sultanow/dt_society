@@ -1,0 +1,30 @@
+.data-table {
+  height: 400px;
+  max-width: 100%;
+  overflow-y: scroll;
+  overflow-x: scroll;
+}
+
+.mat-cell,
+.mat-header-cell {
+  word-wrap: initial;
+  display: table-cell;
+  padding: 0px 10px;
+  line-break: unset;
+  white-space: nowrap;
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.mat-header-cell {
+  font-weight: bold;
+}
+
+.mat-row,
+.mat-header-row {
+  display: table-row;
+}
+
+.data-table-container {
+  padding: 10px;
+}
