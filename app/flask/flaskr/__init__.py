@@ -45,6 +45,41 @@ def create_app(test_config=None):
     mongo.init_app(app)
     cors.init_app(app)
 
+    @app.route("/data/demo", methods=["GET"])
+    def get_demo_datasets():
+
+        demo_data = {
+            "Demo 0": (
+                "arbeitslosenquote_eu.tsv",
+                "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/tipsun20.tsv.gz",
+            ),
+            "Demo 1": (
+                "bip_europa.tsv",
+                "https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/tec00001.tsv.gz",
+            ),
+        }
+        if mongo.db is None:
+            return ("Database not available.", 500)
+
+        for key in demo_data:
+            df = DigitalTwinTimeSeries(demo_data[key][1], sep="\t")
+
+            collection = mongo.db["collection_1"]
+
+            if collection.count_documents({"filename": demo_data[key][0]}) > 0:
+                print(f"Dataset '{demo_data[key][0]}' is already in database.")
+
+            else:
+                collection.insert_one(
+                    {
+                        "filename": demo_data[key][0],
+                        "data": df.data.to_dict("records"),
+                    }
+                )
+                print(f"Added '{demo_data[key][0]}' to database.")
+
+        return ("", 204)
+
     @app.route("/data/upload", methods=["POST"])
     def upload_dataset():
 
@@ -99,6 +134,8 @@ def create_app(test_config=None):
             columns.insert(0, "N/A")
 
             avail_columns.append({"id": dataset["filename"], "columns": columns})
+
+        print(avail_columns)
 
         return jsonify(avail_columns)
 

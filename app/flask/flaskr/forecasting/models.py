@@ -162,12 +162,12 @@ def var_fit_and_predict_multi(
         Tuple[pd.DataFrame, dict]: forecast data, marks dict for slider
     """
 
-    frequencies = {
-        "Yearly": ("AS", 365),
-        "Monthly": ("MS", 30),
-        "Weekly": ("W", 7),
-        "Daily": ("D", 1),
-    }
+    # frequencies = {
+    #     "Yearly": ("AS", 365),
+    #     "Monthly": ("MS", 30),
+    #     "Weekly": ("W", 7),
+    #     "Daily": ("D", 1),
+    # }
 
     merged_df, time = merge_dataframes_multi(dataframes, time_columns)
 
@@ -183,8 +183,11 @@ def var_fit_and_predict_multi(
 
     forecast_df = pd.DataFrame()
 
+    # forecast_df[time] = pd.date_range(
+    #     start=merged_df[time].iloc[-1], periods=periods, freq=frequencies[frequency][0]
+    # )
     forecast_df[time] = pd.date_range(
-        start=merged_df[time].iloc[-1], periods=periods, freq=frequencies[frequency][0]
+        start=merged_df[time].iloc[-1], periods=periods, freq=frequency
     )
 
     forecast_df[feature_columns] = forecast

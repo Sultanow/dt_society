@@ -10,18 +10,6 @@
     </mat-radio-group>
   </div>
   <div class="toggle-container">
-    <mat-button-toggle-group
-      class="freq-selector"
-      name="frequency"
-      aria-label="Frequency"
-      [(ngModel)]="frequency"
-      (change)="updateVarForecast()"
-    >
-      <mat-button-toggle value="Yearly">Yearly</mat-button-toggle>
-      <mat-button-toggle value="Monthly">Monthly</mat-button-toggle>
-      <mat-button-toggle value="Weekly">Weekly</mat-button-toggle>
-      <mat-button-toggle value="Daily">Daily</mat-button-toggle>
-    </mat-button-toggle-group>
     <mat-form-field>
       <mat-label>Country</mat-label>
       <mat-select
