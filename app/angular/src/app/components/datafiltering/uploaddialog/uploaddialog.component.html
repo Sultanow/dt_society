@@ -28,6 +28,8 @@
   </div>
 </div>
 <div mat-dialog-actions>
-  <button mat-button (click)="onFileUpload()">Upload</button>
+  <button mat-button mat-dialog-close cdkFocusInitial (click)="onFileUpload()">
+    Upload
+  </button>
   <button mat-button mat-dialog-close>Close</button>
 </div>

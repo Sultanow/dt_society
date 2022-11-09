@@ -13,3 +13,8 @@
 .app-correlation {
   width: 600px;
 }
+
+.demo-button {
+  float: right;
+  margin-left: auto;
+}

@@ -62,6 +62,21 @@ export class DataService {
     };
   }
 
+  getDemoData(selections: Selections) {
+    this.http
+      .get(this.apiUrl + 'data/demo')
+      .pipe(catchError(this.handleError('Demo mode')))
+      .subscribe((value) => {
+        this._snackBar.open('Successfully downloaded demo data', 'Close', {
+          duration: 4000,
+          horizontalPosition: 'end',
+          verticalPosition: 'bottom',
+        });
+        this.getAvailableDatasets(selections);
+        this.updateDatasetsSelection(selections);
+      });
+  }
+
   getData(
     columns: any,
     endpoint: string,
@@ -162,6 +177,7 @@ export class DataService {
   getAvailableDatasets(selections: Selections): void {
     this.http.get(this.apiUrl + 'data').subscribe((datasets) => {
       let updatedDatasets = datasets as Dataset[];
+      console.log(updatedDatasets);
 
       if (selections.datasets != undefined) {
         for (const dataset of updatedDatasets) {

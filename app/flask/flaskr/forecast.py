@@ -31,6 +31,7 @@ def forecastVAR(model):
     time_columns = []
     feature_columns = []
     filtered_dfs = []
+    frequencies = []
 
     response_data = {}
     for dataset in datasets:
@@ -56,10 +57,16 @@ def forecastVAR(model):
             filtered_df[time_selected].astype("str")
         )
 
-        filtered_dfs.append(filtered_df)
+        freq = pd.infer_freq(filtered_df[time_selected])
 
+        filtered_dfs.append(filtered_df)
+        frequencies.append(freq)
         time_columns.append(time_selected)
         feature_columns.append(feature_selected)
+
+    if len(set(frequencies)) != 1:
+        print("Frequencies of datasets do not match.")
+        return ("Frequencies do not match.", 400)
 
     if model == "var":
         forecast = var_fit_and_predict_multi(
@@ -68,7 +75,7 @@ def forecastVAR(model):
             feature_columns,
             max_lags=data["maxLags"],
             periods=data["periods"],
-            frequency=data["frequency"],
+            frequency=freq,
         )
     elif model == "hwes":
         forecast = hw_es_fit_and_predict_multi(
@@ -102,6 +109,7 @@ def forecastProphet():
     time_columns = []
     feature_columns = []
     filtered_dfs = []
+    frequencies = []
 
     y_feature_index = None
 
@@ -128,8 +136,10 @@ def forecastProphet():
             filtered_df[time_selected].astype("str")
         )
 
-        filtered_dfs.append(filtered_df)
+        freq = pd.infer_freq(filtered_df[time_selected])
 
+        filtered_dfs.append(filtered_df)
+        frequencies.append(freq)
         time_columns.append(time_selected)
         feature_columns.append(feature_selected)
 
@@ -141,6 +151,10 @@ def forecastProphet():
         for dataset in data["scenarios"]
         if dataset != dependent_df
     ]
+
+    if len(set(frequencies)) != 1:
+        print("Frequencies of datasets do not match.")
+        return ("Frequencies do not match.", 400)
 
     response_data = {}
     response_data["future"] = {}
