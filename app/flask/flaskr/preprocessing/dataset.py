@@ -40,7 +40,7 @@ class DigitalTwinTimeSeries:
         if self.sep == "dict":
             data = pd.DataFrame.from_records(path)
         else:
-            data = pd.read_csv(path, encoding="ISO-8859–1", sep=self.sep)
+            data = pd.read_csv(path, sep=self.sep)
 
         columns = data.columns.tolist()
 

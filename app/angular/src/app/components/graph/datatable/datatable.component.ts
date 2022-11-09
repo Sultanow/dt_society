@@ -1,5 +1,5 @@
 import { HttpEventType } from '@angular/common/http';
-import { Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 import { TableData } from 'src/app/types/GraphData';
@@ -24,14 +24,15 @@ export class DatatableComponent implements OnInit {
 
   updateData(newdata: TableData[]) {
     this.columns = Object.keys(newdata[0]);
-    newdata = newdata.slice(0,100);
-    if(newdata.length >= 100){
-      let additionaldata = {}
-      for(let column of this.columns){
-        let pair = {[column]: ".\n.\n."}
-        additionaldata = {...additionaldata, ...pair}
+
+    if (newdata.length >= 100) {
+      newdata = newdata.slice(0, 100);
+      let additionaldata = {};
+      for (let column of this.columns) {
+        let pair = { [column]: '.\n.\n.' };
+        additionaldata = { ...additionaldata, ...pair };
       }
-      newdata.push(additionaldata)
+      newdata.push(additionaldata);
     }
     this.data = newdata;
   }
