@@ -1,6 +1,6 @@
 <div class="data-table-container">
     <div class="mat-elevation-z8 data-table">
-        <mat-table [dataSource]=data.data>
+        <mat-table [dataSource]=data>
             <ng-container *ngFor="let column of columns" [matColumnDef]="column">
                 <th mat-header-cell *matHeaderCellDef>
                     {{column}}

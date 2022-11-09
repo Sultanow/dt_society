@@ -1,8 +1,8 @@
 .data-table {
   height: 400px;
   max-width: 100%;
-  overflow-y: scroll;
-  overflow-x: scroll;
+  overflow-y: auto;
+  overflow-x: auto;
 }
 
 .mat-cell,
@@ -10,8 +10,7 @@
   word-wrap: initial;
   display: table-cell;
   padding: 0px 10px;
-  line-break: unset;
-  white-space: nowrap;
+  white-space: pre-line;
   overflow: hidden;
   vertical-align: middle;
 }

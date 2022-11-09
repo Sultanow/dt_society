@@ -1,9 +1,8 @@
 import { HttpEventType } from '@angular/common/http';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit} from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatTableDataSource } from '@angular/material/table';
+import { TableData } from 'src/app/types/GraphData';
 
 @Component({
   selector: 'app-datatable',
@@ -19,15 +18,22 @@ export class DatatableComponent implements OnInit {
   };
   private oldSelections?: Selections;
 
-  public data = {
-    data: [],
-  };
+  public data: TableData[] = [];
 
   public columns: string[] = [];
 
-  updateData(newdata: any) {
+  updateData(newdata: TableData[]) {
     this.columns = Object.keys(newdata[0]);
-    this.data.data = newdata;
+    newdata = newdata.slice(0,100);
+    if(newdata.length >= 100){
+      let additionaldata = {}
+      for(let column of this.columns){
+        let pair = {[column]: ".\n.\n."}
+        additionaldata = {...additionaldata, ...pair}
+      }
+      newdata.push(additionaldata)
+    }
+    this.data = newdata;
   }
 
   ngDoCheck() {
@@ -51,7 +57,7 @@ export class DatatableComponent implements OnInit {
             .subscribe((res) => {
               if (res.type === HttpEventType.Response) {
                 if (res.body) {
-                  this.updateData(res.body);
+                  this.updateData(res.body as TableData[]);
                 }
               }
             });

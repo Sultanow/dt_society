@@ -3,6 +3,10 @@ export interface GraphData {
   layout: any;
 }
 
+export interface TableData {
+  [column: string]: number | string;
+}
+
 export interface ColumnValues {
   [column: string]: number[] | string[];
 }

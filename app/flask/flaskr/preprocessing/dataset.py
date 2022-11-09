@@ -76,7 +76,7 @@ class DigitalTwinTimeSeries:
                 data.iloc[:, numerical_columns_i:]
                 .replace("[a-zA-Z: ]", "", regex=True)
                 .replace("", 0, regex=True)
-                .astype(np.float32)
+                .astype("float")
             )
 
         if unnamed_cols_i:
