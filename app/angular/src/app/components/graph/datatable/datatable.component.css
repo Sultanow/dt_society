@@ -26,4 +26,11 @@
 
 .data-table-container {
   padding: 10px;
+  width: 48%;
+  display: flex;
+  float: left;
+}
+
+mat-expansion-panel{
+  width: 100%;
 }

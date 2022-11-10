@@ -177,7 +177,6 @@ export class DataService {
   getAvailableDatasets(selections: Selections): void {
     this.http.get(this.apiUrl + 'data').subscribe((datasets) => {
       let updatedDatasets = datasets as Dataset[];
-      console.log(updatedDatasets);
 
       if (selections.datasets != undefined) {
         for (const dataset of updatedDatasets) {

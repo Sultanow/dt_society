@@ -1,0 +1,37 @@
+.statistics-wrapper{
+    width: 48%;
+    display: flex;
+    float: right;
+}
+
+.single-stat{
+    width: 100%;
+    margin: 1em;
+}
+
+.stats-container{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.growth-container{
+    margin-top: 2em;
+    margin-bottom: 2em;
+}
+
+.growth-selections{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+ngx-slider{
+    margin-left: 1em;
+}
+
+mat-form-field{
+    width: 15%;
+    float: left;
+
+}

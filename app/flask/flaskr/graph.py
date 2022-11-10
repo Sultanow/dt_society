@@ -39,6 +39,7 @@ def get_selected_data():
 
 @bp.route("/history", methods=["GET", "POST"])
 @bp.route("/map", methods=["GET", "POST"])
+@bp.route("/statistics", methods=["GET", "POST"])
 def get_selected_feature_data():
 
     data = request.get_json()["datasets"]
