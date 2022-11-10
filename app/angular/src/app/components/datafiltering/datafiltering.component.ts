@@ -1,7 +1,7 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Selections } from '../../types/Datasets';
 import { DataService } from 'src/app/services/data.service';
-import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { UploaddialogComponent } from './uploaddialog/uploaddialog.component';
 
 @Component({
@@ -22,8 +22,7 @@ export class DatafilteringComponent implements OnInit {
   updateSelectedColumns(
     filename: string | undefined,
     value: string,
-    column: string,
-    reshape?: boolean
+    column: string
   ) {
     if (this.selections.datasets.length > 0) {
       const datasetIndex = this.selections.datasets
@@ -33,20 +32,18 @@ export class DatafilteringComponent implements OnInit {
       switch (column) {
         case 'geo':
           this.selections.datasets[datasetIndex].geoSelected = value;
+          this.dataService.getPossibleFeatures(
+            this.selections,
+            value,
+            filename
+          );
           break;
-        case 'rshp':
-          this.selections.datasets[datasetIndex].reshapeSelected = value;
-          this.dataService.getReshapedData(this.selections, filename, reshape);
-          break;
-        case 'x':
+        case 'time':
           this.selections.datasets[datasetIndex].timeSelected = value;
-          this.selections.datasets[datasetIndex].featureOptions =
-            this.selections.datasets[datasetIndex].featureOptions?.filter(
-              (feature) => feature !== value
-            );
           break;
-        case 'y':
+        case 'feature':
           this.selections.datasets[datasetIndex].featureSelected = value;
+          this.dataService.getReshapedData(this.selections, filename, value);
       }
 
       this.dataService.updateDatasetsSelection(this.selections);
@@ -59,15 +56,6 @@ export class DatafilteringComponent implements OnInit {
 
   onDeleteFile(datasedId: string | undefined) {
     this.dataService.deleteDataset(datasedId, this.selections);
-  }
-
-  reshapeOptions(
-    datasetId: string | undefined,
-    reshape: boolean,
-    event: any
-  ): void {
-    this.dataService.getReshapedData(this.selections, datasetId, event.checked);
-    this.dataService.updateDatasetsSelection(this.selections);
   }
 
   changeFocus() {

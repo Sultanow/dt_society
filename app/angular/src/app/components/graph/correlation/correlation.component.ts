@@ -44,7 +44,7 @@ export class CorrelationComponent implements OnInit {
     if (this.data.data.length > 0) {
       this.data.data = [];
     }
-    
+
     let validDataframes: boolean[] = [];
     for (let i = 0; i < data.length; i++) {
       let timeOption = this.selections.datasets[i].timeSelected;
@@ -52,7 +52,7 @@ export class CorrelationComponent implements OnInit {
         ? (validDataframes[i] = true)
         : (validDataframes[i] = false);
     }
-    
+
     this.data.layout.grid = {
       rows: 1,
       columns: validDataframes.filter(Boolean).length,

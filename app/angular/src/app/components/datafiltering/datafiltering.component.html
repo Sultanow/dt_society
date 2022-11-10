@@ -24,7 +24,7 @@
         <div class="selected-columns-container">
           <div class="column-inputs-row">
             <mat-form-field>
-              <mat-label>geo</mat-label>
+              <mat-label>Country column</mat-label>
               <mat-select
                 required
                 #geoSelect
@@ -41,64 +41,37 @@
               </mat-select>
             </mat-form-field>
             <mat-form-field>
-              <mat-label>reshape</mat-label>
+              <mat-label>Feature column</mat-label>
               <mat-select
                 required
-                #reshapeSelect
+                #featureSelect
                 (selectionChange)="
                   updateSelectedColumns(
                     dataset.id,
-                    reshapeSelect.value,
-                    'rshp',
-                    reshapeToggle.checked
+                    featureSelect.value,
+                    'feature'
                   )
                 "
               >
                 <mat-option
-                  *ngFor="let column of dataset.columns"
+                  *ngFor="let column of dataset.possibleFeatures"
                   [value]="column"
                 >
                   {{ column }}</mat-option
                 >
               </mat-select>
             </mat-form-field>
-            <mat-slide-toggle
-              #reshapeToggle
-              (change)="
-                reshapeOptions(dataset.id, reshapeToggle.checked, $event)
-              "
-              >Apply reshape
-            </mat-slide-toggle>
-          </div>
-          <div class="column-inputs-row">
-            <mat-form-field>
-              <mat-label>x</mat-label>
+            <mat-form-field *ngIf="dataset.reshapeSelected === null">
+              <mat-label>Timestamp column</mat-label>
               <mat-select
                 required
-                #xSelect
+                #timeSelect
                 (selectionChange)="
-                  updateSelectedColumns(dataset.id, xSelect.value, 'x')
+                  updateSelectedColumns(dataset.id, timeSelect.value, 'time')
                 "
               >
                 <mat-option
                   *ngFor="let column of dataset.timeOptions"
-                  [value]="column"
-                >
-                  {{ column }}</mat-option
-                >
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field>
-              <mat-label>y</mat-label>
-              <mat-select
-                required
-                #ySelect
-                (selectionChange)="
-                  updateSelectedColumns(dataset.id, ySelect.value, 'y')
-                "
-              >
-                <mat-option
-                  *ngFor="let column of dataset.featureOptions"
                   [value]="column"
                 >
                   {{ column }}</mat-option
@@ -131,3 +104,4 @@
     </div>
   </div>
 </div>
+<div style="clear: both"></div>

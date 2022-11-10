@@ -221,7 +221,9 @@ export class MapComponent implements OnInit {
                 this.oldSelections?.datasets[selectedDatasetIdx]
                   .featureSelected ||
               this.selections.selectedDataset !==
-                this.oldSelections?.selectedDataset
+                this.oldSelections?.selectedDataset ||
+              this.selections.datasets[selectedDatasetIdx].timeSelected !==
+                this.oldSelections?.datasets[selectedDatasetIdx].timeSelected
             ) {
               this.showSpinner = true;
               this.dataService
