@@ -1,6 +1,5 @@
 export interface Dataset {
   id?: string;
-  separator?: string;
   columns?: string[];
   timeOptions?: string[];
   featureOptions?: string[];
@@ -9,10 +8,15 @@ export interface Dataset {
   reshapeSelected?: string;
   timeSelected?: string;
   featureSelected?: string;
-  isSelected?: boolean;
+  possibleFeatures?: string[];
 }
 
 export interface Selections {
   datasets: Dataset[];
   selectedDataset?: string;
+}
+
+export interface Options {
+  features?: string[];
+  countries?: string[];
 }

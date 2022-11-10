@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, throwError, catchError, max } from 'rxjs';
+import { BehaviorSubject, Observable, throwError, catchError } from 'rxjs';
 import {
   HttpClient,
   HttpEvent,
@@ -13,7 +13,7 @@ import {
   CountryData,
   GraphControls,
 } from '../types/GraphData';
-import { Dataset, Selections } from '../types/Datasets';
+import { Dataset, Options, Selections } from '../types/Datasets';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
@@ -22,11 +22,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class DataService {
   private apiUrl: string = 'http://127.0.0.1:5000/';
 
-  private selections: BehaviorSubject<Selections> = new BehaviorSubject(<
-    Selections
-  >{
-    datasets: [],
-  });
+  private selections: BehaviorSubject<Selections> =
+    new BehaviorSubject<Selections>({
+      datasets: [],
+    });
   currentSelections = this.selections.asObservable();
 
   constructor(private http: HttpClient, private _snackBar: MatSnackBar) {}
@@ -177,7 +176,6 @@ export class DataService {
   getAvailableDatasets(selections: Selections): void {
     this.http.get(this.apiUrl + 'data').subscribe((datasets) => {
       let updatedDatasets = datasets as Dataset[];
-      console.log(updatedDatasets);
 
       if (selections.datasets != undefined) {
         for (const dataset of updatedDatasets) {
@@ -194,44 +192,72 @@ export class DataService {
     });
   }
 
+  getPossibleFeatures(
+    selections: Selections,
+    geoColumn: string,
+    datasetId: string | undefined
+  ) {
+    const targetDatasetIdx = selections.datasets.findIndex(
+      (dataset) => dataset.id == datasetId
+    );
+    this.http
+      .post(this.apiUrl + 'data/features', {
+        datasetId: datasetId,
+        geoColumn: geoColumn,
+      })
+      .subscribe((options) => {
+        selections.datasets[targetDatasetIdx].possibleFeatures = (
+          options as Options
+        ).features;
+        selections.datasets[targetDatasetIdx].countryOptions = (
+          options as Options
+        ).countries;
+      });
+  }
+
   getReshapedData(
     selections: Selections,
     datasetId: string | undefined,
-    reshape?: boolean
+    featureSelected: string
   ) {
     const targetDatasetIdx = selections.datasets.findIndex(
       (dataset) => dataset.id == datasetId
     );
 
-    if (
-      selections.datasets[targetDatasetIdx].geoSelected != undefined &&
-      selections.datasets[targetDatasetIdx].reshapeSelected != undefined
-    ) {
-      let reshapeColumn = null;
+    this.http
+      .post(this.apiUrl + 'data/reshapecheck', {
+        datasetId: datasetId,
+        geoColumn: selections.datasets[targetDatasetIdx].geoSelected,
+        featureSelected: featureSelected,
+      })
+      .subscribe((reshapeColumn) => {
+        selections.datasets[targetDatasetIdx].reshapeSelected =
+          reshapeColumn as string;
 
-      if (reshape) {
-        reshapeColumn = selections.datasets[targetDatasetIdx].reshapeSelected;
-      }
+        this.getFeatureColumns(selections, datasetId);
+      });
+  }
 
-      this.http
-        .post(this.apiUrl + 'data/reshape', {
-          datasetId: selections.datasets[targetDatasetIdx].id,
-          reshapeColumn: reshapeColumn,
-          geoColumn: selections.datasets[targetDatasetIdx].geoSelected,
-        })
-        .pipe(catchError(this.handleError('reshape the dataset')))
-        .subscribe((reshapedColumns) => {
-          selections.datasets[targetDatasetIdx].timeOptions = (
-            reshapedColumns as Dataset
-          ).timeOptions;
-          selections.datasets[targetDatasetIdx].featureOptions = (
-            reshapedColumns as Dataset
-          ).featureOptions;
+  getFeatureColumns(selections: Selections, datasetId: string | undefined) {
+    const targetDatasetIdx = selections.datasets.findIndex(
+      (dataset) => dataset.id == datasetId
+    );
 
-          selections.datasets[targetDatasetIdx].countryOptions = (
-            reshapedColumns as Dataset
-          ).countryOptions;
-        });
-    }
+    this.http
+      .post(this.apiUrl + 'data/reshape', {
+        datasetId: datasetId,
+        geoColumn: selections.datasets[targetDatasetIdx].geoSelected,
+        reshapeColumn: selections.datasets[targetDatasetIdx].reshapeSelected,
+      })
+      .subscribe((featureColumns) => {
+        selections.datasets[targetDatasetIdx].featureOptions =
+          featureColumns as string[];
+        if (selections.datasets[targetDatasetIdx].reshapeSelected !== null) {
+          selections.datasets[targetDatasetIdx].timeSelected = 'Time';
+        } else {
+          selections.datasets[targetDatasetIdx].timeOptions =
+            featureColumns as string[];
+        }
+      });
   }
 }

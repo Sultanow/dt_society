@@ -135,8 +135,6 @@ def create_app(test_config=None):
 
             avail_columns.append({"id": dataset["filename"], "columns": columns})
 
-        print(avail_columns)
-
         return jsonify(avail_columns)
 
     @app.route("/data/reshape", methods=["POST"])
@@ -160,22 +158,13 @@ def create_app(test_config=None):
             reshape_column=reshape_column,
         )
 
-        time_columns = df.columns.to_list() if reshape_column is None else ["Time"]
         feature_columns = [
             feature
             for feature in df.columns.to_list()
             if feature not in ("Time", geo_column)
         ]
 
-        countries = df[geo_column].unique().tolist()
-
-        available_columns = {
-            "timeOptions": time_columns,
-            "featureOptions": feature_columns,
-            "countryOptions": countries,
-        }
-
-        return jsonify(available_columns)
+        return jsonify(feature_columns)
 
     @app.route("/data/remove", methods=["DELETE"])
     def remove_dataset():
@@ -195,5 +184,68 @@ def create_app(test_config=None):
         print(f"Successfully removed dataset '{filename}'.")
 
         return ("", 204)
+
+    @app.route("/data/features", methods=["POST"])
+    def get_possible_features():
+
+        if mongo.db is None:
+            return ("Database not available.", 500)
+
+        data = request.get_json()
+
+        if data is None:
+            return ("Empty request.", 400)
+
+        file_id = data["datasetId"]
+        geo_column = data["geoColumn"]
+
+        dataframe = parse_dataset(geo_column=geo_column, dataset_id=file_id)
+
+        countries = dataframe[geo_column].unique().tolist()
+
+        features_in_columns = dataframe.columns.to_list()
+
+        dataframe = dataframe.select_dtypes(exclude=["float"])
+
+        possible_features = features_in_columns
+
+        # possible features in rows
+        for column in dataframe:
+            if column == geo_column:
+                continue
+            possible_features.extend(dataframe[column].unique().tolist())
+
+        response_data = {}
+
+        response_data["features"] = possible_features
+        response_data["countries"] = countries
+
+        return response_data
+
+    @app.route("/data/reshapecheck", methods=["POST"])
+    def check_for_reshape():
+        if mongo.db is None:
+            return ("Database not available.", 500)
+
+        data = request.get_json()
+
+        if data is None:
+            return ("Empty request.", 400)
+
+        file_id = data["datasetId"]
+        geo_column = data["geoColumn"]
+        feature_selected = data["featureSelected"]
+
+        dataframe = parse_dataset(geo_column=geo_column, dataset_id=file_id)
+
+        features_in_columns = dataframe.columns.to_list()
+
+        response_data = None
+
+        for feature in features_in_columns:
+            if feature_selected in dataframe[feature].unique():
+                response_data = feature
+
+        return jsonify(response_data)
 
     return app
