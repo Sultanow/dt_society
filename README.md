@@ -47,23 +47,23 @@ The backend will automatically create a new collection at the default location:
 
 If all requirements have been successfully installed you can start the frontend on a local development server (port 4200 as default) with the Angular CLI:  
 `$ cd app/angular`  
+`$ npm install`  
 `$ ng serve --open`
 
 ## Application usage
 
 ### File upload
 
-Currently the application supports `.tsv` and `.csv` datasets, which contain a column with country codes. You must specify the appropriate separator before uploading your dataset.
+Currently the application supports `.tsv` and `.csv` datasets, which contain a column with country codes. You must specify the appropriate separator when uploading your dataset.
 
 ### Data filtering
 
-All 4 dropdowns must be selected in order to provide visualisations. These include:
+There are 2 dropdowns which must be selected to provide visualisations and forecasts:
 
-- Column with country codes (geo)
-- Column with timestamps (x)
-- Columns with feature of interest (y)
+- Country column: column in the dataset that contains country names/codes
+- Feature column: name of the feature of interest
 
-The reshape dropdown is optional and only necessary if your dataset has a wide format, i.e. each timestamp represents a column. Select N/A if this does not apply to your dataset.
+Depending on the format of your dataset, you might optionally have to provide the name of column that contains timestamps.
 
 ### Forecasting
 
