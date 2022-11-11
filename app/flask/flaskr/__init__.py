@@ -1,4 +1,5 @@
 import os
+import pycountry
 from flask import Flask, request, jsonify
 
 from . import graph, forecast
@@ -137,6 +138,67 @@ def create_app(test_config=None):
 
         return jsonify(avail_columns)
 
+    @app.route("/data/find_geo", methods=["GET"])
+    def get_geo():
+
+        if mongo.db is None:
+            return ("Database not available.", 500)
+
+        collection = mongo.db["collection_1"]
+
+        avail_columns = []
+
+        datasets = collection.find({})
+
+        for i, dataset in enumerate(datasets):
+            df_no_geo = parse_dataset(geo_column=None, dataset_id=i)
+
+            df_sample = df_no_geo.sample(n=10).select_dtypes(include=["object"])
+
+            geo_col = None
+            no_matches = 0
+
+            for col in df_sample:
+                for value in df_sample[col]:
+                    if len(value) == 2:
+                        is_country = pycountry.countries.get(alpha_2=value) != None
+                    elif len(value) == 3:
+                        is_country = pycountry.countries.get(alpha_3=value) != None
+                    elif len(value) > 3:
+                        is_country = pycountry.countries.get(name=value) != None
+
+                    if no_matches > 2:
+                        no_matches = 0
+                        break
+                    if is_country is False:
+                        no_matches += 1
+                    else:
+                        geo_col = col
+
+            dataframe = df_no_geo.select_dtypes(exclude=["float"])
+
+            features_in_columns = df_no_geo.drop(columns=[geo_col]).columns.to_list()
+
+            possible_features = features_in_columns
+
+            # possible features in rows
+            for column in dataframe:
+                if column == geo_col:
+                    print(column)
+                    continue
+
+                possible_features.extend(dataframe[column].unique().tolist())
+
+            avail_columns.append(
+                {
+                    "id": dataset["filename"],
+                    "possibleFeatures": possible_features,
+                    "geoSelected": geo_col,
+                }
+            )
+
+        return jsonify(avail_columns)
+
     @app.route("/data/reshape", methods=["POST"])
     def reshape_dataset():
 
@@ -164,7 +226,14 @@ def create_app(test_config=None):
             if feature not in ("Time", geo_column)
         ]
 
-        return jsonify(feature_columns)
+        countries = df[geo_column].unique().tolist()
+
+        response_data = {}
+
+        response_data["features"] = feature_columns
+        response_data["countries"] = countries
+
+        return response_data
 
     @app.route("/data/remove", methods=["DELETE"])
     def remove_dataset():
@@ -197,28 +266,51 @@ def create_app(test_config=None):
             return ("Empty request.", 400)
 
         file_id = data["datasetId"]
-        geo_column = data["geoColumn"]
 
-        dataframe = parse_dataset(geo_column=geo_column, dataset_id=file_id)
+        df_no_geo = parse_dataset(geo_column=None, dataset_id=file_id)
 
-        countries = dataframe[geo_column].unique().tolist()
+        features_in_columns = df_no_geo.columns.to_list()
 
-        features_in_columns = dataframe.columns.to_list()
+        df_sample = df_no_geo.sample(n=10).select_dtypes(include=["object"])
 
-        dataframe = dataframe.select_dtypes(exclude=["float"])
+        geo_col = None
+        no_matches = 0
+
+        for col in df_sample:
+            for value in df_sample[col]:
+                print(value)
+                if len(value) == 2:
+                    is_country = pycountry.countries.get(alpha_2=value) != None
+                elif len(value) == 3:
+                    is_country = pycountry.countries.get(alpha_3=value) != None
+                elif len(value) > 3:
+                    is_country = pycountry.countries.get(name=value) != None
+
+                if no_matches > 2:
+                    no_matches = 0
+                    break
+                if is_country is False:
+                    no_matches += 1
+                else:
+                    geo_col = col
+
+        print(geo_col)
+
+        # dataframe = parse_dataset(geo_column=geo_column, dataset_id=file_id)
+
+        dataframe = df_no_geo.select_dtypes(exclude=["float"])
 
         possible_features = features_in_columns
 
         # possible features in rows
         for column in dataframe:
-            if column == geo_column:
+            if column == geo_col:
                 continue
             possible_features.extend(dataframe[column].unique().tolist())
 
         response_data = {}
 
         response_data["features"] = possible_features
-        response_data["countries"] = countries
 
         return response_data
 

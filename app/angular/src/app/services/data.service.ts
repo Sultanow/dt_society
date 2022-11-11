@@ -174,7 +174,7 @@ export class DataService {
   }
 
   getAvailableDatasets(selections: Selections): void {
-    this.http.get(this.apiUrl + 'data').subscribe((datasets) => {
+    this.http.get(this.apiUrl + 'data/find_geo').subscribe((datasets) => {
       let updatedDatasets = datasets as Dataset[];
 
       if (selections.datasets != undefined) {
@@ -194,7 +194,7 @@ export class DataService {
 
   getPossibleFeatures(
     selections: Selections,
-    geoColumn: string,
+    // geoColumn: string,
     datasetId: string | undefined
   ) {
     const targetDatasetIdx = selections.datasets.findIndex(
@@ -203,15 +203,15 @@ export class DataService {
     this.http
       .post(this.apiUrl + 'data/features', {
         datasetId: datasetId,
-        geoColumn: geoColumn,
+        // geoColumn: geoColumn,
       })
       .subscribe((options) => {
         selections.datasets[targetDatasetIdx].possibleFeatures = (
           options as Options
         ).features;
-        selections.datasets[targetDatasetIdx].countryOptions = (
-          options as Options
-        ).countries;
+        // selections.datasets[targetDatasetIdx].countryOptions = (
+        //   options as Options
+        // ).countries;
       });
   }
 
@@ -250,13 +250,18 @@ export class DataService {
         reshapeColumn: selections.datasets[targetDatasetIdx].reshapeSelected,
       })
       .subscribe((featureColumns) => {
-        selections.datasets[targetDatasetIdx].featureOptions =
-          featureColumns as string[];
+        selections.datasets[targetDatasetIdx].featureOptions = (
+          featureColumns as Options
+        ).features;
+        selections.datasets[targetDatasetIdx].countryOptions = (
+          featureColumns as Options
+        ).countries;
         if (selections.datasets[targetDatasetIdx].reshapeSelected !== null) {
           selections.datasets[targetDatasetIdx].timeSelected = 'Time';
         } else {
-          selections.datasets[targetDatasetIdx].timeOptions =
-            featureColumns as string[];
+          selections.datasets[targetDatasetIdx].timeOptions = (
+            featureColumns as Options
+          ).features;
         }
       });
   }

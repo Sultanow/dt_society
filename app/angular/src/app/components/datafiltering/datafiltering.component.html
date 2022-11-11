@@ -24,23 +24,6 @@
         <div class="selected-columns-container">
           <div class="column-inputs-row">
             <mat-form-field>
-              <mat-label>Country column</mat-label>
-              <mat-select
-                required
-                #geoSelect
-                (selectionChange)="
-                  updateSelectedColumns(dataset.id, geoSelect.value, 'geo')
-                "
-              >
-                <mat-option
-                  *ngFor="let column of dataset.columns"
-                  [value]="column"
-                >
-                  {{ column }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field>
               <mat-label>Feature column</mat-label>
               <mat-select
                 required
@@ -91,17 +74,5 @@
       </mat-expansion-panel>
     </ng-container>
   </mat-accordion>
-  <div #filesContainer class="files-container">
-    <div class="file-upload">
-      <button
-        mat-mini-fab
-        color="primary"
-        class="upload-btn"
-        (click)="onFileUpload($event)"
-      >
-        <mat-icon>upload_file</mat-icon>
-      </button>
-    </div>
-  </div>
 </div>
 <div style="clear: both"></div>

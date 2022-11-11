@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { Selections } from './types/Datasets';
 import { DataService } from 'src/app/services/data.service';
 import { HttpClient } from '@angular/common/http';
+import { MatDialog } from '@angular/material/dialog';
+import { UploaddialogComponent } from 'src/app/components/datafiltering/uploaddialog/uploaddialog.component';
 
 @Component({
   selector: 'app-root',
@@ -11,7 +13,11 @@ import { HttpClient } from '@angular/common/http';
 export class AppComponent {
   title = 'Digital Twin of Society';
 
-  constructor(private dataService: DataService, private http: HttpClient) {}
+  constructor(
+    private dataService: DataService,
+    private http: HttpClient,
+    public dialog: MatDialog
+  ) {}
 
   selectedDatasets: Selections = {
     datasets: [],
@@ -20,6 +26,10 @@ export class AppComponent {
 
   getDemoDatasets() {
     this.dataService.getDemoData(this.selectedDatasets);
+  }
+
+  onFileUpload(event: any) {
+    this.dialog.open(UploaddialogComponent);
   }
 
   ngOnInit(): void {
