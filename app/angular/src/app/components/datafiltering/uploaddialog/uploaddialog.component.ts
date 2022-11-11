@@ -18,8 +18,6 @@ export class UploaddialogComponent implements OnInit {
 
   fileContent?: File = undefined;
 
-  separator: string = ',';
-
   onFileSelected(event: any) {
     const file: File = event.target.files[0];
 
@@ -33,7 +31,7 @@ export class UploaddialogComponent implements OnInit {
   }
 
   onFileUpload() {
-    this.dataService.uploadDataset(this.fileContent, this.separator, this.data);
+    this.dataService.uploadDataset(this.fileContent, this.data);
   }
 
   ngOnInit(): void {}

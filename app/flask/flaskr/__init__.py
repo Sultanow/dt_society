@@ -62,7 +62,7 @@ def create_app(test_config=None):
             return ("Database not available.", 500)
 
         for key in demo_data:
-            df = DigitalTwinTimeSeries(demo_data[key][1], sep="\t")
+            df = DigitalTwinTimeSeries(demo_data[key][1], filename=demo_data[key][0])
 
             collection = mongo.db["collection_1"]
 
@@ -84,12 +84,11 @@ def create_app(test_config=None):
     def upload_dataset():
 
         uploaded_file = request.files["upload"]
-        separator = request.form.get("separator")
 
         if uploaded_file.filename != "":
 
             try:
-                df = DigitalTwinTimeSeries(uploaded_file.stream, sep=separator)
+                df = DigitalTwinTimeSeries(uploaded_file.stream, filename=uploaded_file.filename)
 
                 if mongo.db is not None and df is not None:
                     collection = mongo.db["collection_1"]

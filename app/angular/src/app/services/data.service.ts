@@ -114,14 +114,12 @@ export class DataService {
 
   uploadDataset(
     file: File | undefined,
-    separator: string,
     selections: Selections
   ): void {
     if (file) {
       const formData = new FormData();
 
       formData.append('upload', file);
-      formData.append('separator', separator);
 
       const request = new HttpRequest(
         'POST',

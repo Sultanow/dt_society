@@ -11,6 +11,7 @@ class DigitalTwinTimeSeries:
         to_iso3: bool = True,
         df: pd.DataFrame = None,
         geo_col: str = None,
+        filename: str = None
     ):
         """
         Preprocesses and stores time series data
@@ -26,9 +27,9 @@ class DigitalTwinTimeSeries:
         self.geo_col: str = geo_col
         self.sep: str = sep
         self.to_iso3: bool = to_iso3
-        self.data: pd.DataFrame = self._preprocess(path) if df is None else df
+        self.data: pd.DataFrame = self._preprocess(path, filename) if df is None else df
 
-    def _preprocess(self, path: str) -> pd.DataFrame:
+    def _preprocess(self, path: str, filename: str) -> pd.DataFrame:
         """Preprocesses dataframe into required format
 
         Args:
@@ -37,10 +38,15 @@ class DigitalTwinTimeSeries:
         Returns:
             pd.DataFrame: Reshaped preprocessed dataset
         """
+        
         if self.sep == "dict":
             data = pd.DataFrame.from_records(path)
         else:
-            data = pd.read_csv(path, sep=self.sep)
+            if filename is not None:
+                if filename.endswith(".tsv"):
+                    data = pd.read_table(path)
+                else:
+                    data = pd.read_csv(path, sep = None)
 
         columns = data.columns.tolist()
 
