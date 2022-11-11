@@ -1,5 +1,6 @@
 <div class="statistics-wrapper" [formGroup]="selectionControl">
     <mat-card>
+        <mat-label>Statistics of {{ selections.selectedDataset }}</mat-label>
         <div class="stats-container">
         <mat-form-field>
             <mat-label>Time</mat-label>
@@ -37,11 +38,11 @@
                 <ngx-slider formControlName="sliderControl" [(value)]="value" [(highValue)]="highValue" [options]="options"></ngx-slider>
             </div>
             <div class="stats-container">
-            <mat-card class="single-stat">
+            <mat-card class="single-stat-growth">
                 <mat-card-title>Growth Rate</mat-card-title>
                 <mat-card-content>{{ growthrate }}</mat-card-content>
             </mat-card>
-            <mat-card class="single-stat">
+            <mat-card class="single-stat-growth">
                 <mat-card-title> Average Growth Rate</mat-card-title>
                 <mat-card-content>{{ growthrate_per_time }}</mat-card-content>
             </mat-card>

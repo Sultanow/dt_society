@@ -124,6 +124,22 @@ export class StatisticsComponent implements OnInit {
     this.highValue = newOptions.ceil;
   }
 
+  private resetStatistics(){ 
+    let countryControl = this.selectionControl.get('selectedCountryControl')!;
+    let yearControl = this.selectionControl.get('selectedYearControl')!;
+    if(countryControl.getRawValue() !== null){
+    this.selectionControl.get('selectedCountryControl')!.setValue(null);
+    this.growthrate = "";
+    this.growthrate_per_time = "";
+    }
+    if(yearControl.getRawValue() !== null){
+    this.selectionControl.get('selectedYearControl')!.setValue(null);
+    this.min = "";
+    this.max = "";
+    this.mean = "";
+    }
+  }
+
   ngDoCheck() {
     if (
       JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
@@ -151,22 +167,25 @@ export class StatisticsComponent implements OnInit {
                 this.oldSelections?.datasets[selectedDatasetIdx]
                   .featureSelected ||
               this.selections.selectedDataset !==
-                this.oldSelections?.selectedDataset
+                this.oldSelections?.selectedDataset ||
+              this.selections.datasets[selectedDatasetIdx].timeSelected !==
+                this.oldSelections?.datasets[selectedDatasetIdx].timeSelected
             ) {
-          this.dataService
-            .getData(
-              this.selections.datasets[selectedDatasetIdx],
-              '/graph/statistics',
-              {}
-            )
-            .subscribe((res) => {
-              if (res.type === HttpEventType.Response) {
-                if (res.body) {
-                  this.updateData(res.body as CountryData);
-                }
-              }
-            });
-          }
+              this.resetStatistics()
+              this.dataService
+                .getData(
+                  this.selections.datasets[selectedDatasetIdx],
+                  '/graph/statistics',
+                  {}
+                )
+                .subscribe((res) => {
+                  if (res.type === HttpEventType.Response) {
+                    if (res.body) {
+                      this.updateData(res.body as CountryData);
+                    }
+                  }
+                });
+            }
         }
         }
       }
@@ -185,7 +204,7 @@ export class StatisticsComponent implements OnInit {
         if (
           this.selectionControl
             .get('selectedYearControl')!
-            .getRawValue() !== ''
+            .getRawValue() !== null
         ) {
           this.updateStats(selectedYear.toString())
         }
@@ -197,7 +216,7 @@ export class StatisticsComponent implements OnInit {
         if (
           this.selectionControl
             .get('selectedCountryControl')!
-            .getRawValue() !== ''
+            .getRawValue() !== null
         ) {
           this.updateGrowth()
         }

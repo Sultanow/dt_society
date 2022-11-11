@@ -1,18 +1,31 @@
 .statistics-wrapper{
-    width: 48%;
-    display: flex;
-    float: right;
+  padding: 10px;
+  width: 48%;
+  float: left;
+}
+
+mat-card{
+    overflow: hidden
 }
 
 .single-stat{
-    width: 100%;
+    width: 6em;
+    min-height: 3em;
+    margin-right: 2em;
+}
+
+.single-stat-growth{
+    width: 16em;
+    min-height: 3em;
     margin: 1em;
 }
 
 .stats-container{
   display: flex;
   flex-direction: row;
-  justify-content: space-evenly;
+  justify-content:flex-start;
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
 .growth-container{
@@ -23,15 +36,18 @@
 .growth-selections{
   display: flex;
   flex-direction: row;
-  justify-content: space-evenly;
+  justify-content: flex-start;
 }
 
 ngx-slider{
     margin-left: 1em;
+    margin-right: 1em;
+    max-width: 26em;
 }
 
 mat-form-field{
-    width: 15%;
+    width: 8em;
+    margin-right: 2em;
     float: left;
 
 }
