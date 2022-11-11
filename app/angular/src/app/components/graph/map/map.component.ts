@@ -128,8 +128,8 @@ export class MapComponent implements OnInit {
         ],
         layout: {
           title: 'Map Visualization for: ' + featureSelected,
-          paper_bgcolor: '#232323',
-          plot_bgcolor: '#232323',
+          paper_bgcolor: '#424242',
+          plot_bgcolor: '#424242',
           font: { color: '#f2f2f2' },
           mapbox: {
             style: 'carto-darkmatter',

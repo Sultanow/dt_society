@@ -14,7 +14,18 @@
   width: 600px;
 }
 
-.demo-button {
+/* .demo-button {
+  float: right;
+  margin-left: auto;
+}
+
+.upload-button {
+  float: right;
+
+  margin-right: auto;
+} */
+
+.header-buttons {
   float: right;
   margin-left: auto;
 }

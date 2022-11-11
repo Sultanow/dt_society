@@ -30,14 +30,6 @@ export class DatafilteringComponent implements OnInit {
         .indexOf(filename);
 
       switch (column) {
-        case 'geo':
-          this.selections.datasets[datasetIndex].geoSelected = value;
-          this.dataService.getPossibleFeatures(
-            this.selections,
-            value,
-            filename
-          );
-          break;
         case 'time':
           this.selections.datasets[datasetIndex].timeSelected = value;
           break;

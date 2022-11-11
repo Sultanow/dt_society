@@ -17,8 +17,8 @@ export class CorrelationComponent implements OnInit {
     data: [],
     layout: {
       legend: { title: { text: '' }, groupclick: 'toggleitem' },
-      paper_bgcolor: '#232323',
-      plot_bgcolor: '#232323',
+      paper_bgcolor: '#424242',
+      plot_bgcolor: '#424242',
       xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
       yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
       font: { color: '#f2f2f2' },

@@ -18,6 +18,11 @@ export class UploaddialogComponent implements OnInit {
 
   fileContent?: File = undefined;
 
+  selections: Selections = {
+    datasets: [],
+    selectedDataset: undefined,
+  };
+
   onFileSelected(event: any) {
     const file: File = event.target.files[0];
 
@@ -31,8 +36,12 @@ export class UploaddialogComponent implements OnInit {
   }
 
   onFileUpload() {
-    this.dataService.uploadDataset(this.fileContent, this.data);
+    this.dataService.uploadDataset(this.fileContent, this.selections);
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.dataService.currentSelections.subscribe((value) => {
+      this.selections = value;
+    });
+  }
 }
