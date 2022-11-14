@@ -1,5 +1,6 @@
-<plotly-plot
-  *ngIf="historyPlot.data.length > 0"
-  [data]="historyPlot.data"
-  [layout]="historyPlot.layout"
-></plotly-plot>
+<div class="history-wrapper">
+  <mat-card *ngIf="historyPlot.data.length > 0">
+    <plotly-plot *ngIf="historyPlot.data.length > 0" [data]="historyPlot.data" [layout]="historyPlot.layout">
+    </plotly-plot>
+  </mat-card>
+</div>

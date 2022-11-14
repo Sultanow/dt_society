@@ -1,9 +1,9 @@
-<plotly-plot
-  *ngIf="data.data.length > 0 && showSpinner == false"
-  [data]="data.data"
-  [layout]="data.layout"
-  [frames] = "frames"
-></plotly-plot>
-<div *ngIf="showSpinner == true" class="spinner-container">
-  <mat-spinner></mat-spinner>
+<div class="map-wrapper">
+  <mat-card *ngIf="data.data.length > 0">
+    <plotly-plot *ngIf="data.data.length > 0 && showSpinner == false" [data]="data.data" [layout]="data.layout"
+      [frames]="frames"></plotly-plot>
+    <div *ngIf="showSpinner == true" class="spinner-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  </mat-card>
 </div>

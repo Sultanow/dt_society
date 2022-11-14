@@ -1,15 +1,19 @@
-<div [formGroup]="selectionControl">
-  <mat-form-field>
-    <mat-label>Country</mat-label>
-    <mat-select formControlName="selectedCountryControl">
-      <mat-option *ngFor="let country of countries" [value]="country">
-        {{ country }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
+<div class="correlation-wrapper">
+  <mat-card>
+    <div [formGroup]="selectionControl">
+      <mat-form-field>
+        <mat-label>Country</mat-label>
+        <mat-select formControlName="selectedCountryControl">
+          <mat-option *ngFor="let country of countries" [value]="country">
+            {{ country }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <plotly-plot
+      *ngIf="data.data.length > 0"
+      [data]="data.data"
+      [layout]="data.layout"
+    ></plotly-plot>
+  </mat-card>
 </div>
-<plotly-plot
-  *ngIf="data.data.length > 0"
-  [data]="data.data"
-  [layout]="data.layout"
-></plotly-plot>
