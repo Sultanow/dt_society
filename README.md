@@ -47,7 +47,7 @@ The backend will automatically create a new collection at the default location:
 
 If all requirements have been successfully installed you can start the frontend on a local development server (port 4200 as default) with the Angular CLI:  
 `$ cd app/angular`  
-`$ npm install`  (only needed before first run)
+`$ npm install` (only needed before first run)  
 `$ ng serve --open`
 
 ## Application usage
@@ -55,6 +55,7 @@ If all requirements have been successfully installed you can start the frontend 
 ### File upload
 
 Currently the application supports `.tsv` and `.csv` datasets, which contain a column with country codes.
+
 ### Data filtering
 
 There is one dropdown which must be selected to provide visualisations and forecasts:
