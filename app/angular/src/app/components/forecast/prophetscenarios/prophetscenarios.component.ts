@@ -8,6 +8,7 @@ import {
   ProphetForecast,
   Scenarios,
 } from 'src/app/types/GraphData';
+import { faChartLine } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-prophetscenarios',
@@ -50,6 +51,8 @@ export class ProphetscenariosComponent implements OnInit {
   public scenarios: Scenarios = {};
 
   public dependentDataset?: string;
+
+  public faChartLine = faChartLine;
 
   updateScenarios() {
     this.scenarioIndeces = new Array(this.predictionPeriods)

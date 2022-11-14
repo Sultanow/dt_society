@@ -1,72 +1,81 @@
-<div class="prophet-wrapper" >
-<mat-card>
-<div class="data-selector">
-  <mat-radio-group [(ngModel)]="dependentDataset" aria-label="Select an option">
-    <mat-radio-button
-      *ngFor="let dataset of selections.datasets"
-      [value]="dataset.id"
-    >
-      {{ dataset.id }}
-      <div *ngIf="dataset.featureSelected !== undefined">
-        ({{ dataset.featureSelected }})
+<div class="prophet-wrapper">
+  <mat-card>
+    <div class="data-selector">
+      <p>Predict for</p>
+      <mat-radio-group
+        [(ngModel)]="dependentDataset"
+        aria-label="Select an option"
+      >
+        <mat-radio-button
+          *ngFor="let dataset of selections.datasets"
+          [value]="dataset.id"
+        >
+          {{ dataset.id }}
+          <div *ngIf="dataset.featureSelected !== undefined">
+            ({{ dataset.featureSelected }})
+          </div>
+        </mat-radio-button>
+      </mat-radio-group>
+    </div>
+    <div class="toggle-container">
+      <mat-form-field>
+        <mat-label>Country</mat-label>
+        <mat-select [(ngModel)]="selectedCountry">
+          <mat-option *ngFor="let country of countries" [value]="country">
+            {{ country }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div>
+      <section class="slider-section">
+        <div># of predictions</div>
+        <mat-slider
+          thumbLabel
+          aria-label="unit(s)"
+          [(ngModel)]="predictionPeriods"
+          (change)="updateScenarios()"
+          [min]="0"
+          [max]="40"
+        ></mat-slider>
+      </section>
+    </div>
+    <ng-container *ngFor="let dataset of selections.datasets">
+      <div
+        *ngIf="
+          dataset.id !== dependentDataset &&
+          dataset.id !== undefined &&
+          dependentDataset !== undefined &&
+          predictionPeriods > 0
+        "
+      >
+        <div class="scenario-label">{{ dataset.featureSelected }}</div>
+        <mat-form-field
+          class="scenario-field"
+          *ngFor="let i of scenarioIndeces"
+        >
+          <mat-label> Step {{ i }}</mat-label>
+          <input
+            matInput
+            [(ngModel)]="scenarios[dataset.id][i]"
+            placeholder="Scenario"
+          />
+        </mat-form-field>
       </div>
-    </mat-radio-button>
-  </mat-radio-group>
-</div>
-<div class="toggle-container">
-  <mat-form-field>
-    <mat-label>Country</mat-label>
-    <mat-select [(ngModel)]="selectedCountry">
-      <mat-option *ngFor="let country of countries" [value]="country">
-        {{ country }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-</div>
-<div>
-  <section class="slider-section">
-    <div># of predictions</div>
-    <mat-slider
-      thumbLabel
-      aria-label="unit(s)"
-      [(ngModel)]="predictionPeriods"
-      (change)="updateScenarios()"
-      [min]="0"
-      [max]="40"
-    ></mat-slider>
+    </ng-container>
     <button
-      mat-mini-fab
+      mat-raised-button
       color="primary"
       class="upload-btn"
       (click)="updateProphetForecast()"
     >
-      <mat-icon>restart_alt</mat-icon>
+      <fa-icon [icon]="faChartLine"></fa-icon>
+      Predict
     </button>
-  </section>
-</div>
-<ng-container *ngFor="let dataset of selections.datasets">
-  <div
-    *ngIf="
-      dataset.id !== dependentDataset &&
-      dataset.id !== undefined &&
-      dependentDataset !== undefined
-    "
-  >
-    <div class="scenario-label">{{ dataset.featureSelected }}</div>
-    <mat-form-field class="scenario-field" *ngFor="let i of scenarioIndeces">
-      <mat-label> Step {{ i }}</mat-label>
-      <input
-        matInput
-        [(ngModel)]="scenarios[dataset.id][i]"
-        placeholder="Scenario"
-      />
-    </mat-form-field>
-  </div>
-</ng-container>
-<plotly-plot
-  *ngIf="data.data.length > 0"
-  [data]="data.data"
-  [layout]="data.layout"
-></plotly-plot>
-</mat-card>
+    <plotly-plot
+      *ngIf="data.data.length > 0"
+      [data]="data.data"
+      [layout]="data.layout"
+    ></plotly-plot>
+  </mat-card>
 </div>

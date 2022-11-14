@@ -1,17 +1,3 @@
-<div class="data-selector">
-  <mat-radio-group
-    aria-label="Select an option"
-    [(ngModel)]="selections.selectedDataset"
-    (change)="changeFocus()"
-  >
-    <mat-radio-button
-      *ngFor="let dataset of selections.datasets"
-      [value]="dataset.id"
-    >
-      {{ dataset.id }}
-    </mat-radio-button>
-  </mat-radio-group>
-</div>
 <div class="column-selection-accordion">
   <mat-accordion>
     <ng-container *ngFor="let dataset of selections.datasets">
@@ -74,5 +60,20 @@
       </mat-expansion-panel>
     </ng-container>
   </mat-accordion>
+</div>
+<div class="data-selector">
+  <p>Select dataset</p>
+  <mat-radio-group
+    aria-label="Select an option"
+    [(ngModel)]="selections.selectedDataset"
+    (change)="changeFocus()"
+  >
+    <mat-radio-button
+      *ngFor="let dataset of selections.datasets"
+      [value]="dataset.id"
+    >
+      {{ dataset.id }}
+    </mat-radio-button>
+  </mat-radio-group>
 </div>
 <div style="clear: both"></div>

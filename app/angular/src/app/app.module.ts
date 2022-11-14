@@ -40,6 +40,7 @@ import { StatisticsComponent } from './components/graph/statistics/statistics.co
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -85,7 +86,8 @@ PlotlyModule.plotlyjs = PlotlyJS;
     MatPaginatorModule,
     NgxSliderModule,
     MatCardModule,
-    MatDividerModule
+    MatDividerModule,
+    FontAwesomeModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
