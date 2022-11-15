@@ -90,6 +90,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     MatDividerModule,
     FontAwesomeModule,
     MatSidenavModule,
+    MatDividerModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

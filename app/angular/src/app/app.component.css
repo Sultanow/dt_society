@@ -15,8 +15,7 @@
 }
 
 .header-buttons {
-  float: right;
-  margin-left: auto;
+  margin-right: 10px;
 }
 
 .forecast-container {
@@ -26,4 +25,26 @@
 .content-container {
   height: 100%;
   border: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.demo-button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 5px;
+  margin-left: 5px;
+  font-size: 14px;
+  font-weight: lighter;
+}
+
+.upload-button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  margin-top: 5px;
+  margin-left: 5px;
+  font-size: 14px;
+  font-weight: lighter;
 }
