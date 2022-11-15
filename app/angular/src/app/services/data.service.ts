@@ -112,10 +112,7 @@ export class DataService {
       .pipe(catchError(this.handleError('get data')));
   }
 
-  uploadDataset(
-    file: File | undefined,
-    selections: Selections
-  ): void {
+  uploadDataset(file: File | undefined, selections: Selections): void {
     if (file) {
       const formData = new FormData();
 
@@ -190,26 +187,18 @@ export class DataService {
     });
   }
 
-  getPossibleFeatures(
-    selections: Selections,
-    // geoColumn: string,
-    datasetId: string | undefined
-  ) {
+  getPossibleFeatures(selections: Selections, datasetId: string | undefined) {
     const targetDatasetIdx = selections.datasets.findIndex(
       (dataset) => dataset.id == datasetId
     );
     this.http
       .post(this.apiUrl + 'data/features', {
         datasetId: datasetId,
-        // geoColumn: geoColumn,
       })
       .subscribe((options) => {
         selections.datasets[targetDatasetIdx].possibleFeatures = (
           options as Options
         ).features;
-        // selections.datasets[targetDatasetIdx].countryOptions = (
-        //   options as Options
-        // ).countries;
       });
   }
 

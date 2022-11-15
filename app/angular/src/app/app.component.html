@@ -1,5 +1,16 @@
 <mat-toolbar color="primary">
-  <span>Digital Twin of Society</span>
+  <button
+    mat-icon-button
+    aria-label="Example icon-button with menu icon"
+    (click)="datafiltering.toggle()"
+    style="margin-right: 10px"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
+  <span>
+    <fa-icon [icon]="faChartColumn"></fa-icon>
+    Digital Twin of Society</span
+  >
   <div class="header-buttons">
     <button class="upload-button" mat-button (click)="onFileUpload($event)">
       <mat-icon>upload_file</mat-icon>
@@ -11,31 +22,35 @@
     </button>
   </div>
 </mat-toolbar>
-<app-datafiltering></app-datafiltering>
-<div style="clear: both"></div>
-<app-datatable></app-datatable>
-<app-statistics></app-statistics>
-<div style="clear: both"></div>
-<div class="plot-row">
-  <app-history></app-history>
-  <app-map></app-map>
-</div>
-<mat-tab-group mat-stretch-tabs style="min-height: 700px">
-  <mat-tab label="Heatmap">
-    <app-heatmap></app-heatmap>
-  </mat-tab>
-  <mat-tab label="Correlation line chart">
-    <ng-template matTabContent>
-      <app-correlation></app-correlation>
-    </ng-template>
-  </mat-tab>
-</mat-tab-group>
+<mat-drawer-container class="content-container">
+  <mat-drawer #datafiltering mode="side">
+    <app-datafiltering></app-datafiltering>
+  </mat-drawer>
+  <div style="clear: both"></div>
+  <app-datatable></app-datatable>
+  <app-statistics></app-statistics>
+  <div style="clear: both"></div>
+  <div class="plot-row">
+    <app-history></app-history>
+    <app-map></app-map>
+  </div>
+  <mat-tab-group mat-stretch-tabs style="min-height: 700px">
+    <mat-tab label="Heatmap">
+      <app-heatmap></app-heatmap>
+    </mat-tab>
+    <mat-tab label="Correlation line chart">
+      <ng-template matTabContent>
+        <app-correlation></app-correlation>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
 
-<mat-tab-group mat-stretch-tabs style="min-height: 700px">
-  <mat-tab label="Multivariate Forecasting">
-    <app-vectorautoregression></app-vectorautoregression>
-  </mat-tab>
-  <mat-tab label="Scenario-based Forecasting">
-    <app-prophetscenarios></app-prophetscenarios>
-  </mat-tab>
-</mat-tab-group>
+  <mat-tab-group mat-stretch-tabs style="min-height: 700px">
+    <mat-tab label="Multivariate Forecasting">
+      <app-vectorautoregression></app-vectorautoregression>
+    </mat-tab>
+    <mat-tab label="Scenario-based Forecasting">
+      <app-prophetscenarios></app-prophetscenarios>
+    </mat-tab>
+  </mat-tab-group>
+</mat-drawer-container>

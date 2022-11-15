@@ -7,22 +7,24 @@
 }
 
 .data-selector {
-  margin: 10px;
+  margin: 5px;
 }
 
 .mat-radio-button {
   margin: 5px;
 }
 
-.column-selection-accordion {
-  padding: 10px;
+.column-inputs-row {
+  margin-left: 30px;
 }
 
 .delete-button {
-  float: right;
+  margin-right: 0;
 }
 
-.files-container {
-  float: right;
-  margin: 10px;
+.data-selector-radio-group {
+  display: flex;
+  flex-direction: column;
+  margin: 15px 0;
+  align-items: flex-start;
 }

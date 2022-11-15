@@ -4,6 +4,7 @@ import { DataService } from 'src/app/services/data.service';
 import { HttpClient } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { UploaddialogComponent } from 'src/app/components/datafiltering/uploaddialog/uploaddialog.component';
+import { faChartColumn } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-root',
@@ -23,6 +24,8 @@ export class AppComponent {
     datasets: [],
     selectedDataset: undefined,
   };
+
+  public faChartColumn = faChartColumn;
 
   getDemoDatasets() {
     this.dataService.getDemoData(this.selectedDatasets);

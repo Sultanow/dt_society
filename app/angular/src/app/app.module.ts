@@ -41,6 +41,7 @@ import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { MatSidenavModule } from '@angular/material/sidenav';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -88,6 +89,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     MatCardModule,
     MatDividerModule,
     FontAwesomeModule,
+    MatSidenavModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

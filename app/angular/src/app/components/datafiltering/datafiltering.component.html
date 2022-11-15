@@ -1,79 +1,69 @@
-<div class="column-selection-accordion">
-  <mat-accordion>
-    <ng-container *ngFor="let dataset of selections.datasets">
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            {{ dataset.id }}
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <div class="selected-columns-container">
-          <div class="column-inputs-row">
-            <mat-form-field>
-              <mat-label>Feature column</mat-label>
-              <mat-select
-                required
-                #featureSelect
-                (selectionChange)="
-                  updateSelectedColumns(
-                    dataset.id,
-                    featureSelect.value,
-                    'feature'
-                  )
-                "
-              >
-                <mat-option
-                  *ngFor="let column of dataset.possibleFeatures"
-                  [value]="column"
-                >
-                  {{ column }}</mat-option
-                >
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field *ngIf="dataset.reshapeSelected === null">
-              <mat-label>Timestamp column</mat-label>
-              <mat-select
-                required
-                #timeSelect
-                (selectionChange)="
-                  updateSelectedColumns(dataset.id, timeSelect.value, 'time')
-                "
-              >
-                <mat-option
-                  *ngFor="let column of dataset.timeOptions"
-                  [value]="column"
-                >
-                  {{ column }}</mat-option
-                >
-              </mat-select>
-            </mat-form-field>
-            <button
-              mat-icon-button
-              color="primary"
-              class="delete-button"
-              (click)="onDeleteFile(dataset.id)"
-            >
-              <mat-icon>delete_forever</mat-icon>
-            </button>
-          </div>
-        </div>
-      </mat-expansion-panel>
-    </ng-container>
-  </mat-accordion>
-</div>
 <div class="data-selector">
-  <p>Select dataset</p>
   <mat-radio-group
+    class="data-selector-radio-group"
     aria-label="Select an option"
     [(ngModel)]="selections.selectedDataset"
     (change)="changeFocus()"
   >
-    <mat-radio-button
-      *ngFor="let dataset of selections.datasets"
-      [value]="dataset.id"
-    >
-      {{ dataset.id }}
-    </mat-radio-button>
+    <ng-container *ngFor="let dataset of selections.datasets">
+      <mat-radio-button [value]="dataset.id">
+        <div>
+          {{ dataset.id }}
+          <button
+            mat-icon-button
+            color="primary"
+            class="delete-button"
+            (click)="onDeleteFile(dataset.id)"
+          >
+            <mat-icon>delete_forever</mat-icon>
+          </button>
+        </div>
+      </mat-radio-button>
+      <div class="selected-columns-container">
+        <div class="column-inputs-row">
+          <mat-form-field>
+            <mat-label>Feature column</mat-label>
+            <mat-select
+              required
+              #featureSelect
+              (selectionChange)="
+                updateSelectedColumns(
+                  dataset.id,
+                  featureSelect.value,
+                  'feature'
+                )
+              "
+            >
+              <mat-option
+                *ngFor="let column of dataset.possibleFeatures"
+                [value]="column"
+              >
+                {{ column }}</mat-option
+              >
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="column-inputs-row">
+          <mat-form-field *ngIf="dataset.reshapeSelected === null">
+            <mat-label>Timestamp column</mat-label>
+            <mat-select
+              required
+              #timeSelect
+              (selectionChange)="
+                updateSelectedColumns(dataset.id, timeSelect.value, 'time')
+              "
+            >
+              <mat-option
+                *ngFor="let column of dataset.timeOptions"
+                [value]="column"
+              >
+                {{ column }}</mat-option
+              >
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </ng-container>
   </mat-radio-group>
 </div>
 <div style="clear: both"></div>
