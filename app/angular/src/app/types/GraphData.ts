@@ -47,7 +47,6 @@ export interface Frame {
       z: any[];
     }
   ];
-  name: string;
 }
 
 export interface GraphControls {

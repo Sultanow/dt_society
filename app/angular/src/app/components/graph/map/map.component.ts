@@ -1,5 +1,7 @@
+import { Options } from '@angular-slider/ngx-slider';
 import { HttpEventType } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 import { GraphData, Frame, CountryData } from 'src/app/types/GraphData';
@@ -11,8 +13,6 @@ import { GraphData, Frame, CountryData } from 'src/app/types/GraphData';
 })
 export class MapComponent implements OnInit {
   constructor(private dataService: DataService) {}
-
-  public showSpinner: boolean = false;
 
   public data: GraphData = {
     data: [],
@@ -26,9 +26,31 @@ export class MapComponent implements OnInit {
   };
   private oldSelections?: Selections;
 
+  selectionControl = new FormGroup({
+    sliderControl: new FormControl(),
+    geojsonControl: new FormControl(),
+  });
+
+  options: Options = {
+    showTicksValues: false,
+    stepsArray: [],
+    translate: (value: number): string => {
+      return '';
+    },
+  };
+  value: number = 0;
+
+  private scope: string = 'global';
+  private z_min?: number;
+  private z_max?: number;
+  private all_timestamps: any[] = [];
+  private all_keys: string[] = [];
+  private featureSelected?: string;
+
+  geojsons_list: string[] = ['global', 'germany'];
   private geojsons = {
     global: {
-      url: 'https://datahub.io/core/geo-countries/r/countries.geojson',
+      url: 'https://raw.githubusercontent.com/sbrand29/geojson/main/countries_scaled.geojson',
       featureidkey: 'properties.ISO_A3',
       center: { lat: 56.5, lon: 11 },
       zoom: 1.0,
@@ -41,35 +63,68 @@ export class MapComponent implements OnInit {
     },
   };
 
+  private federal_states_germany = [
+    'DE-BB',
+    'DE-BE',
+    'DE-BW',
+    'DE-BY',
+    'DE-HB',
+    'DE-HE',
+    'DE-HH',
+    'DE-MV',
+    'DE-NI',
+    'DE-NW',
+    'DE-RP',
+    'DE-SH',
+    'DE-SL',
+    'DE-SN',
+    'DE-ST',
+    'DE-TH',
+  ];
+
   createChoroplethMap(data: CountryData, selectedIdx: number) {
     if (this.data.data.length > 0) {
       this.data.data = [];
     }
 
-    let featureSelected = this.selections.datasets[selectedIdx].featureSelected;
+    this.featureSelected =
+      this.selections.datasets[selectedIdx].featureSelected;
     let timeSelected = this.selections.datasets[selectedIdx].timeSelected;
 
-    if (featureSelected !== undefined && timeSelected !== undefined) {
-      let first_timestamp = (Object.values(data) as any)[0][timeSelected][0];
-      let all_timestamps = (Object.values(data) as any)[0][timeSelected];
+    if (this.featureSelected !== undefined && timeSelected !== undefined) {
+      this.all_timestamps = (Object.values(data) as any)[0][timeSelected];
 
-      let all_keys = Object.keys(data);
+      this.all_keys = Object.keys(data);
       let z_min_val = 0;
       let z_max_val = 0;
+
+      const newOptions: Options = Object.assign({}, this.options);
+      newOptions.floor = 0;
+      newOptions.ceil = this.all_timestamps.length;
+      newOptions.translate = (value: number) => {
+        return String(this.all_timestamps[value]);
+      };
+      newOptions['stepsArray'] = [];
+      this.options = newOptions;
+      this.value = 0;
 
       if (this.frames.length > 0) {
         this.frames = [];
       }
 
-      for (let timestamp in all_timestamps) {
+      for (let timestamp in this.all_timestamps) {
         let z_entries = [];
         for (let [key, value] of Object.entries(data)) {
-          z_entries.push((value as any)[featureSelected][timestamp]);
-          if (z_max_val < Number((value as any)[featureSelected][timestamp])) {
-            z_max_val = (value as any)[featureSelected][timestamp];
+          z_entries.push((value as any)[this.featureSelected][timestamp]);
+          if (
+            z_max_val < Number((value as any)[this.featureSelected][timestamp])
+          ) {
+            z_max_val = (value as any)[this.featureSelected][timestamp];
           }
-          if (z_min_val > Number((value as any)[featureSelected][timestamp])) {
-            z_min_val = (value as any)[featureSelected][timestamp];
+          if (
+            z_min_val > Number((value as any)[this.featureSelected][timestamp])
+          ) {
+            z_min_val = (value as any)[this.featureSelected][timestamp];
           }
         }
 
@@ -79,119 +134,80 @@ export class MapComponent implements OnInit {
               z: z_entries,
             },
           ],
-          name: String(all_timestamps[timestamp]),
         };
         this.frames.push(frame);
+        this.options['stepsArray']!.push({
+          value: Number(timestamp),
+        });
       }
 
-      let scope: string = 'global';
-      let federal_states_germany = [
-        'DE-BB',
-        'DE-BE',
-        'DE-BW',
-        'DE-BY',
-        'DE-HB',
-        'DE-HE',
-        'DE-HH',
-        'DE-MV',
-        'DE-NI',
-        'DE-NW',
-        'DE-RP',
-        'DE-SH',
-        'DE-SL',
-        'DE-SN',
-        'DE-ST',
-        'DE-TH',
-      ];
+      this.z_min = z_min_val;
+      this.z_max = z_max_val;
 
-      for (let state of federal_states_germany) {
-        if (all_keys.includes(state)) {
-          scope = 'germany';
+      for (let state of this.federal_states_germany) {
+        if (this.all_keys.includes(state)) {
+          this.scope = 'germany';
           break;
         }
       }
 
-      this.data = {
-        data: [
-          {
-            type: 'choroplethmapbox',
-            locations: all_keys,
-            z: this.frames[0].data[0].z,
-            zmin: z_min_val,
-            zmax: z_max_val,
-            geojson: this.geojsons[scope as keyof object]['url'],
-            featureidkey: this.geojsons[scope as keyof object]['featureidkey'],
-            zoom: this.geojsons[scope as keyof object]['zoom'],
-            marker: { opacity: 0.7 },
-            colorscale: 'Jet',
-          },
-        ],
-        layout: {
-          title: 'Map Visualization for: ' + featureSelected,
-          paper_bgcolor: '#424242',
-          plot_bgcolor: '#424242',
-          font: { color: '#f2f2f2' },
-          mapbox: {
-            style: 'carto-darkmatter',
-            center: this.geojsons[scope as keyof object]['center'],
-          },
-          updatemenus: [
-            {
-              showactive: false,
-              type: 'buttons',
-              buttons: [
-                {
-                  args: [
-                    {
-                      geojson: this.geojsons['global']['url'],
-                      featureidkey: this.geojsons['global']['featureidkey'],
-                    },
-                    {
-                      mapbox: {
-                        style: 'carto-darkmatter',
-                        center: this.geojsons['global']['center'],
-                        zoom: this.geojsons['global']['zoom'],
-                      },
-                    },
-                  ],
-                  label: 'Global',
-                  method: 'update',
-                },
-                {
-                  args: [
-                    {
-                      geojson: this.geojsons['germany']['url'],
-                      featureidkey: this.geojsons['germany']['featureidkey'],
-                    },
-                    {
-                      mapbox: {
-                        style: 'carto-darkmatter',
-                        center: this.geojsons['germany']['center'],
-                        zoom: this.geojsons['germany']['zoom'],
-                      },
-                    },
-                  ],
-                  label: 'Germany',
-                  method: 'update',
-                },
-              ],
-            },
-          ],
-          sliders: [
-            {
-              currentvalue: {
-                prefix: 'Year: ',
-              },
-              steps: this.frames.map((f) => ({
-                label: f.name,
-                method: 'animate',
-                args: [[f.name], { frame: { duration: 0 } }],
-              })),
-            },
-          ],
-        },
-      };
+      this.createInitialData();
     }
+  }
+
+  private createInitialData() {
+    this.data = {
+      data: [
+        {
+          type: 'choroplethmapbox',
+          locations: this.all_keys,
+          z: this.frames[0].data[0].z,
+          zmin: this.z_min,
+          zmax: this.z_max,
+          geojson: this.geojsons[this.scope as keyof object]['url'],
+          featureidkey:
+            this.geojsons[this.scope as keyof object]['featureidkey'],
+          zoom: this.geojsons[this.scope as keyof object]['zoom'],
+          marker: { opacity: 0.7 },
+          colorscale: 'Jet',
+          colorbar: {
+            title: { text: this.featureSelected, side: 'top' },
+            orientation: 'h',
+          },
+        },
+      ],
+      layout: {
+        paper_bgcolor: '#424242',
+        plot_bgcolor: '#424242',
+        font: { color: '#f2f2f2' },
+        mapbox: {
+          style: 'carto-darkmatter',
+          center: this.geojsons[this.scope as keyof object]['center'],
+        },
+      },
+    };
+  }
+
+  private updateData(sliderValue: number) {
+    let newData = [
+      {
+        type: 'choroplethmapbox',
+        locations: this.all_keys,
+        z: this.frames[sliderValue].data[0]['z' as keyof object],
+        zmin: this.z_min,
+        zmax: this.z_max,
+        geojson: this.geojsons[this.scope as keyof object]['url'],
+        featureidkey: this.geojsons[this.scope as keyof object]['featureidkey'],
+        zoom: this.geojsons[this.scope as keyof object]['zoom'],
+        marker: { opacity: 0.7 },
+        colorscale: 'Jet',
+        colorbar: {
+          title: { text: this.featureSelected, side: 'top' },
+          orientation: 'h',
+        },
+      },
+    ];
+    this.data.data = newData;
   }
 
   ngDoCheck() {
@@ -225,7 +241,6 @@ export class MapComponent implements OnInit {
               this.selections.datasets[selectedDatasetIdx].timeSelected !==
                 this.oldSelections?.datasets[selectedDatasetIdx].timeSelected
             ) {
-              this.showSpinner = true;
               this.dataService
                 .getData(
                   this.selections.datasets[selectedDatasetIdx],
@@ -233,14 +248,8 @@ export class MapComponent implements OnInit {
                   {}
                 )
                 .subscribe((data) => {
-                  if (data.type === HttpEventType.DownloadProgress) {
-                    console.log('downloading');
-                  }
-
                   if (data.type === HttpEventType.Response) {
-                    console.log('completed');
                     if (data.body) {
-                      this.showSpinner = false;
                       this.createChoroplethMap(
                         data.body as CountryData,
                         selectedDatasetIdx
@@ -260,5 +269,11 @@ export class MapComponent implements OnInit {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
     });
+
+    this.selectionControl
+      .get('sliderControl')!
+      .valueChanges.subscribe((sliderValue) => {
+        this.updateData(sliderValue);
+      });
   }
 }
