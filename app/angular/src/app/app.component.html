@@ -1,3 +1,4 @@
+
 <mat-toolbar color="primary">
   <button
     mat-icon-button
@@ -11,6 +12,11 @@
     <fa-icon [icon]="faChartColumn"></fa-icon>
     Digital Twin of Society</span
   >
+  <nav>
+    <a class="nav-button" routerLink="/overview" routerLinkActive="activebutton">Overview</a>
+    <a class="nav-button" routerLink="/correlations" routerLinkActive="activebutton">Correlations</a>
+    <a class="nav-button" routerLink="/forecasts" routerLinkActive="activebutton">Forecasts</a>
+  </nav>
 </mat-toolbar>
 <mat-drawer-container class="content-container">
   <mat-drawer #datafiltering mode="side">
@@ -29,31 +35,7 @@
     <mat-divider></mat-divider>
     <app-datafiltering></app-datafiltering>
   </mat-drawer>
-  <div style="clear: both"></div>
-  <app-datatable></app-datatable>
-  <app-statistics></app-statistics>
-  <div style="clear: both"></div>
-  <div class="plot-row">
-    <app-history></app-history>
-    <app-map></app-map>
-  </div>
-  <mat-tab-group mat-stretch-tabs style="min-height: 700px">
-    <mat-tab label="Heatmap">
-      <app-heatmap></app-heatmap>
-    </mat-tab>
-    <mat-tab label="Correlation line chart">
-      <ng-template matTabContent>
-        <app-correlation></app-correlation>
-      </ng-template>
-    </mat-tab>
-  </mat-tab-group>
-
-  <mat-tab-group mat-stretch-tabs style="min-height: 700px">
-    <mat-tab label="Multivariate Forecasting">
-      <app-vectorautoregression></app-vectorautoregression>
-    </mat-tab>
-    <mat-tab label="Scenario-based Forecasting">
-      <app-prophetscenarios></app-prophetscenarios>
-    </mat-tab>
-  </mat-tab-group>
+  <router-outlet></router-outlet>
 </mat-drawer-container>
+
+

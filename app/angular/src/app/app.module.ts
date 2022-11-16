@@ -41,6 +41,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { OverviewComponent } from './components/overview/overview.component';
+import { ForecastsComponent } from './components/forecasts/forecasts.component';
+import { CorrelationsComponent } from './components/correlations/correlations.component';
+import { RouterModule } from '@angular/router';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -58,6 +62,9 @@ PlotlyModule.plotlyjs = PlotlyJS;
     UploaddialogComponent,
     DatatableComponent,
     StatisticsComponent,
+    OverviewComponent,
+    ForecastsComponent,
+    CorrelationsComponent
   ],
   imports: [
     BrowserModule,
@@ -89,6 +96,12 @@ PlotlyModule.plotlyjs = PlotlyJS;
     FontAwesomeModule,
     MatSidenavModule,
     MatDividerModule,
+    BrowserModule,
+    RouterModule.forRoot([
+      {path: 'overview', component: OverviewComponent},
+      {path: 'correlations', component: CorrelationsComponent},
+      {path: 'forecasts', component: ForecastsComponent},
+    ])
   ],
   providers: [],
   bootstrap: [AppComponent],
