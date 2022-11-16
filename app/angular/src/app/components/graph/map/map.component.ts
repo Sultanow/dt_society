@@ -50,13 +50,13 @@ export class MapComponent implements OnInit {
   geojsons_list: string[] = ['global', 'germany'];
   private geojsons = {
     global: {
-      url: 'https://raw.githubusercontent.com/sbrand29/geojson/main/countries_scaled.geojson',
+      url: 'https://raw.githubusercontent.com/Sultanow/dt_society/main/app/flask/flaskr/static/geojson/countries_scaled.geojson',
       featureidkey: 'properties.ISO_A3',
       center: { lat: 56.5, lon: 11 },
       zoom: 1.0,
     },
     germany: {
-      url: 'https://raw.githubusercontent.com/isellsoap/deutschlandGeoJSON/main/2_bundeslaender/3_mittel.geo.json',
+      url: 'https://raw.githubusercontent.com/Sultanow/dt_society/main/app/flask/flaskr/static/geojson/germany_3_mittel.geo.json',
       featureidkey: 'properties.id',
       center: { lat: 51.3, lon: 10 },
       zoom: 3.5,
