@@ -1,44 +1,61 @@
 <div class="prophet-wrapper">
   <mat-card>
-    <div class="data-selector">
-      <p>Predict for</p>
-      <mat-radio-group
-        [(ngModel)]="dependentDataset"
-        aria-label="Select an option"
-      >
-        <mat-radio-button
-          *ngFor="let dataset of selections.datasets"
-          [value]="dataset.id"
-        >
-          {{ dataset.id }}
-          <div *ngIf="dataset.featureSelected !== undefined">
-            ({{ dataset.featureSelected }})
-          </div>
-        </mat-radio-button>
-      </mat-radio-group>
-    </div>
-    <div class="toggle-container">
-      <mat-form-field>
-        <mat-label>Country</mat-label>
-        <mat-select [(ngModel)]="selectedCountry">
-          <mat-option *ngFor="let country of countries" [value]="country">
-            {{ country }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-    <div>
-      <section class="slider-section">
-        <div># of predictions</div>
-        <mat-slider
-          thumbLabel
-          aria-label="unit(s)"
-          [(ngModel)]="predictionPeriods"
-          (change)="updateScenarios()"
-          [min]="0"
-          [max]="40"
-        ></mat-slider>
-      </section>
+    <div class="forecast-controls">
+      <div>
+        <div class="data-selector">
+          <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+            Forecast for
+          </p>
+          <mat-radio-group
+            [(ngModel)]="dependentDataset"
+            aria-label="Select an option"
+          >
+            <mat-radio-button
+              *ngFor="let dataset of selections.datasets"
+              [value]="dataset.id"
+            >
+              {{ dataset.id }}
+              <div *ngIf="dataset.featureSelected !== undefined">
+                ({{ dataset.featureSelected }})
+              </div>
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+        <div class="toggle-container">
+          <mat-form-field>
+            <mat-label>Country</mat-label>
+            <mat-select [(ngModel)]="selectedCountry">
+              <mat-option *ngFor="let country of countries" [value]="country">
+                {{ country }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
+          <section class="slider-section">
+            <p
+              style="font-size: 18px; font-weight: lighter; margin-bottom: 10px"
+            >
+              Number of forecasts
+            </p>
+            <mat-slider
+              thumbLabel
+              aria-label="unit(s)"
+              [(ngModel)]="predictionPeriods"
+              (change)="updateScenarios()"
+              [min]="0"
+              [max]="40"
+            ></mat-slider>
+          </section>
+        </div>
+      </div>
+
+      <plotly-plot
+        *ngIf="dataScenarios.data.length > 0"
+        [data]="dataScenarios.data"
+        [layout]="dataScenarios.layout"
+        [config]="dataScenarios.config"
+      ></plotly-plot>
     </div>
     <ng-container *ngFor="let dataset of selections.datasets">
       <div
@@ -63,6 +80,7 @@
         </mat-form-field>
       </div>
     </ng-container>
+
     <button
       mat-raised-button
       color="primary"

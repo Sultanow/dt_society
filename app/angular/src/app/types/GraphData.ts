@@ -22,13 +22,15 @@ export interface Plot {
     legend: { title: { text: string }; groupclick?: string };
     paper_bgcolor: string;
     plot_bgcolor: string;
-    xaxis: { gridcolor: string; title: string | undefined; range?: number[]};
+    xaxis: { gridcolor: string; title: string | undefined; range?: number[] };
     yaxis: { gridcolor: string; title: string | undefined };
     font: { color: string };
-    margin?: { t: number; r: number };
+    margin?: { t?: number; r?: number; l?: number; b?: number };
     grid?: {};
     title?: string;
+    autosize?: boolean;
   };
+  config?: {};
 }
 
 export interface MapPlot {

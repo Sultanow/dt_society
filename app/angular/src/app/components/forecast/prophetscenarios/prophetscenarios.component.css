@@ -43,6 +43,10 @@ mat-radio-button {
   margin-bottom: 10px;
 }
 
-.prophet-wrapper{
+.prophet-wrapper {
   padding: 10px;
+}
+
+.forecast-controls {
+  display: flex;
 }
