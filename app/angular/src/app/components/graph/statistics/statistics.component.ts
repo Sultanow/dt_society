@@ -74,15 +74,13 @@ export class StatisticsComponent implements OnInit {
     this.selectedCountry = this.selectionControl.get('selectedCountryControl')!.getRawValue()
 
     let feature = this.selections.datasets[selectedDatasetIdx].featureSelected!;
-    let value_index = this.timestamps.indexOf(this.value.toString());
-    let highValue_index = this.timestamps.indexOf(this.highValue.toString())
 
-    let firstValue = this.data[this.selectedCountry][feature][value_index]
-    let secondValue = this.data[this.selectedCountry][feature][highValue_index]
+    let firstValue = this.data[this.selectedCountry][feature][this.value]
+    let secondValue = this.data[this.selectedCountry][feature][this.highValue]
 
     let tempGrowthrate = (((secondValue as number) - (firstValue as number))) / (firstValue as number)
     this.growthrate = (tempGrowthrate*100).toFixed(3) +"%"
-    this.growthrate_per_time = ((tempGrowthrate*100 / (highValue_index - value_index))).toFixed(3) + "%"
+    this.growthrate_per_time = ((tempGrowthrate*100 / (this.highValue - this.value))).toFixed(3) + "%"
   }
   updateStats(timestamp: string){
 
@@ -117,8 +115,11 @@ export class StatisticsComponent implements OnInit {
 
   private updateSlider(timearray: string[] | number[]) {
     const newOptions: Options = Object.assign({}, this.options);
-    newOptions.floor = timearray[0] as number;
-    newOptions.ceil = timearray[timearray.length - 1] as number;
+    newOptions.floor = 0 as number;
+    newOptions.ceil = timearray.length-1 as number;
+    newOptions.translate = (value: number) => {
+      return String(timearray[value]);
+    };
     this.options = newOptions;
     this.value = newOptions.floor;
     this.highValue = newOptions.ceil;

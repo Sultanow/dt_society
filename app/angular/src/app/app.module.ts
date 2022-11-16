@@ -35,7 +35,6 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSliderModule } from '@angular/material/slider';
 import { DatatableComponent } from './components/graph/datatable/datatable.component';
 import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
 import { StatisticsComponent } from './components/graph/statistics/statistics.component';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { MatCardModule } from '@angular/material/card';
@@ -84,7 +83,6 @@ PlotlyModule.plotlyjs = PlotlyJS;
     MatSnackBarModule,
     MatSliderModule,
     MatTableModule,
-    MatPaginatorModule,
     NgxSliderModule,
     MatCardModule,
     MatDividerModule,

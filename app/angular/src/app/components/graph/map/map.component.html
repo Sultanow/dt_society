@@ -1,6 +1,8 @@
 <div class="map-wrapper" [formGroup]="selectionControl">
   <mat-card *ngIf="data.data.length > 0">
     <plotly-plot *ngIf="data.data.length > 0" [data]="data.data" [layout]="data.layout"></plotly-plot>
-    <ngx-slider formControlName="sliderControl" [(value)]="value" [options]="options"></ngx-slider>
+    <div class="slider-container">
+      <ngx-slider formControlName="sliderControl" [(value)]="currentSliderValue" [options]="options"></ngx-slider>
+    </div>
   </mat-card>
 </div>

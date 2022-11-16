@@ -2,15 +2,15 @@
     <mat-card>
         <mat-label>Statistics of {{ selections.selectedDataset }}</mat-label>
         <div class="stats-container">
-        <mat-form-field>
-            <mat-label>Time</mat-label>
-            <mat-select formControlName="selectedYearControl">
-              <mat-option *ngFor="let timestamp of timestamps" [value]="timestamp">
-                {{ timestamp }}
-              </mat-option>
-            </mat-select>
-        </mat-form-field>
-                <mat-card class="single-stat">
+            <mat-form-field>
+                <mat-label>Time</mat-label>
+                <mat-select formControlName="selectedYearControl">
+                    <mat-option *ngFor="let timestamp of timestamps" [value]="timestamp">
+                        {{ timestamp }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-card class="single-stat">
                 <mat-card-title>Min</mat-card-title>
                 <mat-card-content>{{min}}</mat-card-content>
             </mat-card>
@@ -27,27 +27,28 @@
         <div>
             <div class="growth-container">
                 <div class="growth-selections">
-                <mat-form-field>
-                    <mat-label>Country</mat-label>
-                    <mat-select formControlName="selectedCountryControl">
-                      <mat-option *ngFor="let country of countries" [value]="country">
-                        {{ country }}
-                      </mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <ngx-slider formControlName="sliderControl" [(value)]="value" [(highValue)]="highValue" [options]="options"></ngx-slider>
+                    <mat-form-field>
+                        <mat-label>Country</mat-label>
+                        <mat-select formControlName="selectedCountryControl">
+                            <mat-option *ngFor="let country of countries" [value]="country">
+                                {{ country }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <ngx-slider formControlName="sliderControl" [(value)]="value" [(highValue)]="highValue"
+                        [options]="options"></ngx-slider>
+                </div>
+                <div class="stats-container">
+                    <mat-card class="single-stat-growth">
+                        <mat-card-title>Growth Rate</mat-card-title>
+                        <mat-card-content>{{ growthrate }}</mat-card-content>
+                    </mat-card>
+                    <mat-card class="single-stat-growth">
+                        <mat-card-title> Average Growth Rate</mat-card-title>
+                        <mat-card-content>{{ growthrate_per_time }}</mat-card-content>
+                    </mat-card>
+                </div>
             </div>
-            <div class="stats-container">
-            <mat-card class="single-stat-growth">
-                <mat-card-title>Growth Rate</mat-card-title>
-                <mat-card-content>{{ growthrate }}</mat-card-content>
-            </mat-card>
-            <mat-card class="single-stat-growth">
-                <mat-card-title> Average Growth Rate</mat-card-title>
-                <mat-card-content>{{ growthrate_per_time }}</mat-card-content>
-            </mat-card>
-        </div>
-        </div>
         </div>
     </mat-card>
 </div>

@@ -1,6 +1,6 @@
 import { Options } from '@angular-slider/ngx-slider';
 import { HttpEventType } from '@angular/common/http';
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
@@ -38,7 +38,7 @@ export class MapComponent implements OnInit {
       return '';
     },
   };
-  value: number = 0;
+  currentSliderValue: number = 0;
 
   private scope: string = 'global';
   private z_min?: number;
@@ -106,7 +106,7 @@ export class MapComponent implements OnInit {
       };
       newOptions['stepsArray'] = [];
       this.options = newOptions;
-      this.value = 0;
+      this.currentSliderValue = 0;
 
       if (this.frames.length > 0) {
         this.frames = [];
@@ -177,6 +177,7 @@ export class MapComponent implements OnInit {
         },
       ],
       layout: {
+        margin: {"r":0,"t":0,"l":0,"b":0},
         paper_bgcolor: '#424242',
         plot_bgcolor: '#424242',
         font: { color: '#f2f2f2' },
