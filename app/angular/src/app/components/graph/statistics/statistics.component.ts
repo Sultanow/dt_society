@@ -64,6 +64,7 @@ export class StatisticsComponent implements OnInit {
     }
     
     this.updateSlider(timearray);    
+    this.resetStatistics();
   }
 
   updateGrowth(){
@@ -82,6 +83,8 @@ export class StatisticsComponent implements OnInit {
     this.growthrate = (tempGrowthrate*100).toFixed(3) +"%"
     this.growthrate_per_time = ((tempGrowthrate*100 / (this.highValue - this.value))).toFixed(3) + "%"
   }
+
+  
   updateStats(timestamp: string){
 
     const selectedDatasetIdx = this.selections.datasets.findIndex(
@@ -126,19 +129,8 @@ export class StatisticsComponent implements OnInit {
   }
 
   private resetStatistics(){ 
-    let countryControl = this.selectionControl.get('selectedCountryControl')!;
-    let yearControl = this.selectionControl.get('selectedYearControl')!;
-    if(countryControl.getRawValue() !== null){
-    this.selectionControl.get('selectedCountryControl')!.setValue(null);
-    this.growthrate = "";
-    this.growthrate_per_time = "";
-    }
-    if(yearControl.getRawValue() !== null){
-    this.selectionControl.get('selectedYearControl')!.setValue(null);
-    this.min = "";
-    this.max = "";
-    this.mean = "";
-    }
+    this.selectionControl.get('selectedCountryControl')!.setValue(this.countries[0]);
+    this.selectionControl.get('selectedYearControl')!.setValue(this.timestamps[0]);
   }
 
   ngDoCheck() {
@@ -172,7 +164,6 @@ export class StatisticsComponent implements OnInit {
               this.selections.datasets[selectedDatasetIdx].timeSelected !==
                 this.oldSelections?.datasets[selectedDatasetIdx].timeSelected
             ) {
-              this.resetStatistics()
               this.dataService
                 .getData(
                   this.selections.datasets[selectedDatasetIdx],
@@ -213,7 +204,7 @@ export class StatisticsComponent implements OnInit {
 
     this.selectionControl
       .get('selectedCountryControl')!
-      .valueChanges.subscribe((selectedCountry) => {
+      .valueChanges.subscribe(() => {
         if (
           this.selectionControl
             .get('selectedCountryControl')!
