@@ -28,7 +28,29 @@ export class ProphetscenariosComponent implements OnInit {
       yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
       font: { color: '#f2f2f2' },
       title: '',
+      margin: { t: 10, b: 50 },
     },
+    config: { responsive: true },
+  };
+
+  public dataScenarios: Plot = {
+    data: [],
+    layout: {
+      legend: { title: { text: '' } },
+      paper_bgcolor: '#424242',
+      plot_bgcolor: '#424242',
+      xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
+      yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
+      font: { color: '#f2f2f2' },
+      title: '',
+      margin: {
+        t: 10,
+        b: 50,
+      },
+      height: 300,
+      width: 1000,
+    },
+    config: { responsive: true },
   };
 
   public selections: Selections = {
@@ -82,13 +104,8 @@ export class ProphetscenariosComponent implements OnInit {
   createProphetForecast(data: ProphetForecast) {
     if (this.data.data.length > 0) {
       this.data.data = [];
+      this.dataScenarios.data = [];
     }
-
-    this.data.layout.grid = {
-      rows: 1,
-      columns: this.selections.datasets.length,
-      pattern: 'independent',
-    };
 
     const dependentDatasetIdx = this.selections.datasets.findIndex(
       (dataset) => dataset.id == this.dependentDataset
@@ -164,7 +181,22 @@ export class ProphetscenariosComponent implements OnInit {
 
     const colors = ['mediumspringgreen', 'hotpink', 'mediumblue', 'goldenrod'];
 
-    var indexFeatures = 1;
+    var indexFeatures = 0;
+
+    this.dataScenarios.layout.grid = {
+      rows: 1,
+      columns: this.selections.datasets.length - 1,
+      pattern: 'independent',
+    };
+
+    this.dataScenarios.layout['xaxis'] = {
+      gridcolor: 'rgba(80, 103, 132, 0.3)',
+      title: 'Time',
+    };
+    this.dataScenarios.layout['yaxis'] = {
+      gridcolor: 'rgba(80, 103, 132, 0.3)',
+      title: this.selections.datasets[dependentDatasetIdx].featureSelected,
+    };
 
     for (const [key, value] of Object.entries(data['future'])) {
       if (key === 'x') {
@@ -173,14 +205,14 @@ export class ProphetscenariosComponent implements OnInit {
       let trace_solid: any = {
         type: 'scatter',
         mode: 'lines',
-        line: { color: colors[indexFeatures - 1] },
+        line: { color: colors[indexFeatures] },
         name: key,
       };
 
       let trace_dashed: any = {
         type: 'scatter',
         mode: 'lines',
-        line: { dash: 'dash', color: colors[indexFeatures - 1] },
+        line: { dash: 'dash', color: colors[indexFeatures] },
         name: key + ' (scenario)',
       };
 
@@ -190,23 +222,27 @@ export class ProphetscenariosComponent implements OnInit {
       trace_dashed.x = data['future']['x'];
       trace_dashed.y = data['future'][key];
 
-      trace_solid.xaxis = 'x' + (indexFeatures + 1).toString();
-      trace_solid.yaxis = 'y' + (indexFeatures + 1).toString();
-      trace_dashed.xaxis = 'x' + (indexFeatures + 1).toString();
-      trace_dashed.yaxis = 'y' + (indexFeatures + 1).toString();
+      if (indexFeatures > 0) {
+        trace_solid.xaxis = 'x' + (indexFeatures + 1).toString();
+        trace_solid.yaxis = 'y' + (indexFeatures + 1).toString();
+        trace_dashed.xaxis = 'x' + (indexFeatures + 1).toString();
+        trace_dashed.yaxis = 'y' + (indexFeatures + 1).toString();
 
-      this.data.layout['xaxis' + (indexFeatures + 1).toString()] = {
-        gridcolor: 'rgba(80, 103, 132, 0.3)',
-        title: 'Time',
-      };
-      this.data.layout['yaxis' + (indexFeatures + 1).toString()] = {
-        gridcolor: 'rgba(80, 103, 132, 0.3)',
-        title: key,
-      };
+        this.dataScenarios.layout['xaxis' + (indexFeatures + 1).toString()] = {
+          gridcolor: 'rgba(80, 103, 132, 0.3)',
+          title: 'Time',
+        };
+        this.dataScenarios.layout['yaxis' + (indexFeatures + 1).toString()] = {
+          gridcolor: 'rgba(80, 103, 132, 0.3)',
+          title: key,
+        };
+      }
 
       indexFeatures++;
-      this.data.data.push(trace_solid);
-      this.data.data.push(trace_dashed);
+      this.dataScenarios.data.push(trace_solid);
+      this.dataScenarios.data.push(trace_dashed);
+
+      console.log(this.dataScenarios);
     }
   }
 
@@ -246,6 +282,9 @@ export class ProphetscenariosComponent implements OnInit {
     if (
       JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
     ) {
+      if (this.selections.datasets.length > 0) {
+        this.dependentDataset = this.selections.datasets[0].id;
+      }
     }
     this.oldSelections = structuredClone(this.selections);
   }

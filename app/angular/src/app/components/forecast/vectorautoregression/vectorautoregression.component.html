@@ -2,7 +2,9 @@
   <mat-card>
     <div *ngIf="countries.length > 0">
       <div class="model-selector">
-        <p>Select model</p>
+        <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+          Model
+        </p>
         <mat-radio-group
           aria-label="Select a model"
           [(ngModel)]="selectedModel"
@@ -30,7 +32,9 @@
 
       <div class="toggle-container">
         <section class="slider-section">
-          <div># of predictions</div>
+          <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+            Number of forecasts
+          </p>
           <mat-slider
             thumbLabel
             [(ngModel)]="predictionPeriods"
@@ -41,7 +45,9 @@
           ></mat-slider>
         </section>
         <section *ngIf="selectedModel == 'var'; else elseBlock">
-          <div>Max lags</div>
+          <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+            Max Lags
+          </p>
           <mat-slider
             class="lags-slider"
             thumbLabel
@@ -53,17 +59,22 @@
           ></mat-slider>
         </section>
         <ng-template #elseBlock
-          ><div>&#945;-Parameter</div>
-          <mat-slider
-            class="lags-slider"
-            thumbLabel
-            [(ngModel)]="maxLags"
-            (change)="updateVarForecast()"
-            aria-label="unit(s)"
-            [step]="0.01"
-            [min]="0.01"
-            [max]="0.99"
-          ></mat-slider
+          ><section>
+            <p
+              style="font-size: 18px; font-weight: lighter; margin-bottom: 10px"
+            >
+              &#945;-Parameter
+            </p>
+            <mat-slider
+              class="lags-slider"
+              thumbLabel
+              [(ngModel)]="maxLags"
+              (change)="updateVarForecast()"
+              aria-label="unit(s)"
+              [step]="0.01"
+              [min]="0.01"
+              [max]="0.99"
+            ></mat-slider></section
         ></ng-template>
       </div>
 

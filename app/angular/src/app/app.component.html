@@ -1,4 +1,3 @@
-
 <mat-toolbar color="primary">
   <button
     mat-icon-button
@@ -9,13 +8,25 @@
     <mat-icon>menu</mat-icon>
   </button>
   <span>
+    Digital Twin of Society
     <fa-icon [icon]="faChartColumn"></fa-icon>
-    Digital Twin of Society</span
-  >
+  </span>
   <nav>
-    <a class="nav-button" routerLink="/overview" routerLinkActive="activebutton">Overview</a>
-    <a class="nav-button" routerLink="/correlations" routerLinkActive="activebutton">Correlations</a>
-    <a class="nav-button" routerLink="/forecasts" routerLinkActive="activebutton">Forecasts</a>
+    <a class="nav-button" routerLink="/overview" routerLinkActive="activebutton"
+      >Overview</a
+    >
+    <a
+      class="nav-button"
+      routerLink="/correlations"
+      routerLinkActive="activebutton"
+      >Correlations</a
+    >
+    <a
+      class="nav-button"
+      routerLink="/forecasts"
+      routerLinkActive="activebutton"
+      >Forecasts</a
+    >
   </nav>
 </mat-toolbar>
 <mat-drawer-container class="content-container">
@@ -37,5 +48,3 @@
   </mat-drawer>
   <router-outlet></router-outlet>
 </mat-drawer-container>
-
-

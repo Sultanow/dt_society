@@ -11,10 +11,6 @@ mat-slider {
   display: flex;
 }
 
-.slider-section {
-  margin-left: 10px;
-}
-
 .model-selector {
   margin-top: 10px;
   margin-bottom: 10px;
@@ -29,6 +25,6 @@ mat-radio-button {
   margin-right: 10px;
 }
 
-.var-wrapper{
-  padding: 10px
+.var-wrapper {
+  padding: 10px;
 }
