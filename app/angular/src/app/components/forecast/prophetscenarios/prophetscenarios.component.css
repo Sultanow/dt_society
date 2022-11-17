@@ -50,3 +50,59 @@ mat-radio-button {
 .forecast-controls {
   display: flex;
 }
+
+.predict-button {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+.scenarios-control {
+  margin-bottom: 5px;
+}
+
+.plot-container {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.section-label {
+  font-size: 18px;
+  font-weight: lighter;
+  margin-bottom: 10px;
+}
+
+.example-headers-align .mat-expansion-panel-header-description {
+  justify-content: space-between;
+  align-items: center;
+  display: flex;
+}
+
+.status-icon {
+  float: right;
+  display: flex;
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.status-icon-active {
+  float: right;
+  display: flex;
+  margin-left: auto;
+  margin-right: 0;
+  color: #4caf51;
+}
+
+.status-icon-target {
+  float: right;
+  display: flex;
+  margin-left: auto;
+  margin-right: 0;
+  color: #2596be;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}

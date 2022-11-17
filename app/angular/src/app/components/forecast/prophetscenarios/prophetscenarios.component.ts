@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 import {
+  ActiveScenarios,
   ColumnValues,
   Plot,
   ProphetForecast,
@@ -28,7 +29,8 @@ export class ProphetscenariosComponent implements OnInit {
       yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
       font: { color: '#f2f2f2' },
       title: '',
-      margin: { t: 10, b: 50 },
+      margin: { t: 15, b: 50 },
+      height: 300,
     },
     config: { responsive: true },
   };
@@ -48,7 +50,6 @@ export class ProphetscenariosComponent implements OnInit {
         b: 50,
       },
       height: 300,
-      width: 1000,
     },
     config: { responsive: true },
   };
@@ -66,7 +67,7 @@ export class ProphetscenariosComponent implements OnInit {
 
   public scenarioIndeces: number[] = [];
 
-  public predictionPeriods: number = 0;
+  public predictionPeriods: number = 5;
 
   public frequency: string = 'Yearly';
 
@@ -75,6 +76,17 @@ export class ProphetscenariosComponent implements OnInit {
   public dependentDataset?: string;
 
   public faChartLine = faChartLine;
+
+  public maxScenarios = 5;
+
+  public activeScenarios: ActiveScenarios = {};
+
+  public showSpinner: boolean = false;
+
+  updateMaxScenarios() {
+    this.predictionPeriods += 5;
+    this.updateScenarios();
+  }
 
   updateScenarios() {
     this.scenarioIndeces = new Array(this.predictionPeriods)
@@ -87,6 +99,7 @@ export class ProphetscenariosComponent implements OnInit {
           this.scenarios[dataset.id] = new Array(this.predictionPeriods).fill(
             null
           );
+          this.activeScenarios[dataset.id] = true;
         } else {
           if (this.predictionPeriods > this.scenarios[dataset.id].length) {
             let newScenarios = new Array(
@@ -144,9 +157,7 @@ export class ProphetscenariosComponent implements OnInit {
         array: uncertaintyUpper,
         arrayminus: uncertaintyLower,
       },
-      name:
-        this.selections.datasets[dependentDatasetIdx].featureSelected +
-        ' (prediction)',
+      name: 'Forecast',
     };
 
     const fillerX = [data['merge']['x'].slice(-1)[0], data['forecast']['x'][0]];
@@ -185,17 +196,11 @@ export class ProphetscenariosComponent implements OnInit {
 
     this.dataScenarios.layout.grid = {
       rows: 1,
-      columns: this.selections.datasets.length - 1,
+      columns:
+        Object.values(this.activeScenarios).filter(
+          (isActive) => isActive === true
+        ).length - 1,
       pattern: 'independent',
-    };
-
-    this.dataScenarios.layout['xaxis'] = {
-      gridcolor: 'rgba(80, 103, 132, 0.3)',
-      title: 'Time',
-    };
-    this.dataScenarios.layout['yaxis'] = {
-      gridcolor: 'rgba(80, 103, 132, 0.3)',
-      title: this.selections.datasets[dependentDatasetIdx].featureSelected,
     };
 
     for (const [key, value] of Object.entries(data['future'])) {
@@ -213,7 +218,7 @@ export class ProphetscenariosComponent implements OnInit {
         type: 'scatter',
         mode: 'lines',
         line: { dash: 'dash', color: colors[indexFeatures] },
-        name: key + ' (scenario)',
+        name: 'Scenario',
       };
 
       trace_solid.x = data['merge']['x'];
@@ -236,13 +241,20 @@ export class ProphetscenariosComponent implements OnInit {
           gridcolor: 'rgba(80, 103, 132, 0.3)',
           title: key,
         };
+      } else {
+        this.dataScenarios.layout['xaxis'] = {
+          gridcolor: 'rgba(80, 103, 132, 0.3)',
+          title: 'Time',
+        };
+        this.dataScenarios.layout['yaxis'] = {
+          gridcolor: 'rgba(80, 103, 132, 0.3)',
+          title: key,
+        };
       }
 
       indexFeatures++;
       this.dataScenarios.data.push(trace_solid);
       this.dataScenarios.data.push(trace_dashed);
-
-      console.log(this.dataScenarios);
     }
   }
 
@@ -259,18 +271,26 @@ export class ProphetscenariosComponent implements OnInit {
             dataset.featureSelected === undefined
         )
       ) {
+        const activeScenarios = Object.entries(this.scenarios).filter(
+          ([key]) => this.activeScenarios[key] === true
+        );
+
+        this.data.data = [];
+        this.dataScenarios.data = [];
+        this.showSpinner = true;
         this.dataService
           .getData(this.selections.datasets, '/forecast/prophet', {
             country: this.selectedCountry,
             periods: this.predictionPeriods,
             frequency: this.frequency,
-            scenarios: this.scenarios,
+            scenarios: Object.fromEntries(activeScenarios),
             dependentDataset: this.dependentDataset,
           })
           .subscribe((event) => {
             if (event.type === HttpEventType.Response) {
               if (event.body) {
                 this.createProphetForecast(event.body as ProphetForecast);
+                this.showSpinner = false;
               }
             }
           });
@@ -301,6 +321,7 @@ export class ProphetscenariosComponent implements OnInit {
         }
 
         this.countries = [...new Set(countries)];
+        this.updateScenarios();
       }
     });
   }

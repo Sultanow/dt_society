@@ -77,3 +77,7 @@ export interface ProphetForecast {
   future: ColumnValues;
   forecast: Forecast;
 }
+
+export interface ActiveScenarios {
+  [key: string]: boolean;
+}
