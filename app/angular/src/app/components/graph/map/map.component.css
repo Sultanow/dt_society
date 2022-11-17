@@ -3,5 +3,18 @@
 }
 
 .slider-container{
-    margin-top: 1em;
+    display: flex;
+    position: absolute;
+    bottom: 1em;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 95%;
+}
+
+mat-radio-button{
+    padding: 0.5em;
+}
+
+mat-card{
+    height: 550px;
 }

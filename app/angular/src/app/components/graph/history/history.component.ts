@@ -25,6 +25,8 @@ export class HistoryComponent implements OnInit {
     },
   };
 
+  public config = {responsive: true}
+
   public selections: Selections = {
     datasets: [],
     selectedDataset: undefined,

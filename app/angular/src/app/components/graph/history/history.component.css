@@ -1,3 +1,7 @@
 .history-wrapper{
     padding: 10px
 }
+
+mat-card{
+    height: 550px;
+}

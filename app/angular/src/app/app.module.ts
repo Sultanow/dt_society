@@ -98,9 +98,10 @@ PlotlyModule.plotlyjs = PlotlyJS;
     MatDividerModule,
     BrowserModule,
     RouterModule.forRoot([
-      {path: 'overview', component: OverviewComponent},
-      {path: 'correlations', component: CorrelationsComponent},
-      {path: 'forecasts', component: ForecastsComponent},
+      {path: '', redirectTo: '/overview', pathMatch: 'full'},
+      {path: 'overview', component: OverviewComponent, pathMatch: 'full'},
+      {path: 'correlations', component: CorrelationsComponent, pathMatch: 'full'},
+      {path: 'forecasts', component: ForecastsComponent, pathMatch: 'full'},
     ])
   ],
   providers: [],

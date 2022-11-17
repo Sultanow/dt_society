@@ -1,11 +1,8 @@
 <div class="data-table-container">
-  <mat-expansion-panel>
-    <mat-expansion-panel-header>
-      <mat-panel-title>
-        Datatable for: {{ selections.selectedDataset }}
-      </mat-panel-title>
-    </mat-expansion-panel-header>
-
+  <mat-card>
+    <mat-label>
+      Datatable for: {{ selections.selectedDataset }}
+    </mat-label>
     <div class="mat-elevation-z8 data-table">
       <mat-table [dataSource]="data">
         <ng-container *ngFor="let column of columns" [matColumnDef]="column">
@@ -23,5 +20,5 @@
         <tr mat-row *matRowDef="let row; columns: columns"></tr>
       </mat-table>
     </div>
-  </mat-expansion-panel>
+  </mat-card>
 </div>

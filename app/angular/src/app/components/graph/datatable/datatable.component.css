@@ -1,5 +1,5 @@
 .data-table {
-  height: 400px;
+  height: 95%;
   max-width: 100%;
   overflow-y: auto;
   overflow-x: auto;
@@ -26,11 +26,8 @@
 
 .data-table-container {
   padding: 10px;
-  width: 48%;
-  display: flex;
-  float: left;
+  height: 400px;
 }
-
-mat-expansion-panel{
-  width: 100%;
+mat-card{
+  height: 450px;
 }

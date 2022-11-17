@@ -26,6 +26,8 @@ export class CorrelationComponent implements OnInit {
     },
   };
 
+  public config = {responsive: true}
+
   selectionControl = new FormGroup({
     selectedCountryControl: new FormControl(),
   });

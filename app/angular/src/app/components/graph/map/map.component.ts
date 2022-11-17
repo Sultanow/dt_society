@@ -18,6 +18,8 @@ export class MapComponent implements OnInit {
     data: [],
     layout: {},
   };
+  public config = {responsive: true}
+  
   public frames: Frame[] = [];
 
   private selections: Selections = {
@@ -28,7 +30,7 @@ export class MapComponent implements OnInit {
 
   selectionControl = new FormGroup({
     sliderControl: new FormControl(),
-    geojsonControl: new FormControl(),
+    geojsonControl: new FormControl("global"),
   });
 
   options: Options = {
@@ -47,12 +49,11 @@ export class MapComponent implements OnInit {
   private all_keys: string[] = [];
   private featureSelected?: string;
 
-  geojsons_list: string[] = ['global', 'germany'];
   private geojsons = {
     global: {
       url: 'https://raw.githubusercontent.com/Sultanow/dt_society/main/app/flask/flaskr/static/geojson/countries_scaled.geojson',
       featureidkey: 'properties.ISO_A3',
-      center: { lat: 56.5, lon: 11 },
+      center: { lat: 51.3, lon: 10 },
       zoom: 1.0,
     },
     germany: {
@@ -172,7 +173,7 @@ export class MapComponent implements OnInit {
           colorscale: 'Jet',
           colorbar: {
             title: { text: this.featureSelected, side: 'top' },
-            orientation: 'h',
+            orientation: 'h'
           },
         },
       ],
@@ -275,6 +276,13 @@ export class MapComponent implements OnInit {
       .get('sliderControl')!
       .valueChanges.subscribe((sliderValue) => {
         this.updateData(sliderValue);
+      });
+
+      this.selectionControl
+      .get('geojsonControl')!
+      .valueChanges.subscribe((value) => {
+        this.scope = String(value);
+        this.createInitialData()
       });
   }
 }

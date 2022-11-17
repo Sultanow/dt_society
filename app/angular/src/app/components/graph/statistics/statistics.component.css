@@ -1,11 +1,10 @@
 .statistics-wrapper{
   padding: 10px;
-  width: 48%;
-  float: left;
+  
 }
 
-mat-card{
-    overflow: hidden
+.outer{
+  height: 450px;
 }
 
 .single-stat{
