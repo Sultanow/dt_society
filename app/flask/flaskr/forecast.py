@@ -114,40 +114,42 @@ def forecastProphet():
     y_feature_index = None
 
     for i, dataset in enumerate(datasets):
+        if dataset["id"] in scenarios.keys():
+            reshape_selected = (
+                dataset["reshapeSelected"]
+                if dataset["reshapeSelected"] != "N/A"
+                else None
+            )
+            geo_selected = dataset["geoSelected"]
+            dataset_id = dataset["id"]
+            time_selected = dataset["timeSelected"]
+            feature_selected = dataset["featureSelected"]
 
-        reshape_selected = (
-            dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
-        )
-        geo_selected = dataset["geoSelected"]
-        dataset_id = dataset["id"]
-        time_selected = dataset["timeSelected"]
-        feature_selected = dataset["featureSelected"]
+            df = parse_dataset(
+                geo_column=geo_selected,
+                dataset_id=dataset_id,
+                reshape_column=reshape_selected,
+            )
+            filtered_df = df[df[geo_selected] == selected_country][
+                [time_selected, feature_selected]
+            ]
 
-        df = parse_dataset(
-            geo_column=geo_selected,
-            dataset_id=dataset_id,
-            reshape_column=reshape_selected,
-        )
-        filtered_df = df[df[geo_selected] == selected_country][
-            [time_selected, feature_selected]
-        ]
+            filtered_df[time_selected] = pd.to_datetime(
+                filtered_df[time_selected].astype("str")
+            )
 
-        filtered_df[time_selected] = pd.to_datetime(
-            filtered_df[time_selected].astype("str")
-        )
+            freq = pd.infer_freq(filtered_df[time_selected])
 
-        freq = pd.infer_freq(filtered_df[time_selected])
+            filtered_dfs.append(filtered_df)
+            frequencies.append(freq)
+            time_columns.append(time_selected)
+            feature_columns.append(feature_selected)
 
-        filtered_dfs.append(filtered_df)
-        frequencies.append(freq)
-        time_columns.append(time_selected)
-        feature_columns.append(feature_selected)
-
-        if dataset_id == dependent_df:
-            y_feature_index = i
+            if dataset_id == dependent_df:
+                y_feature_index = i
 
     scenarios_data = [
-        [float(x) if x is not None else x for x in scenarios[dataset]]
+        [float(x) for x in scenarios[dataset] if x is not None and len(x) != 0]
         for dataset in data["scenarios"]
         if dataset != dependent_df
     ]

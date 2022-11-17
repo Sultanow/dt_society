@@ -23,6 +23,7 @@ export class VectorautoregressionComponent implements OnInit {
       font: { color: '#f2f2f2' },
       title: '',
     },
+    config: { responsive: true },
   };
 
   public models: Models = {
