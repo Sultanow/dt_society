@@ -14,6 +14,8 @@ export interface Dataset {
 export interface Selections {
   datasets: Dataset[];
   selectedDataset?: string;
+  totalCountries?: string[];
+  selectedCountry?: string;
 }
 
 export interface Options {

@@ -28,3 +28,9 @@
   margin: 15px 0;
   align-items: flex-start;
 }
+
+.section-label {
+  font-size: 18px;
+  font-weight: lighter;
+  margin-bottom: 10px;
+}

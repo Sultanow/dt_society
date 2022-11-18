@@ -250,6 +250,16 @@ export class DataService {
             featureColumns as Options
           ).features;
         }
+        this.updateTotalCountries(selections);
       });
+  }
+
+  updateTotalCountries(selections: Selections) {
+    var countries: string[] = [];
+    for (const dataset of selections.datasets) {
+      countries = [...countries, ...(dataset.countryOptions || [])];
+    }
+
+    selections.totalCountries = countries.sort();
   }
 }

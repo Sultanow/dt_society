@@ -42,6 +42,11 @@ export class DatafilteringComponent implements OnInit {
     }
   }
 
+  updateSelectedCountry(selectedCountry: string) {
+    this.selections.selectedCountry = selectedCountry;
+    this.dataService.updateDatasetsSelection(this.selections);
+  }
+
   onFileUpload(event: any) {
     this.dialog.open(UploaddialogComponent, { data: this.selections });
   }

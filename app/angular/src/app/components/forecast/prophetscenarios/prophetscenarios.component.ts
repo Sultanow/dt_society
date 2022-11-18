@@ -63,7 +63,7 @@ export class ProphetscenariosComponent implements OnInit {
 
   public countries: string[] = [];
 
-  public selectedCountry?: string;
+  // public selectedCountry?: string;
 
   public scenarioIndeces: number[] = [];
 
@@ -261,7 +261,7 @@ export class ProphetscenariosComponent implements OnInit {
   updateProphetForecast() {
     if (
       this.selections.datasets.length > 0 &&
-      this.selectedCountry != undefined
+      this.selections.selectedCountry != undefined
     ) {
       if (
         !this.selections.datasets.some(
@@ -280,7 +280,7 @@ export class ProphetscenariosComponent implements OnInit {
         this.showSpinner = true;
         this.dataService
           .getData(this.selections.datasets, '/forecast/prophet', {
-            country: this.selectedCountry,
+            country: this.selections.selectedCountry,
             periods: this.predictionPeriods,
             frequency: this.frequency,
             scenarios: Object.fromEntries(activeScenarios),
@@ -312,16 +312,12 @@ export class ProphetscenariosComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
-
-      var countries: string[] | undefined = [] || undefined;
+      console.log(this.selections);
 
       if (this.selections.datasets.length > 0) {
-        for (const data of this.selections.datasets) {
-          countries = [...countries, ...(data.countryOptions || [])];
-        }
-
-        this.countries = [...new Set(countries)];
+        //this.selectedCountry = this.selections.selectedCountry;
         this.updateScenarios();
+        this.updateProphetForecast();
       }
     });
   }
