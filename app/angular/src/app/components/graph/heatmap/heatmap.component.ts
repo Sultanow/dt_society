@@ -23,7 +23,7 @@ export class HeatmapComponent implements OnInit {
       yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
       font: { color: '#f2f2f2' },
     },
-    config: {responsive: true}
+    config: { responsive: true },
   };
 
   public selections: Selections = {
@@ -35,14 +35,12 @@ export class HeatmapComponent implements OnInit {
 
   selectionControl = new FormGroup({
     selectedFeaturesControl: new FormControl(),
-    selectedCountryControl: new FormControl(),
   });
 
   countries: (undefined | string[] | string)[] = [];
 
   private oldSelections?: Selections;
   public selectedFeatures?: string | null;
-  public selectedCountry?: string;
 
   createHeatmapPlot(data: CorrelationMatrix) {
     if (this.data.data.length > 0) {
@@ -86,7 +84,7 @@ export class HeatmapComponent implements OnInit {
         this.dataService
           .getData(this.selections.datasets, '/graph/heatmap', {
             features: this.selectedFeatures,
-            country: this.selectedCountry,
+            country: this.selections.selectedCountry,
           })
           .subscribe((event) => {
             if (event.type === HttpEventType.Response) {
@@ -103,7 +101,6 @@ export class HeatmapComponent implements OnInit {
     if (
       JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
     ) {
-      this.updateCountries();
     }
     this.oldSelections = structuredClone(this.selections);
   }
@@ -114,7 +111,21 @@ export class HeatmapComponent implements OnInit {
       if (this.featureOptions.length > 0) {
         this.featureOptions = [];
       }
-      this.updateCountries();
+
+      this.updateFeatureOptions(this.selections.selectedCountry);
+      let currentFeatureSelection = this.selectionControl
+        .get('selectedFeaturesControl')!
+        .getRawValue();
+      if (currentFeatureSelection !== null) {
+        let newSelection = currentFeatureSelection.filter((x: string) =>
+          this.featureOptions.includes(x)
+        );
+        this.selectionControl
+          .get('selectedFeaturesControl')!
+          .setValue(newSelection);
+        this.selectedFeatures = newSelection;
+        this.updateHeatmap();
+      }
     });
 
     this.selectionControl
@@ -126,26 +137,6 @@ export class HeatmapComponent implements OnInit {
             .getRawValue() !== ''
         ) {
           this.selectedFeatures = selectedFeatures;
-          this.updateHeatmap();
-        }
-      });
-
-    this.selectionControl
-      .get('selectedCountryControl')!
-      .valueChanges.subscribe((selectedCountry) => {
-        this.selectedCountry = selectedCountry;
-        this.updateFeatureOptions(selectedCountry);
-        let currentFeatureSelection = this.selectionControl
-          .get('selectedFeaturesControl')!
-          .getRawValue();
-        if (currentFeatureSelection !== null) {
-          let newSelection = currentFeatureSelection.filter((x: string) =>
-            this.featureOptions.includes(x)
-          );
-          this.selectionControl
-            .get('selectedFeaturesControl')!
-            .setValue(newSelection);
-          this.selectedFeatures = newSelection;
           this.updateHeatmap();
         }
       });
@@ -162,16 +153,5 @@ export class HeatmapComponent implements OnInit {
         this.featureOptions.push(...dataset.featureOptions);
       }
     }
-  }
-
-  private updateCountries() {
-    var countries: string[] | undefined = [] || undefined;
-    for (const dataset of this.selections.datasets) {
-      if (dataset.featureOptions !== undefined) {
-        countries = [...countries, ...(dataset.countryOptions || [])];
-      }
-    }
-    this.countries = [...new Set(countries)];
-    this.selectionControl.get('selectedCountryControl')!.setValue('');
   }
 }

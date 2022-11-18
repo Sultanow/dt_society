@@ -24,7 +24,7 @@ export class CorrelationComponent implements OnInit {
       font: { color: '#f2f2f2' },
       margin: { t: 30, r: 100 },
     },
-    config: {responsive: true}
+    config: { responsive: true },
   };
 
   selectionControl = new FormGroup({
@@ -39,7 +39,6 @@ export class CorrelationComponent implements OnInit {
   };
 
   private oldSelections?: Selections;
-  public selectedCountry?: string;
 
   createCorrelationLines(data: ColumnValues[]) {
     if (this.data.data.length > 0) {
@@ -114,7 +113,7 @@ export class CorrelationComponent implements OnInit {
     if (
       JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
     ) {
-      this.updateCountries();
+      this.updateCorrelationPlot();
     }
     this.oldSelections = structuredClone(this.selections);
   }
@@ -122,31 +121,14 @@ export class CorrelationComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
-      this.updateCountries();
+      this.updateCorrelationPlot();
     });
-    this.selectionControl
-      .get('selectedCountryControl')!
-      .valueChanges.subscribe((selectedCountry) => {
-        this.selectedCountry = selectedCountry;
-        this.updateCorrelationPlot();
-      });
-  }
-
-  private updateCountries() {
-    var countries: string[] | undefined = [] || undefined;
-    for (const dataset of this.selections.datasets) {
-      if (dataset.featureOptions !== undefined) {
-        countries = [...countries, ...(dataset.countryOptions || [])];
-      }
-    }
-    this.countries = [...new Set(countries)];
-    this.selectionControl.get('selectedCountryControl')!.setValue('');
   }
 
   private updateCorrelationPlot() {
     if (
       this.selections.datasets.length > 0 &&
-      this.countries.includes(this.selectedCountry)
+      this.selections.selectedCountry !== undefined
     ) {
       if (
         !this.selections.datasets.some(
@@ -157,7 +139,7 @@ export class CorrelationComponent implements OnInit {
       ) {
         this.dataService
           .getData(this.selections.datasets, '/graph/corr', {
-            country: this.selectedCountry,
+            country: this.selections.selectedCountry,
           })
           .subscribe((event) => {
             if (event.type === HttpEventType.Response) {

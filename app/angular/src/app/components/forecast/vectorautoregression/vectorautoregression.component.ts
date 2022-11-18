@@ -40,8 +40,6 @@ export class VectorautoregressionComponent implements OnInit {
 
   public countries: string[] = [];
 
-  public selectedCountry?: string;
-
   public predictionPeriods: number = 0;
 
   public maxLags: number = 1;
@@ -55,7 +53,10 @@ export class VectorautoregressionComponent implements OnInit {
       this.data.data = [];
     }
     this.data.layout.title =
-      this.models[this.selectedModel] + ' (' + this.selectedCountry + ')';
+      this.models[this.selectedModel] +
+      ' (' +
+      this.selections.selectedCountry +
+      ')';
     this.data.layout.grid = {
       rows: 1,
       columns: this.selections.datasets.length,
@@ -133,7 +134,7 @@ export class VectorautoregressionComponent implements OnInit {
   updateVarForecast() {
     if (
       this.selections.datasets.length > 0 &&
-      this.selectedCountry != undefined
+      this.selections.selectedCountry != undefined
     ) {
       if (
         !this.selections.datasets.some(
@@ -148,7 +149,7 @@ export class VectorautoregressionComponent implements OnInit {
             this.selections.datasets,
             '/forecast/multivariate/' + this.selectedModel,
             {
-              country: this.selectedCountry,
+              country: this.selections.selectedCountry,
               periods: this.predictionPeriods,
               maxLags: this.maxLags,
               frequency: this.frequency,

@@ -303,7 +303,6 @@ export class ProphetscenariosComponent implements OnInit {
       JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
     ) {
       if (this.selections.datasets.length > 0) {
-        this.dependentDataset = this.selections.datasets[0].id;
       }
     }
     this.oldSelections = structuredClone(this.selections);
@@ -312,10 +311,8 @@ export class ProphetscenariosComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
-      console.log(this.selections);
-
       if (this.selections.datasets.length > 0) {
-        //this.selectedCountry = this.selections.selectedCountry;
+        this.dependentDataset = this.selections.datasets[0].id;
         this.updateScenarios();
         this.updateProphetForecast();
       }

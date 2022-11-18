@@ -16,19 +16,6 @@
           <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
         </mat-radio-group>
       </div>
-      <div class="toggle-container">
-        <mat-form-field>
-          <mat-label>Country</mat-label>
-          <mat-select
-            [(ngModel)]="selectedCountry"
-            (selectionChange)="updateVarForecast()"
-          >
-            <mat-option *ngFor="let country of countries" [value]="country">
-              {{ country }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
 
       <div class="toggle-container">
         <section class="slider-section">
