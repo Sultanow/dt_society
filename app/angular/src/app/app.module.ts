@@ -43,7 +43,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { OverviewComponent } from './components/overview/overview.component';
-import { ForecastsComponent } from './components/forecasts/forecasts.component';
 import { CorrelationsComponent } from './components/correlations/correlations.component';
 import { RouteReuseStrategy, RouterModule } from '@angular/router';
 
@@ -64,7 +63,6 @@ PlotlyModule.plotlyjs = PlotlyJS;
     DatatableComponent,
     StatisticsComponent,
     OverviewComponent,
-    ForecastsComponent,
     CorrelationsComponent
   ],
   imports: [
@@ -102,7 +100,8 @@ PlotlyModule.plotlyjs = PlotlyJS;
       {path: '', redirectTo: '/overview', pathMatch: 'full', data: { reuse: true}},
       {path: 'overview', component: OverviewComponent, pathMatch: 'full', data: { reuse: true}},
       {path: 'correlations', component: CorrelationsComponent, pathMatch: 'full', data: { reuse: true}},
-      {path: 'forecasts', component: ForecastsComponent, pathMatch: 'full', data: { reuse: true}},
+      {path: 'forecasts/var', component: VectorautoregressionComponent, pathMatch: 'full', data: { reuse: true}},
+      {path: 'forecasts/prophet', component: ProphetscenariosComponent, pathMatch: 'full', data: { reuse: true}},
     ])
   ],
   providers: [ 

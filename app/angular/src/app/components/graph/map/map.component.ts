@@ -17,8 +17,8 @@ export class MapComponent implements OnInit {
   public data: GraphData = {
     data: [],
     layout: {},
+    config: {responsive: true}
   };
-  public config = {responsive: true}
   
   public frames: Frame[] = [];
 
@@ -187,6 +187,7 @@ export class MapComponent implements OnInit {
           center: this.geojsons[this.scope as keyof object]['center'],
         },
       },
+      config: {responsive: true}
     };
   }
 

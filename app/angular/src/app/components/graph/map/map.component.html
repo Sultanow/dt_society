@@ -1,7 +1,7 @@
 <div class="map-wrapper" [formGroup]="selectionControl">
   <mat-card *ngIf="data.data.length > 0">
     <div>
-      <plotly-plot *ngIf="data.data.length > 0" [data]="data.data" [layout]="data.layout" [config]="config">
+      <plotly-plot *ngIf="data.data.length > 0" [data]="data.data" [layout]="data.layout" [config]="data.config">
       </plotly-plot>
     </div>
     <div class="slider-container">

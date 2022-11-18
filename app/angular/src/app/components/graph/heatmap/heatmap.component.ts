@@ -23,9 +23,8 @@ export class HeatmapComponent implements OnInit {
       yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
       font: { color: '#f2f2f2' },
     },
+    config: {responsive: true}
   };
-
-  public config = {responsive: true}
 
   public selections: Selections = {
     datasets: [],

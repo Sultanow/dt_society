@@ -1,6 +1,7 @@
 export interface GraphData {
   data: Array<Object>;
   layout: any;
+  config?: {};
 }
 
 export interface TableData {

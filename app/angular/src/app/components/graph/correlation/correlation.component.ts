@@ -24,9 +24,8 @@ export class CorrelationComponent implements OnInit {
       font: { color: '#f2f2f2' },
       margin: { t: 30, r: 100 },
     },
+    config: {responsive: true}
   };
-
-  public config = {responsive: true}
 
   selectionControl = new FormGroup({
     selectedCountryControl: new FormControl(),
