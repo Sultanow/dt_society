@@ -22,7 +22,7 @@ export class CorrelationComponent implements OnInit {
       xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
       yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
       font: { color: '#f2f2f2' },
-      margin: { t: 30, r: 100 },
+      margin: { t: 15, b: 50, l: 35 },
     },
     config: { responsive: true },
   };
