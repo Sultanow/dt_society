@@ -5,6 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HistoryComponent } from './components/graph/history/history.component';
+import { RoutecachingService } from './services/routecaching.service';
 
 import * as PlotlyJS from 'plotly.js-dist-min';
 import { PlotlyModule } from 'angular-plotly.js';
@@ -44,7 +45,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { OverviewComponent } from './components/overview/overview.component';
 import { ForecastsComponent } from './components/forecasts/forecasts.component';
 import { CorrelationsComponent } from './components/correlations/correlations.component';
-import { RouterModule } from '@angular/router';
+import { RouteReuseStrategy, RouterModule } from '@angular/router';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -98,13 +99,15 @@ PlotlyModule.plotlyjs = PlotlyJS;
     MatDividerModule,
     BrowserModule,
     RouterModule.forRoot([
-      {path: '', redirectTo: '/overview', pathMatch: 'full'},
-      {path: 'overview', component: OverviewComponent, pathMatch: 'full'},
-      {path: 'correlations', component: CorrelationsComponent, pathMatch: 'full'},
-      {path: 'forecasts', component: ForecastsComponent, pathMatch: 'full'},
+      {path: '', redirectTo: '/overview', pathMatch: 'full', data: { reuse: true}},
+      {path: 'overview', component: OverviewComponent, pathMatch: 'full', data: { reuse: true}},
+      {path: 'correlations', component: CorrelationsComponent, pathMatch: 'full', data: { reuse: true}},
+      {path: 'forecasts', component: ForecastsComponent, pathMatch: 'full', data: { reuse: true}},
     ])
   ],
-  providers: [],
+  providers: [ 
+    {provide: RouteReuseStrategy, useClass: RoutecachingService }
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
