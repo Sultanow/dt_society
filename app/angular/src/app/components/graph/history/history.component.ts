@@ -15,7 +15,7 @@ export class HistoryComponent implements OnInit {
   public historyPlot: Plot = {
     data: [],
     layout: {
-      margin: {"b": 0,"t":60},
+      margin: { t: 30, b: 0, l: 35, r: 90 },
       legend: { title: { text: 'Countries' } },
       paper_bgcolor: '#424242',
       plot_bgcolor: '#424242',
@@ -23,7 +23,7 @@ export class HistoryComponent implements OnInit {
       yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
       font: { color: '#f2f2f2' },
     },
-    config: {responsive: true}
+    config: { responsive: true },
   };
 
   public selections: Selections = {

@@ -1,11 +1,13 @@
 import os
 import pycountry
 from flask import Flask, request, jsonify
-
+from dateutil import parser
 from . import graph, forecast
 from .extensions import mongo, cache, cors, session
 from .preprocessing.parse import parse_dataset
 from .preprocessing.dataset import DigitalTwinTimeSeries
+from .preprocessing.states import germany_federal
+from .preprocessing.filter import find_geo_column, is_datetime, infer_feature_options
 
 
 def create_app(test_config=None):
@@ -89,7 +91,9 @@ def create_app(test_config=None):
         if uploaded_file.filename != "":
 
             try:
-                df = DigitalTwinTimeSeries(uploaded_file.stream, filename=uploaded_file.filename)
+                df = DigitalTwinTimeSeries(
+                    uploaded_file.stream, filename=uploaded_file.filename
+                )
 
                 if mongo.db is not None and df is not None:
                     collection = mongo.db["collection_1"]
@@ -116,27 +120,6 @@ def create_app(test_config=None):
 
         return ("", 204)
 
-    @app.route("/data/", methods=["GET"])
-    def get_datasets():
-
-        if mongo.db is None:
-            return ("Database not available.", 500)
-
-        collection = mongo.db["collection_1"]
-
-        avail_columns = []
-
-        datasets = collection.find({})
-
-        for i, dataset in enumerate(datasets):
-            columns = parse_dataset(geo_column=None, dataset_id=i).columns.to_list()
-
-            columns.insert(0, "N/A")
-
-            avail_columns.append({"id": dataset["filename"], "columns": columns})
-
-        return jsonify(avail_columns)
-
     @app.route("/data/find_geo", methods=["GET"])
     def get_geo():
 
@@ -145,50 +128,18 @@ def create_app(test_config=None):
 
         collection = mongo.db["collection_1"]
 
-        avail_columns = []
+        available_columns = []
 
         datasets = collection.find({})
 
         for i, dataset in enumerate(datasets):
-            df_no_geo = parse_dataset(geo_column=None, dataset_id=i)
+            df = parse_dataset(geo_column=None, dataset_id=i)
 
-            df_sample = df_no_geo.sample(n=10).select_dtypes(include=["object"])
+            df = df.fillna(0)
 
-            geo_col = None
-            no_matches = 0
+            possible_features, geo_col = infer_feature_options(df)
 
-            for col in df_sample:
-                for value in df_sample[col]:
-                    if len(value) == 2:
-                        is_country = pycountry.countries.get(alpha_2=value) != None
-                    elif len(value) == 3:
-                        is_country = pycountry.countries.get(alpha_3=value) != None
-                    elif len(value) > 3:
-                        is_country = pycountry.countries.get(name=value) != None
-
-                    if no_matches > 2:
-                        no_matches = 0
-                        break
-                    if is_country is False:
-                        no_matches += 1
-                    else:
-                        geo_col = col
-
-            dataframe = df_no_geo.select_dtypes(exclude=["float"])
-
-            features_in_columns = df_no_geo.drop(columns=[geo_col]).columns.to_list()
-
-            possible_features = features_in_columns
-
-            # possible features in rows
-            for column in dataframe:
-                if column == geo_col:
-                    print(column)
-                    continue
-
-                possible_features.extend(dataframe[column].unique().tolist())
-
-            avail_columns.append(
+            available_columns.append(
                 {
                     "id": dataset["filename"],
                     "possibleFeatures": possible_features,
@@ -196,7 +147,7 @@ def create_app(test_config=None):
                 }
             )
 
-        return jsonify(avail_columns)
+        return jsonify(available_columns)
 
     @app.route("/data/reshape", methods=["POST"])
     def reshape_dataset():
@@ -252,66 +203,6 @@ def create_app(test_config=None):
         print(f"Successfully removed dataset '{filename}'.")
 
         return ("", 204)
-
-    @app.route("/data/features", methods=["POST"])
-    def get_possible_features():
-
-        if mongo.db is None:
-            return ("Database not available.", 500)
-
-        data = request.get_json()
-
-        if data is None:
-            return ("Empty request.", 400)
-
-        file_id = data["datasetId"]
-
-        df_no_geo = parse_dataset(geo_column=None, dataset_id=file_id)
-
-        features_in_columns = df_no_geo.columns.to_list()
-
-        df_sample = df_no_geo.sample(n=10).select_dtypes(include=["object"])
-
-        geo_col = None
-        no_matches = 0
-
-        for col in df_sample:
-            for value in df_sample[col]:
-                print(value)
-                if len(value) == 2:
-                    is_country = pycountry.countries.get(alpha_2=value) != None
-                elif len(value) == 3:
-                    is_country = pycountry.countries.get(alpha_3=value) != None
-                elif len(value) > 3:
-                    is_country = pycountry.countries.get(name=value) != None
-
-                if no_matches > 2:
-                    no_matches = 0
-                    break
-                if is_country is False:
-                    no_matches += 1
-                else:
-                    geo_col = col
-
-        print(geo_col)
-
-        # dataframe = parse_dataset(geo_column=geo_column, dataset_id=file_id)
-
-        dataframe = df_no_geo.select_dtypes(exclude=["float"])
-
-        possible_features = features_in_columns
-
-        # possible features in rows
-        for column in dataframe:
-            if column == geo_col:
-                continue
-            possible_features.extend(dataframe[column].unique().tolist())
-
-        response_data = {}
-
-        response_data["features"] = possible_features
-
-        return response_data
 
     @app.route("/data/reshapecheck", methods=["POST"])
     def check_for_reshape():

@@ -187,21 +187,6 @@ export class DataService {
     });
   }
 
-  getPossibleFeatures(selections: Selections, datasetId: string | undefined) {
-    const targetDatasetIdx = selections.datasets.findIndex(
-      (dataset) => dataset.id == datasetId
-    );
-    this.http
-      .post(this.apiUrl + 'data/features', {
-        datasetId: datasetId,
-      })
-      .subscribe((options) => {
-        selections.datasets[targetDatasetIdx].possibleFeatures = (
-          options as Options
-        ).features;
-      });
-  }
-
   getReshapedData(
     selections: Selections,
     datasetId: string | undefined,
@@ -260,6 +245,6 @@ export class DataService {
       countries = [...countries, ...(dataset.countryOptions || [])];
     }
 
-    selections.totalCountries = countries.sort();
+    selections.totalCountries = [...new Set(countries)].sort();
   }
 }
