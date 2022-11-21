@@ -32,6 +32,8 @@ def find_geo_column(dataframe: pd.DataFrame, column: str)-> bool:
                     pycountry.countries.get(name=value) != None
                     or value in germany_federal
                 )
+            elif len(value) < 2:
+                is_country = False
                 
             if is_country is False:
                 negative_matches += 1
