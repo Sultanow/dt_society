@@ -176,6 +176,8 @@ def var_fit_and_predict_multi(
     merged_df_diff = merged_df[feature_columns].diff().astype("float32").dropna()
 
     model = VAR(merged_df_diff)
+    
+    print(merged_df_diff)
 
     result = model.fit(maxlags=max_lags)
 

@@ -21,6 +21,7 @@ def find_geo_column(dataframe: pd.DataFrame, column: str)-> bool:
     negative_matches = 0
 
     for value in dataframe[column].sample(n=10):
+        print(value)
         if isinstance(value, str):
             if len(value) == 2:
                 is_country = pycountry.countries.get(alpha_2=value) != None
@@ -31,12 +32,19 @@ def find_geo_column(dataframe: pd.DataFrame, column: str)-> bool:
                     pycountry.countries.get(name=value) != None
                     or value in germany_federal
                 )
-
+                
             if is_country is False:
                 negative_matches += 1
 
-                if negative_matches > 2:
+                
+        else:
+            negative_matches += 1
+            
+        if negative_matches > 4:
                     return False
+                    
+                
+    print(f"{column} is geo column")
 
     return True
 
@@ -107,8 +115,8 @@ def infer_feature_options(dataframe: pd.DataFrame) -> Tuple[List[str], str]:
                 if is_geo_column is True:
                     geo_col = feature
 
-                if feature == geo_col:
-                    continue
+                # if feature == geo_col:
+                #     continue
 
                 features_in_rows = dataframe[feature].unique().tolist()
 
