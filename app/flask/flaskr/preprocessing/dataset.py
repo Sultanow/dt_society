@@ -150,10 +150,16 @@ class DigitalTwinTimeSeries:
                 data.loc[data[self.geo_col] == key, self.geo_col] = old_iso2_codes[key]
 
             # Drop invalid country codes
-            data = data.drop(data[data[self.geo_col].str.len() > 2].index)
-            data = data.drop(data[data[self.geo_col].isin(invalid_country_codes)].index)
+            #
 
-            data[self.geo_col] = data[self.geo_col].apply(get_iso3, from_iso2=True)
+            lengths = data[self.geo_col].map(len).unique()[0]
+            if lengths == 2:
+                data = data.drop(data[data[self.geo_col].str.len() > 2].index)
+                data = data.drop(
+                    data[data[self.geo_col].isin(invalid_country_codes)].index
+                )
+
+                data[self.geo_col] = data[self.geo_col].apply(get_iso3, from_iso2=True)
 
         else:
             # territories = {"Mainland China": "China", "US": "United States"}
