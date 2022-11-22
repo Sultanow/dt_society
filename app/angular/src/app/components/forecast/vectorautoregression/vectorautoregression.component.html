@@ -1,76 +1,50 @@
-<div class="var-wrapper">
-  <mat-card>
-    <div *ngIf="countries.length > 0">
-      <div class="model-selector">
-        <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
-          Model
-        </p>
-        <mat-radio-group
-          aria-label="Select a model"
-          [(ngModel)]="selectedModel"
-          (change)="updateParameterSlider($event.value); updateVarForecast()"
-        >
-          <mat-radio-button value="var"
-            >Vector Auto Regression</mat-radio-button
-          >
-          <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
-        </mat-radio-group>
-      </div>
+<div *ngIf="selections.datasets.length > 0; then vectorautoregression; else dialog"></div>
+<ng-template #vectorautoregression>
+  <div class="var-wrapper">
+    <mat-card>
+      <div *ngIf="countries.length > 0">
+        <div class="model-selector">
+          <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+            Model
+          </p>
+          <mat-radio-group aria-label="Select a model" [(ngModel)]="selectedModel"
+            (change)="updateParameterSlider($event.value); updateVarForecast()">
+            <mat-radio-button value="var">Vector Auto Regression</mat-radio-button>
+            <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
+          </mat-radio-group>
+        </div>
 
-      <div class="toggle-container">
-        <section class="slider-section">
-          <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
-            Number of forecasts
-          </p>
-          <mat-slider
-            thumbLabel
-            [(ngModel)]="predictionPeriods"
-            (change)="updateVarForecast()"
-            aria-label="unit(s)"
-            [min]="0"
-            [max]="40"
-          ></mat-slider>
-        </section>
-        <section *ngIf="selectedModel == 'var'; else elseBlock">
-          <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
-            Max Lags
-          </p>
-          <mat-slider
-            class="lags-slider"
-            thumbLabel
-            [(ngModel)]="maxLags"
-            (change)="updateVarForecast()"
-            aria-label="unit(s)"
-            [min]="1"
-            [max]="8"
-          ></mat-slider>
-        </section>
-        <ng-template #elseBlock
-          ><section>
-            <p
-              style="font-size: 18px; font-weight: lighter; margin-bottom: 10px"
-            >
-              &#945;-Parameter
+        <div class="toggle-container">
+          <section class="slider-section">
+            <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+              Number of forecasts
             </p>
-            <mat-slider
-              class="lags-slider"
-              thumbLabel
-              [(ngModel)]="maxLags"
-              (change)="updateVarForecast()"
-              aria-label="unit(s)"
-              [step]="0.01"
-              [min]="0.01"
-              [max]="0.99"
-            ></mat-slider></section
-        ></ng-template>
+            <mat-slider thumbLabel [(ngModel)]="predictionPeriods" (change)="updateVarForecast()" aria-label="unit(s)"
+              [min]="0" [max]="40"></mat-slider>
+          </section>
+          <section *ngIf="selectedModel == 'var'; else elseBlock">
+            <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+              Max Lags
+            </p>
+            <mat-slider class="lags-slider" thumbLabel [(ngModel)]="maxLags" (change)="updateVarForecast()"
+              aria-label="unit(s)" [min]="1" [max]="8"></mat-slider>
+          </section>
+          <ng-template #elseBlock>
+            <section>
+              <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+                &#945;-Parameter
+              </p>
+              <mat-slider class="lags-slider" thumbLabel [(ngModel)]="maxLags" (change)="updateVarForecast()"
+                aria-label="unit(s)" [step]="0.01" [min]="0.01" [max]="0.99"></mat-slider>
+            </section>
+          </ng-template>
+        </div>
+        <plotly-plot *ngIf="data.data.length > 0" [data]="data.data" [layout]="data.layout" [config]="data.config">
+        </plotly-plot>
       </div>
-
-      <plotly-plot
-        *ngIf="data.data.length > 0"
-        [data]="data.data"
-        [layout]="data.layout"
-        [config]="data.config"
-      ></plotly-plot>
-    </div>
-  </mat-card>
-</div>
+    </mat-card>
+  </div>
+</ng-template>
+<ng-template #dialog>
+  <app-fileupload></app-fileupload>
+</ng-template>

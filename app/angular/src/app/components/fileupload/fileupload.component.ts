@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { MatDialog } from '@angular/material/dialog';
+import { DataService } from 'src/app/services/data.service';
+import { UploaddialogComponent } from '../datafiltering/uploaddialog/uploaddialog.component';
+import { Selections } from 'src/app/types/Datasets';
 
 @Component({
   selector: 'app-fileupload',
@@ -7,25 +10,24 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./fileupload.component.css'],
 })
 export class FileuploadComponent implements OnInit {
-  fileName = '';
 
-  constructor(private httpClient: HttpClient) {}
+  selections: Selections = {
+    datasets: [],
+    selectedDataset: undefined,
+  };
+  
+  constructor(private dataService: DataService, public dialog: MatDialog) {}
 
-  onFileSelected(event: any) {
-    const file: File = event.target.files[0];
-
-    if (file) {
-      this.fileName = file.name;
-
-      const formData = new FormData();
-
-      formData.append('upload', file);
-
-      const upload$ = this.httpClient.post('http://127.0.0.1:5000/', formData);
-
-      upload$.subscribe();
-    }
+  getDemoDatasets() {
+    this.dataService.getDemoData(this.selections);
   }
 
-  ngOnInit(): void {}
+  onFileUpload(event: any) {
+    this.dialog.open(UploaddialogComponent);
+  }
+
+  ngOnInit(): void {
+    this.dataService.currentSelections.subscribe((value) => {
+      this.selections = value;
+    });}
 }

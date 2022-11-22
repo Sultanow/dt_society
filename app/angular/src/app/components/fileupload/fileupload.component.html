@@ -1,11 +1,20 @@
-<input type="file" class="file-input" (change)="onFileSelected($event)" #fileUpload style="display: none;">
-<div #filesContainer class="files-container">
-    <div class="file-upload">
-
-        {{fileName || "No file uploaded yet."}}
-
-        <button mat-mini-fab color="primary" class="upload-btn" (click)="fileUpload.value='';fileUpload.click()">
-            <mat-icon>attach_file</mat-icon>
+<div class="wrapper">
+    <mat-card>
+        <mat-card-title>There are not enough datasets available to use this feature</mat-card-title>
+        <br>
+        <mat-card-content>
+            <p>Please upload a dataset or use the demo to begin.</p>
+            <p>The datasets can be managed through the sidebar.</p>
+        </mat-card-content>
+        <button mat-raised-button (click)="onFileUpload($event)">
+            <mat-icon style="margin-right: 20px">file_upload</mat-icon>
+            Upload dataset
         </button>
-    </div>
+        <button mat-raised-button (click)="getDemoDatasets()">
+            <mat-icon style="margin-right: 20px">slideshow</mat-icon>
+            Demo Datasets
+        </button>
+        <mat-card-actions>
+        </mat-card-actions>
+    </mat-card>
 </div>

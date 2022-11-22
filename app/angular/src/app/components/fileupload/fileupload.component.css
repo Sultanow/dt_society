@@ -1,5 +1,13 @@
-.files-container {
-    border: solid 1px black;
+.wrapper{
     padding: 10px;
-    margin: 5px;
+    text-align: center;
+}
+
+mat-card{
+    max-width: 500px;
+    display: inline-block;
+}
+
+mat-card-title{
+    line-height: 1.5;
 }

@@ -95,29 +95,31 @@ def get_heatmap():
 
     for dataset in datasets:
 
-        reshape_selected = (
-            dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
-        )
-        geo_selected = dataset["geoSelected"]
-        dataset_id = dataset["id"]
-        time_selected = dataset["timeSelected"]
+        if "geoSelected" in dataset and "reshapeSelected" in dataset:
 
-        df = parse_dataset(
-            geo_column=geo_selected,
-            dataset_id=dataset_id,
-            reshape_column=reshape_selected,
-        )
-
-        if selected_country in df[geo_selected].unique():
-            df_by_country = df[df[geo_selected] == selected_country]
-
-            df_by_country = df_by_country.drop(columns=[geo_selected])
-
-            df_by_country[time_selected] = pd.to_datetime(
-                df_by_country[time_selected].astype("str")
+            reshape_selected = (
+                dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
             )
-            dfs.append(df_by_country)
-            time_columns.append(time_selected)
+            geo_selected = dataset["geoSelected"]
+            dataset_id = dataset["id"]
+            time_selected = dataset["timeSelected"]
+
+            df = parse_dataset(
+                geo_column=geo_selected,
+                dataset_id=dataset_id,
+                reshape_column=reshape_selected,
+            )
+
+            if selected_country in df[geo_selected].unique():
+                df_by_country = df[df[geo_selected] == selected_country]
+
+                df_by_country = df_by_country.drop(columns=[geo_selected])
+
+                df_by_country[time_selected] = pd.to_datetime(
+                    df_by_country[time_selected].astype("str")
+                )
+                dfs.append(df_by_country)
+                time_columns.append(time_selected)
 
     if len(dfs) > 1:
         merged_df, merged_time_col = merge_dataframes_multi(dfs, time_columns)
@@ -131,6 +133,8 @@ def get_heatmap():
         correlation_matrix = merged_df.corr().where(~triangular_upper_mask).fillna(0)
 
     else:
+        dfs[0] = dfs[0][data["features"]]
+
         triangular_upper_mask = np.triu(np.ones(dfs[0].corr().shape)).astype(bool)
 
         correlation_matrix = dfs[0].corr().where(~triangular_upper_mask).fillna(0)
@@ -163,56 +167,57 @@ def get_correlation_lines():
     response_data = []
 
     for dataset in datasets:
-        file_data = {}
 
-        reshape_selected = (
-            dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
-        )
-        geo_selected = dataset["geoSelected"]
-        dataset_id = dataset["id"]
-        time_selected = dataset["timeSelected"]
+        if "geoSelected" in dataset and "reshapeSelected" in dataset:
 
-        df = parse_dataset(
-            geo_column=geo_selected,
-            dataset_id=dataset_id,
-            reshape_column=reshape_selected,
-        )
-        df = df.fillna(0)
-        df_by_country = df[df[geo_selected] == selectedcountry]
+            file_data = {}
 
-        df_by_country[time_selected] = pd.to_datetime(
-            df_by_country[time_selected].astype("str")
-        )
+            reshape_selected = (
+                dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
+            )
+            geo_selected = dataset["geoSelected"]
+            dataset_id = dataset["id"]
+            time_selected = dataset["timeSelected"]
 
-        features = [
-            feature
-            for feature in df_by_country.columns.to_list()
-            if feature not in (geo_selected, time_selected)
-        ]
+            df = parse_dataset(
+                geo_column=geo_selected,
+                dataset_id=dataset_id,
+                reshape_column=reshape_selected,
+            )
+            df = df.fillna(0)
+            df_by_country = df[df[geo_selected] == selectedcountry]
 
-        feature_options.append(features)
-        dfs.append(df_by_country)
+            df_by_country[time_selected] = pd.to_datetime(
+                df_by_country[time_selected].astype("str")
+            )
 
-        file_data[time_selected] = (
-            df_by_country[time_selected].dt.strftime("%Y-%m-%d").to_list()
-        )
+            features = [
+                feature
+                for feature in df_by_country.columns.to_list()
+                if feature not in (geo_selected, time_selected)
+            ]
 
-        for feature in features:
-            file_data[feature] = df_by_country[feature].tolist()
+            feature_options.append(features)
+            dfs.append(df_by_country)
 
-        if not df_by_country[time_selected].empty:
-            if min_timestamp is None or min_timestamp > min(
-                df_by_country[time_selected]
-            ):
-                min_timestamp = min(df_by_country[time_selected])
-            if max_timestamp is None or max_timestamp < max(
-                df_by_country[time_selected]
-            ):
-                max_timestamp = max(df_by_country[time_selected])
+            file_data[time_selected] = (
+                df_by_country[time_selected].dt.strftime("%Y-%m-%d").to_list()
+            )
 
-        print(file_data)        
+            for feature in features:
+                file_data[feature] = df_by_country[feature].tolist()
 
-        response_data.append(file_data)
+            if not df_by_country[time_selected].empty:
+                if min_timestamp is None or min_timestamp > min(
+                    df_by_country[time_selected]
+                ):
+                    min_timestamp = min(df_by_country[time_selected])
+                if max_timestamp is None or max_timestamp < max(
+                    df_by_country[time_selected]
+                ):
+                    max_timestamp = max(df_by_country[time_selected])
+
+            response_data.append(file_data)
 
     for dataset in response_data:
         dataset["timestamps"] = [

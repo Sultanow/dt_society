@@ -130,13 +130,6 @@ export class CorrelationComponent implements OnInit {
       this.selections.datasets.length > 0 &&
       this.selections.selectedCountry !== undefined
     ) {
-      if (
-        !this.selections.datasets.some(
-          (dataset) =>
-            dataset.geoSelected === undefined ||
-            dataset.timeSelected === undefined
-        )
-      ) {
         this.dataService
           .getData(this.selections.datasets, '/graph/corr', {
             country: this.selections.selectedCountry,
@@ -148,7 +141,6 @@ export class CorrelationComponent implements OnInit {
               }
             }
           });
-      }
     }
   }
 }

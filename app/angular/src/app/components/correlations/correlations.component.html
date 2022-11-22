@@ -1,2 +1,8 @@
-<app-heatmap></app-heatmap>
-<app-correlation></app-correlation>
+<div *ngIf="selections.datasets.length > 0; then correlations; else dialog"></div>
+<ng-template #correlations>
+    <app-heatmap></app-heatmap>
+    <app-correlation></app-correlation>
+</ng-template>
+<ng-template #dialog>
+    <app-fileupload></app-fileupload>
+</ng-template>

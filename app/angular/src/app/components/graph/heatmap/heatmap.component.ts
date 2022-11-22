@@ -75,13 +75,7 @@ export class HeatmapComponent implements OnInit {
       this.selectedFeatures !== undefined &&
       this.selectedFeatures!.length > 1
     ) {
-      if (
-        !this.selections.datasets.some(
-          (dataset) =>
-            dataset.geoSelected === undefined ||
-            dataset.timeSelected === undefined
-        )
-      ) {
+      
         this.dataService
           .getData(this.selections.datasets, '/graph/heatmap', {
             features: this.selectedFeatures,
@@ -94,16 +88,8 @@ export class HeatmapComponent implements OnInit {
               }
             }
           });
-      }
+      
     }
-  }
-
-  ngDoCheck() {
-    if (
-      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
-    ) {
-    }
-    this.oldSelections = structuredClone(this.selections);
   }
 
   ngOnInit(): void {
