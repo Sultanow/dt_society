@@ -164,6 +164,7 @@ export class DataService {
     this.http.request(request).subscribe((event) => {
       if (event.type == HttpEventType.Response && selectedDatasetIndex > -1) {
         selections.datasets.splice(selectedDatasetIndex, 1);
+        this.updateTotalCountries(selections)
       }
     });
   }
@@ -172,7 +173,7 @@ export class DataService {
     this.http.get(this.apiUrl + 'data/find_geo').subscribe((datasets) => {
       let updatedDatasets = datasets as Dataset[];
 
-      if (selections.datasets != undefined) {
+      if (selections.datasets !== undefined) {
         for (const dataset of updatedDatasets) {
           if (
             selections.datasets.filter((d) => d.id == dataset.id).length == 0
@@ -180,7 +181,8 @@ export class DataService {
             selections.datasets.push(dataset);
           }
         }
-        if (selections.selectedDataset == undefined) {
+        if (selections.selectedDataset === undefined && selections.datasets.length > 0) {
+
           selections.selectedDataset = selections.datasets[0].id;
         }
       }
@@ -246,5 +248,7 @@ export class DataService {
     }
 
     selections.totalCountries = [...new Set(countries)].sort();
+    selections.selectedCountry = selections.totalCountries[0];
+    this.updateDatasetsSelection(selections);
   }
 }
