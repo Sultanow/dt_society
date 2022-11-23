@@ -5,12 +5,20 @@
       <div class="forecast-controls">
         <div style="width: 50%">
           <div class="data-selector">
-            <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+            <p
+              style="font-size: 18px; font-weight: lighter; margin-bottom: 10px"
+            >
               Forecast for
             </p>
-            <mat-radio-group [(ngModel)]="dependentDataset" aria-label="Select an option"
-              (change)="updateProphetForecast()">
-              <mat-radio-button *ngFor="let dataset of selections.datasets" [value]="dataset.id">
+            <mat-radio-group
+              [(ngModel)]="dependentDataset"
+              aria-label="Select an option"
+              (change)="updateProphetForecast()"
+            >
+              <mat-radio-button
+                *ngFor="let dataset of selections.datasets"
+                [value]="dataset.id"
+              >
                 {{ dataset.id }}
                 <div *ngIf="dataset.featureSelected !== undefined">
                   ({{ dataset.featureSelected }})
@@ -19,58 +27,97 @@
             </mat-radio-group>
           </div>
         </div>
-        <div style="width: 50%">
+        <!-- <div style="width: 50%">
           <p *ngIf="predictionPeriods > 0" style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
             Scenarios
           </p>
           <mat-accordion multi="true" class="scenarios-control">
             <ng-container *ngFor="let dataset of selections.datasets">
               <mat-expansion-panel *ngIf="
-                dataset.id !== undefined &&
-                dataset.featureSelected !== undefined &&
-                dependentDataset !== undefined &&
-                predictionPeriods > 0
-              " [disabled]="dataset.id === dependentDataset" [expanded]="dataset.id !== dependentDataset">
+      </div> -->
+
+        <div style="width: 50%">
+          <p
+            *ngIf="predictionPeriods > 0"
+            style="font-size: 18px; font-weight: lighter; margin-bottom: 10px"
+          >
+            Scenarios
+          </p>
+          <mat-accordion multi="true" class="scenarios-control">
+            <ng-container *ngFor="let dataset of selections.datasets">
+              <mat-expansion-panel
+                *ngIf="
+                  dataset.id !== undefined &&
+                  dataset.featureSelected !== undefined &&
+                  dependentDataset !== undefined &&
+                  predictionPeriods > 0
+                "
+                [disabled]="dataset.id === dependentDataset"
+                [expanded]="dataset.id !== dependentDataset"
+              >
                 <mat-expansion-panel-header>
                   <mat-panel-title>
                     {{ dataset.featureSelected }}
                   </mat-panel-title>
-                  <mat-panel-description *ngIf="
-                    activeScenarios[dataset.id] === true &&
-                      dataset.id !== dependentDataset;
-                    else elseBlock
-                  ">
+                  <mat-panel-description
+                    *ngIf="
+                      activeScenarios[dataset.id] === true &&
+                        dataset.id !== dependentDataset;
+                      else elseBlock
+                    "
+                  >
                     Active
-                    <mat-icon class="status-icon-active">check_circle_outline</mat-icon>
+                    <mat-icon class="status-icon-active"
+                      >check_circle_outline</mat-icon
+                    >
                   </mat-panel-description>
                   <ng-template #elseBlock>
-                    <mat-panel-description *ngIf="
-                      dataset.id !== dependentDataset;
-                      else secondElseBlock
-                    ">
+                    <mat-panel-description
+                      *ngIf="
+                        dataset.id !== dependentDataset;
+                        else secondElseBlock
+                      "
+                    >
                       Inactive
-                      <mat-icon class="status-icon" color="warn">block</mat-icon>
+                      <mat-icon class="status-icon" color="warn"
+                        >block</mat-icon
+                      >
                     </mat-panel-description>
                     <ng-template #secondElseBlock>
                       <mat-panel-description>
                         Forecasted
-                        <mat-icon class="status-icon-target">auto_graph</mat-icon>
+                        <mat-icon class="status-icon-target"
+                          >auto_graph</mat-icon
+                        >
                       </mat-panel-description>
                     </ng-template>
                   </ng-template>
                 </mat-expansion-panel-header>
-                <mat-slide-toggle class="example-margin" color="primary" [(ngModel)]="activeScenarios[dataset.id]"
-                  (change)="updateProphetForecast()">
+                <mat-slide-toggle
+                  class="example-margin"
+                  color="primary"
+                  [(ngModel)]="activeScenarios[dataset.id]"
+                  (change)="updateProphetForecast()"
+                >
                   Activate
                 </mat-slide-toggle>
-                <div *ngIf="
-                  dataset.id !== undefined &&
-                  dependentDataset !== undefined &&
-                  predictionPeriods > 0
-                ">
-                  <mat-form-field class="scenario-field" *ngFor="let i of scenarioIndeces">
+                <div
+                  *ngIf="
+                    dataset.id !== undefined &&
+                    dependentDataset !== undefined &&
+                    predictionPeriods > 0
+                  "
+                >
+                  <mat-form-field
+                    class="scenario-field"
+                    *ngFor="let i of scenarioIndeces"
+                  >
                     <mat-label> Step {{ i }}</mat-label>
-                    <input matInput [(ngModel)]="scenarios[dataset.id][i]" placeholder="Scenario" />
+                    <input
+                      matInput
+                      [(ngModel)]="scenarios[dataset.id][i]"
+                      placeholder="Scenario"
+                    />
                   </mat-form-field>
                   <button mat-icon-button (click)="updateMaxScenarios()">
                     <mat-icon>add</mat-icon>
@@ -82,7 +129,12 @@
         </div>
       </div>
       <div style="display: flex; margin-top: 10px">
-        <button mat-raised-button color="primary" class="predict-button" (click)="updateProphetForecast()">
+        <button
+          mat-raised-button
+          color="primary"
+          class="predict-button"
+          (click)="updateProphetForecast()"
+        >
           <fa-icon [icon]="faChartLine"></fa-icon>
           Forecast
         </button>
@@ -90,12 +142,20 @@
 
       <div class="plot-container" *ngIf="dataScenarios.data.length > 0">
         <p class="section-label">Scenarios</p>
-        <plotly-plot [data]="dataScenarios.data" [layout]="dataScenarios.layout" [config]="dataScenarios.config">
+        <plotly-plot
+          [data]="dataScenarios.data"
+          [layout]="dataScenarios.layout"
+          [config]="dataScenarios.config"
+        >
         </plotly-plot>
       </div>
       <div class="plot-container" *ngIf="data.data.length > 0; else elseBlock">
         <p class="section-label">Forecast</p>
-        <plotly-plot [data]="data.data" [layout]="data.layout" [config]="data.config"></plotly-plot>
+        <plotly-plot
+          [data]="data.data"
+          [layout]="data.layout"
+          [config]="data.config"
+        ></plotly-plot>
       </div>
       <ng-template #elseBlock>
         <div class="loading-spinner">

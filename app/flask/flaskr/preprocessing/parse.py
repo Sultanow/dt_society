@@ -6,7 +6,7 @@ from .dataset import DigitalTwinTimeSeries
 from ..extensions import cache, mongo
 
 
-@cache.memoize(timeout=30)
+@cache.memoize(timeout=90)
 def parse_dataset(geo_column, dataset_id, reshape_column=None) -> pd.DataFrame:
     """_summary_
 
@@ -37,7 +37,7 @@ def parse_dataset(geo_column, dataset_id, reshape_column=None) -> pd.DataFrame:
     return df
 
 
-@cache.memoize(timeout=30)
+@cache.memoize(timeout=90)
 def merge_dataframes_multi(
     dataframes: List[pd.DataFrame], time_columns: List[str]
 ) -> Tuple[pd.DataFrame, str]:

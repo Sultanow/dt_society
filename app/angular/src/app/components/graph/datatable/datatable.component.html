@@ -1,9 +1,10 @@
 <div class="data-table-container">
   <mat-card>
-    <mat-label>
-      Datatable for: {{ selections.selectedDataset }}
-    </mat-label>
-    <div class="mat-elevation-z8 data-table">
+    <mat-label> Datatable for: {{ selections.selectedDataset }} </mat-label>
+    <div
+      class="mat-elevation-z8 data-table"
+      *ngIf="showSpinner === false; else elseBlock"
+    >
       <mat-table [dataSource]="data">
         <ng-container *ngFor="let column of columns" [matColumnDef]="column">
           <th mat-header-cell *matHeaderCellDef>
@@ -20,5 +21,10 @@
         <tr mat-row *matRowDef="let row; columns: columns"></tr>
       </mat-table>
     </div>
+    <ng-template #elseBlock>
+      <div class="loading-spinner">
+        <mat-spinner></mat-spinner>
+      </div>
+    </ng-template>
   </mat-card>
 </div>

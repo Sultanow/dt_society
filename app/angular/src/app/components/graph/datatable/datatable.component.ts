@@ -22,6 +22,8 @@ export class DatatableComponent implements OnInit {
 
   public columns: string[] = [];
 
+  public showSpinner: boolean = false;
+
   updateData(newdata: TableData[]) {
     this.columns = Object.keys(newdata[0]);
 
@@ -49,6 +51,7 @@ export class DatatableComponent implements OnInit {
         );
 
         if (this.selections.datasets[selectedDatasetIdx] !== undefined) {
+          this.showSpinner = true;
           this.dataService
             .getData(
               this.selections.datasets[selectedDatasetIdx],
@@ -59,6 +62,7 @@ export class DatatableComponent implements OnInit {
               if (res.type === HttpEventType.Response) {
                 if (res.body) {
                   this.updateData(res.body as TableData[]);
+                  this.showSpinner = false;
                 }
               }
             });
