@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pycountry
+from .states import germany_federal
 
 
 class DigitalTwinTimeSeries:
@@ -105,67 +106,52 @@ class DigitalTwinTimeSeries:
             pd.DataFrame: Dataset with adjusted country codes
         """
 
-        def get_iso3(country, from_iso2: bool):
-            germany_states = {
-                "Rheinland-Pfalz": "DE-RP",
-                "Hessen": "DE-HE",
-                "Brandenburg": "DE-BB",
-                "Schleswig-Holstein": "DE-SH",
-                "Hamburg": "DE-HH",
-                "Berlin": "DE-BE",
-                "Saarland": "DE-SL",
-                "Mecklenburg-Vorpommern": "DE-MV",
-                "Baden-Württemberg": "DE-BW",
-                "Sachsen": "DE-SN",
-                "Niedersachsen": "DE-NI",
-                "Bayern": "DE-BY",
-                "Sachsen-Anhalt": "DE-ST",
-                "Nordrhein-Westfalen": "DE-NW",
-                "Bremen": "DE-HB",
-                "Thüringen": "DE-TH",
-            }
+        def get_iso3(country_id: str, from_iso2: bool):
 
+            country_id_split = country_id.split(",")[0]
             if from_iso2:
-                country = pycountry.countries.get(alpha_2=country)
+                country = pycountry.countries.get(alpha_2=country_id)
             else:
-                if country in germany_states.keys():
-                    return germany_states[country]
-                country = pycountry.countries.get(name=country)
+                if country_id in germany_federal.keys():
+
+                    return germany_federal[country_id]
+                else:
+                    country = pycountry.countries.get(name=country_id_split)
 
             if country is None:
-                unknown_country_code = "UNK"
-                return unknown_country_code
+                try:
+                    country = pycountry.countries.search_fuzzy(country_id_split)[0]
+                except:
+                    unknown_country_code = "UNK"
+                    print(f"{country_id} is unknown")
+                    return unknown_country_code
 
             return country.alpha_3
 
         assert self.geo_col in data.columns, "No 'geo' column found in dataset."
 
-        # if not (data[self.geo_col].str.len() > 10).any():
-        # EA = Eurasian Patent Organization
+        len_counts = data[self.geo_col].map(len).value_counts()
+
+        highest_unique_count = len_counts.iloc[0]
+        most_occuring_len = len_counts[len_counts == highest_unique_count].index[0]
+
+        geo_ids = data[self.geo_col].unique().tolist()
+
         if (data[self.geo_col].str.isupper()).all():
-            invalid_country_codes = ["EA", "XK"]
-            old_iso2_codes = {"UK": "GB", "EL": "GR"}
+            # ISO-2 to ISO-3
+            if most_occuring_len == 2:
+                # non ISO-2 lengths should be removed if they occur as well
+                data = data.drop(data[data[self.geo_col].str.len() != 2].index)
 
-            for key in old_iso2_codes:
-                data.loc[data[self.geo_col] == key, self.geo_col] = old_iso2_codes[key]
-
-            # Drop invalid country codes
-            #
-
-            lengths = data[self.geo_col].map(len).unique()[0]
-            if lengths == 2:
-                data = data.drop(data[data[self.geo_col].str.len() > 2].index)
-                data = data.drop(
-                    data[data[self.geo_col].isin(invalid_country_codes)].index
-                )
-
-                data[self.geo_col] = data[self.geo_col].apply(get_iso3, from_iso2=True)
-
+                geo_codes = {
+                    geo_id: get_iso3(geo_id, from_iso2=True) for geo_id in geo_ids
+                }
         else:
-            # territories = {"Mainland China": "China", "US": "United States"}
-            # for key in territories:
-            #     data.loc[data[self.geo_col] == key, self.geo_col] = territories[key]
-            data[self.geo_col] = data[self.geo_col].apply(get_iso3, from_iso2=False)
+            geo_codes = {
+                geo_id: get_iso3(geo_id, from_iso2=False) for geo_id in geo_ids
+            }
+
+        data[self.geo_col] = data[self.geo_col].replace(geo_codes)
 
         assert not data.empty, "Column did not contain correct country codes."
 
