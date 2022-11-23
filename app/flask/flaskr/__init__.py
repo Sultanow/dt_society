@@ -225,7 +225,7 @@ def create_app(test_config=None):
         response_data = None
 
         for feature in features_in_columns:
-            if feature_selected in dataframe[feature].unique():
+            if feature_selected in dataframe[feature].unique().tolist():
                 response_data = feature
 
         return jsonify(response_data)

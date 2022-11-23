@@ -36,8 +36,6 @@ export class VectorautoregressionComponent implements OnInit {
     selectedDataset: undefined,
   };
 
-  private oldSelections?: Selections;
-
   public countries: string[] = [];
 
   public predictionPeriods: number = 0;
@@ -136,17 +134,14 @@ export class VectorautoregressionComponent implements OnInit {
       this.selections.datasets.length > 0 &&
       this.selections.selectedCountry != undefined
     ) {
-      if (
-        !this.selections.datasets.some(
-          (dataset) =>
-            dataset.geoSelected === undefined ||
-            dataset.timeSelected === undefined ||
-            dataset.featureSelected === undefined
-        )
-      ) {
+      console.log('update var');
+      const filteredSelections = this.selections.datasets.filter(
+        (dataset) => dataset.featureSelected !== undefined
+      );
+      if (filteredSelections.length > 1) {
         this.dataService
           .getData(
-            this.selections.datasets,
+            filteredSelections,
             '/forecast/multivariate/' + this.selectedModel,
             {
               country: this.selections.selectedCountry,
@@ -177,15 +172,6 @@ export class VectorautoregressionComponent implements OnInit {
     }
   }
 
-  ngDoCheck() {
-    if (
-      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
-    ) {
-      this.updateVarForecast();
-    }
-    this.oldSelections = structuredClone(this.selections);
-  }
-
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
@@ -199,6 +185,7 @@ export class VectorautoregressionComponent implements OnInit {
 
         this.countries = [...new Set(countries)];
       }
+      this.updateVarForecast();
     });
   }
 }

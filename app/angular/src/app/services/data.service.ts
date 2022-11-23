@@ -206,11 +206,16 @@ export class DataService {
         selections.datasets[targetDatasetIdx].reshapeSelected =
           reshapeColumn as string;
 
-        this.getFeatureColumns(selections, datasetId);
+        this.getFeatureColumns(selections, datasetId, featureSelected);
+        //
       });
   }
 
-  getFeatureColumns(selections: Selections, datasetId: string | undefined) {
+  getFeatureColumns(
+    selections: Selections,
+    datasetId: string | undefined,
+    featureSelected: string
+  ) {
     const targetDatasetIdx = selections.datasets.findIndex(
       (dataset) => dataset.id == datasetId
     );
@@ -235,7 +240,9 @@ export class DataService {
             featureColumns as Options
           ).features;
         }
+        selections.datasets[targetDatasetIdx].featureSelected = featureSelected;
         this.updateTotalCountries(selections);
+        this.updateDatasetsSelection(selections);
       });
   }
 

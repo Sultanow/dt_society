@@ -6,7 +6,7 @@
     (change)="changeFocus()"
   >
     <label class="section-label">Datasets</label>
-    <ng-container *ngFor="let dataset of selections.datasets">
+    <ng-container *ngFor="let dataset of selections.datasets; let i = index">
       <mat-radio-button [value]="dataset.id">
         <div>
           {{ dataset.id }}
