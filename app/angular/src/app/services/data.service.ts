@@ -224,16 +224,16 @@ export class DataService {
         selections.datasets[targetDatasetIdx].countryOptions = (
           featureColumns as Options
         ).countries;
+        this.updateTotalCountries(selections);
+
         if (selections.datasets[targetDatasetIdx].reshapeSelected !== null) {
           selections.datasets[targetDatasetIdx].timeSelected = 'Time';
+          this.updateDatasetsSelection(selections);
         } else {
           selections.datasets[targetDatasetIdx].timeOptions = (
             featureColumns as Options
           ).features;
         }
-
-        this.updateTotalCountries(selections);
-        this.updateDatasetsSelection(selections);
       });
   }
 }
