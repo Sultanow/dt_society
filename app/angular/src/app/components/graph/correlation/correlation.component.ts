@@ -109,15 +109,6 @@ export class CorrelationComponent implements OnInit {
     }
   }
 
-  ngDoCheck() {
-    if (
-      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
-    ) {
-      this.updateCorrelationPlot();
-    }
-    this.oldSelections = structuredClone(this.selections);
-  }
-
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
@@ -128,7 +119,8 @@ export class CorrelationComponent implements OnInit {
   private updateCorrelationPlot() {
     if (
       this.selections.datasets.length > 0 &&
-      this.selections.selectedCountry !== undefined
+      this.selections.selectedCountry !== undefined 
+      //&& !this.selections.datasets.some((dataset) => dataset.timeSelected === undefined)
     ) {
         this.dataService
           .getData(this.selections.datasets, '/graph/corr', {

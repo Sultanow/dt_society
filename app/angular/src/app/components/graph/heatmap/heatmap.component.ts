@@ -74,21 +74,20 @@ export class HeatmapComponent implements OnInit {
       this.selections.datasets.length > 0 &&
       this.selectedFeatures !== undefined &&
       this.selectedFeatures!.length > 1
+      //&& !this.selections.datasets.some((dataset) => dataset.timeSelected === undefined)
     ) {
-      
-        this.dataService
-          .getData(this.selections.datasets, '/graph/heatmap', {
-            features: this.selectedFeatures,
-            country: this.selections.selectedCountry,
-          })
-          .subscribe((event) => {
-            if (event.type === HttpEventType.Response) {
-              if (event.body) {
-                this.createHeatmapPlot(event.body as CorrelationMatrix);
-              }
+      this.dataService
+        .getData(this.selections.datasets, '/graph/heatmap', {
+          features: this.selectedFeatures,
+          country: this.selections.selectedCountry,
+        })
+        .subscribe((event) => {
+          if (event.type === HttpEventType.Response) {
+            if (event.body) {
+              this.createHeatmapPlot(event.body as CorrelationMatrix);
             }
-          });
-      
+          }
+        });
     }
   }
 
@@ -99,20 +98,20 @@ export class HeatmapComponent implements OnInit {
         this.featureOptions = [];
       }
 
-      this.updateFeatureOptions(this.selections.selectedCountry);
-      let currentFeatureSelection = this.selectionControl
+      this.updateFeatureOptions();
+
+      if(JSON.stringify(this.selections.datasets) !== JSON.stringify(value.datasets)){}
+      this.selectionControl
         .get('selectedFeaturesControl')!
-        .getRawValue();
-      if (currentFeatureSelection !== null) {
-        let newSelection = currentFeatureSelection.filter((x: string) =>
-          this.featureOptions.includes(x)
-        );
-        this.selectionControl
-          .get('selectedFeaturesControl')!
-          .setValue(newSelection);
-        this.selectedFeatures = newSelection;
-        this.updateHeatmap();
-      }
+        .setValue(this.featureOptions);
+        
+
+      //let currentFeatureSelection: string[] = this.selectionControl.get('selectedFeaturesControl')!.getRawValue();
+      //if (currentFeatureSelection !== null) {
+      //  let newSelection = currentFeatureSelection.filter((x: string) => this.featureOptions.includes(x));
+      //  this.selectionControl.get('selectedFeaturesControl')!.setValue(newSelection);
+      //  this.selectedFeatures = newSelection;
+      //}
     });
 
     this.selectionControl
@@ -129,13 +128,15 @@ export class HeatmapComponent implements OnInit {
       });
   }
 
-  private updateFeatureOptions(selectedCountry: any) {
+  private updateFeatureOptions() {
     this.featureOptions = [];
     for (const dataset of this.selections.datasets) {
       if (
-        selectedCountry !== null &&
+        this.selections.selectedCountry !== (undefined && null) &&
         dataset.featureOptions !== undefined &&
-        dataset.countryOptions?.includes(selectedCountry)
+        dataset.countryOptions?.includes(
+          this.selections.selectedCountry?.toString()
+        )
       ) {
         this.featureOptions.push(...dataset.featureOptions);
       }

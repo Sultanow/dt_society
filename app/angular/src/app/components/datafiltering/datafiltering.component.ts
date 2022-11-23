@@ -15,9 +15,8 @@ export class DatafilteringComponent implements OnInit {
   selections: Selections = {
     datasets: [],
     selectedDataset: undefined,
+    totalCountries: [],
   };
-
-  fileName = '';
 
   updateSelectedColumns(
     filename: string | undefined,
@@ -51,11 +50,15 @@ export class DatafilteringComponent implements OnInit {
     this.dialog.open(UploaddialogComponent, { data: this.selections });
   }
 
-  onDeleteFile(datasedId: string | undefined) {
+   onDeleteFile(datasedId: string | undefined) {
     this.dataService.deleteDataset(datasedId, this.selections);
   }
 
   changeFocus() {
+    this.dataService.updateDatasetsSelection(this.selections);
+  }
+
+  updateCountry() {
     this.dataService.updateDatasetsSelection(this.selections);
   }
 
