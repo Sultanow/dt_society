@@ -133,7 +133,7 @@ def create_app(test_config=None):
         datasets = collection.find({})
 
         for i, dataset in enumerate(datasets):
-            df = parse_dataset(geo_column=None, dataset_id=i)
+            df, _ = parse_dataset(geo_column=None, dataset_id=i)
 
             df = df.fillna(0)
 
@@ -161,13 +161,15 @@ def create_app(test_config=None):
             return ("Empty request.", 400)
 
         file_id = data["datasetId"]
-        reshape_column = data["reshapeColumn"]
+        # reshape_column = data["reshapeColumn"]
         geo_column = data["geoColumn"]
+        feature_selected = data["featureSelected"]
 
-        df = parse_dataset(
+        df, reshape_column = parse_dataset(
             geo_column=geo_column,
             dataset_id=file_id,
-            reshape_column=reshape_column,
+            selected_feature=feature_selected
+            # reshape_column=reshape_column,
         )
 
         feature_columns = [
@@ -182,6 +184,7 @@ def create_app(test_config=None):
 
         response_data["features"] = feature_columns
         response_data["countries"] = countries
+        response_data["reshape_column"] = reshape_column
 
         return response_data
 

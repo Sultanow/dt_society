@@ -21,4 +21,5 @@ export interface Selections {
 export interface Options {
   features?: string[];
   countries?: string[];
+  reshape_column?: string;
 }

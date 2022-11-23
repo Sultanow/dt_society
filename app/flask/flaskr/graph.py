@@ -20,21 +20,25 @@ def get_selected_data():
 
     if data is None:
         return ("Empty request", 400)
-    
+
     dataset_id = data["id"]
-    
+
     geo_selected = data["geoSelected"] if "geoSelected" in data else None
-        
-    reshape_col = (data["reshapeSelected"] if data["reshapeSelected"] != "N/A" else None) if "reshapeSelected" in data else None
-   
-    
-    df = parse_dataset(geo_column=geo_selected, dataset_id=dataset_id, reshape_column=reshape_col)
+
+    reshape_col = (
+        (data["reshapeSelected"] if data["reshapeSelected"] != "N/A" else None)
+        if "reshapeSelected" in data
+        else None
+    )
+
+    df, _ = parse_dataset(
+        geo_column=geo_selected, dataset_id=dataset_id, reshape_column=reshape_col
+    )
     df.fillna(value=0)
 
     response_data = df.to_json(orient="records")
 
     return response_data
-    
 
 
 @bp.route("/history", methods=["GET", "POST"])
@@ -53,7 +57,7 @@ def get_selected_feature_data():
     dataset_id = data["id"]
     reshape_col = data["reshapeSelected"] if data["reshapeSelected"] != "N/A" else None
 
-    df = parse_dataset(
+    df, _ = parse_dataset(
         geo_column=geo_selected,
         dataset_id=dataset_id,
         reshape_column=reshape_col,
@@ -98,13 +102,15 @@ def get_heatmap():
         if "geoSelected" in dataset and "reshapeSelected" in dataset:
 
             reshape_selected = (
-                dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
+                dataset["reshapeSelected"]
+                if dataset["reshapeSelected"] != "N/A"
+                else None
             )
             geo_selected = dataset["geoSelected"]
             dataset_id = dataset["id"]
             time_selected = dataset["timeSelected"]
 
-            df = parse_dataset(
+            df, _ = parse_dataset(
                 geo_column=geo_selected,
                 dataset_id=dataset_id,
                 reshape_column=reshape_selected,
@@ -173,13 +179,15 @@ def get_correlation_lines():
             file_data = {}
 
             reshape_selected = (
-                dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
+                dataset["reshapeSelected"]
+                if dataset["reshapeSelected"] != "N/A"
+                else None
             )
             geo_selected = dataset["geoSelected"]
             dataset_id = dataset["id"]
             time_selected = dataset["timeSelected"]
 
-            df = parse_dataset(
+            df, _ = parse_dataset(
                 geo_column=geo_selected,
                 dataset_id=dataset_id,
                 reshape_column=reshape_selected,

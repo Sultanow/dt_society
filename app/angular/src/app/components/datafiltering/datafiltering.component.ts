@@ -35,7 +35,7 @@ export class DatafilteringComponent implements OnInit {
           this.dataService.updateDatasetsSelection(this.selections);
           break;
         case 'feature':
-          this.dataService.getReshapedData(this.selections, filename, value);
+          this.dataService.getFeatureColumns(this.selections, filename, value);
       }
     }
   }

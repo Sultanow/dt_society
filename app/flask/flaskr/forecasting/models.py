@@ -181,8 +181,6 @@ def var_fit_and_predict_multi(
 
     model = VAR(merged_df_diff)
 
-    print(merged_df_diff)
-
     result = model.fit(maxlags=max_lags)
 
     forecast = result.forecast(merged_df_diff[-max_lags:].values, periods)

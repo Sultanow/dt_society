@@ -7,7 +7,9 @@ from ..extensions import cache, mongo
 
 
 @cache.memoize(timeout=90)
-def parse_dataset(geo_column, dataset_id, reshape_column=None) -> pd.DataFrame:
+def parse_dataset(
+    geo_column, dataset_id, reshape_column=None, selected_feature: str = None
+) -> pd.DataFrame:
     """_summary_
 
     Args:
@@ -28,13 +30,22 @@ def parse_dataset(geo_column, dataset_id, reshape_column=None) -> pd.DataFrame:
 
     df = DigitalTwinTimeSeries(file_path["data"], geo_col=geo_column, sep="dict")
 
+    if selected_feature is not None:
+        features_in_columns = df.data.columns.to_list()
+
+        response_data = None
+
+        for feature in features_in_columns:
+            if selected_feature in df.data[feature].unique().tolist():
+                reshape_column = feature
+
     if reshape_column is not None:
         df = df.reshape_wide_to_long(value_id_column=reshape_column)
 
     else:
         df = df.data
 
-    return df
+    return df, reshape_column
 
 
 @cache.memoize(timeout=90)
