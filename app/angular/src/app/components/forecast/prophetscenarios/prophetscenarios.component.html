@@ -15,15 +15,21 @@
               aria-label="Select an option"
               (change)="updateProphetForecast()"
             >
-              <mat-radio-button
-                *ngFor="let dataset of selections.datasets"
-                [value]="dataset.id"
-              >
-                {{ dataset.id }}
-                <div *ngIf="dataset.featureSelected !== undefined">
-                  ({{ dataset.featureSelected }})
-                </div>
-              </mat-radio-button>
+              <ng-container *ngFor="let dataset of selections.datasets">
+                <mat-radio-button
+                  *ngIf="
+                    dataset.id !== undefined &&
+                    dataset.featureSelected !== undefined
+                  "
+                  [value]="dataset.id"
+                  [disabled]="selectableScenarios[dataset.id] === false"
+                >
+                  {{ dataset.id }}
+                  <div *ngIf="dataset.featureSelected !== undefined">
+                    ({{ dataset.featureSelected }})
+                  </div>
+                </mat-radio-button>
+              </ng-container>
             </mat-radio-group>
           </div>
         </div>
@@ -44,8 +50,14 @@
                   dependentDataset !== undefined &&
                   predictionPeriods > 0
                 "
-                [disabled]="dataset.id === dependentDataset"
-                [expanded]="dataset.id !== dependentDataset"
+                [disabled]="
+                  dataset.id === dependentDataset ||
+                  selectableScenarios[dataset.id] === false
+                "
+                [expanded]="
+                  dataset.id !== dependentDataset &&
+                  selectableScenarios[dataset.id] === true
+                "
               >
                 <mat-expansion-panel-header>
                   <mat-panel-title>
@@ -55,7 +67,7 @@
                     *ngIf="
                       activeScenarios[dataset.id] === true &&
                         dataset.id !== dependentDataset;
-                      else elseBlock
+                      else Disabled
                     "
                   >
                     Active
@@ -63,19 +75,30 @@
                       >check_circle_outline</mat-icon
                     >
                   </mat-panel-description>
-                  <ng-template #elseBlock>
+                  <ng-template #Disabled>
                     <mat-panel-description
                       *ngIf="
                         dataset.id !== dependentDataset;
-                        else secondElseBlock
+                        else ForecastedData
                       "
                     >
-                      Inactive
+                      <div
+                        *ngIf="
+                          selectableScenarios[dataset.id] === true;
+                          else NoCountryData
+                        "
+                      >
+                        Inactive
+                      </div>
+                      <ng-template #NoCountryData
+                        ><div>No data for selected country</div></ng-template
+                      >
+
                       <mat-icon class="status-icon" color="warn"
                         >block</mat-icon
                       >
                     </mat-panel-description>
-                    <ng-template #secondElseBlock>
+                    <ng-template #ForecastedData>
                       <mat-panel-description>
                         Forecasted
                         <mat-icon class="status-icon-target"

@@ -59,12 +59,6 @@ export class ProphetscenariosComponent implements OnInit {
     selectedDataset: undefined,
   };
 
-  private oldSelections?: Selections;
-
-  public countries: string[] = [];
-
-  // public selectedCountry?: string;
-
   public scenarioIndeces: number[] = [];
 
   public predictionPeriods: number = 5;
@@ -80,6 +74,8 @@ export class ProphetscenariosComponent implements OnInit {
   public maxScenarios = 5;
 
   public activeScenarios: ActiveScenarios = {};
+
+  public selectableScenarios: ActiveScenarios = {};
 
   public showSpinner: boolean = false;
 
@@ -263,27 +259,26 @@ export class ProphetscenariosComponent implements OnInit {
       this.selections.datasets.length > 0 &&
       this.selections.selectedCountry != undefined
     ) {
-      if (
-        !this.selections.datasets.some(
-          (dataset) =>
-            dataset.geoSelected === undefined ||
-            dataset.timeSelected === undefined ||
-            dataset.featureSelected === undefined
-        )
-      ) {
-        const activeScenarios = Object.entries(this.scenarios).filter(
+      const activeScenarios = Object.fromEntries(
+        Object.entries(this.scenarios).filter(
           ([key]) => this.activeScenarios[key] === true
-        );
+        )
+      ) as Scenarios;
 
+      const activeSelections = this.selections.datasets.filter((dataset) =>
+        Object.keys(activeScenarios).includes(dataset.id as string)
+      );
+
+      if (Object.keys(activeScenarios).length > 1) {
         this.data.data = [];
         this.dataScenarios.data = [];
         this.showSpinner = true;
         this.dataService
-          .getData(this.selections.datasets, '/forecast/prophet', {
+          .getData(activeSelections, '/forecast/prophet', {
             country: this.selections.selectedCountry,
             periods: this.predictionPeriods,
             frequency: this.frequency,
-            scenarios: Object.fromEntries(activeScenarios),
+            scenarios: activeScenarios,
             dependentDataset: this.dependentDataset,
           })
           .subscribe((event) => {
@@ -298,22 +293,42 @@ export class ProphetscenariosComponent implements OnInit {
     }
   }
 
-  ngDoCheck() {
-    if (
-      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
-    ) {
-      if (this.selections.datasets.length > 0) {
-      }
-    }
-    this.oldSelections = structuredClone(this.selections);
-  }
-
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
       if (this.selections.datasets.length > 0) {
-        this.dependentDataset = this.selections.datasets[0].id;
+        if (this.dependentDataset === undefined) {
+          this.dependentDataset = this.selections.datasets[0].id;
+        }
+
         this.updateScenarios();
+
+        for (const dataset_id of Object.keys(this.activeScenarios)) {
+          let selectedDataset = this.selections.datasets.filter(
+            (dataset) => dataset.id === dataset_id
+          )[0];
+
+          this.selectableScenarios[dataset_id] =
+            selectedDataset.countryOptions?.includes(
+              this.selections.selectedCountry as string
+            ) as boolean;
+
+          this.activeScenarios[dataset_id] =
+            selectedDataset.countryOptions?.includes(
+              this.selections.selectedCountry as string
+            ) as boolean;
+        }
+
+        const selectabelDependentDatasets = Object.keys(
+          this.selectableScenarios
+        ).filter((dataset_id) => this.selectableScenarios[dataset_id] === true);
+
+        if (
+          !selectabelDependentDatasets.includes(this.dependentDataset as string)
+        ) {
+          this.dependentDataset = selectabelDependentDatasets[0];
+        }
+
         this.updateProphetForecast();
       }
     });
