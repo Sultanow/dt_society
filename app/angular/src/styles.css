@@ -18,3 +18,9 @@ body {
   align-items: center;
   width: 100%;
 }
+
+.section-label {
+  font-size: 18px;
+  font-weight: lighter;
+  margin-bottom: 10px;
+}

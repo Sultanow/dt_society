@@ -20,6 +20,10 @@ mat-radio-button {
   margin-left: 5px;
 }
 
+mat-checkbox {
+  margin-right: 10px;
+}
+
 .freq-selector {
   height: 50px;
   margin-right: 10px;
@@ -27,4 +31,14 @@ mat-radio-button {
 
 .var-wrapper {
   padding: 10px;
+}
+
+.data-selector {
+  float: right;
+  display: flex;
+  margin-left: auto;
+  margin-right: 0;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }

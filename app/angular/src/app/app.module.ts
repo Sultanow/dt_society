@@ -45,6 +45,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { OverviewComponent } from './components/overview/overview.component';
 import { CorrelationsComponent } from './components/correlations/correlations.component';
 import { RouteReuseStrategy, RouterModule } from '@angular/router';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -63,7 +64,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     DatatableComponent,
     StatisticsComponent,
     OverviewComponent,
-    CorrelationsComponent
+    CorrelationsComponent,
   ],
   imports: [
     BrowserModule,
@@ -97,16 +98,40 @@ PlotlyModule.plotlyjs = PlotlyJS;
     MatDividerModule,
     BrowserModule,
     RouterModule.forRoot([
-      {path: '', redirectTo: '/overview', pathMatch: 'full', data: { reuse: true}},
-      {path: 'overview', component: OverviewComponent, pathMatch: 'full', data: { reuse: true}},
-      {path: 'correlations', component: CorrelationsComponent, pathMatch: 'full', data: { reuse: true}},
-      {path: 'forecasts/var', component: VectorautoregressionComponent, pathMatch: 'full', data: { reuse: true}},
-      {path: 'forecasts/prophet', component: ProphetscenariosComponent, pathMatch: 'full', data: { reuse: true}},
-    ])
+      {
+        path: '',
+        redirectTo: '/overview',
+        pathMatch: 'full',
+        data: { reuse: true },
+      },
+      {
+        path: 'overview',
+        component: OverviewComponent,
+        pathMatch: 'full',
+        data: { reuse: true },
+      },
+      {
+        path: 'correlations',
+        component: CorrelationsComponent,
+        pathMatch: 'full',
+        data: { reuse: true },
+      },
+      {
+        path: 'forecasts/var',
+        component: VectorautoregressionComponent,
+        pathMatch: 'full',
+        data: { reuse: true },
+      },
+      {
+        path: 'forecasts/prophet',
+        component: ProphetscenariosComponent,
+        pathMatch: 'full',
+        data: { reuse: true },
+      },
+    ]),
+    MatCheckboxModule,
   ],
-  providers: [ 
-    {provide: RouteReuseStrategy, useClass: RoutecachingService }
-  ],
+  providers: [{ provide: RouteReuseStrategy, useClass: RoutecachingService }],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
