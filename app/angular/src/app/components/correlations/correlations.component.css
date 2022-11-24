@@ -1,0 +1,13 @@
+.dialog{
+    max-width: 500px;
+    display: inline-block;
+}
+
+.dialog-wrapper{
+    padding: 10px;
+    text-align: center;
+}
+
+mat-card-title{
+    line-height: 1.5;
+}

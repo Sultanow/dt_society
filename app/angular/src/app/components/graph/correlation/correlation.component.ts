@@ -38,8 +38,6 @@ export class CorrelationComponent implements OnInit {
     selectedDataset: undefined,
   };
 
-  private oldSelections?: Selections;
-
   createCorrelationLines(data: ColumnValues[]) {
     if (this.data.data.length > 0) {
       this.data.data = [];
@@ -119,8 +117,7 @@ export class CorrelationComponent implements OnInit {
   private updateCorrelationPlot() {
     if (
       this.selections.datasets.length > 0 &&
-      this.selections.selectedCountry !== undefined 
-      //&& !this.selections.datasets.some((dataset) => dataset.timeSelected === undefined)
+      this.selections.selectedCountry !== undefined
     ) {
         this.dataService
           .getData(this.selections.datasets, '/graph/corr', {

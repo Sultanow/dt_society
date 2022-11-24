@@ -1,5 +1,5 @@
 <div class="statistics-wrapper" [formGroup]="selectionControl">
-    <mat-card class="outer">
+    <mat-card class="outer" *ngIf="(data | json) != ({} | json)">
         <mat-label>Statistics of {{ selections.selectedDataset }}</mat-label>
         <div class="stats-container">
             <mat-form-field>

@@ -16,9 +16,16 @@ export class CorrelationsComponent implements OnInit {
     selectedDataset: undefined,
   };
 
+  public validDatasetAvailable: boolean = false;
+
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
+      if(this.selections.datasets.some((dataset) => dataset.timeSelected !== undefined && dataset.featureSelected !== undefined)){
+        this.validDatasetAvailable = true;
+      } else{
+        this.validDatasetAvailable = false;
+      }
     });
   }
 }

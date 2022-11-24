@@ -48,6 +48,8 @@ export class VectorautoregressionComponent implements OnInit {
 
   public showSpinner: boolean = false;
 
+  public validDatasetsAvailable: boolean = false;
+
   createVarForecast(data: ColumnValues) {
     if (this.data.data.length > 0) {
       this.data.data = [];
@@ -190,12 +192,25 @@ export class VectorautoregressionComponent implements OnInit {
 
       var countries: string[] | undefined = [] || undefined;
 
+      this.validDatasetsAvailable = false;
+
       if (this.selections.datasets.length > 0) {
         for (const data of this.selections.datasets) {
           countries = [...countries, ...(data.countryOptions || [])];
         }
 
         this.countries = [...new Set(countries)];
+
+        let count = 0;
+
+        for(let dataset of this.selections.datasets){
+            if(dataset.countryOptions?.includes(this.selections.selectedCountry!)){
+              count++;
+            }
+        }
+        if(count > 1){
+          this.validDatasetsAvailable = true;
+        }
       }
       this.updateVarForecast();
     });

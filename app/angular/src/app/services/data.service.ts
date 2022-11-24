@@ -200,7 +200,6 @@ export class DataService {
 
     selections.totalCountries = [...new Set(countries)].sort();
     selections.selectedCountry = selections.totalCountries[0];
-    this.updateDatasetsSelection(selections);
   }
 
   getFeatureColumns(
@@ -230,7 +229,6 @@ export class DataService {
         selections.datasets[targetDatasetIdx].countryOptions = (
           featureColumns as Options
         ).countries;
-        this.updateTotalCountries(selections);
 
         if (selections.datasets[targetDatasetIdx].reshapeSelected !== null) {
           selections.datasets[targetDatasetIdx].timeSelected = 'Time';
@@ -239,6 +237,9 @@ export class DataService {
           selections.datasets[targetDatasetIdx].timeOptions = (
             featureColumns as Options
           ).features;
+        }
+        if(selections.datasets[targetDatasetIdx].timeSelected !== undefined){
+          this.updateTotalCountries(selections);
         }
       });
   }

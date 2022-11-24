@@ -31,6 +31,7 @@ export class DatafilteringComponent implements OnInit {
       switch (column) {
         case 'time':
           this.selections.datasets[datasetIndex].timeSelected = value;
+          this.dataService.updateTotalCountries(this.selections);
           this.dataService.updateDatasetsSelection(this.selections);
           break;
         case 'feature':

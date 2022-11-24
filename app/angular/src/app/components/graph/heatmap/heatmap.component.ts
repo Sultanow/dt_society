@@ -40,7 +40,6 @@ export class HeatmapComponent implements OnInit {
 
   countries: (undefined | string[] | string)[] = [];
 
-  private oldSelections?: Selections;
   public selectedFeatures?: string | null;
 
   createHeatmapPlot(data: CorrelationMatrix) {
@@ -74,7 +73,6 @@ export class HeatmapComponent implements OnInit {
       this.selections.datasets.length > 0 &&
       this.selectedFeatures !== undefined &&
       this.selectedFeatures!.length > 1
-      //&& !this.selections.datasets.some((dataset) => dataset.timeSelected === undefined)
     ) {
       this.dataService
         .getData(this.selections.datasets, '/graph/heatmap', {
@@ -92,28 +90,6 @@ export class HeatmapComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.dataService.currentSelections.subscribe((value) => {
-      this.selections = value;
-      if (this.featureOptions.length > 0) {
-        this.featureOptions = [];
-      }
-
-      this.updateFeatureOptions();
-
-      if(JSON.stringify(this.selections.datasets) !== JSON.stringify(value.datasets)){}
-      this.selectionControl
-        .get('selectedFeaturesControl')!
-        .setValue(this.featureOptions);
-        
-
-      //let currentFeatureSelection: string[] = this.selectionControl.get('selectedFeaturesControl')!.getRawValue();
-      //if (currentFeatureSelection !== null) {
-      //  let newSelection = currentFeatureSelection.filter((x: string) => this.featureOptions.includes(x));
-      //  this.selectionControl.get('selectedFeaturesControl')!.setValue(newSelection);
-      //  this.selectedFeatures = newSelection;
-      //}
-    });
-
     this.selectionControl
       .get('selectedFeaturesControl')!
       .valueChanges.subscribe((selectedFeatures) => {
@@ -126,6 +102,19 @@ export class HeatmapComponent implements OnInit {
           this.updateHeatmap();
         }
       });
+
+    this.dataService.currentSelections.subscribe((value) => {
+      this.selections = value;
+      if (this.featureOptions.length > 0) {
+        this.featureOptions = [];
+      }
+
+      this.updateFeatureOptions();
+
+      this.selectionControl
+        .get('selectedFeaturesControl')!
+        .setValue(this.featureOptions);
+    });
   }
 
   private updateFeatureOptions() {
@@ -138,7 +127,7 @@ export class HeatmapComponent implements OnInit {
           this.selections.selectedCountry?.toString()
         )
       ) {
-        this.featureOptions.push(...dataset.featureOptions);
+        this.featureOptions.push(...dataset.featureOptions.filter((feature) => feature != dataset.timeSelected));
       }
     }
   }

@@ -1,8 +1,27 @@
-<div *ngIf="selections.datasets.length > 0; then correlations; else dialog"></div>
+<div *ngIf="selections.datasets.length > 0; then correlations; else uploadDialog"></div>
+
 <ng-template #correlations>
+    <div *ngIf="validDatasetAvailable; then validSelections; else inValidSelections"></div>
+</ng-template>
+
+<ng-template #uploadDialog>
+    <app-fileupload></app-fileupload>
+</ng-template>
+
+<ng-template #validSelections>
     <app-heatmap></app-heatmap>
     <app-correlation></app-correlation>
 </ng-template>
-<ng-template #dialog>
-    <app-fileupload></app-fileupload>
+
+<ng-template #inValidSelections>
+    <div class="dialog-wrapper">
+        <mat-card class="dialog">
+          <mat-card-title>Correlations cannot be computed for the current selections</mat-card-title>
+        <br>
+        <mat-card-content>
+            <p>Please select a feature (and time if necessary) for at least one of the data sets.</p>
+            <p>The datasets can be managed through the sidebar.</p>
+        </mat-card-content>
+        </mat-card>
+      </div>
 </ng-template>
