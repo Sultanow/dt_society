@@ -1,10 +1,23 @@
-.statistics-wrapper{
+.statistics-wrapper, .dialog-wrapper{
   padding: 10px;
-  
+  text-align: center;
+  justify-content: center;
 }
 
-.outer{
+.outer, .dialog {
   height: 450px;
+}
+
+.content-container{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+mat-card-title{
+  line-height: 1.5;
 }
 
 .single-stat{

@@ -37,6 +37,7 @@ export class HistoryComponent implements OnInit {
     if (this.historyPlot.data.length > 0) {
       this.historyPlot.data = [];
     }
+    let count = 0;
     for (const [key, value] of Object.entries(data)) {
       let trace: any = {
         type: 'scatter',
@@ -44,10 +45,11 @@ export class HistoryComponent implements OnInit {
       };
 
       trace.name = key;
-
-      if (trace.name !== 'DEU') {
+      
+      if (count > 4) {
         trace.visible = 'legendonly';
       }
+      count++;
 
       const timeSelected = this.selections.datasets[selectedIdx].timeSelected;
       const featureSelected =
@@ -62,10 +64,9 @@ export class HistoryComponent implements OnInit {
     }
   }
 
-  ngDoCheck() {
-    if (
-      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
-    ) {
+  ngOnInit(): void {
+    this.dataService.currentSelections.subscribe((value) => {
+      this.selections = value;
       if (this.selections.datasets.length > 0) {
         const selectedDatasetId = this.selections.selectedDataset;
 
@@ -74,25 +75,9 @@ export class HistoryComponent implements OnInit {
         );
 
         if (this.selections.datasets[selectedDatasetIdx] !== undefined) {
-          if (
-            this.selections.datasets[selectedDatasetIdx].geoSelected !==
-              undefined &&
-            this.selections.datasets[selectedDatasetIdx].reshapeSelected !==
-              undefined &&
-            this.selections.datasets[selectedDatasetIdx].featureSelected !==
-              undefined &&
-            this.selections.datasets[selectedDatasetIdx].timeSelected !==
-              undefined
+          let selectedDataset = this.selections.datasets[selectedDatasetIdx];
+          if (selectedDataset.featureSelected !== undefined && selectedDataset.timeSelected !== undefined
           ) {
-            if (
-              this.selections.datasets[selectedDatasetIdx].featureSelected !==
-                this.oldSelections?.datasets[selectedDatasetIdx]
-                  .featureSelected ||
-              this.selections.selectedDataset !==
-                this.oldSelections?.selectedDataset ||
-              this.selections.datasets[selectedDatasetIdx].timeSelected !==
-                this.oldSelections?.datasets[selectedDatasetIdx].timeSelected
-            ) {
               this.dataService
                 .getData(
                   this.selections.datasets[selectedDatasetIdx],
@@ -109,17 +94,10 @@ export class HistoryComponent implements OnInit {
                     }
                   }
                 });
-            }
+            
           }
         }
       }
-      this.oldSelections = structuredClone(this.selections);
-    }
-  }
-
-  ngOnInit(): void {
-    this.dataService.currentSelections.subscribe((value) => {
-      this.selections = value;
     });
   }
 }

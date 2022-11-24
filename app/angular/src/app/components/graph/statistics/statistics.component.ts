@@ -23,6 +23,8 @@ export class StatisticsComponent implements OnInit {
   };
   private oldSelections?: Selections;
 
+  public dataAvailable:boolean = false;;
+
   selectedCountry: string = "";
   oldSelectedCountry?: string;
 
@@ -52,6 +54,7 @@ export class StatisticsComponent implements OnInit {
   updateData(newdata: CountryData) {
     
     this.data = newdata;
+    this.countries = [];
 
     const selectedDatasetIdx = this.selections.datasets.findIndex(
       (dataset) => dataset.id == this.selections.selectedDataset
@@ -65,6 +68,8 @@ export class StatisticsComponent implements OnInit {
     
     this.updateSlider(timearray);    
     this.resetStatistics();
+    
+    this.dataAvailable = true;
   }
 
   updateGrowth(){
@@ -133,61 +138,51 @@ export class StatisticsComponent implements OnInit {
     this.selectionControl.get('selectedYearControl')!.setValue(this.timestamps[0]);
   }
 
-  ngDoCheck() {
-    if (
-      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
-    ) {
-      if (this.selections.datasets.length > 0) {
-        const datasetId = this.selections.selectedDataset;
+  private getData() {
+    if (this.selections.datasets.length > 0) {
+      const datasetId = this.selections.selectedDataset;
 
-        const selectedDatasetIdx = this.selections.datasets.findIndex(
-          (dataset) => dataset.id == datasetId
-        );
+      const selectedDatasetIdx = this.selections.datasets.findIndex(
+        (dataset) => dataset.id == datasetId
+      );
 
-        if (this.selections.datasets[selectedDatasetIdx] !== undefined) {
-          if (
-            this.selections.datasets[selectedDatasetIdx].geoSelected !==
-              undefined &&
-            this.selections.datasets[selectedDatasetIdx].reshapeSelected !==
-              undefined &&
-            this.selections.datasets[selectedDatasetIdx].featureSelected !==
-              undefined &&
+      let selectedDataset = this.selections.datasets[selectedDatasetIdx];
+
+      if (selectedDataset !== undefined) {
+        
+        if (selectedDataset.featureSelected !== undefined && selectedDataset.timeSelected !== undefined) {
+          if (this.selections.datasets[selectedDatasetIdx].featureSelected !==
+            this.oldSelections?.datasets[selectedDatasetIdx]
+              .featureSelected ||
+            this.selections.selectedDataset !==
+            this.oldSelections?.selectedDataset ||
             this.selections.datasets[selectedDatasetIdx].timeSelected !==
-              undefined
-          ) {
-            if (
-              this.selections.datasets[selectedDatasetIdx].featureSelected !==
-                this.oldSelections?.datasets[selectedDatasetIdx]
-                  .featureSelected ||
-              this.selections.selectedDataset !==
-                this.oldSelections?.selectedDataset ||
-              this.selections.datasets[selectedDatasetIdx].timeSelected !==
-                this.oldSelections?.datasets[selectedDatasetIdx].timeSelected
-            ) {
-              this.dataService
-                .getData(
-                  this.selections.datasets[selectedDatasetIdx],
-                  '/graph/statistics',
-                  {}
-                )
-                .subscribe((res) => {
-                  if (res.type === HttpEventType.Response) {
-                    if (res.body) {
-                      this.updateData(res.body as CountryData);
-                    }
+            this.oldSelections?.datasets[selectedDatasetIdx].timeSelected) {
+            this.dataService
+              .getData(
+                this.selections.datasets[selectedDatasetIdx],
+                '/graph/statistics',
+                {}
+              )
+              .subscribe((res) => {
+                if (res.type === HttpEventType.Response) {
+                  if (res.body) {
+                    this.updateData(res.body as CountryData);
                   }
-                });
-            }
-        }
+                }
+              });
+          }
+        } else {
+          this.dataAvailable = false;
         }
       }
-      this.oldSelections = structuredClone(this.selections);
     }
   }
 
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
+      this.getData();
     });
 
     this.selectionControl
