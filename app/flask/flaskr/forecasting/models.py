@@ -169,15 +169,17 @@ def var_fit_and_predict_multi(
     #     "Daily": ("D", 1),
     # }
 
-    merged_df, time = merge_dataframes_multi(dataframes, time_columns)
+    if len(dataframes) == 1:
+        merged_df, time = dataframes[0], time_columns[0]
+    else:
+
+        merged_df, time = merge_dataframes_multi(dataframes, time_columns)
 
     merged_df[time] = pd.to_datetime(merged_df[time].astype(str))
 
     merged_df_diff = merged_df[feature_columns].diff().astype("float32").dropna()
 
     model = VAR(merged_df_diff)
-    
-    print(merged_df_diff)
 
     result = model.fit(maxlags=max_lags)
 

@@ -44,25 +44,26 @@ def forecastVAR(model):
         time_selected = dataset["timeSelected"]
         feature_selected = dataset["featureSelected"]
 
-        df = parse_dataset(
+        df, _ = parse_dataset(
             geo_column=geo_selected,
             dataset_id=dataset_id,
             reshape_column=reshape_selected,
         )
-        filtered_df = df[df[geo_selected] == selected_country][
-            [time_selected, feature_selected]
-        ]
+        if selected_country in df[geo_selected].unique():
+            filtered_df = df[df[geo_selected] == selected_country][
+                [time_selected, feature_selected]
+            ]
 
-        filtered_df[time_selected] = pd.to_datetime(
-            filtered_df[time_selected].astype("str")
-        )
+            filtered_df[time_selected] = pd.to_datetime(
+                filtered_df[time_selected].astype("str")
+            )
 
-        freq = pd.infer_freq(filtered_df[time_selected])
+            freq = pd.infer_freq(filtered_df[time_selected])
 
-        filtered_dfs.append(filtered_df)
-        frequencies.append(freq)
-        time_columns.append(time_selected)
-        feature_columns.append(feature_selected)
+            filtered_dfs.append(filtered_df)
+            frequencies.append(freq)
+            time_columns.append(time_selected)
+            feature_columns.append(feature_selected)
 
     if len(set(frequencies)) != 1:
         print("Frequencies of datasets do not match.")
@@ -125,7 +126,7 @@ def forecastProphet():
             time_selected = dataset["timeSelected"]
             feature_selected = dataset["featureSelected"]
 
-            df = parse_dataset(
+            df, _ = parse_dataset(
                 geo_column=geo_selected,
                 dataset_id=dataset_id,
                 reshape_column=reshape_selected,

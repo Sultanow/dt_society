@@ -36,8 +36,6 @@ export class VectorautoregressionComponent implements OnInit {
     selectedDataset: undefined,
   };
 
-  private oldSelections?: Selections;
-
   public countries: string[] = [];
 
   public predictionPeriods: number = 0;
@@ -47,6 +45,8 @@ export class VectorautoregressionComponent implements OnInit {
   public frequency: string = 'Yearly';
 
   public selectedModel: string = 'var';
+
+  public showSpinner: boolean = false;
 
   createVarForecast(data: ColumnValues) {
     if (this.data.data.length > 0) {
@@ -59,7 +59,7 @@ export class VectorautoregressionComponent implements OnInit {
       ')';
     this.data.layout.grid = {
       rows: 1,
-      columns: this.selections.datasets.length,
+      columns: Object.keys(data).length - 1,
       pattern: 'independent',
     };
 
@@ -131,22 +131,28 @@ export class VectorautoregressionComponent implements OnInit {
     }
   }
 
+  toggleSpinner() {
+    this.showSpinner = !this.showSpinner;
+  }
+
   updateVarForecast() {
     if (
       this.selections.datasets.length > 0 &&
       this.selections.selectedCountry != undefined
     ) {
-      if (
-        !this.selections.datasets.some(
-          (dataset) =>
-            dataset.geoSelected === undefined ||
-            dataset.timeSelected === undefined ||
-            dataset.featureSelected === undefined
-        )
-      ) {
+      const filteredSelections = this.selections.datasets.filter(
+        (dataset) =>
+          dataset.featureSelected !== undefined &&
+          dataset.timeSelected !== undefined &&
+          dataset.countryOptions?.includes(
+            this.selections.selectedCountry as string
+          )
+      );
+      if (filteredSelections.length > 1) {
+        this.toggleSpinner();
         this.dataService
           .getData(
-            this.selections.datasets,
+            filteredSelections,
             '/forecast/multivariate/' + this.selectedModel,
             {
               country: this.selections.selectedCountry,
@@ -158,6 +164,7 @@ export class VectorautoregressionComponent implements OnInit {
           .subscribe((event) => {
             if (event.type === HttpEventType.Response) {
               if (event.body) {
+                this.toggleSpinner();
                 this.createVarForecast(event.body as ColumnValues);
               }
             }
@@ -177,18 +184,9 @@ export class VectorautoregressionComponent implements OnInit {
     }
   }
 
-  ngDoCheck() {
-    if (
-      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
-    ) {
-      this.updateVarForecast();
-    }
-    this.oldSelections = structuredClone(this.selections);
-  }
-
   ngOnInit(): void {
-    this.dataService.currentSelections.subscribe((value) => {
-      this.selections = value;
+    this.dataService.currentSelections.subscribe((updatedSelections) => {
+      this.selections = updatedSelections;
 
       var countries: string[] | undefined = [] || undefined;
 
@@ -199,6 +197,7 @@ export class VectorautoregressionComponent implements OnInit {
 
         this.countries = [...new Set(countries)];
       }
+      this.updateVarForecast();
     });
   }
 }

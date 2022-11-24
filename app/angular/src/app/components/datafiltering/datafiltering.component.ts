@@ -31,13 +31,11 @@ export class DatafilteringComponent implements OnInit {
       switch (column) {
         case 'time':
           this.selections.datasets[datasetIndex].timeSelected = value;
+          this.dataService.updateDatasetsSelection(this.selections);
           break;
         case 'feature':
-          this.selections.datasets[datasetIndex].featureSelected = value;
-          this.dataService.getReshapedData(this.selections, filename, value);
+          this.dataService.getFeatureColumns(this.selections, filename, value);
       }
-
-      this.dataService.updateDatasetsSelection(this.selections);
     }
   }
 

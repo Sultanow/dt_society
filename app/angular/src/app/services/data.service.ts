@@ -164,7 +164,8 @@ export class DataService {
     this.http.request(request).subscribe((event) => {
       if (event.type == HttpEventType.Response && selectedDatasetIndex > -1) {
         selections.datasets.splice(selectedDatasetIndex, 1);
-        this.updateTotalCountries(selections)
+        this.updateTotalCountries(selections);
+        this.updateDatasetsSelection(selections);
       }
     });
   }
@@ -181,64 +182,14 @@ export class DataService {
             selections.datasets.push(dataset);
           }
         }
-        if (selections.selectedDataset === undefined && selections.datasets.length > 0) {
-
+        if (
+          selections.selectedDataset === undefined &&
+          selections.datasets.length > 0
+        ) {
           selections.selectedDataset = selections.datasets[0].id;
         }
       }
     });
-  }
-
-  getReshapedData(
-    selections: Selections,
-    datasetId: string | undefined,
-    featureSelected: string
-  ) {
-    const targetDatasetIdx = selections.datasets.findIndex(
-      (dataset) => dataset.id == datasetId
-    );
-
-    this.http
-      .post(this.apiUrl + 'data/reshapecheck', {
-        datasetId: datasetId,
-        geoColumn: selections.datasets[targetDatasetIdx].geoSelected,
-        featureSelected: featureSelected,
-      })
-      .subscribe((reshapeColumn) => {
-        selections.datasets[targetDatasetIdx].reshapeSelected =
-          reshapeColumn as string;
-
-        this.getFeatureColumns(selections, datasetId);
-      });
-  }
-
-  getFeatureColumns(selections: Selections, datasetId: string | undefined) {
-    const targetDatasetIdx = selections.datasets.findIndex(
-      (dataset) => dataset.id == datasetId
-    );
-
-    this.http
-      .post(this.apiUrl + 'data/reshape', {
-        datasetId: datasetId,
-        geoColumn: selections.datasets[targetDatasetIdx].geoSelected,
-        reshapeColumn: selections.datasets[targetDatasetIdx].reshapeSelected,
-      })
-      .subscribe((featureColumns) => {
-        selections.datasets[targetDatasetIdx].featureOptions = (
-          featureColumns as Options
-        ).features;
-        selections.datasets[targetDatasetIdx].countryOptions = (
-          featureColumns as Options
-        ).countries;
-        if (selections.datasets[targetDatasetIdx].reshapeSelected !== null) {
-          selections.datasets[targetDatasetIdx].timeSelected = 'Time';
-        } else {
-          selections.datasets[targetDatasetIdx].timeOptions = (
-            featureColumns as Options
-          ).features;
-        }
-        this.updateTotalCountries(selections);
-      });
   }
 
   updateTotalCountries(selections: Selections) {
@@ -250,5 +201,45 @@ export class DataService {
     selections.totalCountries = [...new Set(countries)].sort();
     selections.selectedCountry = selections.totalCountries[0];
     this.updateDatasetsSelection(selections);
+  }
+
+  getFeatureColumns(
+    selections: Selections,
+    datasetId: string | undefined,
+    featureSelected: string
+  ) {
+    const targetDatasetIdx = selections.datasets.findIndex(
+      (dataset) => dataset.id == datasetId
+    );
+
+    selections.datasets[targetDatasetIdx].featureSelected = featureSelected;
+
+    this.http
+      .post(this.apiUrl + 'data/reshape', {
+        datasetId: datasetId,
+        geoColumn: selections.datasets[targetDatasetIdx].geoSelected,
+        featureSelected: selections.datasets[targetDatasetIdx].featureSelected,
+      })
+      .subscribe((featureColumns) => {
+        selections.datasets[targetDatasetIdx].reshapeSelected = (
+          featureColumns as Options
+        ).reshape_column;
+        selections.datasets[targetDatasetIdx].featureOptions = (
+          featureColumns as Options
+        ).features;
+        selections.datasets[targetDatasetIdx].countryOptions = (
+          featureColumns as Options
+        ).countries;
+        this.updateTotalCountries(selections);
+
+        if (selections.datasets[targetDatasetIdx].reshapeSelected !== null) {
+          selections.datasets[targetDatasetIdx].timeSelected = 'Time';
+          this.updateDatasetsSelection(selections);
+        } else {
+          selections.datasets[targetDatasetIdx].timeOptions = (
+            featureColumns as Options
+          ).features;
+        }
+      });
   }
 }
