@@ -20,6 +20,10 @@ mat-radio-button {
   margin-left: 5px;
 }
 
+mat-checkbox {
+  margin-right: 10px;
+}
+
 .freq-selector {
   height: 50px;
   margin-right: 10px;
@@ -29,6 +33,7 @@ mat-radio-button {
   padding: 10px;
 }
 
+<<<<<<< HEAD
 .dialog{
   max-width: 500px;
   display: inline-block;
@@ -42,3 +47,14 @@ mat-radio-button {
 mat-card-title{
   line-height: 1.5;
 }
+=======
+.data-selector {
+  float: right;
+  display: flex;
+  margin-left: auto;
+  margin-right: 0;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+>>>>>>> refactor/forecast_requests

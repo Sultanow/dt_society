@@ -2,7 +2,12 @@ import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
-import { ColumnValues, Models, Plot } from 'src/app/types/GraphData';
+import {
+  ActiveScenarios,
+  ColumnValues,
+  Models,
+  Plot,
+} from 'src/app/types/GraphData';
 
 @Component({
   selector: 'app-vectorautoregression',
@@ -48,7 +53,12 @@ export class VectorautoregressionComponent implements OnInit {
 
   public showSpinner: boolean = false;
 
+<<<<<<< HEAD
   public validDatasetsAvailable: boolean = false;
+=======
+  public selectableDatasets: ActiveScenarios = {};
+  public activeDatasets: ActiveScenarios = {};
+>>>>>>> refactor/forecast_requests
 
   createVarForecast(data: ColumnValues) {
     if (this.data.data.length > 0) {
@@ -148,7 +158,8 @@ export class VectorautoregressionComponent implements OnInit {
           dataset.timeSelected !== undefined &&
           dataset.countryOptions?.includes(
             this.selections.selectedCountry as string
-          )
+          ) &&
+          this.activeDatasets[dataset.id as string] === true
       );
       if (filteredSelections.length > 1) {
         this.toggleSpinner();
@@ -186,6 +197,8 @@ export class VectorautoregressionComponent implements OnInit {
     }
   }
 
+  updateActiveDatasets() {}
+
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((updatedSelections) => {
       this.selections = updatedSelections;
@@ -197,6 +210,20 @@ export class VectorautoregressionComponent implements OnInit {
       if (this.selections.datasets.length > 0) {
         for (const data of this.selections.datasets) {
           countries = [...countries, ...(data.countryOptions || [])];
+
+          if (!Object.keys(this.activeDatasets).includes(data.id as string)) {
+            this.activeDatasets[data.id as string] = true;
+          } else {
+            this.selectableDatasets[data.id as string] =
+              data.countryOptions?.includes(
+                this.selections.selectedCountry as string
+              ) as boolean;
+
+            this.activeDatasets[data.id as string] =
+              data.countryOptions?.includes(
+                this.selections.selectedCountry as string
+              ) as boolean;
+          }
         }
 
         this.countries = [...new Set(countries)];

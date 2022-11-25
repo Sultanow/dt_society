@@ -7,20 +7,44 @@
   <div class="var-wrapper">
     <mat-card>
       <div *ngIf="countries.length > 0">
-        <div class="model-selector">
-          <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
-            Model
-          </p>
-          <mat-radio-group
-            aria-label="Select a model"
-            [(ngModel)]="selectedModel"
-            (change)="updateParameterSlider($event.value); updateVarForecast()"
-          >
-            <mat-radio-button value="var"
-              >Vector Auto Regression</mat-radio-button
+        <div class="toggle-container">
+          <div class="model-selector">
+            <p
+              style="font-size: 18px; font-weight: lighter; margin-bottom: 10px"
             >
-            <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
-          </mat-radio-group>
+              Model
+            </p>
+            <mat-radio-group
+              aria-label="Select a model"
+              [(ngModel)]="selectedModel"
+              (change)="
+                updateParameterSlider($event.value); updateVarForecast()
+              "
+            >
+              <mat-radio-button value="var"
+                >Vector Auto Regression</mat-radio-button
+              >
+              <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
+            </mat-radio-group>
+          </div>
+          <div class="data-selector">
+            <div>
+              <p class="section-label">Forecasted data</p>
+              <ng-container *ngFor="let dataset of selections.datasets">
+                <mat-checkbox
+                  *ngIf="
+                    dataset.id !== undefined &&
+                    dataset.featureSelected !== undefined
+                  "
+                  [(ngModel)]="activeDatasets[dataset.id]"
+                  [disabled]="selectableDatasets[dataset.id] === false"
+                  (change)="updateVarForecast()"
+                >
+                  {{ dataset.id }}
+                </mat-checkbox>
+              </ng-container>
+            </div>
+          </div>
         </div>
 
         <div class="toggle-container">
