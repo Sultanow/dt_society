@@ -33,21 +33,19 @@ mat-checkbox {
   padding: 10px;
 }
 
-<<<<<<< HEAD
-.dialog{
+.dialog {
   max-width: 500px;
   display: inline-block;
 }
 
-.dialog-wrapper{
+.dialog-wrapper {
   padding: 10px;
   text-align: center;
 }
 
-mat-card-title{
+mat-card-title {
   line-height: 1.5;
 }
-=======
 .data-selector {
   float: right;
   display: flex;
@@ -57,4 +55,3 @@ mat-card-title{
   justify-content: center;
   align-items: center;
 }
->>>>>>> refactor/forecast_requests

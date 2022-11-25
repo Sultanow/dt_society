@@ -53,12 +53,9 @@ export class VectorautoregressionComponent implements OnInit {
 
   public showSpinner: boolean = false;
 
-<<<<<<< HEAD
   public validDatasetsAvailable: boolean = false;
-=======
   public selectableDatasets: ActiveScenarios = {};
   public activeDatasets: ActiveScenarios = {};
->>>>>>> refactor/forecast_requests
 
   createVarForecast(data: ColumnValues) {
     if (this.data.data.length > 0) {
@@ -230,12 +227,14 @@ export class VectorautoregressionComponent implements OnInit {
 
         let count = 0;
 
-        for(let dataset of this.selections.datasets){
-            if(dataset.countryOptions?.includes(this.selections.selectedCountry!)){
-              count++;
-            }
+        for (let dataset of this.selections.datasets) {
+          if (
+            dataset.countryOptions?.includes(this.selections.selectedCountry!)
+          ) {
+            count++;
+          }
         }
-        if(count > 1){
+        if (count > 1) {
           this.validDatasetsAvailable = true;
         }
       }
