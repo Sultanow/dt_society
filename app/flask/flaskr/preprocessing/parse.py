@@ -1,9 +1,6 @@
 from typing import List
 from typing import Tuple
 import pandas as pd
-from flask import request
-from flask_jwt_extended import decode_token
-
 
 from .dataset import DigitalTwinTimeSeries
 from ..extensions import cache, mongo
@@ -11,8 +8,12 @@ from ..extensions import cache, mongo
 
 @cache.memoize(timeout=90)
 def parse_dataset(
-    geo_column, dataset_id, reshape_column=None, selected_feature: str = None
-) -> pd.DataFrame:
+    geo_column,
+    dataset_id,
+    session_id,
+    reshape_column=None,
+    selected_feature: str = None,
+) -> Tuple[pd.DataFrame, str]:
     """_summary_
 
     Args:
@@ -24,13 +25,7 @@ def parse_dataset(
         pd.DataFrame: _description_
     """
 
-    token = request.headers.get("Authorization").split(sep=" ")[1]
-
-    decoded_token = decode_token(token, allow_expired=True)
-
-    session = decoded_token["sub"]
-
-    collection = mongo.db[session]
+    collection = mongo.db[session_id]
 
     if isinstance(dataset_id, int):
         file_path = collection.find({})[dataset_id]
@@ -41,8 +36,6 @@ def parse_dataset(
 
     if selected_feature is not None:
         features_in_columns = df.data.columns.to_list()
-
-        response_data = None
 
         for feature in features_in_columns:
             if selected_feature in df.data[feature].unique().tolist():

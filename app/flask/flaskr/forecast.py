@@ -4,6 +4,7 @@ from flask import (
     Blueprint,
     request,
 )
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from .forecasting.models import (
     var_fit_and_predict_multi,
     hw_es_fit_and_predict_multi,
@@ -16,6 +17,7 @@ bp = Blueprint("forecast", __name__, url_prefix="/forecast")
 
 
 @bp.route("/multivariate/<model>", methods=["POST"])
+@jwt_required()
 def forecastVAR(model):
     if model not in ("var", "hwes"):
         return ("Unknown model.", 400)
@@ -33,6 +35,8 @@ def forecastVAR(model):
     filtered_dfs = []
     frequencies = []
 
+    session = get_jwt_identity()
+
     response_data = {}
     for dataset in datasets:
 
@@ -48,6 +52,7 @@ def forecastVAR(model):
             geo_column=geo_selected,
             dataset_id=dataset_id,
             reshape_column=reshape_selected,
+            session_id=session,
         )
         if selected_country in df[geo_selected].unique():
             filtered_df = df[df[geo_selected] == selected_country][
@@ -96,6 +101,7 @@ def forecastVAR(model):
 
 
 @bp.route("prophet", methods=["POST"])
+@jwt_required()
 def forecastProphet():
     data = request.get_json()
 
@@ -114,6 +120,8 @@ def forecastProphet():
 
     y_feature_index = None
 
+    session = get_jwt_identity()
+
     for i, dataset in enumerate(datasets):
         if dataset["id"] in scenarios.keys():
             reshape_selected = (
@@ -130,6 +138,7 @@ def forecastProphet():
                 geo_column=geo_selected,
                 dataset_id=dataset_id,
                 reshape_column=reshape_selected,
+                session_id=session,
             )
             filtered_df = df[df[geo_selected] == selected_country][
                 [time_selected, feature_selected]

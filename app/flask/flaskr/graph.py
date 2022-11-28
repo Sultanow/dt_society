@@ -6,6 +6,7 @@ from flask import (
     jsonify,
     request,
 )
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from .preprocessing.parse import parse_dataset, merge_dataframes_multi
 
 from .extensions import mongo
@@ -14,6 +15,7 @@ bp = Blueprint("graph", __name__, url_prefix="/graph")
 
 
 @bp.route("/datatable", methods=["GET", "POST"])
+@jwt_required()
 def get_selected_data():
 
     data = request.get_json()["datasets"]
@@ -31,8 +33,13 @@ def get_selected_data():
         else None
     )
 
+    session = get_jwt_identity()
+
     df, _ = parse_dataset(
-        geo_column=geo_selected, dataset_id=dataset_id, reshape_column=reshape_col
+        geo_column=geo_selected,
+        dataset_id=dataset_id,
+        reshape_column=reshape_col,
+        session_id=session,
     )
     df.fillna(value=0)
 
@@ -44,6 +51,7 @@ def get_selected_data():
 @bp.route("/history", methods=["GET", "POST"])
 @bp.route("/map", methods=["GET", "POST"])
 @bp.route("/statistics", methods=["GET", "POST"])
+@jwt_required()
 def get_selected_feature_data():
 
     data = request.get_json()["datasets"]
@@ -57,10 +65,13 @@ def get_selected_feature_data():
     dataset_id = data["id"]
     reshape_col = data["reshapeSelected"] if data["reshapeSelected"] != "N/A" else None
 
+    session = get_jwt_identity()
+
     df, _ = parse_dataset(
         geo_column=geo_selected,
         dataset_id=dataset_id,
         reshape_column=reshape_col,
+        session_id=session,
     )
 
     df = df.fillna(value=0)
@@ -81,6 +92,7 @@ def get_selected_feature_data():
 
 
 @bp.route("/heatmap", methods=["POST"])
+@jwt_required()
 def get_heatmap():
 
     if mongo.db is None:
@@ -96,6 +108,8 @@ def get_heatmap():
     dfs = []
     time_columns = []
     response_data = {}
+
+    session = get_jwt_identity()
 
     for dataset in datasets:
 
@@ -114,6 +128,7 @@ def get_heatmap():
                 geo_column=geo_selected,
                 dataset_id=dataset_id,
                 reshape_column=reshape_selected,
+                session_id=session,
             )
 
             if selected_country in df[geo_selected].unique():
@@ -153,6 +168,7 @@ def get_heatmap():
 
 
 @bp.route("/corr", methods=["POST"])
+@jwt_required()
 def get_correlation_lines():
     if mongo.db is None:
         return ("Database not available", 500)
@@ -171,6 +187,8 @@ def get_correlation_lines():
     feature_options = []
 
     response_data = []
+
+    session = get_jwt_identity()
 
     for dataset in datasets:
 
@@ -191,6 +209,7 @@ def get_correlation_lines():
                 geo_column=geo_selected,
                 dataset_id=dataset_id,
                 reshape_column=reshape_selected,
+                session_id=session,
             )
             df = df.fillna(0)
             df_by_country = df[df[geo_selected] == selectedcountry]

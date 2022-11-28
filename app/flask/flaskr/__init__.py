@@ -1,25 +1,13 @@
 import os
-import pycountry
-import uuid
-import datetime
-import time
 from flask import Flask, request, jsonify, make_response
-from flask_jwt_extended import create_access_token
-from flask_jwt_extended import (
-    get_jwt_identity,
-    get_current_user,
-    decode_token,
-    verify_jwt_in_request,
-)
-from flask_jwt_extended import jwt_required
-from dateutil import parser
-from jwt import ExpiredSignatureError
+from flask_jwt_extended import get_jwt_identity, jwt_required
+
 from . import graph, forecast
+from .auth.session import get_session
 from .extensions import mongo, cache, cors, session, jwt
 from .preprocessing.parse import parse_dataset
 from .preprocessing.dataset import DigitalTwinTimeSeries
-from .preprocessing.states import germany_federal
-from .preprocessing.filter import find_geo_column, is_datetime, infer_feature_options
+from .preprocessing.filter import infer_feature_options
 
 
 def create_app(test_config=None):
@@ -64,6 +52,7 @@ def create_app(test_config=None):
     jwt.init_app(app)
 
     @app.route("/data/demo", methods=["GET"])
+    @jwt_required()
     def get_demo_datasets():
 
         demo_data = {
@@ -79,11 +68,7 @@ def create_app(test_config=None):
         if mongo.db is None:
             return ("Database not available.", 500)
 
-        token = request.headers.get("Authorization").split(sep=" ")[1]
-
-        decoded_token = decode_token(token, allow_expired=True)
-
-        session = decoded_token["sub"]
+        session = get_jwt_identity()
 
         collection = mongo.db[session]
 
@@ -105,6 +90,7 @@ def create_app(test_config=None):
         return ("", 204)
 
     @app.route("/data/upload", methods=["POST"])
+    @jwt_required()
     def upload_dataset():
 
         uploaded_file = request.files["upload"]
@@ -112,11 +98,8 @@ def create_app(test_config=None):
         if uploaded_file.filename != "":
 
             try:
-                token = request.headers.get("Authorization").split(sep=" ")[1]
 
-                decoded_token = decode_token(token, allow_expired=True)
-
-                session = decoded_token["sub"]
+                session = get_jwt_identity()
 
                 df = DigitalTwinTimeSeries(
                     uploaded_file.stream, filename=uploaded_file.filename
@@ -152,46 +135,18 @@ def create_app(test_config=None):
         if mongo.db is None:
             return ("Database not available.", 500)
 
-        access_token = None
+        session, access_token = get_session()
 
-        session = None
-
-        # mongo.db.drop_collection("collection_1")
-
-        try:
-
-            token = request.headers.get("Authorization").split(sep=" ")[1]
-
-            decoded_token = decode_token(token, allow_expired=True)
-
-            session = decoded_token["sub"]
-
-            if decoded_token["exp"] < time.time():
-                raise ExpiredSignatureError
-
-            collection = mongo.db[session]
-
-        except:
-            print("No valid token found. \n")
-
-            if session is not None:
-                mongo.db.drop_collection(session)
-
-            expiration = datetime.timedelta(minutes=5)
-            new_session = str(uuid.uuid1())
-            access_token = create_access_token(
-                identity=new_session, expires_delta=expiration
-            )
-            print("New Token created for session.\n")
-
-            collection = mongo.db[new_session]
+        collection = mongo.db[session]
 
         selection_options = []
 
         datasets = collection.find({})
 
         for i, dataset in enumerate(datasets):
-            df, _ = parse_dataset(geo_column=None, dataset_id=i)
+            df, _ = parse_dataset(
+                geo_column=None, dataset_id=dataset["filename"], session_id=session
+            )
 
             df = df.fillna(0)
 
@@ -213,6 +168,7 @@ def create_app(test_config=None):
         return response_data
 
     @app.route("/data/reshape", methods=["POST"])
+    @jwt_required()
     def reshape_dataset():
 
         if mongo.db is None:
@@ -224,15 +180,16 @@ def create_app(test_config=None):
             return ("Empty request.", 400)
 
         file_id = data["datasetId"]
-        # reshape_column = data["reshapeColumn"]
         geo_column = data["geoColumn"]
         feature_selected = data["featureSelected"]
+
+        session = get_jwt_identity()
 
         df, reshape_column = parse_dataset(
             geo_column=geo_column,
             dataset_id=file_id,
-            selected_feature=feature_selected
-            # reshape_column=reshape_column,
+            selected_feature=feature_selected,
+            session_id=session,
         )
 
         feature_columns = [
@@ -252,16 +209,13 @@ def create_app(test_config=None):
         return response_data
 
     @app.route("/data/remove", methods=["DELETE"])
+    @jwt_required()
     def remove_dataset():
 
         if mongo.db is None:
             return ("Database not available.", 500)
 
-        token = request.headers.get("Authorization").split(sep=" ")[1]
-
-        decoded_token = decode_token(token, allow_expired=True)
-
-        session = decoded_token["sub"]
+        session = get_jwt_identity()
 
         collection = mongo.db[session]
 
@@ -277,7 +231,10 @@ def create_app(test_config=None):
         return ("", 204)
 
     @app.route("/data/reshapecheck", methods=["POST"])
+    @jwt_required()
     def check_for_reshape():
+
+        session = get_jwt_identity()
         if mongo.db is None:
             return ("Database not available.", 500)
 
@@ -290,7 +247,9 @@ def create_app(test_config=None):
         geo_column = data["geoColumn"]
         feature_selected = data["featureSelected"]
 
-        dataframe = parse_dataset(geo_column=geo_column, dataset_id=file_id)
+        dataframe = parse_dataset(
+            geo_column=geo_column, dataset_id=file_id, session_id=session
+        )
 
         features_in_columns = dataframe.columns.to_list()
 
