@@ -17,9 +17,9 @@ export class MapComponent implements OnInit {
   public data: GraphData = {
     data: [],
     layout: {},
-    config: {responsive: true}
+    config: { responsive: true },
   };
-  
+
   public frames: Frame[] = [];
 
   private selections: Selections = {
@@ -30,7 +30,7 @@ export class MapComponent implements OnInit {
 
   selectionControl = new FormGroup({
     sliderControl: new FormControl(),
-    geojsonControl: new FormControl("global"),
+    geojsonControl: new FormControl(),
   });
 
   options: Options = {
@@ -144,6 +144,7 @@ export class MapComponent implements OnInit {
 
       this.z_min = z_min_val;
       this.z_max = z_max_val;
+      this.scope = 'global';
 
       for (let state of this.federal_states_germany) {
         if (this.all_keys.includes(state)) {
@@ -152,7 +153,7 @@ export class MapComponent implements OnInit {
         }
       }
 
-      this.createInitialData();
+      this.selectionControl.get('geojsonControl')!.setValue(this.scope);
     }
   }
 
@@ -173,12 +174,12 @@ export class MapComponent implements OnInit {
           colorscale: 'Jet',
           colorbar: {
             title: { text: this.featureSelected, side: 'top' },
-            orientation: 'h'
+            orientation: 'h',
           },
         },
       ],
       layout: {
-        margin: {"r":0,"t":0,"l":0,"b":0},
+        margin: { r: 0, t: 0, l: 0, b: 0 },
         paper_bgcolor: '#424242',
         plot_bgcolor: '#424242',
         font: { color: '#f2f2f2' },
@@ -187,7 +188,7 @@ export class MapComponent implements OnInit {
           center: this.geojsons[this.scope as keyof object]['center'],
         },
       },
-      config: {responsive: true}
+      config: { responsive: true },
     };
   }
 
@@ -213,10 +214,10 @@ export class MapComponent implements OnInit {
     this.data.data = newData;
   }
 
-  ngDoCheck() {
-    if (
-      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
-    ) {
+  ngOnInit(): void {
+    this.dataService.currentSelections.subscribe((value) => {
+      this.selections = value;
+
       if (this.selections.datasets.length > 0) {
         const datasetId = this.selections.selectedDataset;
 
@@ -225,18 +226,15 @@ export class MapComponent implements OnInit {
         );
 
         if (this.selections.datasets[selectedDatasetIdx] !== undefined) {
+          let selectedDataset = this.selections.datasets[selectedDatasetIdx];
           if (
-            this.selections.datasets[selectedDatasetIdx].geoSelected !==
-              undefined &&
-            this.selections.datasets[selectedDatasetIdx].reshapeSelected !==
-              undefined &&
-            this.selections.datasets[selectedDatasetIdx].featureSelected !==
-              undefined &&
-            this.selections.datasets[selectedDatasetIdx].timeSelected !==
-              undefined
+            selectedDataset.geoSelected !== undefined &&
+            selectedDataset.reshapeSelected !== undefined &&
+            selectedDataset.featureSelected !== undefined &&
+            selectedDataset.timeSelected !== undefined
           ) {
             if (
-              this.selections.datasets[selectedDatasetIdx].featureSelected !==
+              selectedDataset.featureSelected !==
                 this.oldSelections?.datasets[selectedDatasetIdx]
                   .featureSelected ||
               this.selections.selectedDataset !==
@@ -260,17 +258,11 @@ export class MapComponent implements OnInit {
                     }
                   }
                 });
+              this.oldSelections = structuredClone(this.selections);
             }
           }
         }
       }
-      this.oldSelections = structuredClone(this.selections);
-    }
-  }
-
-  ngOnInit(): void {
-    this.dataService.currentSelections.subscribe((value) => {
-      this.selections = value;
     });
 
     this.selectionControl
@@ -279,11 +271,11 @@ export class MapComponent implements OnInit {
         this.updateData(sliderValue);
       });
 
-      this.selectionControl
+    this.selectionControl
       .get('geojsonControl')!
       .valueChanges.subscribe((value) => {
         this.scope = String(value);
-        this.createInitialData()
+        this.createInitialData();
       });
   }
 }

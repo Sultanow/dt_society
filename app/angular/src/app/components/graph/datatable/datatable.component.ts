@@ -16,7 +16,6 @@ export class DatatableComponent implements OnInit {
     datasets: [],
     selectedDataset: undefined,
   };
-  private oldSelections?: Selections;
 
   public data: TableData[] = [];
 
@@ -39,10 +38,10 @@ export class DatatableComponent implements OnInit {
     this.data = newdata;
   }
 
-  ngDoCheck() {
-    if (
-      JSON.stringify(this.selections) !== JSON.stringify(this.oldSelections)
-    ) {
+  ngOnInit(): void {
+    this.dataService.currentSelections.subscribe((value) => {
+      this.selections = value;
+
       if (this.selections.datasets.length > 0) {
         const datasetId = this.selections.selectedDataset;
 
@@ -68,13 +67,6 @@ export class DatatableComponent implements OnInit {
             });
         }
       }
-      this.oldSelections = structuredClone(this.selections);
-    }
-  }
-
-  ngOnInit(): void {
-    this.dataService.currentSelections.subscribe((value) => {
-      this.selections = value;
     });
   }
 }

@@ -31,8 +31,6 @@ export class HistoryComponent implements OnInit {
     selectedDataset: undefined,
   };
 
-  private oldSelections?: Selections;
-
   createHistoryPlot(data: CountryData, selectedIdx: number) {
     if (this.historyPlot.data.length > 0) {
       this.historyPlot.data = [];
