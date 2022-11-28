@@ -1,7 +1,15 @@
-<div *ngIf="selections.datasets.length > 0; then datasetsavailable; else dialog"></div>
+<div
+  *ngIf="selections.datasets.length > 0; then datasetsavailable; else dialog"
+></div>
 
 <ng-template #datasetsavailable>
-  <div *ngIf="validDatasetsAvailable; then vectorautoregression; else inValidSelections"></div>
+  <div
+    *ngIf="
+      validDatasetsAvailable;
+      then vectorautoregression;
+      else inValidSelections
+    "
+  ></div>
 </ng-template>
 <ng-template #vectorautoregression>
   <div class="var-wrapper">
@@ -126,12 +134,22 @@
 <ng-template #inValidSelections>
   <div class="dialog-wrapper">
     <mat-card class="dialog">
-      <mat-card-title>The forecast cannot be computed for the selected country</mat-card-title>
-        <br>
-        <mat-card-content>
-            <p>Please select a country which is available in at least two of the data sets.</p>
-            <p>The data sets can be managed through the sidebar.</p>
-        </mat-card-content>
+      <mat-card-title>
+        <mat-icon style="font-size: xx-large; padding: 7px"
+          >info_outline</mat-icon
+        >
+        <div>
+          The forecast cannot be computed for the selected country
+        </div></mat-card-title
+      >
+      <br />
+      <mat-card-content>
+        <p>
+          Please select a country which is available in at least two of the data
+          sets.
+        </p>
+        <p>The data sets can be managed through the sidebar.</p>
+      </mat-card-content>
     </mat-card>
   </div>
 </ng-template>

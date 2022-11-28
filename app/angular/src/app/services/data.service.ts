@@ -171,25 +171,37 @@ export class DataService {
   }
 
   getAvailableDatasets(selections: Selections): void {
-    this.http.get(this.apiUrl + 'data/find_geo').subscribe((datasets) => {
-      let updatedDatasets = datasets as Dataset[];
+    this.http
+      .get(this.apiUrl + 'data/find_geo')
+      .subscribe((selectionOptions) => {
+        if ((selectionOptions as Dataset[]).length > 0) {
+          if (selections.datasets !== undefined) {
+            if (
+              Object.keys(
+                (selectionOptions as Dataset[]).slice(-1)[0]
+              ).includes('token')
+            ) {
+              const idToken = (selectionOptions as Dataset[]).pop();
+              localStorage.setItem('id_token', idToken?.token as string);
+            }
 
-      if (selections.datasets !== undefined) {
-        for (const dataset of updatedDatasets) {
-          if (
-            selections.datasets.filter((d) => d.id == dataset.id).length == 0
-          ) {
-            selections.datasets.push(dataset);
+            for (const dataset of selectionOptions as Dataset[]) {
+              if (
+                selections.datasets.filter((d) => d.id == dataset.id).length ==
+                0
+              ) {
+                selections.datasets.push(dataset);
+              }
+            }
+            if (
+              selections.selectedDataset === undefined &&
+              selections.datasets.length > 0
+            ) {
+              selections.selectedDataset = selections.datasets[0].id;
+            }
           }
         }
-        if (
-          selections.selectedDataset === undefined &&
-          selections.datasets.length > 0
-        ) {
-          selections.selectedDataset = selections.datasets[0].id;
-        }
-      }
-    });
+      });
   }
 
   updateTotalCountries(selections: Selections) {
@@ -238,7 +250,7 @@ export class DataService {
             featureColumns as Options
           ).features;
         }
-        if(selections.datasets[targetDatasetIdx].timeSelected !== undefined){
+        if (selections.datasets[targetDatasetIdx].timeSelected !== undefined) {
           this.updateTotalCountries(selections);
         }
       });
