@@ -1,9 +1,21 @@
 import os
 import pycountry
-from flask import Flask, request, jsonify
+import uuid
+import datetime
+import time
+from flask import Flask, request, jsonify, make_response
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import (
+    get_jwt_identity,
+    get_current_user,
+    decode_token,
+    verify_jwt_in_request,
+)
+from flask_jwt_extended import jwt_required
 from dateutil import parser
+from jwt import ExpiredSignatureError
 from . import graph, forecast
-from .extensions import mongo, cache, cors, session
+from .extensions import mongo, cache, cors, session, jwt
 from .preprocessing.parse import parse_dataset
 from .preprocessing.dataset import DigitalTwinTimeSeries
 from .preprocessing.states import germany_federal
@@ -22,6 +34,8 @@ def create_app(test_config=None):
     app.config["PROPAGATE_EXCEPTIONS"] = True
 
     app.config["MONGO_URI"] = "mongodb://127.0.0.1:27017/dt_society_datasets"
+
+    app.config["JWT_SECRET_KEY"] = "super-secret"
 
     app.register_blueprint(graph.bp)
     app.register_blueprint(forecast.bp)
@@ -47,6 +61,7 @@ def create_app(test_config=None):
     cache.init_app(app)
     mongo.init_app(app)
     cors.init_app(app)
+    jwt.init_app(app)
 
     @app.route("/data/demo", methods=["GET"])
     def get_demo_datasets():
@@ -64,10 +79,16 @@ def create_app(test_config=None):
         if mongo.db is None:
             return ("Database not available.", 500)
 
+        token = request.headers.get("Authorization").split(sep=" ")[1]
+
+        decoded_token = decode_token(token, allow_expired=True)
+
+        session = decoded_token["sub"]
+
+        collection = mongo.db[session]
+
         for key in demo_data:
             df = DigitalTwinTimeSeries(demo_data[key][1], filename=demo_data[key][0])
-
-            collection = mongo.db["collection_1"]
 
             if collection.count_documents({"filename": demo_data[key][0]}) > 0:
                 print(f"Dataset '{demo_data[key][0]}' is already in database.")
@@ -91,12 +112,18 @@ def create_app(test_config=None):
         if uploaded_file.filename != "":
 
             try:
+                token = request.headers.get("Authorization").split(sep=" ")[1]
+
+                decoded_token = decode_token(token, allow_expired=True)
+
+                session = decoded_token["sub"]
+
                 df = DigitalTwinTimeSeries(
                     uploaded_file.stream, filename=uploaded_file.filename
                 )
 
                 if mongo.db is not None and df is not None:
-                    collection = mongo.db["collection_1"]
+                    collection = mongo.db[session]
 
                     if (
                         collection.count_documents({"filename": uploaded_file.filename})
@@ -115,20 +142,51 @@ def create_app(test_config=None):
                         )
                         print(f"Added '{uploaded_file.filename}' to database.")
             except Exception as e:
-
+                print(e)
                 return ("", 400)
 
         return ("", 204)
 
     @app.route("/data/find_geo", methods=["GET"])
     def get_geo():
-
         if mongo.db is None:
             return ("Database not available.", 500)
 
-        collection = mongo.db["collection_1"]
+        access_token = None
 
-        available_columns = []
+        session = None
+
+        # mongo.db.drop_collection("collection_1")
+
+        try:
+
+            token = request.headers.get("Authorization").split(sep=" ")[1]
+
+            decoded_token = decode_token(token, allow_expired=True)
+
+            session = decoded_token["sub"]
+
+            if decoded_token["exp"] < time.time():
+                raise ExpiredSignatureError
+
+            collection = mongo.db[session]
+
+        except:
+            print("No valid token found. \n")
+
+            if session is not None:
+                mongo.db.drop_collection(session)
+
+            expiration = datetime.timedelta(minutes=5)
+            new_session = str(uuid.uuid1())
+            access_token = create_access_token(
+                identity=new_session, expires_delta=expiration
+            )
+            print("New Token created for session.\n")
+
+            collection = mongo.db[new_session]
+
+        selection_options = []
 
         datasets = collection.find({})
 
@@ -139,7 +197,7 @@ def create_app(test_config=None):
 
             possible_features, geo_col = infer_feature_options(df)
 
-            available_columns.append(
+            selection_options.append(
                 {
                     "id": dataset["filename"],
                     "possibleFeatures": possible_features,
@@ -147,7 +205,12 @@ def create_app(test_config=None):
                 }
             )
 
-        return jsonify(available_columns)
+        if access_token is not None:
+            selection_options.append({"token": access_token})
+
+        response_data = make_response(jsonify(selection_options))
+
+        return response_data
 
     @app.route("/data/reshape", methods=["POST"])
     def reshape_dataset():
@@ -194,7 +257,13 @@ def create_app(test_config=None):
         if mongo.db is None:
             return ("Database not available.", 500)
 
-        collection = mongo.db["collection_1"]
+        token = request.headers.get("Authorization").split(sep=" ")[1]
+
+        decoded_token = decode_token(token, allow_expired=True)
+
+        session = decoded_token["sub"]
+
+        collection = mongo.db[session]
 
         data = request.get_json()
         if data is None:

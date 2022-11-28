@@ -1,72 +1,87 @@
 <div *ngIf="dataAvailable; then statistics; else selectFeatureDialog"></div>
 
 <ng-template #statistics>
-    <div class="statistics-wrapper" [formGroup]="selectionControl">
-        <mat-card class="outer">
-            <mat-label>Statistics of {{ selections.selectedDataset }}</mat-label>
-            <div class="stats-container">
-                <mat-form-field>
-                    <mat-label>Time</mat-label>
-                    <mat-select formControlName="selectedYearControl">
-                        <mat-option *ngFor="let timestamp of timestamps" [value]="timestamp">
-                            {{ timestamp }}
-                        </mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <mat-card class="single-stat">
-                    <mat-card-title>Min</mat-card-title>
-                    <mat-card-content>{{min}}</mat-card-content>
-                </mat-card>
-                <mat-card class="single-stat">
-                    <mat-card-title>Max</mat-card-title>
-                    <mat-card-content>{{max}}</mat-card-content>
-                </mat-card>
-                <mat-card class="single-stat">
-                    <mat-card-title>Mean</mat-card-title>
-                    <mat-card-content>{{mean}}</mat-card-content>
-                </mat-card>
-            </div>
-            <mat-divider inset></mat-divider>
-            <div>
-                <div class="growth-container">
-                    <div class="growth-selections">
-                        <mat-form-field>
-                            <mat-label>Country</mat-label>
-                            <mat-select formControlName="selectedCountryControl">
-                                <mat-option *ngFor="let country of countries" [value]="country">
-                                    {{ country }}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                        <ngx-slider formControlName="sliderControl" [(value)]="value" [(highValue)]="highValue"
-                            [options]="options"></ngx-slider>
-                    </div>
-                    <div class="stats-container">
-                        <mat-card class="single-stat-growth">
-                            <mat-card-title>Growth Rate</mat-card-title>
-                            <mat-card-content>{{ growthrate }}</mat-card-content>
-                        </mat-card>
-                        <mat-card class="single-stat-growth">
-                            <mat-card-title> Average Growth Rate</mat-card-title>
-                            <mat-card-content>{{ growthrate_per_time }}</mat-card-content>
-                        </mat-card>
-                    </div>
-                </div>
-            </div>
+  <div class="statistics-wrapper" [formGroup]="selectionControl">
+    <mat-card class="outer">
+      <mat-label>Statistics of {{ selections.selectedDataset }}</mat-label>
+      <div class="stats-container">
+        <mat-form-field>
+          <mat-label>Time</mat-label>
+          <mat-select formControlName="selectedYearControl">
+            <mat-option
+              *ngFor="let timestamp of timestamps"
+              [value]="timestamp"
+            >
+              {{ timestamp }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-card class="single-stat">
+          <mat-card-title>Min</mat-card-title>
+          <mat-card-content>{{ min }}</mat-card-content>
         </mat-card>
-    </div>
-</ng-template>
-<ng-template #selectFeatureDialog>
-    <div class="dialog-wrapper">
-        <mat-card class="dialog">
-            <div class = "content-container">
-          <mat-card-title>Statistics cannot be computed for the selected data set</mat-card-title>
-        <br>
-        <mat-card-content>
-            <p>Please select a feature (and time if necessary) for the focus data set.</p>
-            <p>The data sets can be managed through the sidebar.</p>
-        </mat-card-content>
-        </div>
+        <mat-card class="single-stat">
+          <mat-card-title>Max</mat-card-title>
+          <mat-card-content>{{ max }}</mat-card-content>
+        </mat-card>
+        <mat-card class="single-stat">
+          <mat-card-title>Mean</mat-card-title>
+          <mat-card-content>{{ mean }}</mat-card-content>
         </mat-card>
       </div>
+      <mat-divider inset></mat-divider>
+      <div>
+        <div class="growth-container">
+          <div class="growth-selections">
+            <mat-form-field>
+              <mat-label>Country</mat-label>
+              <mat-select formControlName="selectedCountryControl">
+                <mat-option *ngFor="let country of countries" [value]="country">
+                  {{ country }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <ngx-slider
+              formControlName="sliderControl"
+              [(value)]="value"
+              [(highValue)]="highValue"
+              [options]="options"
+            ></ngx-slider>
+          </div>
+          <div class="stats-container">
+            <mat-card class="single-stat-growth">
+              <mat-card-title>Growth Rate</mat-card-title>
+              <mat-card-content>{{ growthrate }}</mat-card-content>
+            </mat-card>
+            <mat-card class="single-stat-growth">
+              <mat-card-title> Average Growth Rate</mat-card-title>
+              <mat-card-content>{{ growthrate_per_time }}</mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+</ng-template>
+<ng-template #selectFeatureDialog>
+  <div class="dialog-wrapper">
+    <mat-card class="dialog">
+      <div class="content-container">
+        <mat-card-title>
+          <mat-icon style="font-size: xx-large; padding: 7px"
+            >info_outline</mat-icon
+          >
+          <div>Statistics cannot be computed for the selected data set</div>
+        </mat-card-title>
+        <br />
+        <mat-card-content>
+          <p>
+            Please select a feature (and time if necessary) for the focus data
+            set.
+          </p>
+          <p>The data sets can be managed through the sidebar.</p>
+        </mat-card-content>
+      </div>
+    </mat-card>
+  </div>
 </ng-template>

@@ -1,14 +1,16 @@
-.statistics-wrapper, .dialog-wrapper{
+.statistics-wrapper,
+.dialog-wrapper {
   padding: 10px;
   text-align: center;
   justify-content: center;
 }
 
-.outer, .dialog {
+.outer,
+.dialog {
   height: 450px;
 }
 
-.content-container{
+.content-container {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -16,50 +18,53 @@
   transform: translate(-50%, -50%);
 }
 
-mat-card-title{
+mat-card-title {
   line-height: 1.5;
 }
 
-.single-stat{
-    width: 6em;
-    min-height: 3em;
-    margin-right: 2em;
+.single-stat {
+  width: 6em;
+  min-height: 3em;
+  margin-right: 2em;
 }
 
-.single-stat-growth{
-    width: 16em;
-    min-height: 3em;
-    margin: 1em;
+.single-stat-growth {
+  width: 16em;
+  min-height: 3em;
+  margin: 1em;
 }
 
-.stats-container{
+.stats-container {
   display: flex;
   flex-direction: row;
-  justify-content:flex-start;
+  justify-content: flex-start;
   margin-top: 1em;
   margin-bottom: 1em;
 }
 
-.growth-container{
-    margin-top: 2em;
-    margin-bottom: 2em;
+.growth-container {
+  margin-top: 2em;
+  margin-bottom: 2em;
 }
 
-.growth-selections{
+.growth-selections {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
 }
 
-ngx-slider{
-    margin-left: 1em;
-    margin-right: 1em;
-    max-width: 26em;
+ngx-slider {
+  margin-left: 1em;
+  margin-right: 1em;
+  max-width: 26em;
 }
 
-mat-form-field{
-    width: 8em;
-    margin-right: 2em;
-    float: left;
+mat-form-field {
+  width: 8em;
+  margin-right: 2em;
+  float: left;
+}
 
+.info-title {
+  display: flex;
 }

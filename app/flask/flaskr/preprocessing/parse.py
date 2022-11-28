@@ -1,6 +1,9 @@
 from typing import List
 from typing import Tuple
 import pandas as pd
+from flask import request
+from flask_jwt_extended import decode_token
+
 
 from .dataset import DigitalTwinTimeSeries
 from ..extensions import cache, mongo
@@ -21,7 +24,13 @@ def parse_dataset(
         pd.DataFrame: _description_
     """
 
-    collection = mongo.db["collection_1"]
+    token = request.headers.get("Authorization").split(sep=" ")[1]
+
+    decoded_token = decode_token(token, allow_expired=True)
+
+    session = decoded_token["sub"]
+
+    collection = mongo.db[session]
 
     if isinstance(dataset_id, int):
         file_path = collection.find({})[dataset_id]

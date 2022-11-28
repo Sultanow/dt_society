@@ -9,6 +9,7 @@ export interface Dataset {
   timeSelected?: string;
   featureSelected?: string;
   possibleFeatures?: string[];
+  token?: string;
 }
 
 export interface Selections {
