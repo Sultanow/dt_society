@@ -28,11 +28,11 @@ def parse_dataset(
     collection = mongo.db[session_id]
 
     if isinstance(dataset_id, int):
-        file_path = collection.find({})[dataset_id]
+        selected_df = collection.find({})[dataset_id]
     elif isinstance(dataset_id, str):
-        file_path = collection.find_one({"filename": dataset_id})
+        selected_df = collection.find_one({"id": dataset_id})
 
-    df = DigitalTwinTimeSeries(file_path["data"], geo_col=geo_column, sep="dict")
+    df = DigitalTwinTimeSeries(selected_df["data"], geo_col=geo_column, sep="dict")
 
     if selected_feature is not None:
         features_in_columns = df.data.columns.to_list()

@@ -24,7 +24,7 @@
                   [value]="dataset.id"
                   [disabled]="selectableScenarios[dataset.id] === false"
                 >
-                  {{ dataset.id }}
+                  {{ dataset.name }}
                   <div *ngIf="dataset.featureSelected !== undefined">
                     ({{ dataset.featureSelected }})
                   </div>

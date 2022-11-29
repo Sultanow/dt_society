@@ -69,7 +69,7 @@ export class CorrelationComponent implements OnInit {
             type: 'scatter',
             mode: 'lines',
             legendgroup: 'df' + group.toString(),
-            legendgrouptitle: { text: this.selections.datasets[i].id },
+            legendgrouptitle: { text: this.selections.datasets[i].name },
           };
 
           if (key !== timeSelection) {
@@ -119,17 +119,17 @@ export class CorrelationComponent implements OnInit {
       this.selections.datasets.length > 0 &&
       this.selections.selectedCountry !== undefined
     ) {
-        this.dataService
-          .getData(this.selections.datasets, '/graph/corr', {
-            country: this.selections.selectedCountry,
-          })
-          .subscribe((event) => {
-            if (event.type === HttpEventType.Response) {
-              if (event.body) {
-                this.createCorrelationLines(event.body as ColumnValues[]);
-              }
+      this.dataService
+        .getData(this.selections.datasets, '/graph/corr', {
+          country: this.selections.selectedCountry,
+        })
+        .subscribe((event) => {
+          if (event.type === HttpEventType.Response) {
+            if (event.body) {
+              this.createCorrelationLines(event.body as ColumnValues[]);
             }
-          });
+          }
+        });
     }
   }
 }

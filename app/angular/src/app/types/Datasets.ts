@@ -10,6 +10,7 @@ export interface Dataset {
   featureSelected?: string;
   possibleFeatures?: string[];
   token?: string;
+  name?: string;
 }
 
 export interface Selections {

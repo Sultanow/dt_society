@@ -1,6 +1,7 @@
 import os
 from flask import Flask, request, jsonify, make_response
 from flask_jwt_extended import get_jwt_identity, jwt_required
+import time
 
 from . import graph, forecast
 from .auth.session import get_session
@@ -75,14 +76,16 @@ def create_app(test_config=None):
         for key in demo_data:
             df = DigitalTwinTimeSeries(demo_data[key][1], filename=demo_data[key][0])
 
-            if collection.count_documents({"filename": demo_data[key][0]}) > 0:
+            if collection.count_documents({"name": demo_data[key][0]}) > 0:
                 print(f"Dataset '{demo_data[key][0]}' is already in database.")
 
             else:
+                file_id = hash(demo_data[key][0] + str(time.time()))
                 collection.insert_one(
                     {
-                        "filename": demo_data[key][0],
+                        "name": demo_data[key][0],
                         "data": df.data.to_dict("records"),
+                        "id": str(file_id),
                     }
                 )
                 print(f"Added '{demo_data[key][0]}' to database.")
@@ -108,19 +111,18 @@ def create_app(test_config=None):
                 if mongo.db is not None and df is not None:
                     collection = mongo.db[session]
 
-                    if (
-                        collection.count_documents({"filename": uploaded_file.filename})
-                        > 0
-                    ):
+                    if collection.count_documents({"name": uploaded_file.filename}) > 0:
                         print(
                             f"Dataset '{uploaded_file.filename}' is already in database."
                         )
 
                     else:
+                        file_id = hash(uploaded_file.filename + str(time.time()))
                         collection.insert_one(
                             {
-                                "filename": uploaded_file.filename,
+                                "name": uploaded_file.filename,
                                 "data": df.data.to_dict("records"),
+                                "id": str(file_id),
                             }
                         )
                         print(f"Added '{uploaded_file.filename}' to database.")
@@ -145,7 +147,7 @@ def create_app(test_config=None):
 
         for i, dataset in enumerate(datasets):
             df, _ = parse_dataset(
-                geo_column=None, dataset_id=dataset["filename"], session_id=session
+                geo_column=None, dataset_id=dataset["id"], session_id=session
             )
 
             df = df.fillna(0)
@@ -154,9 +156,10 @@ def create_app(test_config=None):
 
             selection_options.append(
                 {
-                    "id": dataset["filename"],
+                    "id": dataset["id"],
                     "possibleFeatures": possible_features,
                     "geoSelected": geo_col,
+                    "name": dataset["name"],
                 }
             )
 
@@ -222,11 +225,11 @@ def create_app(test_config=None):
         data = request.get_json()
         if data is None:
             return ("Empty request.", 400)
-        filename = data["datasetId"]
+        dataset_id = data["datasetId"]
 
-        collection.delete_one({"filename": filename})
+        collection.delete_one({"id": dataset_id})
 
-        print(f"Successfully removed dataset '{filename}'.")
+        print(f"Successfully removed dataset '{dataset_id}'.")
 
         return ("", 204)
 
