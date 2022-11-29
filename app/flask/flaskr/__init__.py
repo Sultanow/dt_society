@@ -1,7 +1,10 @@
+import io
 import os
 from flask import Flask, request, jsonify, make_response
 from flask_jwt_extended import get_jwt_identity, jwt_required
 import time
+
+import gridfs
 
 from . import graph, forecast
 from .auth.session import get_session
@@ -73,6 +76,8 @@ def create_app(test_config=None):
 
         collection = mongo.db[session]
 
+        bucket = gridfs.GridFS(mongo.db, session)
+
         for key in demo_data:
             df = DigitalTwinTimeSeries(demo_data[key][1], filename=demo_data[key][0])
 
@@ -81,13 +86,14 @@ def create_app(test_config=None):
 
             else:
                 file_id = hash(demo_data[key][0] + str(time.time()))
-                collection.insert_one(
-                    {
-                        "name": demo_data[key][0],
-                        "data": df.data.to_dict("records"),
-                        "id": str(file_id),
-                    }
-                )
+
+                buffer = io.BytesIO()
+                df.data.to_json(buffer, orient = "records")
+                buffer.seek(0)
+
+                bucket.put(buffer, filename=demo_data[key][0], id= str(file_id))
+
+            
                 print(f"Added '{demo_data[key][0]}' to database.")
 
         return ("", 204)
@@ -109,22 +115,21 @@ def create_app(test_config=None):
                 )
 
                 if mongo.db is not None and df is not None:
-                    collection = mongo.db[session]
+                    bucket = gridfs.GridFS(mongo.db, session)
 
-                    if collection.count_documents({"name": uploaded_file.filename}) > 0:
+                    if bucket.find_one({"name": uploaded_file.filename}):
                         print(
                             f"Dataset '{uploaded_file.filename}' is already in database."
                         )
 
                     else:
                         file_id = hash(uploaded_file.filename + str(time.time()))
-                        collection.insert_one(
-                            {
-                                "name": uploaded_file.filename,
-                                "data": df.data.to_dict("records"),
-                                "id": str(file_id),
-                            }
-                        )
+                        
+                        buffer = io.BytesIO()
+                        df.data.to_json(buffer, orient = "records")
+                        buffer.seek(0)
+
+                        bucket.put(buffer, filename=uploaded_file.filename, id= str(file_id))
                         print(f"Added '{uploaded_file.filename}' to database.")
             except Exception as e:
                 print(e)
@@ -139,11 +144,11 @@ def create_app(test_config=None):
 
         session, access_token = get_session()
 
-        collection = mongo.db[session]
+        bucket = mongo.db[session+".files"]
 
         selection_options = []
 
-        datasets = collection.find({})
+        datasets = bucket.find({})
 
         for i, dataset in enumerate(datasets):
             df, _ = parse_dataset(
@@ -159,7 +164,7 @@ def create_app(test_config=None):
                     "id": dataset["id"],
                     "possibleFeatures": possible_features,
                     "geoSelected": geo_col,
-                    "name": dataset["name"],
+                    "name": dataset["filename"],
                 }
             )
 
@@ -220,14 +225,16 @@ def create_app(test_config=None):
 
         session = get_jwt_identity()
 
-        collection = mongo.db[session]
+        bucket = gridfs.GridFS(mongo.db, session)
 
         data = request.get_json()
         if data is None:
             return ("Empty request.", 400)
         dataset_id = data["datasetId"]
 
-        collection.delete_one({"id": dataset_id})
+        file_to_delete = mongo.db[session+".files"].find_one({"id":dataset_id})
+               
+        bucket.delete(file_to_delete["_id"])
 
         print(f"Successfully removed dataset '{dataset_id}'.")
 

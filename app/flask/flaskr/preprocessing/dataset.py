@@ -41,11 +41,11 @@ class DigitalTwinTimeSeries:
         """
 
         if self.sep == "dict":
-            data = pd.DataFrame.from_records(path)
+            data = pd.read_json(path, orient="records")
         else:
             if filename is not None:
                 if filename.endswith(".tsv"):
-                    data = pd.read_table(path)
+                    data = pd.read_table(path) 
                 else:
                     data = pd.read_csv(path, sep=None)
 
