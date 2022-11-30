@@ -59,7 +59,7 @@ def get_selected_feature_data():
     if data is None:
         return ("Empty request", 400)
 
-    geo_selected = data["geoSelected"]
+    geo_selected = data["geoSelected"] if data["geoSelected"] != "None" else None
     time_selected = data["timeSelected"]
     feature_selected = data["featureSelected"]
     dataset_id = data["id"]
@@ -78,15 +78,19 @@ def get_selected_feature_data():
 
     response_data = {}
 
-    for country in df[geo_selected].unique().tolist():
-        response_data[country] = {}
+    if geo_selected is not None:
+        for country in df[geo_selected].unique().tolist():
+            response_data[country] = {}
 
-        response_data[country][time_selected] = df[df[geo_selected] == country][
-            time_selected
-        ].to_list()
-        response_data[country][feature_selected] = df[df[geo_selected] == country][
-            feature_selected
-        ].to_list()
+            response_data[country][time_selected] = df[df[geo_selected] == country][
+                time_selected
+            ].to_list()
+            response_data[country][feature_selected] = df[df[geo_selected] == country][
+                feature_selected
+            ].to_list()
+    else:
+        response_data[time_selected] = df[time_selected].to_list()
+        response_data[feature_selected] = df[feature_selected].to_list()
 
     return response_data
 
@@ -120,7 +124,9 @@ def get_heatmap():
                 if dataset["reshapeSelected"] != "N/A"
                 else None
             )
-            geo_selected = dataset["geoSelected"]
+            geo_selected = (
+                dataset["geoSelected"] if dataset["geoSelected"] != "None" else None
+            )
             dataset_id = dataset["id"]
             time_selected = dataset["timeSelected"]
 
@@ -131,7 +137,15 @@ def get_heatmap():
                 session_id=session,
             )
 
-            if selected_country in df[geo_selected].unique():
+            if geo_selected is None:
+                df[time_selected] = pd.to_datetime(df[time_selected].astype("str"))
+                dfs.append(df)
+                time_columns.append(time_selected)
+
+            elif (
+                geo_selected is not None
+                and selected_country in df[geo_selected].unique()
+            ):
                 df_by_country = df[df[geo_selected] == selected_country]
 
                 df_by_country = df_by_country.drop(columns=[geo_selected])
@@ -190,7 +204,7 @@ def get_correlation_lines():
 
     session = get_jwt_identity()
 
-    for dataset in datasets:
+    for i, dataset in enumerate(datasets):
 
         if "geoSelected" in dataset and "reshapeSelected" in dataset:
 
@@ -201,7 +215,9 @@ def get_correlation_lines():
                 if dataset["reshapeSelected"] != "N/A"
                 else None
             )
-            geo_selected = dataset["geoSelected"]
+            geo_selected = (
+                dataset["geoSelected"] if dataset["geoSelected"] != "None" else None
+            )
             dataset_id = dataset["id"]
             time_selected = dataset["timeSelected"]
 
@@ -212,7 +228,13 @@ def get_correlation_lines():
                 session_id=session,
             )
             df = df.fillna(0)
-            df_by_country = df[df[geo_selected] == selectedcountry]
+
+            if geo_selected is not None:
+                df_by_country = df[df[geo_selected] == selectedcountry]
+            else:
+                df_by_country = df
+
+            print("iter ", i)
 
             df_by_country[time_selected] = pd.to_datetime(
                 df_by_country[time_selected].astype("str")

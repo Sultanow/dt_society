@@ -44,7 +44,7 @@ def forecastVAR(model):
             dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
         )
         geo_selected = dataset["geoSelected"]
-        dataset_id = dataset["id"]
+        dataset_id = dataset["id"] if dataset["geoSelected"] != "None" else None
         time_selected = dataset["timeSelected"]
         feature_selected = dataset["featureSelected"]
 
@@ -54,7 +54,20 @@ def forecastVAR(model):
             reshape_column=reshape_selected,
             session_id=session,
         )
-        if selected_country in df[geo_selected].unique():
+        if geo_selected is None:
+            filtered_df = df
+            filtered_df[time_selected] = pd.to_datetime(
+                filtered_df[time_selected].astype("str")
+            )
+
+            freq = pd.infer_freq(filtered_df[time_selected])
+
+            filtered_dfs.append(filtered_df)
+            frequencies.append(freq)
+            time_columns.append(time_selected)
+            feature_columns.append(feature_selected)
+
+        elif geo_selected is not None and selected_country in df[geo_selected].unique():
             filtered_df = df[df[geo_selected] == selected_country][
                 [time_selected, feature_selected]
             ]
@@ -129,7 +142,9 @@ def forecastProphet():
                 if dataset["reshapeSelected"] != "N/A"
                 else None
             )
-            geo_selected = dataset["geoSelected"]
+            geo_selected = (
+                dataset["geoSelected"] if dataset["geoSelected"] != "None" else None
+            )
             dataset_id = dataset["id"]
             time_selected = dataset["timeSelected"]
             feature_selected = dataset["featureSelected"]
@@ -140,9 +155,12 @@ def forecastProphet():
                 reshape_column=reshape_selected,
                 session_id=session,
             )
-            filtered_df = df[df[geo_selected] == selected_country][
-                [time_selected, feature_selected]
-            ]
+            if geo_selected is not None:
+                filtered_df = df[df[geo_selected] == selected_country][
+                    [time_selected, feature_selected]
+                ]
+            else:
+                filtered_df = df[[time_selected, feature_selected]]
 
             filtered_df[time_selected] = pd.to_datetime(
                 filtered_df[time_selected].astype("str")

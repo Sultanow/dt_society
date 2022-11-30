@@ -159,6 +159,9 @@ def create_app(test_config=None):
 
             possible_features, geo_col, initialColumns = infer_feature_options(df)
 
+            if geo_col is None:
+                geo_col = "None"
+
             selection_options.append(
                 {
                     "id": dataset["id"],
@@ -228,7 +231,7 @@ def create_app(test_config=None):
             return ("Empty request.", 400)
 
         file_id = data["datasetId"]
-        geo_column = data["geoColumn"]
+        geo_column = data["geoColumn"] if data["geoColumn"] != "None" else None
         feature_selected = data["featureSelected"]
 
         session = get_jwt_identity()
@@ -246,12 +249,12 @@ def create_app(test_config=None):
             if feature not in ("Time", geo_column)
         ]
 
-        countries = df[geo_column].unique().tolist()
-
         response_data = {}
 
         response_data["features"] = feature_columns
-        response_data["countries"] = countries
+        if geo_column is not None:
+            countries = df[geo_column].unique().tolist()
+            response_data["countries"] = countries
         response_data["reshape_column"] = reshape_column
 
         return response_data
@@ -294,7 +297,7 @@ def create_app(test_config=None):
             return ("Empty request.", 400)
 
         file_id = data["datasetId"]
-        geo_column = data["geoColumn"]
+        geo_column = data["geoColumn"] if data["geoColumn"] != "None" else None
         feature_selected = data["featureSelected"]
 
         dataframe = parse_dataset(
