@@ -81,19 +81,18 @@ def create_app(test_config=None):
         for key in demo_data:
             df = DigitalTwinTimeSeries(demo_data[key][1], filename=demo_data[key][0])
 
-            if collection.count_documents({"name": demo_data[key][0]}) > 0:
+            if bucket.find_one({"name": demo_data[key][0]}):
                 print(f"Dataset '{demo_data[key][0]}' is already in database.")
 
             else:
                 file_id = hash(demo_data[key][0] + str(time.time()))
 
                 buffer = io.BytesIO()
-                df.data.to_json(buffer, orient = "records")
+                df.data.to_json(buffer, orient="records")
                 buffer.seek(0)
 
-                bucket.put(buffer, filename=demo_data[key][0], id= str(file_id))
+                bucket.put(buffer, filename=demo_data[key][0], id=str(file_id))
 
-            
                 print(f"Added '{demo_data[key][0]}' to database.")
 
         return ("", 204)
@@ -124,12 +123,14 @@ def create_app(test_config=None):
 
                     else:
                         file_id = hash(uploaded_file.filename + str(time.time()))
-                        
+
                         buffer = io.BytesIO()
-                        df.data.to_json(buffer, orient = "records")
+                        df.data.to_json(buffer, orient="records")
                         buffer.seek(0)
 
-                        bucket.put(buffer, filename=uploaded_file.filename, id= str(file_id))
+                        bucket.put(
+                            buffer, filename=uploaded_file.filename, id=str(file_id)
+                        )
                         print(f"Added '{uploaded_file.filename}' to database.")
             except Exception as e:
                 print(e)
@@ -144,13 +145,14 @@ def create_app(test_config=None):
 
         session, access_token = get_session()
 
-        collection = mongo.db[session+".files"]
+        collection = mongo.db[session + ".files"]
 
         selection_options = []
 
         datasets = collection.find({})
 
         for i, dataset in enumerate(datasets):
+            print(dataset["filename"])
             df, _ = parse_dataset(
                 geo_column=None, dataset_id=dataset["id"], session_id=session
             )
@@ -179,7 +181,6 @@ def create_app(test_config=None):
 
         return response_data
 
-
     @app.route("/data/update_dataset", methods=["POST"])
     @jwt_required()
     def update_dataset():
@@ -198,24 +199,27 @@ def create_app(test_config=None):
         geo_column = data["geoColumn"]
         reshape_column = data["reshapeSelected"]
 
-        dataset = mongo.db[session+".files"].find_one({"id":file_id})
+        dataset = mongo.db[session + ".files"].find_one({"id": file_id})
 
         df, _ = parse_dataset(
-                geo_column=geo_column, dataset_id=dataset["id"], reshape_column=reshape_column, session_id=session
-            )
+            geo_column=geo_column,
+            dataset_id=dataset["id"],
+            reshape_column=reshape_column,
+            session_id=session,
+        )
 
         df = df.fillna(0)
 
         possible_features, _, initialColumns = infer_feature_options(df)
 
         response_data = {
-                "id": dataset["id"],
-                "possibleFeatures": possible_features,
-                "geoSelected": geo_column,
-                "name": dataset["filename"],
-                "initialColumns": initialColumns,
-            }
-        
+            "id": dataset["id"],
+            "possibleFeatures": possible_features,
+            "geoSelected": geo_column,
+            "name": dataset["filename"],
+            "initialColumns": initialColumns,
+        }
+
         return response_data
 
     @app.route("/data/reshape", methods=["POST"])
@@ -275,8 +279,8 @@ def create_app(test_config=None):
             return ("Empty request.", 400)
         dataset_id = data["datasetId"]
 
-        file_to_delete = mongo.db[session+".files"].find_one({"id":dataset_id})
-               
+        file_to_delete = mongo.db[session + ".files"].find_one({"id": dataset_id})
+
         bucket.delete(file_to_delete["_id"])
 
         print(f"Successfully removed dataset '{dataset_id}'.")

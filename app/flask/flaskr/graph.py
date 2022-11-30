@@ -25,7 +25,7 @@ def get_selected_data():
 
     dataset_id = data["id"]
 
-    geo_selected = data["geoSelected"] if "geoSelected" in data else None
+    geo_selected = data["geoSelected"] if data["geoSelected"] != "None" else None
 
     reshape_col = (
         (data["reshapeSelected"] if data["reshapeSelected"] != "N/A" else None)
