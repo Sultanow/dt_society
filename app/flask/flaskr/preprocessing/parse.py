@@ -36,18 +36,21 @@ def parse_dataset(
 
     df = DigitalTwinTimeSeries(selected_df, geo_col=geo_column, sep="dict")
 
-    if selected_feature is not None:
-        features_in_columns = df.data.columns.to_list()
+    if reshape_column is None: 
+        if selected_feature is not None:
+            features_in_columns = df.data.columns.to_list()
 
-        for feature in features_in_columns:
-            if selected_feature in df.data[feature].unique().tolist():
-                reshape_column = feature
+            for feature in features_in_columns:
+                if selected_feature in df.data[feature].unique().tolist():
+                    reshape_column = feature
 
-    if reshape_column is not None:
-        df = df.reshape_wide_to_long(value_id_column=reshape_column)
+        if reshape_column is not None:
+            df = df.reshape_wide_to_long(value_id_column=reshape_column)
 
-    else:
-        df = df.data
+        else:
+            df = df.data
+            
+    else: df = df.reshape_wide_to_long(value_id_column=reshape_column)
 
     return df, reshape_column
 

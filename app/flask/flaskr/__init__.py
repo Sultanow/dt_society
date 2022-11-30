@@ -144,11 +144,11 @@ def create_app(test_config=None):
 
         session, access_token = get_session()
 
-        bucket = mongo.db[session+".files"]
+        collection = mongo.db[session+".files"]
 
         selection_options = []
 
-        datasets = bucket.find({})
+        datasets = collection.find({})
 
         for i, dataset in enumerate(datasets):
             df, _ = parse_dataset(
@@ -157,7 +157,7 @@ def create_app(test_config=None):
 
             df = df.fillna(0)
 
-            possible_features, geo_col = infer_feature_options(df)
+            possible_features, geo_col, initialColumns = infer_feature_options(df)
 
             selection_options.append(
                 {
@@ -165,6 +165,7 @@ def create_app(test_config=None):
                     "possibleFeatures": possible_features,
                     "geoSelected": geo_col,
                     "name": dataset["filename"],
+                    "initialColumns": initialColumns,
                 }
             )
 
@@ -173,6 +174,45 @@ def create_app(test_config=None):
 
         response_data = make_response(jsonify(selection_options))
 
+        return response_data
+
+
+    @app.route("/data/update_dataset", methods=["POST"])
+    @jwt_required()
+    def update_dataset():
+
+        if mongo.db is None:
+            return ("Database not available.", 500)
+
+        session = get_jwt_identity()
+
+        data = request.get_json()
+
+        if data is None:
+            return ("Empty request.", 400)
+
+        file_id = data["datasetId"]
+        geo_column = data["geoColumn"]
+        reshape_column = data["reshapeSelected"]
+
+        dataset = mongo.db[session+".files"].find_one({"id":file_id})
+
+        df, _ = parse_dataset(
+                geo_column=geo_column, dataset_id=dataset["id"], reshape_column=reshape_column, session_id=session
+            )
+
+        df = df.fillna(0)
+
+        possible_features, _, initialColumns = infer_feature_options(df)
+
+        response_data = {
+                "id": dataset["id"],
+                "possibleFeatures": possible_features,
+                "geoSelected": geo_column,
+                "name": dataset["filename"],
+                "initialColumns": initialColumns,
+            }
+        
         return response_data
 
     @app.route("/data/reshape", methods=["POST"])

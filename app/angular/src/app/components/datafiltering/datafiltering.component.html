@@ -10,6 +10,7 @@
       <mat-radio-button [value]="dataset.id">
         <div>
           {{ dataset.name }}
+          <!--
           <button
             mat-icon-button
             color="primary"
@@ -17,6 +18,15 @@
             (click)="onDeleteFile(dataset.id)"
           >
             <mat-icon color="warn">delete_forever</mat-icon>
+          </button>
+          -->
+          <button
+            mat-icon-button
+            color="primary"
+            class="settings-button"
+            (click)="onSettings(dataset.id)"
+          >
+          <fa-icon [icon]="settingsIcon"></fa-icon>
           </button>
         </div>
       </mat-radio-button>

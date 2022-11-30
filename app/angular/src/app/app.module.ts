@@ -28,6 +28,7 @@ import { DatatableComponent } from './components/graph/datatable/datatable.compo
 import { StatisticsComponent } from './components/graph/statistics/statistics.component';
 import { OverviewComponent } from './components/overview/overview.component';
 import { CorrelationsComponent } from './components/correlations/correlations.component';
+import { DatasetSettingsComponent } from './components/datafiltering/dataset-settings/dataset-settings.component';
 
 // Services
 import { AuthService } from './services/auth.service';
@@ -54,6 +55,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTooltipModule } from '@angular/material/tooltip'
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -73,6 +75,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     StatisticsComponent,
     OverviewComponent,
     CorrelationsComponent,
+    DatasetSettingsComponent,
   ],
   imports: [
     BrowserModule,
@@ -138,6 +141,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
       },
     ]),
     MatCheckboxModule,
+    MatTooltipModule
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: RoutecachingService },

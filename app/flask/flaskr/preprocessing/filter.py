@@ -70,7 +70,7 @@ def is_datetime(value: str)-> bool:
     return is_date
 
 
-def infer_feature_options(dataframe: pd.DataFrame) -> Tuple[List[str], str]:
+def infer_feature_options(dataframe: pd.DataFrame) -> Tuple[List[str], str, List[str]]:
     """
     Infer possible options for selectable features and column with geo data
     
@@ -89,6 +89,7 @@ def infer_feature_options(dataframe: pd.DataFrame) -> Tuple[List[str], str]:
     """
     
     columns = dataframe.columns.to_list()
+    columns = [c.strip() for c in columns]
     geo_col = None
     feature_candidates = []
     
@@ -130,6 +131,6 @@ def infer_feature_options(dataframe: pd.DataFrame) -> Tuple[List[str], str]:
     if geo_col in feature_candidates:
                 feature_candidates.remove(geo_col)
                 
-    return feature_candidates, geo_col
+    return feature_candidates, geo_col, columns
             
     

@@ -3,6 +3,10 @@ import { Selections } from '../../types/Datasets';
 import { DataService } from 'src/app/services/data.service';
 import { MatDialog } from '@angular/material/dialog';
 import { UploaddialogComponent } from './uploaddialog/uploaddialog.component';
+import {
+  faGear
+} from '@fortawesome/free-solid-svg-icons';
+import { DatasetSettingsComponent } from './dataset-settings/dataset-settings.component';
 
 @Component({
   selector: 'app-datafiltering',
@@ -11,6 +15,8 @@ import { UploaddialogComponent } from './uploaddialog/uploaddialog.component';
 })
 export class DatafilteringComponent implements OnInit {
   constructor(private dataService: DataService, public dialog: MatDialog) {}
+
+  settingsIcon = faGear;
 
   selections: Selections = {
     datasets: [],
@@ -59,6 +65,11 @@ export class DatafilteringComponent implements OnInit {
 
   updateCountry() {
     this.dataService.updateDatasetsSelection(this.selections);
+  }
+
+  onSettings(datasedId: string | undefined){
+    let dialogRef = this.dialog.open(DatasetSettingsComponent)
+    dialogRef.componentInstance.datasetId = datasedId;
   }
 
   ngOnInit(): void {

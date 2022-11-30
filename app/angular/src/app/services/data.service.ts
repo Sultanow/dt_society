@@ -255,4 +255,25 @@ export class DataService {
         }
       });
   }
+
+  updateDataset(
+    selections: Selections,
+    datasetId: string | undefined
+  ) {
+    const targetDatasetIdx = selections.datasets.findIndex(
+      (dataset) => dataset.id == datasetId
+    );
+
+    this.http
+      .post(this.apiUrl + 'data/update_dataset', {
+        datasetId: datasetId,
+        geoColumn: selections.datasets[targetDatasetIdx].geoSelected,
+        featureSelected: selections.datasets[targetDatasetIdx].featureSelected,
+        reshapeSelected: selections.datasets[targetDatasetIdx].reshapeSelected,
+      })
+      .subscribe((data) => {
+        selections.datasets[targetDatasetIdx] = data as Dataset
+        this.updateDatasetsSelection(selections)
+      });
+  }
 }

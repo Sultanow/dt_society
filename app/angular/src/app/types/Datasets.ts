@@ -11,6 +11,7 @@ export interface Dataset {
   possibleFeatures?: string[];
   token?: string;
   name?: string;
+  initialColumns?: string[];
 }
 
 export interface Selections {
