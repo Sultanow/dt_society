@@ -1,4 +1,5 @@
 import pandas as pd
+import pycountry
 
 from flask import (
     Blueprint,
@@ -25,7 +26,7 @@ def forecastVAR(model):
     data = request.get_json()
 
     datasets = data["datasets"]
-    selected_country = data["country"]
+    selected_country = pycountry.countries.get(name=data["country"]).alpha_3
 
     if datasets is None:
         return ("Empty request", 400)
@@ -119,7 +120,7 @@ def forecastProphet():
     data = request.get_json()
 
     datasets = data["datasets"]
-    selected_country = data["country"]
+    selected_country = pycountry.countries.get(name=data["country"]).alpha_3
     dependent_df = data["dependentDataset"]
     scenarios = data["scenarios"]
 

@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pycountry
 
 from flask import (
     Blueprint,
@@ -78,8 +79,11 @@ def get_selected_feature_data():
 
     response_data = {}
 
+    countries = df[geo_selected].unique().tolist()
+
     if geo_selected is not None:
-        for country in df[geo_selected].unique().tolist():
+        for country in countries:
+
             response_data[country] = {}
 
             response_data[country][time_selected] = df[df[geo_selected] == country][
@@ -88,6 +92,11 @@ def get_selected_feature_data():
             response_data[country][feature_selected] = df[df[geo_selected] == country][
                 feature_selected
             ].to_list()
+
+            if "statistics" in request.path:
+                country_full = pycountry.countries.get(alpha_3=country).name
+                response_data[country_full] = response_data.pop(country)
+
     else:
         response_data[time_selected] = df[time_selected].to_list()
         response_data[feature_selected] = df[feature_selected].to_list()
@@ -104,7 +113,7 @@ def get_heatmap():
 
     data = request.get_json()
     datasets = data["datasets"]
-    selected_country = data["country"]
+    selected_country = pycountry.countries.get(name=data["country"]).alpha_3
 
     if data is None:
         return ("Empty request", 400)
@@ -189,7 +198,7 @@ def get_correlation_lines():
 
     data = request.get_json()
     datasets = data["datasets"]
-    selectedcountry = data["country"]
+    selectedcountry = pycountry.countries.get(name=data["country"]).alpha_3
 
     min_timestamp = None
     max_timestamp = None

@@ -3,6 +3,7 @@ import os
 from flask import Flask, request, jsonify, make_response
 from flask_jwt_extended import get_jwt_identity, jwt_required
 import time
+import pycountry
 
 import gridfs
 
@@ -258,7 +259,11 @@ def create_app(test_config=None):
         response_data["features"] = feature_columns
         if geo_column is not None:
             countries = df[geo_column].unique().tolist()
-            response_data["countries"] = countries
+            print(countries)
+            countries = map(
+                lambda country: pycountry.countries.get(alpha_3=country).name, countries
+            )
+            response_data["countries"] = list(countries)
         response_data["reshape_column"] = reshape_column
 
         return response_data

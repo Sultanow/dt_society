@@ -45,7 +45,7 @@ class DigitalTwinTimeSeries:
         else:
             if filename is not None:
                 if filename.endswith(".tsv"):
-                    data = pd.read_table(path) 
+                    data = pd.read_table(path)
                 else:
                     data = pd.read_csv(path, sep=None)
 
@@ -152,6 +152,8 @@ class DigitalTwinTimeSeries:
             }
 
         data[self.geo_col] = data[self.geo_col].replace(geo_codes)
+
+        data = data[data[self.geo_col] != "UNK"]
 
         assert not data.empty, "Column did not contain correct country codes."
 
