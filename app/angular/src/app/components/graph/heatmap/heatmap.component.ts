@@ -121,13 +121,18 @@ export class HeatmapComponent implements OnInit {
     this.featureOptions = [];
     for (const dataset of this.selections.datasets) {
       if (
-        this.selections.selectedCountry !== (undefined && null) &&
         dataset.featureOptions !== undefined &&
-        dataset.countryOptions?.includes(
-          this.selections.selectedCountry?.toString()
-        )
+        ((this.selections.selectedCountry !== (undefined && null) &&
+          dataset.countryOptions?.includes(
+            this.selections.selectedCountry?.toString()
+          )) ||
+          dataset.countryOptions === undefined)
       ) {
-        this.featureOptions.push(...dataset.featureOptions.filter((feature) => feature != dataset.timeSelected));
+        this.featureOptions.push(
+          ...dataset.featureOptions.filter(
+            (feature) => feature !== dataset.timeSelected
+          )
+        );
       }
     }
   }

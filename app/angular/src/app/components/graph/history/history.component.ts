@@ -46,7 +46,7 @@ export class HistoryComponent implements OnInit {
     this.historyPlot = {
       data: [],
       layout: {
-        margin: { t: 70, b: 0, l: 40, r: 10 },
+        margin: { t: 70, b: 50, l: 40, r: 10 },
         paper_bgcolor: '#424242',
         plot_bgcolor: '#424242',
         xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: ''},

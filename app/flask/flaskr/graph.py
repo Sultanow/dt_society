@@ -89,7 +89,7 @@ def get_selected_feature_data():
                 feature_selected
             ].to_list()
     else:
-        response_data[time_selected] = df[time_selected].to_list()
+        response_data[time_selected] = df[time_selected].dt.strftime("%Y-%m-%d").to_list()
         response_data[feature_selected] = df[feature_selected].to_list()
 
     return response_data
@@ -104,7 +104,7 @@ def get_heatmap():
 
     data = request.get_json()
     datasets = data["datasets"]
-    selected_country = data["country"]
+    selected_country = data["country"] if "country" in data else None
 
     if data is None:
         return ("Empty request", 400)
@@ -189,7 +189,7 @@ def get_correlation_lines():
 
     data = request.get_json()
     datasets = data["datasets"]
-    selectedcountry = data["country"]
+    selectedcountry = data["country"] if "country" in data else None
 
     min_timestamp = None
     max_timestamp = None
@@ -208,7 +208,10 @@ def get_correlation_lines():
 
         if "geoSelected" in dataset and "reshapeSelected" in dataset:
 
+            datasetid = dataset["id"]
             file_data = {}
+
+            file_data["datasetid"] = datasetid
 
             reshape_selected = (
                 dataset["reshapeSelected"]

@@ -1,8 +1,10 @@
 import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
+import { DateAdapter } from '@angular/material/core';
+import { throwToolbarMixedModesError } from '@angular/material/toolbar';
 import { DataService } from 'src/app/services/data.service';
-import { Selections } from 'src/app/types/Datasets';
+import { Dataset, Selections } from 'src/app/types/Datasets';
 import { ColumnValues, Plot } from 'src/app/types/GraphData';
 
 @Component({
@@ -43,33 +45,30 @@ export class CorrelationComponent implements OnInit {
       this.data.data = [];
     }
 
-    let validDataframes: boolean[] = [];
-    for (let i = 0; i < data.length; i++) {
-      let timeOption = this.selections.datasets[i].timeSelected;
-      data[i][timeOption!].length > 0
-        ? (validDataframes[i] = true)
-        : (validDataframes[i] = false);
-    }
+    data = data.filter(set => Object.values(set).every( val => val.length > 0))
 
     this.data.layout.grid = {
       rows: 1,
-      columns: validDataframes.filter(Boolean).length,
+      columns: data.length,
       pattern: 'independent',
     };
 
     let group = 0;
     for (let i = 0; i < data.length; i++) {
+    
       const timeSelection = this.selections.datasets[i].timeSelected;
-      if (validDataframes[i]) {
+      let setId = data[i]["datasetid"].toString();
+
         for (const [key, value] of Object.entries(data[i])) {
-          if (key === 'timestamps') {
+          let dataset = this.selections.datasets.filter(dataset => dataset.id == setId)[0]
+          if (key === 'timestamps' || key === "datasetid" || key == dataset.timeSelected) {
             continue;
           }
           let trace: any = {
             type: 'scatter',
             mode: 'lines',
             legendgroup: 'df' + group.toString(),
-            legendgrouptitle: { text: this.selections.datasets[i].name },
+            legendgrouptitle: { text: dataset.name },
           };
 
           if (key !== timeSelection) {
@@ -103,9 +102,10 @@ export class CorrelationComponent implements OnInit {
           }
         }
         group++;
-      }
-    }
+      
+    
   }
+}
 
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
@@ -116,8 +116,7 @@ export class CorrelationComponent implements OnInit {
 
   private updateCorrelationPlot() {
     if (
-      this.selections.datasets.length > 0 &&
-      this.selections.selectedCountry !== undefined
+      this.selections.datasets.length > 0
     ) {
       this.dataService
         .getData(this.selections.datasets, '/graph/corr', {
