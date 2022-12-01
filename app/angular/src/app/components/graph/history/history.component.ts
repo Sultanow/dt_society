@@ -15,11 +15,11 @@ export class HistoryComponent implements OnInit {
   public historyPlot: Plot = {
     data: [],
     layout: {
-      margin: { t: 30, b: 0, l: 35, r: 90 },
+      margin: { t: 70, b: 0, l: 35, r: 90 },
       legend: { title: { text: 'Countries' } },
       paper_bgcolor: '#424242',
       plot_bgcolor: '#424242',
-      xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
+      xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: ''},
       yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
       font: { color: '#f2f2f2' },
     },
@@ -32,9 +32,63 @@ export class HistoryComponent implements OnInit {
   };
 
   createHistoryPlot(data: CountryData, selectedIdx: number) {
-    if (this.historyPlot.data.length > 0) {
-      this.historyPlot.data = [];
+    
+    if(Object.keys(data).includes(this.selections.datasets[selectedIdx].featureSelected!)){
+      this.createPlotWithoutGeoReference(selectedIdx, data);
+
+    } else{
+      this.createPlotWithGeoReference(data, selectedIdx);
     }
+  }
+
+  private createPlotWithoutGeoReference(selectedIdx: number, data: CountryData) {
+    
+    this.historyPlot = {
+      data: [],
+      layout: {
+        margin: { t: 70, b: 0, l: 40, r: 10 },
+        paper_bgcolor: '#424242',
+        plot_bgcolor: '#424242',
+        xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: ''},
+        yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
+        font: { color: '#f2f2f2' },
+      },
+      config: { responsive: true },
+    };
+
+    let trace: any = {
+      type: 'scatter',
+      mode: 'lines',
+    };
+
+    const timeSelected = this.selections.datasets[selectedIdx].timeSelected;
+    const featureSelected = this.selections.datasets[selectedIdx].featureSelected;
+    if (timeSelected !== undefined && featureSelected !== undefined) {
+      trace.x = data[timeSelected];
+      trace.y = data[featureSelected];
+    }
+
+    this.historyPlot.layout.yaxis.title = featureSelected;
+    this.historyPlot.layout.xaxis.title = timeSelected;
+    this.historyPlot.data.push(trace);
+  }
+
+  private createPlotWithGeoReference(data: CountryData, selectedIdx: number) {
+
+    this.historyPlot = {
+      data: [],
+      layout: {
+        margin: { t: 70, b: 0, l: 35, r: 90 },
+        legend: { title: { text: 'Countries' } },
+        paper_bgcolor: '#424242',
+        plot_bgcolor: '#424242',
+        xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: ''},
+        yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
+        font: { color: '#f2f2f2' },
+      },
+      config: { responsive: true },
+    };
+
     let count = 0;
     for (const [key, value] of Object.entries(data)) {
       let trace: any = {
@@ -43,15 +97,14 @@ export class HistoryComponent implements OnInit {
       };
 
       trace.name = key;
-      
+
       if (count > 4) {
         trace.visible = 'legendonly';
       }
       count++;
 
       const timeSelected = this.selections.datasets[selectedIdx].timeSelected;
-      const featureSelected =
-        this.selections.datasets[selectedIdx].featureSelected;
+      const featureSelected = this.selections.datasets[selectedIdx].featureSelected;
       if (timeSelected !== undefined && featureSelected !== undefined) {
         trace.x = value[timeSelected];
         trace.y = value[featureSelected];

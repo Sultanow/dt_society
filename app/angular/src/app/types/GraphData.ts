@@ -20,7 +20,7 @@ export interface Plot {
   data: any[];
   layout: {
     [property: string]: any;
-    legend: { title: { text: string }; groupclick?: string };
+    legend?: { title: { text: string }; groupclick?: string };
     paper_bgcolor: string;
     plot_bgcolor: string;
     xaxis: { gridcolor: string; title: string | undefined; range?: number[] };

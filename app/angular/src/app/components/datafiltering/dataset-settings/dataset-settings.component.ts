@@ -31,7 +31,7 @@ export class DatasetSettingsComponent implements OnInit {
     this.currentDataset = this.selections.datasets.filter(dataset => dataset.id == this.datasetId)[0];
   }
 
-  showData(){
+  saveDatasetSettings(){
     if(this.currentDataset?.geoSelected === undefined){
       this.currentDataset!.geoSelected = "None";
     }
@@ -42,8 +42,7 @@ export class DatasetSettingsComponent implements OnInit {
     })
 
     this.dataService.updateDataset(this.selections, this.datasetId)
-    console.log(this.currentDataset)
-    console.log(this.selections.datasets.filter(dataset => dataset.id == this.datasetId)[0])
+    
   }
 
 }

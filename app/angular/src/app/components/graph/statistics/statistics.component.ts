@@ -17,6 +17,8 @@ export class StatisticsComponent implements OnInit {
 
   data: CountryData = {}
 
+  geodata: boolean = true;
+
   selections: Selections = {
     datasets: [],
     selectedDataset: undefined,
@@ -52,6 +54,16 @@ export class StatisticsComponent implements OnInit {
   growthrate_per_time: String = "";
 
   updateData(newdata: CountryData) {
+
+    const datasetId = this.selections.selectedDataset;
+
+        const selectedDatasetIdx = this.selections.datasets.findIndex(
+          (dataset) => dataset.id == datasetId
+        );
+
+    if(Object.keys(newdata).includes(this.selections.datasets[selectedDatasetIdx].featureSelected!)){
+      this.geodata = false;
+    } else{
     
     this.data = newdata;
     this.countries = [];
@@ -70,7 +82,9 @@ export class StatisticsComponent implements OnInit {
     this.resetStatistics();
     
     this.dataAvailable = true;
+    this.geodata = true;
   }
+}
 
   updateGrowth(){
     const selectedDatasetIdx = this.selections.datasets.findIndex(

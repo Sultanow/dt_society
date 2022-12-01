@@ -14,6 +14,7 @@ import { GraphData, Frame, CountryData } from 'src/app/types/GraphData';
 export class MapComponent implements OnInit {
   constructor(private dataService: DataService) {}
 
+  public geoData: boolean = true;
   public data: GraphData = {
     data: [],
     layout: {},
@@ -88,6 +89,10 @@ export class MapComponent implements OnInit {
       this.data.data = [];
     }
 
+    if(Object.keys(data).includes(this.selections.datasets[selectedIdx].featureSelected!)){
+      this.geoData = false;
+    } else{
+
     this.featureSelected =
       this.selections.datasets[selectedIdx].featureSelected;
     let timeSelected = this.selections.datasets[selectedIdx].timeSelected;
@@ -155,7 +160,9 @@ export class MapComponent implements OnInit {
 
       this.selectionControl.get('geojsonControl')!.setValue(this.scope);
     }
+    this.geoData = true;
   }
+}
 
   private createInitialData() {
     this.data = {
