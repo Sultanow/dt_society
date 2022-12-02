@@ -41,7 +41,7 @@ def get_selected_data():
         dataset_id=dataset_id,
         reshape_column=reshape_col,
         session_id=session,
-        processed_state=True,
+        use_preprocessed=False,
     )
     df.fillna(value=0)
 
@@ -74,7 +74,6 @@ def get_selected_feature_data():
         dataset_id=dataset_id,
         reshape_column=reshape_col,
         session_id=session,
-        processed_state=True,
     )
 
     df = df.fillna(value=0)
@@ -116,8 +115,9 @@ def get_heatmap():
 
     data = request.get_json()
     datasets = data["datasets"]
-    selected_country = data["country"] if "country" in data else None
-    selected_country = pycountry.countries.get(name=data["country"]).alpha_3
+
+    if "country" in data:
+        selected_country = pycountry.countries.get(name=data["country"]).alpha_3
 
     if data is None:
         return ("Empty request", 400)
@@ -148,7 +148,6 @@ def get_heatmap():
                 dataset_id=dataset_id,
                 reshape_column=reshape_selected,
                 session_id=session,
-                processed_state=True,
             )
 
             if geo_selected is None:
@@ -203,8 +202,9 @@ def get_correlation_lines():
 
     data = request.get_json()
     datasets = data["datasets"]
-    selectedcountry = data["country"] if "country" in data else None
-    selectedcountry = pycountry.countries.get(name=data["country"]).alpha_3
+
+    if "country" in data:
+        selectedcountry = pycountry.countries.get(name=data["country"]).alpha_3
 
     min_timestamp = None
     max_timestamp = None
@@ -244,11 +244,10 @@ def get_correlation_lines():
                 dataset_id=dataset_id,
                 reshape_column=reshape_selected,
                 session_id=session,
-                processed_state=True,
             )
             df = df.fillna(0)
 
-            if geo_selected is not None and selectedcountry is not None:
+            if geo_selected is not None:
                 df_by_country = df[df[geo_selected] == selectedcountry]
             else:
                 df_by_country = df

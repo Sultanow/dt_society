@@ -54,7 +54,6 @@ def forecastVAR(model):
             dataset_id=dataset_id,
             reshape_column=reshape_selected,
             session_id=session,
-            processed_state=True,
         )
         if geo_selected is None:
             filtered_df = df
@@ -156,7 +155,6 @@ def forecastProphet():
                 dataset_id=dataset_id,
                 reshape_column=reshape_selected,
                 session_id=session,
-                processed_state=True,
             )
             if geo_selected is not None:
                 filtered_df = df[df[geo_selected] == selected_country][

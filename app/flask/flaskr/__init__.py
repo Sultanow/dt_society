@@ -163,7 +163,10 @@ def create_app(test_config=None):
         for i, dataset in enumerate(datasets):
             print(dataset["filename"])
             df, _ = parse_dataset(
-                geo_column=None, dataset_id=dataset["id"], session_id=session
+                geo_column=None,
+                dataset_id=dataset["id"],
+                session_id=session,
+                use_preprocessed=False,
             )
 
             df = df.fillna(0)
@@ -256,6 +259,7 @@ def create_app(test_config=None):
             dataset_id=file_id,
             selected_feature=feature_selected,
             session_id=session,
+            use_preprocessed=False,
         )
 
         processed = mongo.db[session + ".files"].find_one(
@@ -268,7 +272,7 @@ def create_app(test_config=None):
 
         if processed is not None:
             print("Reprocessing file: ", processed)
-            bucket.delete(processed)
+            bucket.delete(processed["_id"])
         else:
             print("File does not exist")
 
@@ -318,10 +322,18 @@ def create_app(test_config=None):
             return ("Empty request.", 400)
         dataset_id = data["datasetId"]
 
-        file_to_delete_processed = mongo.db[session + ".files"].find_one({"id": dataset_id, "state": "processed"})
-        file_to_delete_original = mongo.db[session + ".files"].find_one({"id": dataset_id, "state": "original"})
+        file_to_delete_processed = mongo.db[session + ".files"].find_one(
+            {"id": dataset_id, "state": "processed"}
+        )
 
-        bucket.delete(file_to_delete_processed["_id"])
+        file_to_delete_original = mongo.db[session + ".files"].find_one(
+            {"id": dataset_id, "state": "original"}
+        )
+
+
+        if file_to_delete_processed is not None:
+            bucket.delete(file_to_delete_processed["_id"])
+
         bucket.delete(file_to_delete_original["_id"])
 
         print(f"Successfully removed dataset '{dataset_id}'.")
@@ -346,7 +358,10 @@ def create_app(test_config=None):
         feature_selected = data["featureSelected"]
 
         dataframe = parse_dataset(
-            geo_column=geo_column, dataset_id=file_id, session_id=session
+            geo_column=geo_column,
+            dataset_id=file_id,
+            session_id=session,
+            use_preprocessed=False,
         )
 
         features_in_columns = dataframe.columns.to_list()

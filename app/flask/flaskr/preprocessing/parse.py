@@ -12,7 +12,7 @@ def parse_dataset(
     geo_column,
     dataset_id,
     session_id,
-    processed_state: bool = False,
+    use_preprocessed: bool = True,
     reshape_column=None,
     selected_feature: str = None,
 ) -> Tuple[pd.DataFrame, str]:
@@ -32,11 +32,19 @@ def parse_dataset(
     if isinstance(dataset_id, int):
         selected_df = bucket.find({})[dataset_id]
     elif isinstance(dataset_id, str):
-        selected_df = bucket.find_one({"id": dataset_id, "state":"processed"})
-        if selected_df is None:
-            selected_df = bucket.find_one({"id": dataset_id, "state":"original"}).read().decode("utf-8")
-        else: 
-            return pd.read_json(selected_df.read().decode("utf-8"), orient="records"), None
+        if use_preprocessed:
+            selected_df = bucket.find_one({"id": dataset_id, "state": "processed"})
+            return (
+                pd.read_json(selected_df.read().decode("utf-8"), orient="records"),
+                None,
+            )
+
+        else:
+            selected_df = (
+                bucket.find_one({"id": dataset_id, "state": "original"})
+                .read()
+                .decode("utf-8")
+            )
 
     df = DigitalTwinTimeSeries(selected_df, geo_col=geo_column, sep="dict")
 
