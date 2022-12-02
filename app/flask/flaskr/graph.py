@@ -36,11 +36,12 @@ def get_selected_data():
 
     session = get_jwt_identity()
 
-    df, _ = parse_dataset(
+    df = parse_dataset(
         geo_column=geo_selected,
         dataset_id=dataset_id,
         reshape_column=reshape_col,
         session_id=session,
+        processed_state=True,
     )
     df.fillna(value=0)
 
@@ -68,11 +69,12 @@ def get_selected_feature_data():
 
     session = get_jwt_identity()
 
-    df, _ = parse_dataset(
+    df = parse_dataset(
         geo_column=geo_selected,
         dataset_id=dataset_id,
         reshape_column=reshape_col,
         session_id=session,
+        processed_state=True,
     )
 
     df = df.fillna(value=0)
@@ -139,11 +141,12 @@ def get_heatmap():
             dataset_id = dataset["id"]
             time_selected = dataset["timeSelected"]
 
-            df, _ = parse_dataset(
+            df = parse_dataset(
                 geo_column=geo_selected,
                 dataset_id=dataset_id,
                 reshape_column=reshape_selected,
                 session_id=session,
+                processed_state=True,
             )
 
             if geo_selected is None:
@@ -230,11 +233,12 @@ def get_correlation_lines():
             dataset_id = dataset["id"]
             time_selected = dataset["timeSelected"]
 
-            df, _ = parse_dataset(
+            df = parse_dataset(
                 geo_column=geo_selected,
                 dataset_id=dataset_id,
                 reshape_column=reshape_selected,
                 session_id=session,
+                processed_state=True,
             )
             df = df.fillna(0)
 
