@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pycountry
 
 from flask import (
     Blueprint,
@@ -35,11 +36,12 @@ def get_selected_data():
 
     session = get_jwt_identity()
 
-    df, _ = parse_dataset(
+    df = parse_dataset(
         geo_column=geo_selected,
         dataset_id=dataset_id,
         reshape_column=reshape_col,
         session_id=session,
+        processed_state=True,
     )
     df.fillna(value=0)
 
@@ -67,11 +69,12 @@ def get_selected_feature_data():
 
     session = get_jwt_identity()
 
-    df, _ = parse_dataset(
+    df = parse_dataset(
         geo_column=geo_selected,
         dataset_id=dataset_id,
         reshape_column=reshape_col,
         session_id=session,
+        processed_state=True,
     )
 
     df = df.fillna(value=0)
@@ -79,7 +82,9 @@ def get_selected_feature_data():
     response_data = {}
 
     if geo_selected is not None:
-        for country in df[geo_selected].unique().tolist():
+        countries = df[geo_selected].unique().tolist()
+        for country in countries:
+
             response_data[country] = {}
 
             response_data[country][time_selected] = df[df[geo_selected] == country][
@@ -88,8 +93,15 @@ def get_selected_feature_data():
             response_data[country][feature_selected] = df[df[geo_selected] == country][
                 feature_selected
             ].to_list()
+
+            if "statistics" in request.path:
+                country_full = pycountry.countries.get(alpha_3=country).name
+                response_data[country_full] = response_data.pop(country)
+
     else:
-        response_data[time_selected] = df[time_selected].dt.strftime("%Y-%m-%d").to_list()
+        response_data[time_selected] = (
+            df[time_selected].dt.strftime("%Y-%m-%d").to_list()
+        )
         response_data[feature_selected] = df[feature_selected].to_list()
 
     return response_data
@@ -105,6 +117,7 @@ def get_heatmap():
     data = request.get_json()
     datasets = data["datasets"]
     selected_country = data["country"] if "country" in data else None
+    selected_country = pycountry.countries.get(name=data["country"]).alpha_3
 
     if data is None:
         return ("Empty request", 400)
@@ -130,11 +143,12 @@ def get_heatmap():
             dataset_id = dataset["id"]
             time_selected = dataset["timeSelected"]
 
-            df, _ = parse_dataset(
+            df = parse_dataset(
                 geo_column=geo_selected,
                 dataset_id=dataset_id,
                 reshape_column=reshape_selected,
                 session_id=session,
+                processed_state=True,
             )
 
             if geo_selected is None:
@@ -190,6 +204,7 @@ def get_correlation_lines():
     data = request.get_json()
     datasets = data["datasets"]
     selectedcountry = data["country"] if "country" in data else None
+    selectedcountry = pycountry.countries.get(name=data["country"]).alpha_3
 
     min_timestamp = None
     max_timestamp = None
@@ -224,15 +239,16 @@ def get_correlation_lines():
             dataset_id = dataset["id"]
             time_selected = dataset["timeSelected"]
 
-            df, _ = parse_dataset(
+            df = parse_dataset(
                 geo_column=geo_selected,
                 dataset_id=dataset_id,
                 reshape_column=reshape_selected,
                 session_id=session,
+                processed_state=True,
             )
             df = df.fillna(0)
 
-            if geo_selected is not None:
+            if geo_selected is not None and selectedcountry is not None:
                 df_by_country = df[df[geo_selected] == selectedcountry]
             else:
                 df_by_country = df

@@ -1,4 +1,5 @@
 import pandas as pd
+import pycountry
 
 from flask import (
     Blueprint,
@@ -25,7 +26,7 @@ def forecastVAR(model):
     data = request.get_json()
 
     datasets = data["datasets"]
-    selected_country = data["country"]
+    selected_country = pycountry.countries.get(name=data["country"]).alpha_3
 
     if datasets is None:
         return ("Empty request", 400)
@@ -48,11 +49,12 @@ def forecastVAR(model):
         time_selected = dataset["timeSelected"]
         feature_selected = dataset["featureSelected"]
 
-        df, _ = parse_dataset(
+        df = parse_dataset(
             geo_column=geo_selected,
             dataset_id=dataset_id,
             reshape_column=reshape_selected,
             session_id=session,
+            processed_state=True,
         )
         if geo_selected is None:
             filtered_df = df
@@ -119,7 +121,7 @@ def forecastProphet():
     data = request.get_json()
 
     datasets = data["datasets"]
-    selected_country = data["country"]
+    selected_country = pycountry.countries.get(name=data["country"]).alpha_3
     dependent_df = data["dependentDataset"]
     scenarios = data["scenarios"]
 
@@ -149,11 +151,12 @@ def forecastProphet():
             time_selected = dataset["timeSelected"]
             feature_selected = dataset["featureSelected"]
 
-            df, _ = parse_dataset(
+            df = parse_dataset(
                 geo_column=geo_selected,
                 dataset_id=dataset_id,
                 reshape_column=reshape_selected,
                 session_id=session,
+                processed_state=True,
             )
             if geo_selected is not None:
                 filtered_df = df[df[geo_selected] == selected_country][

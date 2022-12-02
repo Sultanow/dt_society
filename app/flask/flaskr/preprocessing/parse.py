@@ -12,6 +12,7 @@ def parse_dataset(
     geo_column,
     dataset_id,
     session_id,
+    processed_state: bool = False,
     reshape_column=None,
     selected_feature: str = None,
 ) -> Tuple[pd.DataFrame, str]:
@@ -31,12 +32,16 @@ def parse_dataset(
     if isinstance(dataset_id, int):
         selected_df = bucket.find({})[dataset_id]
     elif isinstance(dataset_id, str):
-        selected_df = bucket.find_one({"id": dataset_id}).read().decode("utf-8")
-
+        if processed_state:
+            selected_df = bucket.find_one({"id": dataset_id, "state":"processed"}).read().decode("utf-8")
+            return pd.read_json(selected_df, orient="records")
+        else:
+            
+            selected_df = bucket.find_one({"id": dataset_id, "state":"original"}).read().decode("utf-8")
 
     df = DigitalTwinTimeSeries(selected_df, geo_col=geo_column, sep="dict")
 
-    if reshape_column is None: 
+    if reshape_column is None:
         if selected_feature is not None:
             features_in_columns = df.data.columns.to_list()
 
@@ -49,8 +54,9 @@ def parse_dataset(
 
         else:
             df = df.data
-            
-    else: df = df.reshape_wide_to_long(value_id_column=reshape_column)
+
+    else:
+        df = df.reshape_wide_to_long(value_id_column=reshape_column)
 
     return df, reshape_column
 

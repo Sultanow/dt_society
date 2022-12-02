@@ -3,6 +3,7 @@ import os
 from flask import Flask, request, jsonify, make_response
 from flask_jwt_extended import get_jwt_identity, jwt_required
 import time
+import pycountry
 
 import gridfs
 
@@ -91,7 +92,12 @@ def create_app(test_config=None):
                 df.data.to_json(buffer, orient="records")
                 buffer.seek(0)
 
-                bucket.put(buffer, filename=demo_data[key][0], id=str(file_id))
+                bucket.put(
+                    buffer,
+                    filename=demo_data[key][0],
+                    id=str(file_id),
+                    state="original",
+                )
 
                 print(f"Added '{demo_data[key][0]}' to database.")
 
@@ -129,7 +135,10 @@ def create_app(test_config=None):
                         buffer.seek(0)
 
                         bucket.put(
-                            buffer, filename=uploaded_file.filename, id=str(file_id)
+                            buffer,
+                            filename=uploaded_file.filename,
+                            id=str(file_id),
+                            state="original",
                         )
                         print(f"Added '{uploaded_file.filename}' to database.")
             except Exception as e:
@@ -240,11 +249,38 @@ def create_app(test_config=None):
 
         session = get_jwt_identity()
 
+        bucket = gridfs.GridFS(mongo.db, session)
+
         df, reshape_column = parse_dataset(
             geo_column=geo_column,
             dataset_id=file_id,
             selected_feature=feature_selected,
             session_id=session,
+        )
+
+        processed = mongo.db[session + ".files"].find_one(
+            {"id": file_id, "state": "processed"}
+        )
+
+        file_name = mongo.db[session + ".files"].find_one(
+            {"id": file_id, "state": "original"}
+        )["filename"]
+
+        if processed is not None:
+            print("Reprocessing file: ", processed)
+            bucket.delete(processed)
+        else:
+            print("File does not exist")
+
+        buffer = io.BytesIO()
+        df.to_json(buffer, orient="records")
+        buffer.seek(0)
+
+        bucket.put(
+            buffer,
+            filename=file_name,
+            id=str(file_id),
+            state="processed",
         )
 
         feature_columns = [
@@ -258,7 +294,10 @@ def create_app(test_config=None):
         response_data["features"] = feature_columns
         if geo_column is not None:
             countries = df[geo_column].unique().tolist()
-            response_data["countries"] = countries
+            countries = map(
+                lambda country: pycountry.countries.get(alpha_3=country).name, countries
+            )
+            response_data["countries"] = list(countries)
         response_data["reshape_column"] = reshape_column
 
         return response_data
