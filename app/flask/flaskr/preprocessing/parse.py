@@ -32,12 +32,11 @@ def parse_dataset(
     if isinstance(dataset_id, int):
         selected_df = bucket.find({})[dataset_id]
     elif isinstance(dataset_id, str):
-        if processed_state:
-            selected_df = bucket.find_one({"id": dataset_id, "state":"processed"}).read().decode("utf-8")
-            return pd.read_json(selected_df, orient="records")
-        else:
-            
+        selected_df = bucket.find_one({"id": dataset_id, "state":"processed"})
+        if selected_df is None:
             selected_df = bucket.find_one({"id": dataset_id, "state":"original"}).read().decode("utf-8")
+        else: 
+            return pd.read_json(selected_df.read().decode("utf-8"), orient="records"), None
 
     df = DigitalTwinTimeSeries(selected_df, geo_col=geo_column, sep="dict")
 

@@ -49,7 +49,7 @@ def forecastVAR(model):
         time_selected = dataset["timeSelected"]
         feature_selected = dataset["featureSelected"]
 
-        df = parse_dataset(
+        df, _ = parse_dataset(
             geo_column=geo_selected,
             dataset_id=dataset_id,
             reshape_column=reshape_selected,
@@ -151,7 +151,7 @@ def forecastProphet():
             time_selected = dataset["timeSelected"]
             feature_selected = dataset["featureSelected"]
 
-            df = parse_dataset(
+            df, _ = parse_dataset(
                 geo_column=geo_selected,
                 dataset_id=dataset_id,
                 reshape_column=reshape_selected,

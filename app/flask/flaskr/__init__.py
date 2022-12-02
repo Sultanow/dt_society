@@ -318,9 +318,11 @@ def create_app(test_config=None):
             return ("Empty request.", 400)
         dataset_id = data["datasetId"]
 
-        file_to_delete = mongo.db[session + ".files"].find_one({"id": dataset_id})
+        file_to_delete_processed = mongo.db[session + ".files"].find_one({"id": dataset_id, "state": "processed"})
+        file_to_delete_original = mongo.db[session + ".files"].find_one({"id": dataset_id, "state": "original"})
 
-        bucket.delete(file_to_delete["_id"])
+        bucket.delete(file_to_delete_processed["_id"])
+        bucket.delete(file_to_delete_original["_id"])
 
         print(f"Successfully removed dataset '{dataset_id}'.")
 
