@@ -118,6 +118,8 @@ def get_heatmap():
 
     if "country" in data:
         selected_country = pycountry.countries.get(name=data["country"]).alpha_3
+    else:
+        selected_country = None
 
     if data is None:
         return ("Empty request", 400)
@@ -204,7 +206,9 @@ def get_correlation_lines():
     datasets = data["datasets"]
 
     if "country" in data:
-        selectedcountry = pycountry.countries.get(name=data["country"]).alpha_3
+        selected_country = pycountry.countries.get(name=data["country"]).alpha_3
+    else:
+        selected_country = None
 
     min_timestamp = None
     max_timestamp = None
@@ -248,7 +252,7 @@ def get_correlation_lines():
             df = df.fillna(0)
 
             if geo_selected is not None:
-                df_by_country = df[df[geo_selected] == selectedcountry]
+                df_by_country = df[df[geo_selected] == selected_country]
             else:
                 df_by_country = df
 
