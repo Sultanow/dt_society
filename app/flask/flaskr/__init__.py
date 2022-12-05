@@ -115,7 +115,7 @@ def create_app():
 
         return ("", 204)
 
-    @app.route("/data", methods=["GET"])
+    @app.route("/data/", methods=["GET"])
     def get_data():
         if mongo.db is None:
             return ("Database not available.", 500)

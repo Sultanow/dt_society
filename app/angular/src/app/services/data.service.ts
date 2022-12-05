@@ -171,7 +171,7 @@ export class DataService {
   }
 
   getAvailableDatasets(selections: Selections): void {
-    this.http.get(this.apiUrl + 'data').subscribe((selectionOptions) => {
+    this.http.get(this.apiUrl + 'data/').subscribe((selectionOptions) => {
       if ((selectionOptions as Dataset[]).length > 0) {
         if (selections.datasets !== undefined) {
           if (
