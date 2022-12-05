@@ -12,10 +12,7 @@
         <mat-form-field>
           <mat-label>Time</mat-label>
           <mat-select formControlName="selectedYearControl">
-            <mat-option
-              *ngFor="let timestamp of timestamps"
-              [value]="timestamp"
-            >
+            <mat-option *ngFor="let timestamp of timestamps" [value]="timestamp">
               {{ timestamp }}
             </mat-option>
           </mat-select>
@@ -40,17 +37,16 @@
             <mat-form-field>
               <mat-label>Country</mat-label>
               <mat-select formControlName="selectedCountryControl">
-                <mat-option *ngFor="let country of countries" [value]="country">
+                <mat-option>
+                  <ngx-mat-select-search formControlName="countryFilterControl" placeholderLabel="Search..." noEntriesFoundLabel="No matches"></ngx-mat-select-search>
+                </mat-option>
+                <mat-option *ngFor="let country of filteredCountries | async" [value]="country">
                   {{ country }}
                 </mat-option>
               </mat-select>
             </mat-form-field>
-            <ngx-slider
-              formControlName="sliderControl"
-              [(value)]="value"
-              [(highValue)]="highValue"
-              [options]="options"
-            ></ngx-slider>
+            <ngx-slider formControlName="sliderControl" [(value)]="value" [(highValue)]="highValue" [options]="options">
+            </ngx-slider>
           </div>
           <div class="stats-container">
             <mat-card class="single-stat-growth">
@@ -72,9 +68,7 @@
     <mat-card class="dialog">
       <div class="content-container">
         <mat-card-title>
-          <mat-icon style="font-size: xx-large; padding: 7px"
-            >info_outline</mat-icon
-          >
+          <mat-icon style="font-size: xx-large; padding: 7px">info_outline</mat-icon>
           <div>Statistics cannot be computed for the selected data set</div>
         </mat-card-title>
         <br />
@@ -95,9 +89,7 @@
     <mat-card class="dialog">
       <div class="content-container">
         <mat-card-title>
-          <mat-icon style="font-size: xx-large; padding: 7px"
-            >info_outline</mat-icon
-          >
+          <mat-icon style="font-size: xx-large; padding: 7px">info_outline</mat-icon>
           <div>Statistics cannot be computed for the selected data set</div>
         </mat-card-title>
         <br />

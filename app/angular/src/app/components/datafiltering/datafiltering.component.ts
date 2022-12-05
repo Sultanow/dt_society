@@ -7,6 +7,7 @@ import {
   faGear
 } from '@fortawesome/free-solid-svg-icons';
 import { DatasetSettingsComponent } from './dataset-settings/dataset-settings.component';
+import { ReplaySubject } from 'rxjs';
 
 @Component({
   selector: 'app-datafiltering',
@@ -23,6 +24,9 @@ export class DatafilteringComponent implements OnInit {
     selectedDataset: undefined,
     totalCountries: [],
   };
+
+  public filteredCountries: ReplaySubject<string[] | undefined> =
+    new ReplaySubject<string[] | undefined>(1);
 
   updateSelectedColumns(
     filename: string | undefined,
@@ -74,8 +78,27 @@ export class DatafilteringComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
+      this.filteredCountries.next(this.selections.totalCountries);
     });
-
     this.dataService.getAvailableDatasets(this.selections);
+  }
+
+  protected filterCountries(event: any){
+    if (!this.selections.totalCountries) {
+      return;
+    }
+    let search = event;
+    if (!search) {
+      this.filteredCountries.next(this.selections.totalCountries);
+      return;
+    } else {
+      search = search.toLowerCase();
+    }
+
+    this.filteredCountries.next(
+      this.selections.totalCountries.filter((country) =>
+        country!.toLowerCase().includes(search)
+      )
+    );
   }
 }
