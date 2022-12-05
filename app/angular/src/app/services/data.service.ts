@@ -150,7 +150,7 @@ export class DataService {
   deleteDataset(datasetId: string | undefined, selections: Selections) {
     const request = new HttpRequest(
       'DELETE',
-      this.apiUrl + 'data/remove',
+      this.apiUrl + 'data/',
       { datasetId: datasetId },
       {
         reportProgress: true,
@@ -171,37 +171,34 @@ export class DataService {
   }
 
   getAvailableDatasets(selections: Selections): void {
-    this.http
-      .get(this.apiUrl + 'data/find_geo')
-      .subscribe((selectionOptions) => {
-        if ((selectionOptions as Dataset[]).length > 0) {
-          if (selections.datasets !== undefined) {
-            if (
-              Object.keys(
-                (selectionOptions as Dataset[]).slice(-1)[0]
-              ).includes('token')
-            ) {
-              const idToken = (selectionOptions as Dataset[]).pop();
-              localStorage.setItem('id_token', idToken?.token as string);
-            }
+    this.http.get(this.apiUrl + 'data').subscribe((selectionOptions) => {
+      if ((selectionOptions as Dataset[]).length > 0) {
+        if (selections.datasets !== undefined) {
+          if (
+            Object.keys((selectionOptions as Dataset[]).slice(-1)[0]).includes(
+              'token'
+            )
+          ) {
+            const idToken = (selectionOptions as Dataset[]).pop();
+            localStorage.setItem('id_token', idToken?.token as string);
+          }
 
-            for (const dataset of selectionOptions as Dataset[]) {
-              if (
-                selections.datasets.filter((d) => d.id == dataset.id).length ==
-                0
-              ) {
-                selections.datasets.push(dataset);
-              }
-            }
+          for (const dataset of selectionOptions as Dataset[]) {
             if (
-              selections.selectedDataset === undefined &&
-              selections.datasets.length > 0
+              selections.datasets.filter((d) => d.id == dataset.id).length == 0
             ) {
-              selections.selectedDataset = selections.datasets[0].id;
+              selections.datasets.push(dataset);
             }
           }
+          if (
+            selections.selectedDataset === undefined &&
+            selections.datasets.length > 0
+          ) {
+            selections.selectedDataset = selections.datasets[0].id;
+          }
         }
-      });
+      }
+    });
   }
 
   updateTotalCountries(selections: Selections) {
@@ -257,24 +254,22 @@ export class DataService {
       });
   }
 
-  updateDataset(
-    selections: Selections,
-    datasetId: string | undefined
-  ) {
+  updateDataset(selections: Selections, datasetId: string | undefined) {
     const targetDatasetIdx = selections.datasets.findIndex(
       (dataset) => dataset.id == datasetId
     );
 
     this.http
-      .post(this.apiUrl + 'data/update_dataset', {
+      .post(this.apiUrl + 'data/update', {
         datasetId: datasetId,
         geoColumn: selections.datasets[targetDatasetIdx].geoSelected,
         featureSelected: selections.datasets[targetDatasetIdx].featureSelected,
         reshapeSelected: selections.datasets[targetDatasetIdx].reshapeSelected,
+        datasetName: selections.datasets[targetDatasetIdx].name,
       })
       .subscribe((data) => {
-        selections.datasets[targetDatasetIdx] = data as Dataset
-        this.updateDatasetsSelection(selections)
+        selections.datasets[targetDatasetIdx] = data as Dataset;
+        this.updateDatasetsSelection(selections);
       });
   }
 }

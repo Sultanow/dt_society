@@ -4,11 +4,7 @@
 
 <ng-template #datasetsavailable>
   <div
-    *ngIf="
-      validDatasetsAvailable;
-      then vectorautoregression;
-      else inValidSelections
-    "
+    *ngIf="validDatasets > 1; then vectorautoregression; else inValidSelections"
   ></div>
 </ng-template>
 <ng-template #vectorautoregression>

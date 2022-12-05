@@ -9,61 +9,57 @@ from ..extensions import cache, mongo
 
 @cache.memoize(timeout=90)
 def parse_dataset(
-    geo_column,
-    dataset_id,
-    session_id,
+    geo_column: str,
+    dataset_id: str,
+    session_id: str,
     use_preprocessed: bool = True,
-    reshape_column=None,
+    reshape_column: str = None,
     selected_feature: str = None,
 ) -> Tuple[pd.DataFrame, str]:
-    """_summary_
+    """
+    Preprocess dataset from database
 
     Args:
-        geo_column (_type_): _description_
-        dataset_id (_type_): _description_
-        reshape_column (_type_, optional): _description_. Defaults to None.
+        geo_column (str): name of column with geo data
+        dataset_id (str): id of dataset in database
+        session_id (str): id of the session requesting the dataset
+        use_preprocessed (bool, optional): whether to retrieve the dataset in its preprocessed state. Defaults to True.
+        reshape_column (str, optional): name of the feature column to reshape on. Defaults to None.
+        selected_feature (str, optional): value of selected feature. Reshape column will be inferred from selected feature, if possible. Defaults to None.
 
     Returns:
-        pd.DataFrame: _description_
+        Tuple[pd.DataFrame, str]: Processed dataset, value of inferred reshape column
     """
 
     bucket = gridfs.GridFS(mongo.db, session_id)
 
-    if isinstance(dataset_id, int):
-        selected_df = bucket.find({})[dataset_id]
-    elif isinstance(dataset_id, str):
-        if use_preprocessed:
-            selected_df = bucket.find_one({"id": dataset_id, "state": "processed"})
-            return (
-                pd.read_json(selected_df.read().decode("utf-8"), orient="records"),
-                None,
-            )
+    if use_preprocessed:
+        selected_df = bucket.find_one({"id": dataset_id, "state": "processed"})
+        return (
+            pd.read_json(selected_df.read().decode("utf-8"), orient="records"),
+            None,
+        )
 
-        else:
-            selected_df = (
-                bucket.find_one({"id": dataset_id, "state": "original"})
-                .read()
-                .decode("utf-8")
-            )
+    else:
+        selected_df = (
+            bucket.find_one({"id": dataset_id, "state": "original"})
+            .read()
+            .decode("utf-8")
+        )
 
     df = DigitalTwinTimeSeries(selected_df, geo_col=geo_column, sep="dict")
 
-    if reshape_column is None:
-        if selected_feature is not None:
-            features_in_columns = df.data.columns.to_list()
+    if selected_feature is not None:
+        features_in_columns = df.data.columns.to_list()
 
-            for feature in features_in_columns:
-                if selected_feature in df.data[feature].unique().tolist():
-                    reshape_column = feature
+        for feature in features_in_columns:
+            if selected_feature in df.data[feature].unique().tolist():
+                reshape_column = feature
 
-        if reshape_column is not None:
-            df = df.reshape_wide_to_long(value_id_column=reshape_column)
-
-        else:
-            df = df.data
-
+    if reshape_column is not None:
+        df = df.reshape_wide_to_long(feature_column=reshape_column)
     else:
-        df = df.reshape_wide_to_long(value_id_column=reshape_column)
+        df = df.data
 
     return df, reshape_column
 

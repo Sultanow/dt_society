@@ -7,42 +7,39 @@ from .states import germany_federal
 class DigitalTwinTimeSeries:
     def __init__(
         self,
-        path: str = None,
+        path: str,
         sep: str = "\t",
-        to_iso3: bool = True,
-        df: pd.DataFrame = None,
         geo_col: str = None,
         filename: str = None,
     ):
         """
-        Preprocesses and stores time series data
+        Preprocesses time series data for Digital Twin of Society
 
         Args:
-            path (str): path or URL to dataset
-            sep (str): seperator value in dataset
-            to_iso3 (bool, optional): converts country codes to Alpha-3. Defaults to True.
-            df (pd.DataFrame, optional): Processed pandas dataframe. Defaults to None.
-            country_codes (bool, optional): _description_. Defaults to True.
-            geo_col (str, optional): name of the column containing geographical information. Defaults to "geo".
+            path (str): path to the dataset (URL, file path or pd.Dataframe as JSON).
+            sep (str, optional): value of separator in file. Defaults to "\t".
+            geo_col (str, optional): value of the column with country data. Defaults to None.
+            filename (str, optional): name of the dataset file. Defaults to None.
         """
+
         self.geo_col: str = geo_col
         self.sep: str = sep
-        self.to_iso3: bool = to_iso3
-        self.data: pd.DataFrame = self._preprocess(path, filename) if df is None else df
+        self.data: pd.DataFrame = self._preprocess(path, filename)
 
     def _preprocess(self, path: str, filename: str) -> pd.DataFrame:
         """Preprocesses dataframe into required format
 
         Args:
             path (str): Path to dataset
+            filename (str): name of the dataset file
 
         Returns:
-            pd.DataFrame: Reshaped preprocessed dataset
+            pd.DataFrame: Preprocessed dataset
         """
 
         if self.sep == "dict":
             data = pd.read_json(path, orient="records")
-            # return data
+
         else:
             if filename is not None:
                 if filename.endswith(".tsv"):
@@ -92,8 +89,6 @@ class DigitalTwinTimeSeries:
 
         if self.geo_col != None:
             data = self._format_country_codes(data)
-
-        data = self._drop_redundant_columns(data)
 
         return data
 
@@ -160,40 +155,33 @@ class DigitalTwinTimeSeries:
 
         return data
 
-    def _drop_redundant_columns(self, data: pd.DataFrame) -> pd.DataFrame:
-        """Drops columns that contain the same value throughout the entire dataset.
+    def reshape_wide_to_long(self, feature_column: str) -> pd.DataFrame:
+        """
+        Pivots time series data along a column into a "long" format.
+
+        Wide -> time dimension expands column wise
+        Long -> time dimension expands row wise
 
         Args:
-            data (pd.DataFrame): Dataset
+            feature_column (str): name of the column that contains features
 
         Returns:
-            pd.DataFrame: Dataset
+            pd.DataFrame: transformed dataset
         """
-        redundant_columns = []
-
-        for column in data.columns:
-            if len(data[column].unique()) == 1:
-                redundant_columns.append(column)
-
-        data = data.drop(columns=redundant_columns, axis=1)
-
-        return data
-
-    def reshape_wide_to_long(self, value_id_column):
 
         assert (
-            self.geo_col != value_id_column
+            self.geo_col != feature_column
         ), "Column to reshape on can not be the column that has been set as geo column."
 
-        if value_id_column == "None":
+        if feature_column == "None":
             reshaped_data = self.data.melt(id_vars=[self.geo_col], var_name="Time")
 
         else:
             reshaped_data = (
-                self.data.set_index([self.geo_col, value_id_column])
+                self.data.set_index([self.geo_col, feature_column])
                 .rename_axis(["Time"], axis=1)
                 .stack()
-                .unstack(value_id_column)
+                .unstack(feature_column)
                 .reset_index()
             )
 

@@ -1,28 +1,68 @@
-<button mat-icon-button mat-dialog-close color="primary" class="delete-button" (click)="onDeleteFile()">
-    <mat-icon color="warn">delete_forever</mat-icon>
+<button
+  mat-icon-button
+  mat-dialog-close
+  color="primary"
+  class="delete-button"
+  (click)="onDeleteFile()"
+>
+  <mat-icon color="warn">delete_forever</mat-icon>
 </button>
-<div>
-    <mat-form-field>
-        <mat-label>Geo column</mat-label>
-        <mat-select [(ngModel)]=currentDataset!.geoSelected
-            matTooltip='If the dataset has no geographical reference, unselect the geo column'
-            matTooltipPosition="left">
-            <mat-option></mat-option>
-            <mat-option *ngFor="let geoOption of currentDataset!.initialColumns!" [value]="geoOption">{{ geoOption }}
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
+<div class="edit-filename" style="display: flex">
+  <mat-form-field *ngIf="editMode === true; else filenameLabel">
+    <mat-label>File name</mat-label>
+    <input matInput [(ngModel)]="currentDataset!.name" />
+  </mat-form-field>
+  <ng-template #filenameLabel
+    ><div style="padding-top: 5px; padding-bottom: 10px; padding-right: 5px">
+      {{ currentDataset!.name }}
+    </div></ng-template
+  >
+  <button
+    mat-icon-button
+    color="primary"
+    class="edit-button"
+    (click)="toggleEditMode()"
+  >
+    <mat-icon *ngIf="editMode === true; else EditIcon" color="primary"
+      >check</mat-icon
+    >
+    <ng-template #EditIcon>
+      <mat-icon color="primary">edit</mat-icon>
+    </ng-template>
+  </button>
 </div>
 <div>
-    <mat-form-field>
-        <mat-label>Reshape column</mat-label>
-        <mat-select [(ngModel)]="currentDataset!.reshapeSelected">
-            <mat-option *ngFor="let reshapeOption of currentDataset!.initialColumns!" [value]="reshapeOption">{{
-                reshapeOption }}</mat-option>
-        </mat-select>
-    </mat-form-field>
+  <mat-form-field>
+    <mat-label>Geo column</mat-label>
+    <mat-select
+      [(ngModel)]="currentDataset!.geoSelected"
+      matTooltip="If the dataset has no geographical reference, unselect the geo column"
+      matTooltipPosition="left"
+    >
+      <mat-option></mat-option>
+      <mat-option
+        *ngFor="let geoOption of currentDataset!.initialColumns!"
+        [value]="geoOption"
+        >{{ geoOption }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
 </div>
 <div>
-    <button mat-raised-button color="primary" (click)="saveDatasetSettings()">Save</button>
-    <button mat-raised-button color="basic" mat-dialog-close>Cancel</button>
+  <mat-form-field>
+    <mat-label>Reshape column</mat-label>
+    <mat-select [(ngModel)]="currentDataset!.reshapeSelected">
+      <mat-option
+        *ngFor="let reshapeOption of currentDataset!.initialColumns!"
+        [value]="reshapeOption"
+        >{{ reshapeOption }}</mat-option
+      >
+    </mat-select>
+  </mat-form-field>
+</div>
+<div>
+  <button mat-raised-button color="primary" (click)="saveDatasetSettings()">
+    Save
+  </button>
+  <button mat-raised-button color="basic" mat-dialog-close>Cancel</button>
 </div>

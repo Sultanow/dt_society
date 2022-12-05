@@ -1,11 +1,9 @@
 import io
-import os
 from flask import Flask, request, jsonify, make_response
 from flask_jwt_extended import get_jwt_identity, jwt_required
+import gridfs
 import time
 import pycountry
-
-import gridfs
 
 from . import graph, forecast
 from .auth.session import get_session
@@ -15,40 +13,17 @@ from .preprocessing.dataset import DigitalTwinTimeSeries
 from .preprocessing.filter import infer_feature_options
 
 
-def create_app(test_config=None):
+def create_app():
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
 
-    # Upload folder
-    UPLOAD_FOLDER = "flaskr/static/files"
-    app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-    app.config["SESSION_PERMANENT"] = False
-    app.config["SESSION_TYPE"] = "filesystem"
     app.config["PROPAGATE_EXCEPTIONS"] = True
-
     app.config["MONGO_URI"] = "mongodb://127.0.0.1:27017/dt_society_datasets"
-
     app.config["JWT_SECRET_KEY"] = "super-secret"
+    app.config.from_mapping(SECRET_KEY="dev")
 
     app.register_blueprint(graph.bp)
     app.register_blueprint(forecast.bp)
-
-    app.config.from_mapping(
-        SECRET_KEY="dev",
-    )
-
-    if test_config is None:
-        # load the instance config, if it exists, when not testing
-        app.config.from_pyfile("config.py", silent=True)
-    else:
-        # load the test config if passed in
-        app.config.from_mapping(test_config)
-
-    # ensure the instance folder exists
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
 
     session.init_app(app)
     cache.init_app(app)
@@ -75,14 +50,12 @@ def create_app(test_config=None):
 
         session = get_jwt_identity()
 
-        collection = mongo.db[session]
-
         bucket = gridfs.GridFS(mongo.db, session)
 
         for key in demo_data:
             df = DigitalTwinTimeSeries(demo_data[key][1], filename=demo_data[key][0])
 
-            if bucket.find_one({"name": demo_data[key][0]}):
+            if bucket.exists({"filename": demo_data[key][0]}):
                 print(f"Dataset '{demo_data[key][0]}' is already in database.")
 
             else:
@@ -122,33 +95,28 @@ def create_app(test_config=None):
                 if mongo.db is not None and df is not None:
                     bucket = gridfs.GridFS(mongo.db, session)
 
-                    if bucket.find_one({"name": uploaded_file.filename}):
-                        print(
-                            f"Dataset '{uploaded_file.filename}' is already in database."
-                        )
+                    file_id = hash(uploaded_file.filename + str(time.time()))
 
-                    else:
-                        file_id = hash(uploaded_file.filename + str(time.time()))
+                    buffer = io.BytesIO()
+                    df.data.to_json(buffer, orient="records")
+                    buffer.seek(0)
 
-                        buffer = io.BytesIO()
-                        df.data.to_json(buffer, orient="records")
-                        buffer.seek(0)
+                    bucket.put(
+                        buffer,
+                        filename=uploaded_file.filename,
+                        id=str(file_id),
+                        state="original",
+                    )
+                    print(f"Added '{uploaded_file.filename}' to database.")
 
-                        bucket.put(
-                            buffer,
-                            filename=uploaded_file.filename,
-                            id=str(file_id),
-                            state="original",
-                        )
-                        print(f"Added '{uploaded_file.filename}' to database.")
             except Exception as e:
                 print(e)
                 return ("", 400)
 
         return ("", 204)
 
-    @app.route("/data/find_geo", methods=["GET"])
-    def get_geo():
+    @app.route("/data", methods=["GET"])
+    def get_data():
         if mongo.db is None:
             return ("Database not available.", 500)
 
@@ -160,7 +128,7 @@ def create_app(test_config=None):
 
         datasets = collection.find({})
 
-        for i, dataset in enumerate(datasets):
+        for dataset in datasets:
             print(dataset["filename"])
             df, _ = parse_dataset(
                 geo_column=None,
@@ -193,7 +161,7 @@ def create_app(test_config=None):
 
         return response_data
 
-    @app.route("/data/update_dataset", methods=["POST"])
+    @app.route("/data/update", methods=["POST"])
     @jwt_required()
     def update_dataset():
 
@@ -211,13 +179,20 @@ def create_app(test_config=None):
         geo_column = data["geoColumn"]
         reshape_column = data["reshapeSelected"]
 
-        dataset = mongo.db[session + ".files"].find_one({"id": file_id})
+        collection = mongo.db[session + ".files"]
+
+        dataset = collection.find_one({"id": file_id})
+
+        collection.update_one(
+            {"id": file_id}, {"$set": {"filename": data["datasetName"]}}
+        )
 
         df, _ = parse_dataset(
             geo_column=geo_column,
             dataset_id=dataset["id"],
             reshape_column=reshape_column,
             session_id=session,
+            use_preprocessed=False,
         )
 
         df = df.fillna(0)
@@ -228,7 +203,7 @@ def create_app(test_config=None):
             "id": dataset["id"],
             "possibleFeatures": possible_features,
             "geoSelected": geo_column,
-            "name": dataset["filename"],
+            "name": data["datasetName"],
             "initialColumns": initialColumns,
         }
 
@@ -271,7 +246,7 @@ def create_app(test_config=None):
         )["filename"]
 
         if processed is not None:
-            print("Reprocessing file: ", processed)
+            print("Updating processed state of: \n", processed)
             bucket.delete(processed["_id"])
         else:
             print("File does not exist")
@@ -306,20 +281,21 @@ def create_app(test_config=None):
 
         return response_data
 
-    @app.route("/data/remove", methods=["DELETE"])
+    @app.route("/data/", methods=["DELETE"])
     @jwt_required()
     def remove_dataset():
+
+        data = request.get_json()
 
         if mongo.db is None:
             return ("Database not available.", 500)
 
-        session = get_jwt_identity()
-
-        bucket = gridfs.GridFS(mongo.db, session)
-
-        data = request.get_json()
         if data is None:
             return ("Empty request.", 400)
+
+        session = get_jwt_identity()
+        bucket = gridfs.GridFS(mongo.db, session)
+
         dataset_id = data["datasetId"]
 
         file_to_delete_processed = mongo.db[session + ".files"].find_one(
@@ -330,7 +306,6 @@ def create_app(test_config=None):
             {"id": dataset_id, "state": "original"}
         )
 
-
         if file_to_delete_processed is not None:
             bucket.delete(file_to_delete_processed["_id"])
 
@@ -339,39 +314,5 @@ def create_app(test_config=None):
         print(f"Successfully removed dataset '{dataset_id}'.")
 
         return ("", 204)
-
-    @app.route("/data/reshapecheck", methods=["POST"])
-    @jwt_required()
-    def check_for_reshape():
-
-        session = get_jwt_identity()
-        if mongo.db is None:
-            return ("Database not available.", 500)
-
-        data = request.get_json()
-
-        if data is None:
-            return ("Empty request.", 400)
-
-        file_id = data["datasetId"]
-        geo_column = data["geoColumn"] if data["geoColumn"] != "None" else None
-        feature_selected = data["featureSelected"]
-
-        dataframe = parse_dataset(
-            geo_column=geo_column,
-            dataset_id=file_id,
-            session_id=session,
-            use_preprocessed=False,
-        )
-
-        features_in_columns = dataframe.columns.to_list()
-
-        response_data = None
-
-        for feature in features_in_columns:
-            if feature_selected in dataframe[feature].unique().tolist():
-                response_data = feature
-
-        return jsonify(response_data)
 
     return app

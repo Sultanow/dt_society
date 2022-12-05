@@ -5,15 +5,15 @@ import { Dataset, Selections } from 'src/app/types/Datasets';
 @Component({
   selector: 'app-dataset-settings',
   templateUrl: './dataset-settings.component.html',
-  styleUrls: ['./dataset-settings.component.css']
+  styleUrls: ['./dataset-settings.component.css'],
 })
 export class DatasetSettingsComponent implements OnInit {
-
   public datasetId?: string;
   public geoEnabled: boolean = true;
-  constructor(private dataService: DataService) { }
+  constructor(private dataService: DataService) {}
 
   public currentDataset?: Dataset;
+  public editMode: boolean = false;
 
   selections: Selections = {
     datasets: [],
@@ -24,25 +24,24 @@ export class DatasetSettingsComponent implements OnInit {
     this.dataService.deleteDataset(this.datasetId, this.selections);
   }
 
+  toggleEditMode() {
+    this.editMode = !this.editMode;
+  }
+
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
     });
-    this.currentDataset = this.selections.datasets.filter(dataset => dataset.id == this.datasetId)[0];
+    this.currentDataset = this.selections.datasets.filter(
+      (dataset) => dataset.id == this.datasetId
+    )[0];
   }
 
-  saveDatasetSettings(){
-    if(this.currentDataset?.geoSelected === undefined){
-      this.currentDataset!.geoSelected = "None";
+  saveDatasetSettings() {
+    if (this.currentDataset?.geoSelected === undefined) {
+      this.currentDataset!.geoSelected = 'None';
     }
-    this.selections.datasets.map(dataset => {
-      if(dataset.id === this.datasetId){
-        this.currentDataset;
-      }
-    })
 
-    this.dataService.updateDataset(this.selections, this.datasetId)
-    
+    this.dataService.updateDataset(this.selections, this.datasetId);
   }
-
 }

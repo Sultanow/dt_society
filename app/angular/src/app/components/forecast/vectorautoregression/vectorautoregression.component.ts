@@ -17,6 +17,26 @@ import {
 export class VectorautoregressionComponent implements OnInit {
   constructor(private dataService: DataService) {}
 
+  public models: Models = {
+    var: 'Vector Auto Regression',
+    hwes: 'HW Smoothing',
+  };
+
+  public selections: Selections = {
+    datasets: [],
+    selectedDataset: undefined,
+  };
+
+  // Binded properties
+  public countries: string[] = [];
+  public predictionPeriods: number = 0;
+  public maxLags: number = 1;
+  public frequency: string = 'Yearly';
+  public selectedModel: string = 'var';
+  public showSpinner: boolean = false;
+  public validDatasets: number = 0;
+  public selectableDatasets: ActiveScenarios = {};
+  public activeDatasets: ActiveScenarios = {};
   public data: Plot = {
     data: [],
     layout: {
@@ -31,33 +51,8 @@ export class VectorautoregressionComponent implements OnInit {
     config: { responsive: true },
   };
 
-  public models: Models = {
-    var: 'Vector Auto Regression',
-    hwes: 'HW Smoothing',
-  };
-
-  public selections: Selections = {
-    datasets: [],
-    selectedDataset: undefined,
-  };
-
-  public countries: string[] = [];
-
-  public predictionPeriods: number = 0;
-
-  public maxLags: number = 1;
-
-  public frequency: string = 'Yearly';
-
-  public selectedModel: string = 'var';
-
-  public showSpinner: boolean = false;
-
-  public validDatasetsAvailable: boolean = false;
-  public selectableDatasets: ActiveScenarios = {};
-  public activeDatasets: ActiveScenarios = {};
-
-  createVarForecast(data: ColumnValues) {
+  createVarForecast(data: ColumnValues): void {
+    // Renders plot from received data
     if (this.data.data.length > 0) {
       this.data.data = [];
     }
@@ -140,11 +135,12 @@ export class VectorautoregressionComponent implements OnInit {
     }
   }
 
-  toggleSpinner() {
+  toggleSpinner(): void {
     this.showSpinner = !this.showSpinner;
   }
 
-  updateVarForecast() {
+  updateVarForecast(): void {
+    // Handles updates updates of VAR forecast
     if (
       this.selections.datasets.length > 0 &&
       this.selections.selectedCountry != undefined
@@ -183,7 +179,7 @@ export class VectorautoregressionComponent implements OnInit {
     }
   }
 
-  updateParameterSlider(event: any) {
+  updateParameterSlider(event: any): void {
     switch (event) {
       case 'hwes':
         this.maxLags = 0.49;
@@ -194,49 +190,40 @@ export class VectorautoregressionComponent implements OnInit {
     }
   }
 
-  updateActiveDatasets() {}
-
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((updatedSelections) => {
       this.selections = updatedSelections;
-
-      var countries: string[] | undefined = [] || undefined;
-
-      this.validDatasetsAvailable = false;
+      this.validDatasets = 0;
 
       if (this.selections.datasets.length > 0) {
-        for (const data of this.selections.datasets) {
-          countries = [...countries, ...(data.countryOptions || [])];
+        let countries = this.selections.datasets.reduce<string[]>(
+          (countries, dataset) => {
+            if (
+              dataset.countryOptions?.includes(this.selections.selectedCountry!)
+            ) {
+              this.validDatasets++;
+            }
+            if (
+              !Object.keys(this.activeDatasets).includes(dataset.id as string)
+            ) {
+              this.activeDatasets[dataset.id as string] = true;
+            } else {
+              this.selectableDatasets[dataset.id as string] =
+                dataset.countryOptions?.includes(
+                  this.selections.selectedCountry as string
+                ) as boolean;
 
-          if (!Object.keys(this.activeDatasets).includes(data.id as string)) {
-            this.activeDatasets[data.id as string] = true;
-          } else {
-            this.selectableDatasets[data.id as string] =
-              data.countryOptions?.includes(
-                this.selections.selectedCountry as string
-              ) as boolean;
-
-            this.activeDatasets[data.id as string] =
-              data.countryOptions?.includes(
-                this.selections.selectedCountry as string
-              ) as boolean;
-          }
-        }
+              this.activeDatasets[dataset.id as string] =
+                dataset.countryOptions?.includes(
+                  this.selections.selectedCountry as string
+                ) as boolean;
+            }
+            return [...countries, ...(dataset.countryOptions || [])];
+          },
+          []
+        );
 
         this.countries = [...new Set(countries)];
-
-        let count = 0;
-
-        for (let dataset of this.selections.datasets) {
-          if (
-            dataset.countryOptions?.includes(this.selections.selectedCountry!)
-          ) {
-            count++;
-          }
-        }
-        if (count > 1) {
-          this.validDatasetsAvailable = true;
-        }
       }
       this.updateVarForecast();
     });
