@@ -12,6 +12,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 
 // Components
 import { AppComponent } from './app.component';
@@ -141,7 +142,8 @@ PlotlyModule.plotlyjs = PlotlyJS;
       },
     ]),
     MatCheckboxModule,
-    MatTooltipModule
+    MatTooltipModule,
+    NgxMatSelectSearchModule
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: RoutecachingService },

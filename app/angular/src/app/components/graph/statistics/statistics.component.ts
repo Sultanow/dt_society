@@ -3,8 +3,10 @@ import { Options } from '@angular-slider/ngx-slider';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 import { HttpEventType } from '@angular/common/http';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, UntypedFormControl } from '@angular/forms';
 import { CountryData } from 'src/app/types/GraphData';
+import { takeUntil } from 'rxjs/operators';
+import { ReplaySubject } from 'rxjs';
 
 @Component({
   selector: 'app-statistics',
@@ -40,10 +42,14 @@ export class StatisticsComponent implements OnInit {
     selectedYearControl: new FormControl(),
     selectedCountryControl: new FormControl(),
     sliderControl: new FormControl(),
+    countryFilterControl: new UntypedFormControl(),
   });
 
+  public filteredCountries: ReplaySubject<(undefined | string)[]> =
+    new ReplaySubject<(undefined | string)[]>(1);
+
   timestamps: (undefined | string[] | string | number)[] = [];
-  countries: (undefined | string[] | string)[] = [];
+  countries: (undefined | string)[] = [];
 
   min: String = '';
   max: String = '';
@@ -81,6 +87,8 @@ export class StatisticsComponent implements OnInit {
       for (const [key, value] of Object.entries(newdata)) {
         this.countries = [...this.countries, key];
       }
+
+      this.filteredCountries.next(this.countries.slice());
 
       this.updateSlider(timearray);
       this.resetStatistics();
@@ -215,10 +223,16 @@ export class StatisticsComponent implements OnInit {
     });
 
     this.selectionControl
+      .get('countryFilterControl')!
+      .valueChanges.subscribe(() => {
+        this.filterCountries();
+      });
+
+    this.selectionControl
       .get('selectedYearControl')!
       .valueChanges.subscribe((selectedYear) => {
         if (
-          this.selectionControl.get('selectedYearControl')!.getRawValue() !==
+          this.selectionControl.get('selectedYearControl')!.value !==
           null
         ) {
           this.updateStats(selectedYear.toString());
@@ -229,7 +243,7 @@ export class StatisticsComponent implements OnInit {
       .get('selectedCountryControl')!
       .valueChanges.subscribe(() => {
         if (
-          this.selectionControl.get('selectedCountryControl')!.getRawValue() !==
+          this.selectionControl.get('selectedCountryControl')!.value !==
           null
         ) {
           this.updateGrowth();
@@ -243,11 +257,30 @@ export class StatisticsComponent implements OnInit {
         this.highValue = sliderValues[1];
 
         if (
-          this.selectionControl.get('selectedCountryControl')!.getRawValue() !==
+          this.selectionControl.get('selectedCountryControl')!.value !==
           null
         ) {
           this.updateGrowth();
         }
       });
+  }
+
+  protected filterCountries() {
+    if (!this.countries) {
+      return;
+    }
+    let search = this.selectionControl.get('countryFilterControl')!.value;
+    if (!search) {
+      this.filteredCountries.next(this.countries.slice());
+      return;
+    } else {
+      search = search.toLowerCase();
+    }
+
+    this.filteredCountries.next(
+      this.countries.filter((country) =>
+        country!.toLowerCase().includes(search)
+      )
+    );
   }
 }
