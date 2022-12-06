@@ -7,12 +7,15 @@
 <ng-template #geo>
   <div class="statistics-wrapper" [formGroup]="selectionControl">
     <mat-card class="outer">
-      <mat-label>Statistics of {{ selections.selectedDataset }}</mat-label>
+      <p class="section-label">Statistics</p>
       <div class="stats-container">
         <mat-form-field>
           <mat-label>Time</mat-label>
           <mat-select formControlName="selectedYearControl">
-            <mat-option *ngFor="let timestamp of timestamps" [value]="timestamp">
+            <mat-option
+              *ngFor="let timestamp of timestamps"
+              [value]="timestamp"
+            >
               {{ timestamp }}
             </mat-option>
           </mat-select>
@@ -40,15 +43,34 @@
               <mat-label>Country</mat-label>
               <mat-select formControlName="selectedCountryControl">
                 <mat-option>
-                  <ngx-mat-select-search formControlName="countryFilterControl" placeholderLabel="Search..."
-                    noEntriesFoundLabel="No matches"></ngx-mat-select-search>
+                  <<<<<<< HEAD
+                  <ngx-mat-select-search
+                    formControlName="countryFilterControl"
+                    placeholderLabel="Search..."
+                    noEntriesFoundLabel="No matches"
+                  ></ngx-mat-select-search>
+                  =======
+                  <ngx-mat-select-search
+                    formControlName="countryFilterControl"
+                    placeholderLabel="Search..."
+                    noEntriesFoundLabel="No matches"
+                  ></ngx-mat-select-search>
+                  >>>>>>> feature/correlation_frequency
                 </mat-option>
-                <mat-option *ngFor="let country of filteredCountries | async" [value]="country">
+                <mat-option
+                  *ngFor="let country of filteredCountries | async"
+                  [value]="country"
+                >
                   {{ country }}
                 </mat-option>
               </mat-select>
             </mat-form-field>
-            <ngx-slider formControlName="sliderControl" [(value)]="value" [(highValue)]="highValue" [options]="options">
+            <ngx-slider
+              formControlName="sliderControl"
+              [(value)]="value"
+              [(highValue)]="highValue"
+              [options]="options"
+            >
             </ngx-slider>
           </div>
           <div class="stats-container">
@@ -72,7 +94,9 @@
     <mat-card class="dialog">
       <div class="content-container">
         <mat-card-title>
-          <mat-icon style="font-size: xx-large; padding: 7px">info_outline</mat-icon>
+          <mat-icon style="font-size: xx-large; padding: 7px"
+            >info_outline</mat-icon
+          >
           <div>Statistics cannot be computed for the selected data set</div>
         </mat-card-title>
         <br />
@@ -112,7 +136,12 @@
       <div>
         <div class="growth-container">
           <div class="growth-selections">
-            <ngx-slider formControlName="sliderControl" [(value)]="value" [(highValue)]="highValue" [options]="options">
+            <ngx-slider
+              formControlName="sliderControl"
+              [(value)]="value"
+              [(highValue)]="highValue"
+              [options]="options"
+            >
             </ngx-slider>
           </div>
           <div class="stats-container">

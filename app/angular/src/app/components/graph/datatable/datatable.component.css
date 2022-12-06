@@ -1,8 +1,6 @@
 .data-table {
   height: 95%;
   max-width: 100%;
-  overflow-y: auto;
-  overflow-x: auto;
 }
 
 .mat-cell,

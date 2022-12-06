@@ -26,6 +26,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.2.0",
     "angular-plotly.js": "^4.0.4",
     "ngx-mat-select-search": "^5.0.0",
+    "ngx-scrollbar": "^10.0.1",
     "plotly.js-dist-min": "^2.15.0",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",

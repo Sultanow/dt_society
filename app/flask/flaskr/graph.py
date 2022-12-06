@@ -218,6 +218,7 @@ def get_correlation_lines():
 
     dfs = []
     feature_options = []
+    frequencies = []
 
     response_data = []
 
@@ -256,8 +257,6 @@ def get_correlation_lines():
             else:
                 df_by_country = df
 
-            print("iter ", i)
-
             df_by_country[time_selected] = pd.to_datetime(
                 df_by_country[time_selected].astype("str")
             )
@@ -270,6 +269,10 @@ def get_correlation_lines():
 
             feature_options.append(features)
             dfs.append(df_by_country)
+
+            if df_by_country[time_selected].size > 2:
+                freq = pd.infer_freq(df_by_country[time_selected])
+                frequencies.append(freq)
 
             file_data[time_selected] = (
                 df_by_country[time_selected].dt.strftime("%Y-%m-%d").to_list()
@@ -295,5 +298,18 @@ def get_correlation_lines():
             min_timestamp.strftime("%Y-%m-%d"),
             max_timestamp.strftime("%Y-%m-%d"),
         ]
+
+    print(len(set(frequencies)))
+
+    if len(set(frequencies)) != 1:
+        matching_frequencies = False
+    else:
+        matching_frequencies = True
+
+    print(matching_frequencies)
+
+    response_data.append({"matchingFrequencies": matching_frequencies})
+
+    print(response_data)
 
     return response_data

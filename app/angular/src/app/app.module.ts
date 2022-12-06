@@ -13,6 +13,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+import { NgScrollbarModule } from 'ngx-scrollbar';
 
 // Components
 import { AppComponent } from './app.component';
@@ -56,7 +57,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatTooltipModule } from '@angular/material/tooltip'
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -143,7 +144,8 @@ PlotlyModule.plotlyjs = PlotlyJS;
     ]),
     MatCheckboxModule,
     MatTooltipModule,
-    NgxMatSelectSearchModule
+    NgxMatSelectSearchModule,
+    NgScrollbarModule,
   ],
   providers: [
     { provide: RouteReuseStrategy, useClass: RoutecachingService },

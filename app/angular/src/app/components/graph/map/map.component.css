@@ -1,32 +1,31 @@
-.map-wrapper{
-    padding: 10px
+.map-wrapper {
+  padding: 10px;
 }
 
-.slider-container{
-    display: flex;
-    position: absolute;
-    bottom: 1em;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 95%;
+.slider-container {
+  display: flex;
+  position: absolute;
+  bottom: 1em;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 95%;
 }
 
-mat-radio-button{
-    padding: 0.5em;
+mat-radio-button {
+  padding: 0.5em;
 }
 
-mat-card{
-    height: 550px;
+mat-card {
+  height: 550px;
 }
 
 mat-card-title {
-    line-height: 1.5;
-  }
+  line-height: 1.5;
+}
 
 .dialog-wrapper {
   padding: 10px;
 }
-
 
 .content-container {
   position: absolute;

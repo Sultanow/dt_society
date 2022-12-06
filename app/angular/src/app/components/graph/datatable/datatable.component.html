@@ -1,25 +1,24 @@
 <div class="data-table-container">
   <mat-card>
-    <mat-label> Datatable for: {{ selections.selectedDataset }} </mat-label>
-    <div
-      class="mat-elevation-z8 data-table"
-      *ngIf="showSpinner === false; else elseBlock"
-    >
-      <mat-table [dataSource]="data">
-        <ng-container *ngFor="let column of columns" [matColumnDef]="column">
-          <th mat-header-cell *matHeaderCellDef>
-            {{ column }}
-          </th>
+    <p class="section-label">Data</p>
+    <div class="data-table" *ngIf="showSpinner === false; else elseBlock">
+      <ng-scrollbar track="all" appearance="standard">
+        <table mat-table [dataSource]="data">
+          <ng-container *ngFor="let column of columns" [matColumnDef]="column">
+            <th mat-header-cell *matHeaderCellDef>
+              {{ column }}
+            </th>
 
-          <td mat-cell *matCellDef="let record">
-            {{ record[column] }}
-          </td>
-        </ng-container>
+            <td mat-cell *matCellDef="let record">
+              {{ record[column] }}
+            </td>
+          </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+          <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
 
-        <tr mat-row *matRowDef="let row; columns: columns"></tr>
-      </mat-table>
+          <tr mat-row *matRowDef="let row; columns: columns"></tr>
+        </table>
+      </ng-scrollbar>
     </div>
     <ng-template #elseBlock>
       <div class="loading-spinner">

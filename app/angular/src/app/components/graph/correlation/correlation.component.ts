@@ -27,6 +27,8 @@ export class CorrelationComponent implements OnInit {
     config: { responsive: false },
   };
 
+  public matchingFrequencies?: boolean;
+
   selectionControl = new FormGroup({
     selectedCountryControl: new FormControl(),
   });
@@ -43,7 +45,17 @@ export class CorrelationComponent implements OnInit {
       this.data.data = [];
     }
 
-    data = data.filter(set => Object.values(set).every( val => val.length > 0))
+    if (Object.keys(data.slice(-1)[0]).includes('matchingFrequencies')) {
+      const matchingFrequencyFlag = data.pop();
+
+      this.matchingFrequencies = matchingFrequencyFlag![
+        'matchingFrequencies'
+      ] as unknown as boolean;
+    }
+
+    data = data.filter((set) =>
+      Object.values(set).every((val) => (val as []).length > 0)
+    );
 
     this.data.layout.grid = {
       rows: 1,
@@ -53,57 +65,61 @@ export class CorrelationComponent implements OnInit {
 
     let group = 0;
     for (let i = 0; i < data.length; i++) {
-    
       const timeSelection = this.selections.datasets[i].timeSelected;
-      let setId = data[i]["datasetid"].toString();
+      let setId = data[i]['datasetid'].toString();
 
-        for (const [key, value] of Object.entries(data[i])) {
-          let dataset = this.selections.datasets.filter(dataset => dataset.id == setId)[0]
-          if (key === 'timestamps' || key === "datasetid" || key == dataset.timeSelected) {
-            continue;
-          }
-          let trace: any = {
-            type: 'scatter',
-            mode: 'lines',
-            legendgroup: 'df' + group.toString(),
-            legendgrouptitle: { text: dataset.name },
-          };
-
-          if (key !== timeSelection) {
-            if (timeSelection !== undefined) {
-              trace.x = data[i][timeSelection];
-            }
-
-            trace.y = value;
-            trace.name = key;
-            if (group > 0) {
-              trace.xaxis = 'x' + (group + 1).toString();
-              trace.yaxis = 'y' + (group + 1).toString();
-
-              this.data.layout['xaxis' + (group + 1).toString()] = {
-                gridcolor: 'rgba(80, 103, 132, 0.3)',
-                title: timeSelection,
-                range: data[i]['timestamps'] as number[],
-              };
-              this.data.layout['yaxis' + (group + 1).toString()] = {
-                gridcolor: 'rgba(80, 103, 132, 0.3)',
-                title: '',
-              };
-            } else {
-              this.data.layout.xaxis = {
-                gridcolor: 'rgba(80, 103, 132, 0.3)',
-                title: timeSelection,
-                range: data[i]['timestamps'] as number[],
-              };
-            }
-            this.data.data.push(trace);
-          }
+      for (const [key, value] of Object.entries(data[i])) {
+        let dataset = this.selections.datasets.filter(
+          (dataset) => dataset.id == setId
+        )[0];
+        if (
+          key === 'timestamps' ||
+          key === 'datasetid' ||
+          key == dataset.timeSelected
+        ) {
+          continue;
         }
-        group++;
-      
-    
+
+        let trace: any = {
+          type: 'scatter',
+          mode: 'lines',
+          legendgroup: 'df' + group.toString(),
+          legendgrouptitle: { text: dataset.name },
+        };
+
+        if (key !== timeSelection) {
+          if (timeSelection !== undefined) {
+            trace.x = data[i][timeSelection];
+          }
+
+          trace.y = value;
+          trace.name = key;
+          if (group > 0) {
+            trace.xaxis = 'x' + (group + 1).toString();
+            trace.yaxis = 'y' + (group + 1).toString();
+
+            this.data.layout['xaxis' + (group + 1).toString()] = {
+              gridcolor: 'rgba(80, 103, 132, 0.3)',
+              title: timeSelection,
+              range: data[i]['timestamps'] as number[],
+            };
+            this.data.layout['yaxis' + (group + 1).toString()] = {
+              gridcolor: 'rgba(80, 103, 132, 0.3)',
+              title: '',
+            };
+          } else {
+            this.data.layout.xaxis = {
+              gridcolor: 'rgba(80, 103, 132, 0.3)',
+              title: timeSelection,
+              range: data[i]['timestamps'] as number[],
+            };
+          }
+          this.data.data.push(trace);
+        }
+      }
+      group++;
+    }
   }
-}
 
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
@@ -113,9 +129,7 @@ export class CorrelationComponent implements OnInit {
   }
 
   private updateCorrelationPlot() {
-    if (
-      this.selections.datasets.length > 0
-    ) {
+    if (this.selections.datasets.length > 0) {
       this.dataService
         .getData(this.selections.datasets, '/graph/corr', {
           country: this.selections.selectedCountry,
