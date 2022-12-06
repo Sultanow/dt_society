@@ -90,6 +90,8 @@ class DigitalTwinTimeSeries:
         if self.geo_col != None:
             data = self._format_country_codes(data)
 
+        data = self._drop_redundant_columns(data)
+
         return data
 
     def _format_country_codes(self, data: pd.DataFrame) -> pd.DataFrame:
@@ -152,6 +154,23 @@ class DigitalTwinTimeSeries:
         data = data[data[self.geo_col] != "UNK"]
 
         assert not data.empty, "Column did not contain correct country codes."
+
+        return data
+
+    def _drop_redundant_columns(self, data: pd.DataFrame) -> pd.DataFrame:
+        """Drops columns that contain the same value throughout the entire dataset.
+        Args:
+            data (pd.DataFrame): Dataset
+        Returns:
+            pd.DataFrame: Dataset
+        """
+        redundant_columns = []
+
+        for column in data.columns:
+            if len(data[column].unique()) == 1:
+                redundant_columns.append(column)
+
+        data = data.drop(columns=redundant_columns, axis=1)
 
         return data
 
