@@ -1,5 +1,9 @@
 <div class="correlation-wrapper">
   <mat-card>
+    <div class="frequency-disclaimer" *ngIf="matchingFrequencies === false">
+      <mat-icon>info_outline</mat-icon>
+      <p class="disclaimer-text">Time frequencies should match to correlate</p>
+    </div>
     <plotly-plot
       *ngIf="data.data.length > 0"
       [data]="data.data"

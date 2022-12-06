@@ -1,3 +1,11 @@
-.correlation-wrapper{
-    padding: 10px
+.correlation-wrapper {
+  padding: 10px;
+}
+
+.frequency-disclaimer {
+  display: flex;
+}
+
+.disclaimer-text {
+  margin-left: 10px;
 }
