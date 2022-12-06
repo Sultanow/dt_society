@@ -267,6 +267,8 @@ export class MapComponent implements OnInit {
                 });
               this.oldSelections = structuredClone(this.selections);
             }
+          } else {
+            this.data.data = []
           }
         }
       }

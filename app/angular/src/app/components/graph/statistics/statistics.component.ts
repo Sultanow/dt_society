@@ -5,7 +5,6 @@ import { Selections } from 'src/app/types/Datasets';
 import { HttpEventType } from '@angular/common/http';
 import { FormControl, FormGroup, UntypedFormControl } from '@angular/forms';
 import { CountryData } from 'src/app/types/GraphData';
-import { takeUntil } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
 
 @Component({
@@ -52,17 +51,17 @@ export class StatisticsComponent implements OnInit {
   countries: (undefined | string)[] = [];
 
   min: String = '';
+  min_key: String = '';
   max: String = '';
+  max_key: String = '';
   mean: String = '';
 
   growthrate: String = '';
   growthrate_per_time: String = '';
 
   updateData(newdata: CountryData) {
-    const datasetId = this.selections.selectedDataset;
-
     const selectedDatasetIdx = this.selections.datasets.findIndex(
-      (dataset) => dataset.id == datasetId
+      (dataset) => dataset.id === this.selections.selectedDataset
     );
 
     if (
@@ -70,32 +69,67 @@ export class StatisticsComponent implements OnInit {
         this.selections.datasets[selectedDatasetIdx].featureSelected!
       )
     ) {
-      this.geodata = false;
+      this.updateNoGeoData(newdata, selectedDatasetIdx);
     } else {
-      this.data = newdata;
-      this.countries = [];
-
-      const selectedDatasetIdx = this.selections.datasets.findIndex(
-        (dataset) => dataset.id == this.selections.selectedDataset
-      );
-
-      let timearray =
-        Object.entries(newdata)[0][1][
-          this.selections.datasets[selectedDatasetIdx].timeSelected!
-        ];
-      this.timestamps = timearray.map(String);
-      for (const [key, value] of Object.entries(newdata)) {
-        this.countries = [...this.countries, key];
-      }
-
-      this.filteredCountries.next(this.countries.slice());
-
-      this.updateSlider(timearray);
-      this.resetStatistics();
-
-      this.dataAvailable = true;
-      this.geodata = true;
+      this.updateGeoData(newdata);
     }
+  }
+
+  private updateGeoData(newdata: CountryData) {
+    this.geodata = true;
+    this.data = newdata;
+    this.countries = [];
+
+    const selectedDatasetIdx = this.selections.datasets.findIndex(
+      (dataset) => dataset.id == this.selections.selectedDataset
+    );
+
+    let timearray = Object.entries(newdata)[0][1][this.selections.datasets[selectedDatasetIdx].timeSelected!];
+    this.timestamps = timearray.map(String);
+    for (const [key, value] of Object.entries(newdata)) {
+      this.countries = [...this.countries, key];
+    }
+
+    this.filteredCountries.next(this.countries.slice());
+
+    this.updateSlider(timearray);
+    this.resetStatistics();
+
+    this.dataAvailable = true;
+  }
+
+  private updateNoGeoData(newdata: CountryData, selectedDatasetIdx: number) {
+    this.geodata = false;
+    this.data = newdata;
+    let timearray = newdata[this.selections.datasets[selectedDatasetIdx].timeSelected!] as unknown as string[];
+    this.updateSlider(timearray);
+
+    let dataarray = newdata[this.selections.datasets[selectedDatasetIdx].featureSelected!] as unknown as [];
+
+    let min = null;
+    let min_key: string = '';
+    let max = null;
+    let max_key: string = '';
+    let sum = 0;
+    for (const [i, value] of dataarray.entries()) {
+      let current_val = value as number;
+      if (min === null || min > current_val) {
+        min = current_val;
+        min_key = timearray[i];
+      }
+      if (max === null || max < current_val) {
+        max = current_val;
+        max_key = timearray[i];
+      }
+      sum = sum + current_val;
+    }
+    this.mean = (sum / dataarray.length).toFixed(3).toString();
+    this.min = min!.toFixed(3).toString();
+    this.min_key = min_key;
+    this.max = max!.toFixed(3).toString();
+    this.max_key = max_key;
+
+    this.dataAvailable = true;
   }
 
   updateGrowth() {
@@ -108,13 +142,17 @@ export class StatisticsComponent implements OnInit {
       .getRawValue();
 
     let feature = this.selections.datasets[selectedDatasetIdx].featureSelected!;
+    let firstValue: number;
+    let secondValue: number;
+    if (this.geodata) {
+      firstValue = this.data[this.selectedCountry][feature][this.value] as number;
+      secondValue = this.data[this.selectedCountry][feature][this.highValue] as number;
+    } else {
+      firstValue = (this.data[feature] as unknown as [])[this.value] as number;
+      secondValue = (this.data[feature] as unknown as [])[this.highValue] as number;
+    }
 
-    let firstValue = this.data[this.selectedCountry][feature][this.value];
-    let secondValue = this.data[this.selectedCountry][feature][this.highValue];
-
-    let tempGrowthrate =
-      ((secondValue as number) - (firstValue as number)) /
-      (firstValue as number);
+    let tempGrowthrate = (secondValue - firstValue) / firstValue;
     this.growthrate = (tempGrowthrate * 100).toFixed(3) + '%';
     this.growthrate_per_time =
       ((tempGrowthrate * 100) / (this.highValue - this.value)).toFixed(3) + '%';
@@ -146,8 +184,10 @@ export class StatisticsComponent implements OnInit {
     }
 
     this.mean = (sum / Object.entries(this.data).length).toFixed(3).toString();
-    this.min = min + ' - ' + min_key;
-    this.max = max + ' - ' + max_key;
+    this.min = min!.toFixed(3).toString();
+    this.min_key = min_key;
+    this.max = max!.toFixed(3).toString();
+    this.max_key = max_key;
   }
 
   private updateSlider(timearray: string[] | number[]) {
@@ -187,20 +227,16 @@ export class StatisticsComponent implements OnInit {
           selectedDataset.timeSelected !== undefined
         ) {
           if (
-            this.selections.datasets[selectedDatasetIdx].featureSelected !==
+            selectedDataset.featureSelected !==
               this.oldSelections?.datasets[selectedDatasetIdx]
                 .featureSelected ||
             this.selections.selectedDataset !==
               this.oldSelections?.selectedDataset ||
-            this.selections.datasets[selectedDatasetIdx].timeSelected !==
+            selectedDataset.timeSelected !==
               this.oldSelections?.datasets[selectedDatasetIdx].timeSelected
           ) {
             this.dataService
-              .getData(
-                this.selections.datasets[selectedDatasetIdx],
-                '/graph/statistics',
-                {}
-              )
+              .getData(selectedDataset, '/graph/statistics', {})
               .subscribe((res) => {
                 if (res.type === HttpEventType.Response) {
                   if (res.body) {
@@ -208,6 +244,7 @@ export class StatisticsComponent implements OnInit {
                   }
                 }
               });
+            this.oldSelections = structuredClone(this.selections);
           }
         } else {
           this.dataAvailable = false;
@@ -231,10 +268,7 @@ export class StatisticsComponent implements OnInit {
     this.selectionControl
       .get('selectedYearControl')!
       .valueChanges.subscribe((selectedYear) => {
-        if (
-          this.selectionControl.get('selectedYearControl')!.value !==
-          null
-        ) {
+        if (this.selectionControl.get('selectedYearControl')!.value !== null) {
           this.updateStats(selectedYear.toString());
         }
       });
@@ -243,8 +277,7 @@ export class StatisticsComponent implements OnInit {
       .get('selectedCountryControl')!
       .valueChanges.subscribe(() => {
         if (
-          this.selectionControl.get('selectedCountryControl')!.value !==
-          null
+          this.selectionControl.get('selectedCountryControl')!.value !== null
         ) {
           this.updateGrowth();
         }
@@ -257,8 +290,14 @@ export class StatisticsComponent implements OnInit {
         this.highValue = sliderValues[1];
 
         if (
-          this.selectionControl.get('selectedCountryControl')!.value !==
-          null
+          this.geodata &&
+          this.selectionControl.get('selectedCountryControl')!.value !== null
+        ) {
+          this.updateGrowth();
+        }
+        if (
+          !this.geodata &&
+          this.selectionControl.get('selectedCountryControl')!.value === null
         ) {
           this.updateGrowth();
         }

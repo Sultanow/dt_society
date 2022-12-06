@@ -16,6 +16,7 @@ export class DatatableComponent implements OnInit {
     datasets: [],
     selectedDataset: undefined,
   };
+  private oldSelections?: Selections;
 
   public data: TableData[] = [];
 
@@ -50,21 +51,27 @@ export class DatatableComponent implements OnInit {
         );
 
         if (this.selections.datasets[selectedDatasetIdx] !== undefined) {
-          this.showSpinner = true;
-          this.dataService
-            .getData(
-              this.selections.datasets[selectedDatasetIdx],
-              '/graph/datatable',
-              {}
-            )
-            .subscribe((res) => {
-              if (res.type === HttpEventType.Response) {
-                if (res.body) {
-                  this.updateData(res.body as TableData[]);
-                  this.showSpinner = false;
+          if (
+            this.selections.selectedDataset !==
+            this.oldSelections?.selectedDataset
+          ) {
+            this.showSpinner = true;
+            this.dataService
+              .getData(
+                this.selections.datasets[selectedDatasetIdx],
+                '/graph/datatable',
+                {}
+              )
+              .subscribe((res) => {
+                if (res.type === HttpEventType.Response) {
+                  if (res.body) {
+                    this.updateData(res.body as TableData[]);
+                    this.showSpinner = false;
+                  }
                 }
-              }
-            });
+              });
+            this.oldSelections = structuredClone(this.selections);
+          }
         }
       }
     });

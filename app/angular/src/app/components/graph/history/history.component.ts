@@ -31,6 +31,8 @@ export class HistoryComponent implements OnInit {
     selectedDataset: undefined,
   };
 
+  private oldSelections?: Selections;
+
   createHistoryPlot(data: CountryData, selectedIdx: number) {
     
     if(Object.keys(data).includes(this.selections.datasets[selectedIdx].featureSelected!)){
@@ -129,9 +131,18 @@ export class HistoryComponent implements OnInit {
           let selectedDataset = this.selections.datasets[selectedDatasetIdx];
           if (selectedDataset.featureSelected !== undefined && selectedDataset.timeSelected !== undefined
           ) {
+            if (
+              selectedDataset.featureSelected !==
+                this.oldSelections?.datasets[selectedDatasetIdx]
+                  .featureSelected ||
+              this.selections.selectedDataset !==
+                this.oldSelections?.selectedDataset ||
+                selectedDataset.timeSelected !==
+                this.oldSelections?.datasets[selectedDatasetIdx].timeSelected
+            ) {
               this.dataService
                 .getData(
-                  this.selections.datasets[selectedDatasetIdx],
+                  selectedDataset,
                   '/graph/history',
                   {}
                 )
@@ -145,7 +156,10 @@ export class HistoryComponent implements OnInit {
                     }
                   }
                 });
-            
+                this.oldSelections = structuredClone(this.selections);
+              }
+          } else{
+            this.historyPlot.data = []
           }
         }
       }

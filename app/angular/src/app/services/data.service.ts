@@ -165,6 +165,12 @@ export class DataService {
       if (event.type == HttpEventType.Response && selectedDatasetIndex > -1) {
         selections.datasets.splice(selectedDatasetIndex, 1);
         this.updateTotalCountries(selections);
+        if(selections.selectedDataset === datasetId && selections.datasets[0] !== undefined){
+          selections.selectedDataset = selections.datasets[0].id;
+        }
+        if(selections.selectedDataset === datasetId && selections.datasets[0] === undefined){
+          selections.selectedDataset = undefined;
+        }
         this.updateDatasetsSelection(selections);
       }
     });

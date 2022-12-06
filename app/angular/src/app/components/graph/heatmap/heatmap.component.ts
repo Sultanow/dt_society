@@ -24,7 +24,7 @@ export class HeatmapComponent implements OnInit {
       font: { color: '#f2f2f2' },
       margin: { t: 10, b: 50 },
     },
-    config: { responsive: true },
+    config: { responsive: false },
   };
 
   public selections: Selections = {

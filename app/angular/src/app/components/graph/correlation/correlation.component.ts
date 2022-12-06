@@ -1,10 +1,8 @@
 import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { DateAdapter } from '@angular/material/core';
-import { throwToolbarMixedModesError } from '@angular/material/toolbar';
 import { DataService } from 'src/app/services/data.service';
-import { Dataset, Selections } from 'src/app/types/Datasets';
+import { Selections } from 'src/app/types/Datasets';
 import { ColumnValues, Plot } from 'src/app/types/GraphData';
 
 @Component({
@@ -26,7 +24,7 @@ export class CorrelationComponent implements OnInit {
       font: { color: '#f2f2f2' },
       margin: { t: 15, b: 50, l: 35 },
     },
-    config: { responsive: true },
+    config: { responsive: false },
   };
 
   selectionControl = new FormGroup({

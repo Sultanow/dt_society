@@ -1,10 +1,10 @@
 <div *ngIf="dataAvailable; then featureVaild; else selectFeatureDialog"></div>
 
 <ng-template #featureVaild>
-  <div *ngIf="geodata; then statistics; else noGeoData"></div>
+  <div *ngIf="geodata; then geo; else noGeo"></div>
 </ng-template>
 
-<ng-template #statistics>
+<ng-template #geo>
   <div class="statistics-wrapper" [formGroup]="selectionControl">
     <mat-card class="outer">
       <mat-label>Statistics of {{ selections.selectedDataset }}</mat-label>
@@ -20,10 +20,12 @@
         <mat-card class="single-stat">
           <mat-card-title>Min</mat-card-title>
           <mat-card-content>{{ min }}</mat-card-content>
+          <mat-card-content>{{ min_key }}</mat-card-content>
         </mat-card>
         <mat-card class="single-stat">
           <mat-card-title>Max</mat-card-title>
           <mat-card-content>{{ max }}</mat-card-content>
+          <mat-card-content>{{ max_key }}</mat-card-content>
         </mat-card>
         <mat-card class="single-stat">
           <mat-card-title>Mean</mat-card-title>
@@ -38,7 +40,8 @@
               <mat-label>Country</mat-label>
               <mat-select formControlName="selectedCountryControl">
                 <mat-option>
-                  <ngx-mat-select-search formControlName="countryFilterControl" placeholderLabel="Search..." noEntriesFoundLabel="No matches"></ngx-mat-select-search>
+                  <ngx-mat-select-search formControlName="countryFilterControl" placeholderLabel="Search..."
+                    noEntriesFoundLabel="No matches"></ngx-mat-select-search>
                 </mat-option>
                 <mat-option *ngFor="let country of filteredCountries | async" [value]="country">
                   {{ country }}
@@ -63,6 +66,7 @@
     </mat-card>
   </div>
 </ng-template>
+
 <ng-template #selectFeatureDialog>
   <div class="dialog-wrapper">
     <mat-card class="dialog">
@@ -84,21 +88,44 @@
   </div>
 </ng-template>
 
-<ng-template #noGeoData>
-  <div class="dialog-wrapper">
-    <mat-card class="dialog">
-      <div class="content-container">
-        <mat-card-title>
-          <mat-icon style="font-size: xx-large; padding: 7px">info_outline</mat-icon>
-          <div>Statistics cannot be computed for the selected data set</div>
-        </mat-card-title>
-        <br />
-        <mat-card-content>
-          <p>
-            Please select a data set with a geographical reference.
-          </p>
-          <p>The data sets can be managed through the sidebar.</p>
-        </mat-card-content>
+<ng-template #noGeo>
+  <div class="statistics-wrapper" [formGroup]="selectionControl">
+    <mat-card class="outer">
+      <mat-label>Statistics of {{ selections.selectedDataset }}</mat-label>
+      <div class="stats-container">
+        <mat-card class="single-stat">
+          <mat-card-title>Min</mat-card-title>
+          <mat-card-content>{{ min }}</mat-card-content>
+          <mat-card-content>{{ min_key }}</mat-card-content>
+        </mat-card>
+        <mat-card class="single-stat">
+          <mat-card-title>Max</mat-card-title>
+          <mat-card-content>{{ max }}</mat-card-content>
+          <mat-card-content>{{ max_key }}</mat-card-content>
+        </mat-card>
+        <mat-card class="single-stat">
+          <mat-card-title>Mean</mat-card-title>
+          <mat-card-content>{{ mean }}</mat-card-content>
+        </mat-card>
+      </div>
+      <mat-divider inset></mat-divider>
+      <div>
+        <div class="growth-container">
+          <div class="growth-selections">
+            <ngx-slider formControlName="sliderControl" [(value)]="value" [(highValue)]="highValue" [options]="options">
+            </ngx-slider>
+          </div>
+          <div class="stats-container">
+            <mat-card class="single-stat-growth">
+              <mat-card-title>Growth Rate</mat-card-title>
+              <mat-card-content>{{ growthrate }}</mat-card-content>
+            </mat-card>
+            <mat-card class="single-stat-growth">
+              <mat-card-title> Average Growth Rate</mat-card-title>
+              <mat-card-content>{{ growthrate_per_time }}</mat-card-content>
+            </mat-card>
+          </div>
+        </div>
       </div>
     </mat-card>
   </div>
