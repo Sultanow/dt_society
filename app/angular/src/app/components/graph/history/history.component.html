@@ -1,12 +1,22 @@
 <div class="history-wrapper">
   <mat-card *ngIf="historyPlot.data.length > 0">
-    <p class="section-label">History</p>
-    <plotly-plot
-      *ngIf="historyPlot.data.length > 0"
-      [data]="historyPlot.data"
-      [layout]="historyPlot.layout"
-      [config]="historyPlot.config"
-    >
-    </plotly-plot>
+    <div *ngIf="showSpinner; then spinner; else history"></div>
   </mat-card>
 </div>
+
+<ng-template #history>
+  <p class="section-label">History</p>
+  <plotly-plot
+    *ngIf="historyPlot.data.length > 0"
+    [data]="historyPlot.data"
+    [layout]="historyPlot.layout"
+    [config]="historyPlot.config"
+  >
+  </plotly-plot>
+</ng-template>
+
+<ng-template #spinner>
+  <div class="loading-spinner">
+    <mat-spinner></mat-spinner>
+  </div>
+</ng-template>

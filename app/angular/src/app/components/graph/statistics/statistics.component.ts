@@ -15,6 +15,8 @@ import { ReplaySubject } from 'rxjs';
 export class StatisticsComponent implements OnInit {
   constructor(private dataService: DataService) {}
 
+  public showSpinner: boolean = false;
+
   data: CountryData = {};
 
   geodata: boolean = true;
@@ -84,7 +86,10 @@ export class StatisticsComponent implements OnInit {
       (dataset) => dataset.id == this.selections.selectedDataset
     );
 
-    let timearray = Object.entries(newdata)[0][1][this.selections.datasets[selectedDatasetIdx].timeSelected!];
+    let timearray =
+      Object.entries(newdata)[0][1][
+        this.selections.datasets[selectedDatasetIdx].timeSelected!
+      ];
     this.timestamps = timearray.map(String);
     for (const [key, value] of Object.entries(newdata)) {
       this.countries = [...this.countries, key];
@@ -101,10 +106,14 @@ export class StatisticsComponent implements OnInit {
   private updateNoGeoData(newdata: CountryData, selectedDatasetIdx: number) {
     this.geodata = false;
     this.data = newdata;
-    let timearray = newdata[this.selections.datasets[selectedDatasetIdx].timeSelected!] as unknown as string[];
+    let timearray = newdata[
+      this.selections.datasets[selectedDatasetIdx].timeSelected!
+    ] as unknown as string[];
     this.updateSlider(timearray);
 
-    let dataarray = newdata[this.selections.datasets[selectedDatasetIdx].featureSelected!] as unknown as [];
+    let dataarray = newdata[
+      this.selections.datasets[selectedDatasetIdx].featureSelected!
+    ] as unknown as [];
 
     let min = null;
     let min_key: string = '';
@@ -145,11 +154,17 @@ export class StatisticsComponent implements OnInit {
     let firstValue: number;
     let secondValue: number;
     if (this.geodata) {
-      firstValue = this.data[this.selectedCountry][feature][this.value] as number;
-      secondValue = this.data[this.selectedCountry][feature][this.highValue] as number;
+      firstValue = this.data[this.selectedCountry][feature][
+        this.value
+      ] as number;
+      secondValue = this.data[this.selectedCountry][feature][
+        this.highValue
+      ] as number;
     } else {
       firstValue = (this.data[feature] as unknown as [])[this.value] as number;
-      secondValue = (this.data[feature] as unknown as [])[this.highValue] as number;
+      secondValue = (this.data[feature] as unknown as [])[
+        this.highValue
+      ] as number;
     }
 
     let tempGrowthrate = (secondValue - firstValue) / firstValue;
@@ -235,12 +250,14 @@ export class StatisticsComponent implements OnInit {
             selectedDataset.timeSelected !==
               this.oldSelections?.datasets[selectedDatasetIdx].timeSelected
           ) {
+            this.showSpinner = true;
             this.dataService
               .getData(selectedDataset, '/graph/statistics', {})
               .subscribe((res) => {
                 if (res.type === HttpEventType.Response) {
                   if (res.body) {
                     this.updateData(res.body as CountryData);
+                    this.showSpinner = false;
                   }
                 }
               });

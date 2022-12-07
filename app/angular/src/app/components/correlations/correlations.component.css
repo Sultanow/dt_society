@@ -1,13 +1,23 @@
-.dialog{
-    max-width: 500px;
-    display: inline-block;
-}
-
 .dialog-wrapper{
     padding: 10px;
     text-align: center;
+    justify-content: center;
+    display: flex;
 }
 
 mat-card-title{
     line-height: 1.5;
+}
+
+mat-card{
+    height: 500px;
+    width: 100%;
+}
+
+.content-container{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 }

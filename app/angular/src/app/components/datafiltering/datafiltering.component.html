@@ -1,12 +1,21 @@
 <div class="data-selector">
-  <mat-radio-group class="data-selector-radio-group" aria-label="Select an option"
-    [(ngModel)]="selections.selectedDataset" (change)="changeFocus()">
+  <mat-radio-group
+    class="data-selector-radio-group"
+    aria-label="Select an option"
+    [(ngModel)]="selections.selectedDataset"
+    (change)="changeFocus()"
+  >
     <label class="section-label">Datasets</label>
     <ng-container *ngFor="let dataset of selections.datasets; let i = index">
       <mat-radio-button [value]="dataset.id">
         <div>
           {{ dataset.name }}
-          <button mat-icon-button color="primary" class="settings-button" (click)="onSettings(dataset.id)">
+          <button
+            mat-icon-button
+            color="primary"
+            class="settings-button"
+            (click)="onSettings(dataset.id)"
+          >
             <fa-icon [icon]="settingsIcon"></fa-icon>
           </button>
         </div>
@@ -15,45 +24,76 @@
         <div class="column-inputs-row">
           <mat-form-field>
             <mat-label>Feature column</mat-label>
-            <mat-select required #featureSelect (selectionChange)="
+            <mat-select
+              required
+              #featureSelect
+              (selectionChange)="
                 updateSelectedColumns(
                   dataset.id,
                   featureSelect.value,
                   'feature'
                 )
-              ">
-              <mat-option *ngFor="let column of dataset.possibleFeatures" [value]="column">
-                {{ column }}</mat-option>
+              "
+            >
+              <mat-option
+                *ngFor="let column of dataset.possibleFeatures"
+                [value]="column"
+              >
+                {{ column }}</mat-option
+              >
             </mat-select>
           </mat-form-field>
         </div>
         <div class="column-inputs-row">
           <mat-form-field *ngIf="dataset.reshapeSelected === null">
             <mat-label>Timestamp column</mat-label>
-            <mat-select required #timeSelect (selectionChange)="
+            <mat-select
+              required
+              #timeSelect
+              (selectionChange)="
                 updateSelectedColumns(dataset.id, timeSelect.value, 'time')
-              ">
-              <mat-option *ngFor="let column of dataset.timeOptions" [value]="column">
-                {{ column }}</mat-option>
+              "
+            >
+              <mat-option
+                *ngFor="let column of dataset.timeOptions"
+                [value]="column"
+              >
+                {{ column }}</mat-option
+              >
             </mat-select>
           </mat-form-field>
         </div>
       </div>
     </ng-container>
   </mat-radio-group>
-  <div class="selected-columns-container" *ngIf="selections.datasets.length > 0">
+  <div
+    class="selected-columns-container"
+    *ngIf="selections.datasets.length > 0"
+  >
     <p class="section-label">Country</p>
     <div class="column-inputs-row">
       <mat-form-field>
         <mat-label>Country</mat-label>
-        <mat-select required #countrySelect [(ngModel)]="selections.selectedCountry"
-          (selectionChange)="updateCountry()">
+        <mat-select
+          required
+          #countrySelect
+          [(ngModel)]="selections.selectedCountry"
+          (selectionChange)="updateCountry()"
+        >
           <mat-option>
-            <ngx-mat-select-search ngModel (ngModelChange)="filterCountries($event)" placeholderLabel="Search..."
-              noEntriesFoundLabel="No matches"></ngx-mat-select-search>
+            <ngx-mat-select-search
+              ngModel
+              (ngModelChange)="filterCountries($event)"
+              placeholderLabel="Search..."
+              noEntriesFoundLabel="No matches"
+            ></ngx-mat-select-search>
           </mat-option>
-          <mat-option *ngFor="let country of filteredCountries | async" [value]="country">
-            {{ country }}</mat-option>
+          <mat-option
+            *ngFor="let country of filteredCountries | async"
+            [value]="country"
+          >
+            {{ country }}</mat-option
+          >
         </mat-select>
       </mat-form-field>
     </div>

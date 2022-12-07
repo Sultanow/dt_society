@@ -13,6 +13,8 @@ import { ColumnValues, Plot } from 'src/app/types/GraphData';
 export class CorrelationComponent implements OnInit {
   constructor(private dataService: DataService) {}
 
+  public showSpinner: boolean = false;
+
   public data: Plot = {
     data: [],
     layout: {
@@ -24,7 +26,7 @@ export class CorrelationComponent implements OnInit {
       font: { color: '#f2f2f2' },
       margin: { t: 15, b: 50, l: 35 },
     },
-    config: { responsive: false },
+    config: { responsive: true },
   };
 
   public matchingFrequencies?: boolean;
@@ -130,6 +132,7 @@ export class CorrelationComponent implements OnInit {
 
   private updateCorrelationPlot() {
     if (this.selections.datasets.length > 0) {
+      this.showSpinner = true;
       this.dataService
         .getData(this.selections.datasets, '/graph/corr', {
           country: this.selections.selectedCountry,
@@ -138,6 +141,7 @@ export class CorrelationComponent implements OnInit {
           if (event.type === HttpEventType.Response) {
             if (event.body) {
               this.createCorrelationLines(event.body as ColumnValues[]);
+              this.showSpinner = false;
             }
           }
         });

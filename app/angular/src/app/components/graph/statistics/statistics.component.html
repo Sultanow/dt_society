@@ -1,6 +1,6 @@
-<div *ngIf="dataAvailable; then featureVaild; else selectFeatureDialog"></div>
+<div *ngIf="dataAvailable; then featureValid; else selectFeatureDialog"></div>
 
-<ng-template #featureVaild>
+<ng-template #featureValid>
   <div *ngIf="geodata; then geo; else noGeo"></div>
 </ng-template>
 
@@ -43,19 +43,11 @@
               <mat-label>Country</mat-label>
               <mat-select formControlName="selectedCountryControl">
                 <mat-option>
-                  <<<<<<< HEAD
                   <ngx-mat-select-search
                     formControlName="countryFilterControl"
                     placeholderLabel="Search..."
                     noEntriesFoundLabel="No matches"
                   ></ngx-mat-select-search>
-                  =======
-                  <ngx-mat-select-search
-                    formControlName="countryFilterControl"
-                    placeholderLabel="Search..."
-                    noEntriesFoundLabel="No matches"
-                  ></ngx-mat-select-search>
-                  >>>>>>> feature/correlation_frequency
                 </mat-option>
                 <mat-option
                   *ngFor="let country of filteredCountries | async"
@@ -115,7 +107,7 @@
 <ng-template #noGeo>
   <div class="statistics-wrapper" [formGroup]="selectionControl">
     <mat-card class="outer">
-      <mat-label>Statistics of {{ selections.selectedDataset }}</mat-label>
+      <p class="section-label">Statistics</p>
       <div class="stats-container">
         <mat-card class="single-stat">
           <mat-card-title>Min</mat-card-title>

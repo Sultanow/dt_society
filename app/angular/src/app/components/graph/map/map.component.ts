@@ -14,6 +14,8 @@ import { GraphData, Frame, CountryData } from 'src/app/types/GraphData';
 export class MapComponent implements OnInit {
   constructor(private dataService: DataService) {}
 
+  public showSpinner: boolean = false;
+
   public geoData: boolean = true;
   public data: GraphData = {
     data: [],
@@ -89,80 +91,86 @@ export class MapComponent implements OnInit {
       this.data.data = [];
     }
 
-    if(Object.keys(data).includes(this.selections.datasets[selectedIdx].featureSelected!)){
+    if (
+      Object.keys(data).includes(
+        this.selections.datasets[selectedIdx].featureSelected!
+      )
+    ) {
       this.geoData = false;
-    } else{
+    } else {
+      this.featureSelected =
+        this.selections.datasets[selectedIdx].featureSelected;
+      let timeSelected = this.selections.datasets[selectedIdx].timeSelected;
 
-    this.featureSelected =
-      this.selections.datasets[selectedIdx].featureSelected;
-    let timeSelected = this.selections.datasets[selectedIdx].timeSelected;
+      if (this.featureSelected !== undefined && timeSelected !== undefined) {
+        this.all_timestamps = (Object.values(data) as any)[0][timeSelected];
 
-    if (this.featureSelected !== undefined && timeSelected !== undefined) {
-      this.all_timestamps = (Object.values(data) as any)[0][timeSelected];
+        this.all_keys = Object.keys(data);
+        let z_min_val = 0;
+        let z_max_val = 0;
 
-      this.all_keys = Object.keys(data);
-      let z_min_val = 0;
-      let z_max_val = 0;
-
-      const newOptions: Options = Object.assign({}, this.options);
-      newOptions.floor = 0;
-      newOptions.ceil = this.all_timestamps.length;
-      newOptions.translate = (value: number) => {
-        return String(this.all_timestamps[value]);
-      };
-      newOptions['stepsArray'] = [];
-      this.options = newOptions;
-      this.currentSliderValue = 0;
-
-      if (this.frames.length > 0) {
-        this.frames = [];
-      }
-
-      for (let timestamp in this.all_timestamps) {
-        let z_entries = [];
-        for (let [key, value] of Object.entries(data)) {
-          z_entries.push((value as any)[this.featureSelected][timestamp]);
-          if (
-            z_max_val < Number((value as any)[this.featureSelected][timestamp])
-          ) {
-            z_max_val = (value as any)[this.featureSelected][timestamp];
-          }
-          if (
-            z_min_val > Number((value as any)[this.featureSelected][timestamp])
-          ) {
-            z_min_val = (value as any)[this.featureSelected][timestamp];
-          }
-        }
-
-        let frame: Frame = {
-          data: [
-            {
-              z: z_entries,
-            },
-          ],
+        const newOptions: Options = Object.assign({}, this.options);
+        newOptions.floor = 0;
+        newOptions.ceil = this.all_timestamps.length;
+        newOptions.translate = (value: number) => {
+          return String(this.all_timestamps[value]);
         };
-        this.frames.push(frame);
-        this.options['stepsArray']!.push({
-          value: Number(timestamp),
-        });
-      }
+        newOptions['stepsArray'] = [];
+        this.options = newOptions;
+        this.currentSliderValue = 0;
 
-      this.z_min = z_min_val;
-      this.z_max = z_max_val;
-      this.scope = 'global';
-
-      for (let state of this.federal_states_germany) {
-        if (this.all_keys.includes(state)) {
-          this.scope = 'germany';
-          break;
+        if (this.frames.length > 0) {
+          this.frames = [];
         }
-      }
 
-      this.selectionControl.get('geojsonControl')!.setValue(this.scope);
+        for (let timestamp in this.all_timestamps) {
+          let z_entries = [];
+          for (let [key, value] of Object.entries(data)) {
+            z_entries.push((value as any)[this.featureSelected][timestamp]);
+            if (
+              z_max_val <
+              Number((value as any)[this.featureSelected][timestamp])
+            ) {
+              z_max_val = (value as any)[this.featureSelected][timestamp];
+            }
+            if (
+              z_min_val >
+              Number((value as any)[this.featureSelected][timestamp])
+            ) {
+              z_min_val = (value as any)[this.featureSelected][timestamp];
+            }
+          }
+
+          let frame: Frame = {
+            data: [
+              {
+                z: z_entries,
+              },
+            ],
+          };
+          this.frames.push(frame);
+          this.options['stepsArray']!.push({
+            value: Number(timestamp),
+          });
+        }
+
+        this.z_min = z_min_val;
+        this.z_max = z_max_val;
+        this.scope = 'global';
+
+        for (let state of this.federal_states_germany) {
+          if (this.all_keys.includes(state)) {
+            this.scope = 'germany';
+            break;
+          }
+        }
+
+        this.selectionControl.get('geojsonControl')!.setValue(this.scope);
+      }
+      this.geoData = true;
     }
-    this.geoData = true;
+    this.showSpinner = false;
   }
-}
 
   private createInitialData() {
     this.data = {
@@ -249,6 +257,7 @@ export class MapComponent implements OnInit {
               this.selections.datasets[selectedDatasetIdx].timeSelected !==
                 this.oldSelections?.datasets[selectedDatasetIdx].timeSelected
             ) {
+              this.showSpinner = true;
               this.dataService
                 .getData(
                   this.selections.datasets[selectedDatasetIdx],
@@ -268,7 +277,7 @@ export class MapComponent implements OnInit {
               this.oldSelections = structuredClone(this.selections);
             }
           } else {
-            this.data.data = []
+            this.data.data = [];
           }
         }
       }

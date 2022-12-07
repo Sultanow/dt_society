@@ -13,6 +13,8 @@ import { CorrelationMatrix, Plot } from 'src/app/types/GraphData';
 export class HeatmapComponent implements OnInit {
   constructor(private dataService: DataService) {}
 
+  public showSpinner: boolean = false;
+
   public data: Plot = {
     data: [],
     layout: {
@@ -24,7 +26,7 @@ export class HeatmapComponent implements OnInit {
       font: { color: '#f2f2f2' },
       margin: { t: 10, b: 50 },
     },
-    config: { responsive: false },
+    config: { responsive: true },
   };
 
   public selections: Selections = {
@@ -74,6 +76,7 @@ export class HeatmapComponent implements OnInit {
       this.selectedFeatures !== undefined &&
       this.selectedFeatures!.length > 1
     ) {
+      this.showSpinner = true;
       this.dataService
         .getData(this.selections.datasets, '/graph/heatmap', {
           features: this.selectedFeatures,
@@ -83,6 +86,7 @@ export class HeatmapComponent implements OnInit {
           if (event.type === HttpEventType.Response) {
             if (event.body) {
               this.createHeatmapPlot(event.body as CorrelationMatrix);
+              this.showSpinner = false;
             }
           }
         });

@@ -1,46 +1,46 @@
 <div *ngIf="selections.datasets.length > 0; then overview; else dialog"></div>
 
 <ng-template #overview>
-    <div *ngIf="geoData; then geo; else nogeo"></div>
+  <div *ngIf="geoData; then geo; else nogeo"></div>
 </ng-template>
 
 <ng-template #geo>
-    <div class="row">
-        <div class="col">
-            <app-datatable></app-datatable>
-        </div>
-        <div class="col">
-            <app-statistics></app-statistics>
-        </div>
+  <div class="row">
+    <div class="col">
+      <app-datatable></app-datatable>
     </div>
-    <div class="clear-div"></div>
-    <div class="row">
-        <div class="col">
-            <app-history></app-history>
-        </div>
-        <div class="col">
-            <app-map></app-map>
-        </div>
+    <div class="col">
+      <app-statistics></app-statistics>
     </div>
+  </div>
+  <div class="clear-div"></div>
+  <div class="row">
+    <div class="col">
+      <app-history></app-history>
+    </div>
+    <div class="col">
+      <app-map></app-map>
+    </div>
+  </div>
 </ng-template>
 
 <ng-template #dialog>
-    <app-fileupload></app-fileupload>
+  <app-fileupload></app-fileupload>
 </ng-template>
 
 <ng-template #nogeo>
-    <div class="row">
-        <div class="col">
-            <app-datatable></app-datatable>
-        </div>
-        <div class="col">
-            <app-statistics></app-statistics>
-        </div>
+  <div class="row">
+    <div class="col">
+      <app-datatable></app-datatable>
     </div>
-    <div class="clear-div"></div>
-    <div class="row">
-        <div class="col">
-            <app-history></app-history>
-        </div>
+    <div class="col">
+      <app-statistics></app-statistics>
     </div>
+  </div>
+  <div class="clear-div"></div>
+  <div class="row">
+    <div class="col">
+      <app-history></app-history>
+    </div>
+  </div>
 </ng-template>

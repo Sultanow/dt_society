@@ -1,14 +1,25 @@
 <div class="correlation-wrapper">
   <mat-card>
-    <div class="frequency-disclaimer" *ngIf="matchingFrequencies === false">
-      <mat-icon>info_outline</mat-icon>
-      <p class="disclaimer-text">Time frequencies should match to correlate</p>
-    </div>
-    <plotly-plot
-      *ngIf="data.data.length > 0"
-      [data]="data.data"
-      [layout]="data.layout"
-      [config]="data.config"
-    ></plotly-plot>
+    <div *ngIf="showSpinner; then spinner; else correlation"></div>
   </mat-card>
 </div>
+
+<ng-template #correlation>
+  <div class="frequency-disclaimer" *ngIf="matchingFrequencies === false">
+    <mat-icon>info_outline</mat-icon>
+    <p class="disclaimer-text">Time frequencies should match to correlate</p>
+  </div>
+  <plotly-plot
+    *ngIf="data.data.length > 0"
+    [data]="data.data"
+    [layout]="data.layout"
+    [config]="data.config"
+  >
+  </plotly-plot>
+</ng-template>
+
+<ng-template #spinner>
+  <div class="loading-spinner">
+    <mat-spinner></mat-spinner>
+  </div>
+</ng-template>

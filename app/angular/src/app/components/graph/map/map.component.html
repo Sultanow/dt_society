@@ -1,51 +1,39 @@
-<div *ngIf="geoData; then map; else dialog"></div>
+<div class="map-wrapper">
+  <mat-card *ngIf="data.data.length > 0">
+    <div *ngIf="showSpinner; then spinner; else map"></div>
+  </mat-card>
+</div>
 
-<ng-template #map>
-  <div class="map-wrapper" [formGroup]="selectionControl">
-    <mat-card *ngIf="data.data.length > 0">
-      <div>
-        <plotly-plot
-          *ngIf="data.data.length > 0"
-          [data]="data.data"
-          [layout]="data.layout"
-          [config]="data.config"
-        >
-        </plotly-plot>
-      </div>
-      <div class="slider-container">
-        <mat-radio-group
-          aria-label="Select an option"
-          formControlName="geojsonControl"
-        >
-          <mat-radio-button value="global">Global</mat-radio-button>
-          <mat-radio-button value="germany">Germany</mat-radio-button>
-        </mat-radio-group>
-        <ngx-slider
-          formControlName="sliderControl"
-          [(value)]="currentSliderValue"
-          [options]="options"
-        ></ngx-slider>
-      </div>
-    </mat-card>
+<ng-template #spinner>
+  <div class="loading-spinner">
+    <mat-spinner></mat-spinner>
   </div>
 </ng-template>
 
-<ng-template #dialog>
-  <div class="dialog-wrapper">
-    <mat-card class="dialog">
-      <div class="content-container">
-        <mat-card-title>
-          <mat-icon style="font-size: xx-large; padding: 7px"
-            >info_outline</mat-icon
-          >
-          <div>Map cannot be displayed for the selected data set</div>
-        </mat-card-title>
-        <br />
-        <mat-card-content>
-          <p>Please select a data set with a geographical reference.</p>
-          <p>The data sets can be managed through the sidebar.</p>
-        </mat-card-content>
-      </div>
-    </mat-card>
+<ng-template #map>
+  <div [formGroup]="selectionControl">
+    <div>
+      <plotly-plot
+        *ngIf="data.data.length > 0"
+        [data]="data.data"
+        [layout]="data.layout"
+        [config]="data.config"
+      >
+      </plotly-plot>
+    </div>
+    <div class="slider-container">
+      <mat-radio-group
+        aria-label="Select an option"
+        formControlName="geojsonControl"
+      >
+        <mat-radio-button value="global">Global</mat-radio-button>
+        <mat-radio-button value="germany">Germany</mat-radio-button>
+      </mat-radio-group>
+      <ngx-slider
+        formControlName="sliderControl"
+        [(value)]="currentSliderValue"
+        [options]="options"
+      ></ngx-slider>
+    </div>
   </div>
 </ng-template>

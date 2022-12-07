@@ -12,6 +12,8 @@ import { HttpEventType } from '@angular/common/http';
 export class HistoryComponent implements OnInit {
   constructor(private dataService: DataService) {}
 
+  public showSpinner: boolean = false;
+
   public historyPlot: Plot = {
     data: [],
     layout: {
@@ -19,7 +21,7 @@ export class HistoryComponent implements OnInit {
       legend: { title: { text: 'Countries' } },
       paper_bgcolor: '#424242',
       plot_bgcolor: '#424242',
-      xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: ''},
+      xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
       yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
       font: { color: '#f2f2f2' },
     },
@@ -34,24 +36,28 @@ export class HistoryComponent implements OnInit {
   private oldSelections?: Selections;
 
   createHistoryPlot(data: CountryData, selectedIdx: number) {
-    
-    if(Object.keys(data).includes(this.selections.datasets[selectedIdx].featureSelected!)){
+    if (
+      Object.keys(data).includes(
+        this.selections.datasets[selectedIdx].featureSelected!
+      )
+    ) {
       this.createPlotWithoutGeoReference(selectedIdx, data);
-
-    } else{
+    } else {
       this.createPlotWithGeoReference(data, selectedIdx);
     }
   }
 
-  private createPlotWithoutGeoReference(selectedIdx: number, data: CountryData) {
-    
+  private createPlotWithoutGeoReference(
+    selectedIdx: number,
+    data: CountryData
+  ) {
     this.historyPlot = {
       data: [],
       layout: {
         margin: { t: 70, b: 50, l: 40, r: 10 },
         paper_bgcolor: '#424242',
         plot_bgcolor: '#424242',
-        xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: ''},
+        xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
         yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
         font: { color: '#f2f2f2' },
       },
@@ -64,7 +70,8 @@ export class HistoryComponent implements OnInit {
     };
 
     const timeSelected = this.selections.datasets[selectedIdx].timeSelected;
-    const featureSelected = this.selections.datasets[selectedIdx].featureSelected;
+    const featureSelected =
+      this.selections.datasets[selectedIdx].featureSelected;
     if (timeSelected !== undefined && featureSelected !== undefined) {
       trace.x = data[timeSelected];
       trace.y = data[featureSelected];
@@ -76,7 +83,6 @@ export class HistoryComponent implements OnInit {
   }
 
   private createPlotWithGeoReference(data: CountryData, selectedIdx: number) {
-
     this.historyPlot = {
       data: [],
       layout: {
@@ -84,7 +90,7 @@ export class HistoryComponent implements OnInit {
         legend: { title: { text: 'Countries' } },
         paper_bgcolor: '#424242',
         plot_bgcolor: '#424242',
-        xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: ''},
+        xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
         yaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
         font: { color: '#f2f2f2' },
       },
@@ -106,7 +112,8 @@ export class HistoryComponent implements OnInit {
       count++;
 
       const timeSelected = this.selections.datasets[selectedIdx].timeSelected;
-      const featureSelected = this.selections.datasets[selectedIdx].featureSelected;
+      const featureSelected =
+        this.selections.datasets[selectedIdx].featureSelected;
       if (timeSelected !== undefined && featureSelected !== undefined) {
         trace.x = value[timeSelected];
         trace.y = value[featureSelected];
@@ -129,7 +136,9 @@ export class HistoryComponent implements OnInit {
 
         if (this.selections.datasets[selectedDatasetIdx] !== undefined) {
           let selectedDataset = this.selections.datasets[selectedDatasetIdx];
-          if (selectedDataset.featureSelected !== undefined && selectedDataset.timeSelected !== undefined
+          if (
+            selectedDataset.featureSelected !== undefined &&
+            selectedDataset.timeSelected !== undefined
           ) {
             if (
               selectedDataset.featureSelected !==
@@ -137,15 +146,12 @@ export class HistoryComponent implements OnInit {
                   .featureSelected ||
               this.selections.selectedDataset !==
                 this.oldSelections?.selectedDataset ||
-                selectedDataset.timeSelected !==
+              selectedDataset.timeSelected !==
                 this.oldSelections?.datasets[selectedDatasetIdx].timeSelected
             ) {
+              this.showSpinner = true;
               this.dataService
-                .getData(
-                  selectedDataset,
-                  '/graph/history',
-                  {}
-                )
+                .getData(selectedDataset, '/graph/history', {})
                 .subscribe((event) => {
                   if (event.type === HttpEventType.Response) {
                     if (event.body) {
@@ -153,13 +159,14 @@ export class HistoryComponent implements OnInit {
                         event.body as CountryData,
                         selectedDatasetIdx
                       );
+                      this.showSpinner = false;
                     }
                   }
                 });
-                this.oldSelections = structuredClone(this.selections);
-              }
-          } else{
-            this.historyPlot.data = []
+              this.oldSelections = structuredClone(this.selections);
+            }
+          } else {
+            this.historyPlot.data = [];
           }
         }
       }
