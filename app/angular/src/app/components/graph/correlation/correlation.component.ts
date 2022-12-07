@@ -26,7 +26,7 @@ export class CorrelationComponent implements OnInit {
       font: { color: '#f2f2f2' },
       margin: { t: 15, b: 50, l: 35 },
     },
-    config: { responsive: true },
+    config: { responsive: false },
   };
 
   public matchingFrequencies?: boolean;
@@ -67,7 +67,6 @@ export class CorrelationComponent implements OnInit {
 
     let group = 0;
     for (let i = 0; i < data.length; i++) {
-      const timeSelection = this.selections.datasets[i].timeSelected;
       let setId = data[i]['datasetid'].toString();
 
       for (const [key, value] of Object.entries(data[i])) {
@@ -89,10 +88,8 @@ export class CorrelationComponent implements OnInit {
           legendgrouptitle: { text: dataset.name },
         };
 
-        if (key !== timeSelection) {
-          if (timeSelection !== undefined) {
-            trace.x = data[i][timeSelection];
-          }
+        if (key !== dataset.timeSelected) {
+          trace.x = data[i][dataset.timeSelected!];
 
           trace.y = value;
           trace.name = key;
@@ -102,7 +99,7 @@ export class CorrelationComponent implements OnInit {
 
             this.data.layout['xaxis' + (group + 1).toString()] = {
               gridcolor: 'rgba(80, 103, 132, 0.3)',
-              title: timeSelection,
+              title: dataset.timeSelected,
               range: data[i]['timestamps'] as number[],
             };
             this.data.layout['yaxis' + (group + 1).toString()] = {
@@ -112,7 +109,7 @@ export class CorrelationComponent implements OnInit {
           } else {
             this.data.layout.xaxis = {
               gridcolor: 'rgba(80, 103, 132, 0.3)',
-              title: timeSelection,
+              title: dataset.timeSelected,
               range: data[i]['timestamps'] as number[],
             };
           }
