@@ -9,6 +9,7 @@ import { Dataset, Selections } from 'src/app/types/Datasets';
 })
 export class DatasetSettingsComponent implements OnInit {
   public datasetId?: string;
+  public fileName?: string;
   public geoEnabled: boolean = true;
   constructor(private dataService: DataService) {}
 
@@ -25,6 +26,33 @@ export class DatasetSettingsComponent implements OnInit {
   }
 
   toggleEditMode() {
+    if (this.editMode) {
+      this.dataService.renameDataset(
+        this.selections,
+        this.datasetId,
+        this.fileName
+      );
+    }
+    this.editMode = !this.editMode;
+  }
+
+  updateReshape() {
+    this.dataService.getFeatureColumns(
+      this.selections,
+      this.datasetId,
+      this.currentDataset?.featureSelected!
+    );
+  }
+
+  updateGeo() {
+    if (this.currentDataset?.geoSelected === undefined) {
+      this.currentDataset!.geoSelected = 'None';
+    }
+
+    this.dataService.updateDataset(this.selections, this.datasetId);
+  }
+
+  doubleclick() {
     this.editMode = !this.editMode;
   }
 
@@ -35,6 +63,8 @@ export class DatasetSettingsComponent implements OnInit {
     this.currentDataset = this.selections.datasets.filter(
       (dataset) => dataset.id == this.datasetId
     )[0];
+
+    this.fileName = this.currentDataset.name;
   }
 
   saveDatasetSettings() {

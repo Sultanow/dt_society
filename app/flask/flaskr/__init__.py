@@ -162,6 +162,7 @@ def create_app():
         return response_data
 
     @app.route("/data/update", methods=["POST"])
+    @app.route("/data/name", methods=["POST"])
     @jwt_required()
     def update_dataset():
 
@@ -176,21 +177,27 @@ def create_app():
             return ("Empty request.", 400)
 
         file_id = data["datasetId"]
-        geo_column = data["geoColumn"]
-        reshape_column = data["reshapeSelected"]
 
         collection = mongo.db[session + ".files"]
 
         dataset = collection.find_one({"id": file_id})
 
-        collection.update_one(
-            {"id": file_id}, {"$set": {"filename": data["datasetName"]}}
-        )
+        print(request.path)
+
+        if "name" in request.path:
+
+            collection.update_one(
+                {"id": file_id}, {"$set": {"filename": data["datasetName"]}}
+            )
+
+            return ("", 204)
+
+        geo_column = data["geoColumn"]
 
         df, _ = parse_dataset(
             geo_column=geo_column,
             dataset_id=dataset["id"],
-            reshape_column=reshape_column,
+            # reshape_column=reshape_column,
             session_id=session,
             use_preprocessed=False,
         )
@@ -225,6 +232,8 @@ def create_app():
         geo_column = data["geoColumn"] if data["geoColumn"] != "None" else None
         feature_selected = data["featureSelected"]
 
+        reshape_column = data["reshapeSelected"] if "reshapeSelected" in data else None
+
         session = get_jwt_identity()
 
         bucket = gridfs.GridFS(mongo.db, session)
@@ -232,6 +241,7 @@ def create_app():
         df, reshape_column = parse_dataset(
             geo_column=geo_column,
             dataset_id=file_id,
+            reshape_column=reshape_column,
             selected_feature=feature_selected,
             session_id=session,
             use_preprocessed=False,

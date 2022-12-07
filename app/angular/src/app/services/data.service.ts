@@ -6,6 +6,7 @@ import {
   HttpEventType,
   HttpRequest,
   HttpErrorResponse,
+  HttpResponse,
 } from '@angular/common/http';
 import {
   ColumnValues,
@@ -165,10 +166,16 @@ export class DataService {
       if (event.type == HttpEventType.Response && selectedDatasetIndex > -1) {
         selections.datasets.splice(selectedDatasetIndex, 1);
         this.updateTotalCountries(selections);
-        if(selections.selectedDataset === datasetId && selections.datasets[0] !== undefined){
+        if (
+          selections.selectedDataset === datasetId &&
+          selections.datasets[0] !== undefined
+        ) {
           selections.selectedDataset = selections.datasets[0].id;
         }
-        if(selections.selectedDataset === datasetId && selections.datasets[0] === undefined){
+        if (
+          selections.selectedDataset === datasetId &&
+          selections.datasets[0] === undefined
+        ) {
           selections.selectedDataset = undefined;
         }
         this.updateDatasetsSelection(selections);
@@ -234,11 +241,17 @@ export class DataService {
         datasetId: datasetId,
         geoColumn: selections.datasets[targetDatasetIdx].geoSelected,
         featureSelected: selections.datasets[targetDatasetIdx].featureSelected,
+        reshapeSelected: selections.datasets[targetDatasetIdx].reshapeSelected,
       })
       .subscribe((featureColumns) => {
-        selections.datasets[targetDatasetIdx].reshapeSelected = (
-          featureColumns as Options
-        ).reshape_column;
+        if (
+          selections.datasets[targetDatasetIdx].reshapeSelected === undefined
+        ) {
+          selections.datasets[targetDatasetIdx].reshapeSelected = (
+            featureColumns as Options
+          ).reshape_column;
+        }
+
         selections.datasets[targetDatasetIdx].featureOptions = (
           featureColumns as Options
         ).features;
@@ -274,7 +287,31 @@ export class DataService {
         datasetName: selections.datasets[targetDatasetIdx].name,
       })
       .subscribe((data) => {
-        selections.datasets[targetDatasetIdx] = data as Dataset;
+        if (Object.keys(data).length > 0) {
+          selections.datasets[targetDatasetIdx] = data as Dataset;
+        }
+
+        this.updateDatasetsSelection(selections);
+      });
+  }
+
+  renameDataset(
+    selections: Selections,
+    datasetId: string | undefined,
+    updatedName: string | undefined
+  ) {
+    const targetDatasetIdx = selections.datasets.findIndex(
+      (dataset) => dataset.id == datasetId
+    );
+
+    this.http
+      .post(this.apiUrl + 'data/name', {
+        datasetName: updatedName,
+        datasetId: datasetId,
+      })
+      .subscribe((response) => {
+        selections.datasets[targetDatasetIdx].name = updatedName;
+
         this.updateDatasetsSelection(selections);
       });
   }
