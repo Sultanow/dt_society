@@ -49,7 +49,7 @@ def parse_dataset(
 
     df = DigitalTwinTimeSeries(selected_df, geo_col=geo_column, sep="dict")
 
-    if selected_feature is not None:
+    if selected_feature is not None and reshape_column is None:
         features_in_columns = df.data.columns.to_list()
 
         for feature in features_in_columns:

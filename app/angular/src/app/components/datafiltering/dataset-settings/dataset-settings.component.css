@@ -2,8 +2,31 @@
   justify-content: center;
   align-items: center;
   display: flex;
+  width: 100%;
 }
 
 .edit-button {
   float: right;
+  margin-left: auto;
+}
+
+.exit-button {
+  float: right;
+  margin-left: auto;
+}
+
+.exit-button-container {
+  padding-bottom: 20px;
+  display: flex;
+}
+
+.filename-label {
+  padding-top: 5px;
+  padding-bottom: 10px;
+  padding-right: 5px;
+  width: 100%;
+}
+
+.edit-filename-area {
+  width: 150px;
 }
