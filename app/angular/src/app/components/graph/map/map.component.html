@@ -11,6 +11,7 @@
 </ng-template>
 
 <ng-template #map>
+  <button mat-raised-button color="primary" (click)="zoom()">Zoom</button>
   <div [formGroup]="selectionControl">
     <div>
       <plotly-plot

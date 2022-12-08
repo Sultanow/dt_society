@@ -25,11 +25,17 @@
 .data-selector-radio-group {
   display: flex;
   flex-direction: column;
-  margin: 15px 0;
+  margin-top: 1em;
   align-items: flex-start;
 }
 
-.section-label {
+.section-label-1 {
+  font-size: 18px;
+  font-weight: lighter;
+  padding: 10px;
+}
+
+.section-label-2 {
   font-size: 18px;
   font-weight: lighter;
   padding: 10px;
@@ -37,7 +43,7 @@
 }
 
 .dataset{
-  margin-top: 2em;
+  margin-bottom: 2em;
   padding-left: 1em;
   width: 250px;
 }
@@ -61,6 +67,6 @@
 }
 
 .inactive{
-  border-left: 10px solid #c2185b;
+  border-left: 10px solid #f44336;
   border-radius: 10px;
 }

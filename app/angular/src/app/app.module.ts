@@ -58,6 +58,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MapZoomComponent } from './components/zoom/map-zoom/map-zoom.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -78,6 +79,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     OverviewComponent,
     CorrelationsComponent,
     DatasetSettingsComponent,
+    MapZoomComponent,
   ],
   imports: [
     BrowserModule,

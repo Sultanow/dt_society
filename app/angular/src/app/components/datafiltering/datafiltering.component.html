@@ -5,7 +5,7 @@
     [(ngModel)]="selections.selectedDataset"
     (change)="changeFocus()"
   >
-    <label class="section-label">Datasets</label>
+    <label class="section-label-1">Datasets</label>
     <ng-container *ngFor="let dataset of selections.datasets; let i = index">
       <div class="dataset" [ngClass]="getDatasetStatus(dataset.id)">
         <mat-radio-button [value]="dataset.id">
@@ -75,7 +75,7 @@
     class="selected-columns-container active"
     *ngIf="selections.datasets.length > 0"
   >
-    <p class="section-label">Country</p>
+    <p class="section-label-2">Country</p>
     <div class="column-inputs-row">
       <mat-form-field>
         <mat-label>Country</mat-label>

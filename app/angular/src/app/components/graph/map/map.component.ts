@@ -2,9 +2,11 @@ import { Options } from '@angular-slider/ngx-slider';
 import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 import { GraphData, Frame, CountryData } from 'src/app/types/GraphData';
+import { MapZoomComponent } from '../../zoom/map-zoom/map-zoom.component';
 
 @Component({
   selector: 'app-map',
@@ -12,7 +14,7 @@ import { GraphData, Frame, CountryData } from 'src/app/types/GraphData';
   templateUrl: './map.component.html',
 })
 export class MapComponent implements OnInit {
-  constructor(private dataService: DataService) {}
+  constructor(private dataService: DataService, public dialog: MatDialog) {}
 
   public showSpinner: boolean = false;
 
@@ -208,6 +210,7 @@ export class MapComponent implements OnInit {
   }
 
   private updateData(sliderValue: number) {
+    this.currentSliderValue = sliderValue;
     let newData = [
       {
         type: 'choroplethmapbox',
@@ -227,6 +230,16 @@ export class MapComponent implements OnInit {
       },
     ];
     this.data.data = newData;
+  }
+
+  zoom() {
+    console.log('HALLO');
+    let dialogRef = this.dialog.open(MapZoomComponent, {
+      data: {},
+      //width: '1000px',
+      //height: '1000px',
+    });
+    dialogRef.componentInstance.plotData = this.data;
   }
 
   ngOnInit(): void {
