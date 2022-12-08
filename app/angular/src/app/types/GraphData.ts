@@ -1,5 +1,5 @@
 export interface GraphData {
-  data: Array<Object>;
+  data: Object[];
   layout: any;
   config?: {};
 }
@@ -58,27 +58,22 @@ export interface GraphControls {
   frequency?: string;
   periods?: number;
   maxLags?: number;
-  scenarios?: Scenarios;
+  scenarios?: ScenarioData;
   dependentDataset?: string;
 }
 
-export interface Models {
-  [key: string]: string;
-}
-
-export interface Scenarios {
-  [key: string]: number[];
-}
-
-export interface Forecast {
-  [key: string]: number[];
-}
 export interface ProphetForecast {
   merge: ColumnValues;
   future: ColumnValues;
-  forecast: Forecast;
+  forecast: { [id: string]: number[] };
 }
 
-export interface ActiveScenarios {
-  [key: string]: boolean;
+export interface Scenario {
+  active: boolean;
+  selectable: boolean;
+  data: number[];
+}
+
+export interface ScenarioData {
+  [id: string]: Scenario;
 }

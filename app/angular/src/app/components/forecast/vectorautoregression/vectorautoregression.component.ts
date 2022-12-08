@@ -3,10 +3,10 @@ import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 import {
-  ActiveScenarios,
   ColumnValues,
-  Models,
   Plot,
+  Scenario,
+  ScenarioData,
 } from 'src/app/types/GraphData';
 
 @Component({
@@ -16,11 +16,6 @@ import {
 })
 export class VectorautoregressionComponent implements OnInit {
   constructor(private dataService: DataService) {}
-
-  public models: Models = {
-    var: 'Vector Auto Regression',
-    hwes: 'HW Smoothing',
-  };
 
   public selections: Selections = {
     datasets: [],
@@ -35,8 +30,8 @@ export class VectorautoregressionComponent implements OnInit {
   public selectedModel: string = 'var';
   public showSpinner: boolean = false;
   public validDatasets: number = 0;
-  public selectableDatasets: ActiveScenarios = {};
-  public activeDatasets: ActiveScenarios = {};
+  public scenarios: ScenarioData = {};
+
   public data: Plot = {
     data: [],
     layout: {
@@ -57,10 +52,7 @@ export class VectorautoregressionComponent implements OnInit {
       this.data.data = [];
     }
     this.data.layout.title =
-      this.models[this.selectedModel] +
-      ' (' +
-      this.selections.selectedCountry +
-      ')';
+      'Forecast' + ' (' + this.selections.selectedCountry + ')';
     this.data.layout.grid = {
       rows: 1,
       columns: Object.keys(data).length - 1,
@@ -152,7 +144,7 @@ export class VectorautoregressionComponent implements OnInit {
           dataset.countryOptions?.includes(
             this.selections.selectedCountry as string
           ) &&
-          this.activeDatasets[dataset.id as string] === true
+          this.scenarios[dataset.id as string].active === true
       );
       if (filteredSelections.length > 1) {
         this.toggleSpinner();
@@ -203,17 +195,16 @@ export class VectorautoregressionComponent implements OnInit {
             ) {
               this.validDatasets++;
             }
-            if (
-              !Object.keys(this.activeDatasets).includes(dataset.id as string)
-            ) {
-              this.activeDatasets[dataset.id as string] = true;
+            if (!Object.keys(this.scenarios).includes(dataset.id as string)) {
+              this.scenarios[dataset.id!] = {} as Scenario;
+              this.scenarios[dataset.id as string].active = true;
             } else {
-              this.selectableDatasets[dataset.id as string] =
+              this.scenarios[dataset.id as string].selectable =
                 dataset.countryOptions?.includes(
                   this.selections.selectedCountry as string
                 ) as boolean;
 
-              this.activeDatasets[dataset.id as string] =
+              this.scenarios[dataset.id as string].active =
                 dataset.countryOptions?.includes(
                   this.selections.selectedCountry as string
                 ) as boolean;

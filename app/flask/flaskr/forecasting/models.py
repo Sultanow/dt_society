@@ -162,13 +162,6 @@ def var_fit_and_predict_multi(
         Tuple[pd.DataFrame, dict]: forecast data, marks dict for slider
     """
 
-    # frequencies = {
-    #     "Yearly": ("AS", 365),
-    #     "Monthly": ("MS", 30),
-    #     "Weekly": ("W", 7),
-    #     "Daily": ("D", 1),
-    # }
-
     if len(dataframes) == 1:
         merged_df, time = dataframes[0], time_columns[0]
     else:
@@ -227,13 +220,6 @@ def hw_es_fit_and_predict_multi(
         Tuple[pd.DataFrame, dict]: forecast data, marks dict for slider
     """
 
-    frequencies = {
-        "Yearly": ("AS", 365),
-        "Monthly": ("MS", 30),
-        "Weekly": ("W", 7),
-        "Daily": ("D", 1),
-    }
-
     merged_df, time = merge_dataframes_multi(dataframes, time_columns)
 
     merged_df[time] = pd.to_datetime(merged_df[time].astype(str))
@@ -256,7 +242,7 @@ def hw_es_fit_and_predict_multi(
     forecast_df = pd.DataFrame()
 
     forecast_df[time] = pd.date_range(
-        start=merged_df[time].iloc[-1], periods=periods, freq=frequencies[frequency][0]
+        start=merged_df[time].iloc[-1], periods=periods, freq=frequency
     )
 
     for i, feature in enumerate(sorted(feature_columns)):
@@ -289,13 +275,6 @@ def prophet_fit_and_predict_n(
         Tuple[pd.DataFrame, str]: forecast, intitial and future dataframe, name of dependent feature
     """
 
-    frequencies = {
-        "Yearly": ("AS", 365),
-        "Monthly": ("MS", 30),
-        "Weekly": ("W", 7),
-        "Daily": ("D", 1),
-    }
-
     merged_df, time = merge_dataframes_multi(dataframes, time_columns)
 
     # if feature_column_1 == feature_column_2:
@@ -316,9 +295,7 @@ def prophet_fit_and_predict_n(
     model.fit(merged_df)
 
     scenario_min_len = len(min(scenarios, key=len))
-    future = model.make_future_dataframe(
-        periods=scenario_min_len, freq=frequencies[frequency][0]
-    )
+    future = model.make_future_dataframe(periods=scenario_min_len, freq=frequency)
 
     for feature, scenario in zip(feature_columns, scenarios):
         artificial_scenario = np.append(

@@ -19,10 +19,11 @@
                 <mat-radio-button
                   *ngIf="
                     dataset.id !== undefined &&
-                    dataset.featureSelected !== undefined
+                    dataset.featureSelected !== undefined &&
+                    scenarioData[dataset.id] !== undefined
                   "
                   [value]="dataset.id"
-                  [disabled]="selectableScenarios[dataset.id] === false"
+                  [disabled]="scenarioData[dataset.id].selectable === false"
                 >
                   {{ dataset.name }}
                   <div *ngIf="dataset.featureSelected !== undefined">
@@ -52,11 +53,11 @@
                 "
                 [disabled]="
                   dataset.id === dependentDataset ||
-                  selectableScenarios[dataset.id] === false
+                  scenarioData[dataset.id].selectable === false
                 "
                 [expanded]="
                   dataset.id !== dependentDataset &&
-                  selectableScenarios[dataset.id] === true
+                  scenarioData[dataset.id].selectable === true
                 "
               >
                 <mat-expansion-panel-header>
@@ -65,7 +66,7 @@
                   </mat-panel-title>
                   <mat-panel-description
                     *ngIf="
-                      activeScenarios[dataset.id] === true &&
+                      scenarioData[dataset.id].active === true &&
                         dataset.id !== dependentDataset;
                       else Disabled
                     "
@@ -84,7 +85,7 @@
                     >
                       <div
                         *ngIf="
-                          selectableScenarios[dataset.id] === true;
+                          scenarioData[dataset.id].selectable === true;
                           else NoCountryData
                         "
                       >
@@ -111,7 +112,7 @@
                 <mat-slide-toggle
                   class="example-margin"
                   color="primary"
-                  [(ngModel)]="activeScenarios[dataset.id]"
+                  [(ngModel)]="scenarioData[dataset.id].active"
                   (change)="updateProphetForecast()"
                 >
                   Activate
@@ -130,7 +131,7 @@
                     <mat-label> Step {{ i }}</mat-label>
                     <input
                       matInput
-                      [(ngModel)]="scenarios[dataset.id][i]"
+                      [(ngModel)]="scenarioData[dataset.id].data[i]"
                       placeholder="Scenario"
                     />
                   </mat-form-field>

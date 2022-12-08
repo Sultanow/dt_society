@@ -2,10 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Selections } from '../../types/Datasets';
 import { DataService } from 'src/app/services/data.service';
 import { MatDialog } from '@angular/material/dialog';
-import { UploaddialogComponent } from './uploaddialog/uploaddialog.component';
-import {
-  faGear
-} from '@fortawesome/free-solid-svg-icons';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { DatasetSettingsComponent } from './dataset-settings/dataset-settings.component';
 import { ReplaySubject } from 'rxjs';
 
@@ -17,8 +14,6 @@ import { ReplaySubject } from 'rxjs';
 export class DatafilteringComponent implements OnInit {
   constructor(private dataService: DataService, public dialog: MatDialog) {}
 
-  settingsIcon = faGear;
-
   selections: Selections = {
     datasets: [],
     selectedDataset: undefined,
@@ -27,6 +22,8 @@ export class DatafilteringComponent implements OnInit {
 
   public filteredCountries: ReplaySubject<string[] | undefined> =
     new ReplaySubject<string[] | undefined>(1);
+
+  settingsIcon = faGear;
 
   updateSelectedColumns(
     filename: string | undefined,
@@ -54,25 +51,16 @@ export class DatafilteringComponent implements OnInit {
     this.dataService.updateDatasetsSelection(this.selections);
   }
 
-  onFileUpload(event: any) {
-    this.dialog.open(UploaddialogComponent, { data: this.selections });
-  }
-
-   onDeleteFile(datasedId: string | undefined) {
+  onDeleteFile(datasedId: string | undefined) {
     this.dataService.deleteDataset(datasedId, this.selections);
   }
 
-  changeFocus() {
+  updateSideBar() {
     this.dataService.updateDatasetsSelection(this.selections);
   }
 
-  updateCountry() {
-    this.dataService.updateDatasetsSelection(this.selections);
-  }
-
-  onSettings(datasedId: string | undefined){
-    let dialogRef = this.dialog.open(DatasetSettingsComponent)
-    dialogRef.componentInstance.datasetId = datasedId;
+  onSettings(datasetId: string | undefined) {
+    this.dialog.open(DatasetSettingsComponent, { data: datasetId });
   }
 
   ngOnInit(): void {
@@ -83,7 +71,7 @@ export class DatafilteringComponent implements OnInit {
     this.dataService.getAvailableDatasets(this.selections);
   }
 
-  protected filterCountries(event: any){
+  protected filterCountries(event: any) {
     if (!this.selections.totalCountries) {
       return;
     }
