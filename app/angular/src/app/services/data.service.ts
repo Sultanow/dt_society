@@ -277,6 +277,7 @@ export class DataService {
     const targetDatasetIdx = selections.datasets.findIndex(
       (dataset) => dataset.id == datasetId
     );
+    console.log(selections.datasets[targetDatasetIdx].geoSelected);
 
     this.http
       .post(this.apiUrl + 'data/update', {
@@ -288,6 +289,7 @@ export class DataService {
       })
       .subscribe((data) => {
         if (Object.keys(data).length > 0) {
+          console.log(data);
           selections.datasets[targetDatasetIdx] = data as Dataset;
         }
 

@@ -34,7 +34,7 @@ export class AppComponent {
     this.dataService.getDemoData(this.selectedDatasets);
   }
 
-  onFileUpload(event: any) {
+  onFileUpload() {
     this.dialog.open(UploaddialogComponent);
   }
 

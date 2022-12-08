@@ -8,10 +8,10 @@
     <mat-icon>menu</mat-icon>
   </button>
   <a id="TitleButton" routerLink="/">
-  <span>
-    Digital Twin of Society
-    <fa-icon [icon]="faChartColumn"></fa-icon>
-  </span>
+    <span>
+      Digital Twin of Society
+      <fa-icon [icon]="faChartColumn"></fa-icon>
+    </span>
   </a>
   <nav>
     <a class="nav-button" routerLink="/overview" routerLinkActive="activebutton"
@@ -40,7 +40,7 @@
 <mat-drawer-container class="content-container">
   <mat-drawer #datafiltering mode="side">
     <div class="header-buttons">
-      <button class="upload-button" mat-button (click)="onFileUpload($event)">
+      <button class="upload-button" mat-button (click)="onFileUpload()">
         <mat-icon style="margin-right: 20px">file_upload</mat-icon>
         Upload dataset
       </button>

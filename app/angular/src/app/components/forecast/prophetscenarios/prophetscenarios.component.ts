@@ -3,11 +3,10 @@ import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 import {
-  ActiveScenarios,
-  ColumnValues,
   Plot,
   ProphetForecast,
-  Scenarios,
+  Scenario,
+  ScenarioData,
 } from 'src/app/types/GraphData';
 import { faChartLine } from '@fortawesome/free-solid-svg-icons';
 
@@ -19,6 +18,16 @@ import { faChartLine } from '@fortawesome/free-solid-svg-icons';
 export class ProphetscenariosComponent implements OnInit {
   constructor(private dataService: DataService) {}
 
+  public selections: Selections = {
+    datasets: [],
+    selectedDataset: undefined,
+  };
+
+  // Scenarios
+  public scenarioIndeces: number[] = [];
+  public scenarioData: ScenarioData = {};
+
+  // Forecast plot
   public data: Plot = {
     data: [],
     layout: {
@@ -35,6 +44,7 @@ export class ProphetscenariosComponent implements OnInit {
     config: { responsive: true },
   };
 
+  // Scenarios plot
   public dataScenarios: Plot = {
     data: [],
     layout: {
@@ -54,31 +64,12 @@ export class ProphetscenariosComponent implements OnInit {
     config: { responsive: true },
   };
 
-  public selections: Selections = {
-    datasets: [],
-    selectedDataset: undefined,
-  };
-
-  public scenarioIndeces: number[] = [];
-
+  // Bindings
   public predictionPeriods: number = 5;
-
-  public frequency: string = 'Yearly';
-
-  public scenarios: Scenarios = {};
-
   public dependentDataset?: string;
-
   public faChartLine = faChartLine;
-
   public maxScenarios = 5;
-
   public validDatasets: number = 0;
-
-  public activeScenarios: ActiveScenarios = {};
-
-  public selectableScenarios: ActiveScenarios = {};
-
   public showSpinner: boolean = false;
 
   updateMaxScenarios() {
@@ -93,19 +84,22 @@ export class ProphetscenariosComponent implements OnInit {
 
     for (const dataset of this.selections.datasets) {
       if (dataset.id !== undefined) {
-        if (!(dataset.id in this.scenarios)) {
-          this.scenarios[dataset.id] = new Array(this.predictionPeriods).fill(
-            null
-          );
-          this.activeScenarios[dataset.id] = true;
+        if (!(dataset.id in this.scenarioData)) {
+          this.scenarioData[dataset.id] = {} as Scenario;
+          this.scenarioData[dataset.id].data = new Array(
+            this.predictionPeriods
+          ).fill(null);
+          this.scenarioData[dataset.id].active = true;
         } else {
-          if (this.predictionPeriods > this.scenarios[dataset.id].length) {
+          if (
+            this.predictionPeriods > this.scenarioData[dataset.id].data.length
+          ) {
             let newScenarios = new Array(
-              this.predictionPeriods - this.scenarios[dataset.id].length
+              this.predictionPeriods - this.scenarioData[dataset.id].data.length
             ).fill(null);
-            this.scenarios[dataset.id].push(...newScenarios);
+            this.scenarioData[dataset.id].data.push(...newScenarios);
           } else {
-            this.scenarios[dataset.id].splice(this.predictionPeriods);
+            this.scenarioData[dataset.id].data.splice(this.predictionPeriods);
           }
         }
       }
@@ -195,8 +189,8 @@ export class ProphetscenariosComponent implements OnInit {
     this.dataScenarios.layout.grid = {
       rows: 1,
       columns:
-        Object.values(this.activeScenarios).filter(
-          (isActive) => isActive === true
+        Object.keys(this.scenarioData).filter(
+          (id) => this.scenarioData[id].active === true
         ).length - 1,
       pattern: 'independent',
     };
@@ -262,10 +256,10 @@ export class ProphetscenariosComponent implements OnInit {
       this.selections.selectedCountry != undefined
     ) {
       const activeScenarios = Object.fromEntries(
-        Object.entries(this.scenarios).filter(
-          ([key]) => this.activeScenarios[key] === true
+        Object.entries(this.scenarioData).filter(
+          ([id, scenario]) => scenario.active
         )
-      ) as Scenarios;
+      );
 
       const activeSelections = this.selections.datasets.filter((dataset) =>
         Object.keys(activeScenarios).includes(dataset.id as string)
@@ -279,7 +273,6 @@ export class ProphetscenariosComponent implements OnInit {
           .getData(activeSelections, '/forecast/prophet', {
             country: this.selections.selectedCountry,
             periods: this.predictionPeriods,
-            frequency: this.frequency,
             scenarios: activeScenarios,
             dependentDataset: this.dependentDataset,
           })
@@ -307,7 +300,7 @@ export class ProphetscenariosComponent implements OnInit {
 
         this.updateScenarios();
 
-        for (const dataset_id of Object.keys(this.activeScenarios)) {
+        for (const dataset_id of Object.keys(this.scenarioData)) {
           let selectedDataset = this.selections.datasets.filter(
             (dataset) => dataset.id === dataset_id
           )[0];
@@ -320,20 +313,20 @@ export class ProphetscenariosComponent implements OnInit {
             this.validDatasets++;
           }
 
-          this.selectableScenarios[dataset_id] =
+          this.scenarioData[dataset_id].selectable =
             selectedDataset.countryOptions?.includes(
               this.selections.selectedCountry as string
             ) as boolean;
 
-          this.activeScenarios[dataset_id] =
+          this.scenarioData[dataset_id].active =
             selectedDataset.countryOptions?.includes(
               this.selections.selectedCountry as string
             ) as boolean;
         }
 
         const selectabelDependentDatasets = Object.keys(
-          this.selectableScenarios
-        ).filter((dataset_id) => this.selectableScenarios[dataset_id] === true);
+          this.scenarioData
+        ).filter((id) => this.scenarioData[id].selectable === true);
 
         if (
           !selectabelDependentDatasets.includes(this.dependentDataset as string)

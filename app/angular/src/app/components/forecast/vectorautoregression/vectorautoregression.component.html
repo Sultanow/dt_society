@@ -30,8 +30,8 @@
                   dataset.id !== undefined &&
                   dataset.featureSelected !== undefined
                 "
-                [(ngModel)]="activeDatasets[dataset.id]"
-                [disabled]="selectableDatasets[dataset.id] === false"
+                [(ngModel)]="scenarios[dataset.id].active"
+                [disabled]="scenarios[dataset.id].selectable === false"
                 (change)="updateVarForecast()"
               >
                 {{ dataset.name }}

@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DataService } from 'src/app/services/data.service';
 import { Dataset, Selections } from 'src/app/types/Datasets';
 
@@ -8,24 +9,26 @@ import { Dataset, Selections } from 'src/app/types/Datasets';
   styleUrls: ['./dataset-settings.component.css'],
 })
 export class DatasetSettingsComponent implements OnInit {
-  public datasetId?: string;
-  public fileName?: string;
-  public geoEnabled: boolean = true;
-  constructor(private dataService: DataService) {}
-
-  public currentDataset?: Dataset;
-  public editMode: boolean = false;
+  constructor(
+    private dataService: DataService,
+    @Inject(MAT_DIALOG_DATA) public datasetId: string
+  ) {}
 
   selections: Selections = {
     datasets: [],
     selectedDataset: undefined,
   };
 
+  public currentDataset?: Dataset;
+  public fileName?: string;
+  public editMode: boolean = false;
+  public currentDatasetIdx?: number;
+
   onDeleteFile() {
     this.dataService.deleteDataset(this.datasetId, this.selections);
   }
 
-  toggleEditMode() {
+  renameFile() {
     if (this.editMode) {
       this.dataService.renameDataset(
         this.selections,
@@ -52,10 +55,6 @@ export class DatasetSettingsComponent implements OnInit {
     this.dataService.updateDataset(this.selections, this.datasetId);
   }
 
-  doubleclick() {
-    this.editMode = !this.editMode;
-  }
-
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
@@ -65,13 +64,9 @@ export class DatasetSettingsComponent implements OnInit {
     )[0];
 
     this.fileName = this.currentDataset.name;
-  }
 
-  saveDatasetSettings() {
-    if (this.currentDataset?.geoSelected === undefined) {
-      this.currentDataset!.geoSelected = 'None';
-    }
-
-    this.dataService.updateDataset(this.selections, this.datasetId);
+    this.currentDatasetIdx = this.selections.datasets.findIndex(
+      (dataset) => dataset.id === this.datasetId
+    );
   }
 }

@@ -104,7 +104,7 @@ def forecastVAR(model):
             feature_columns,
             alpha=data["maxLags"],
             periods=data["periods"],
-            frequency=data["frequency"],
+            frequency=freq,
         )
 
     response_data["x"] = forecast[time_columns[-1]].dt.strftime("%Y-%m-%d").tolist()
@@ -178,7 +178,7 @@ def forecastProphet():
                 y_feature_index = i
 
     scenarios_data = [
-        [float(x) for x in scenarios[dataset] if x is not None and len(x) != 0]
+        [float(x) for x in scenarios[dataset]["data"] if x is not None and len(x) != 0]
         for dataset in data["scenarios"]
         if dataset != dependent_df
     ]
@@ -196,7 +196,7 @@ def forecastProphet():
         time_columns,
         feature_columns,
         scenarios=scenarios_data,
-        frequency=data["frequency"],
+        frequency=set(frequencies).pop(),
         y_feature_index=y_feature_index,
     )
 

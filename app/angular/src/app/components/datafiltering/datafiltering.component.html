@@ -3,7 +3,7 @@
     class="data-selector-radio-group"
     aria-label="Select an option"
     [(ngModel)]="selections.selectedDataset"
-    (change)="changeFocus()"
+    (change)="updateSideBar()"
   >
     <label class="section-label-1">Datasets</label>
     <ng-container *ngFor="let dataset of selections.datasets; let i = index">
@@ -83,7 +83,7 @@
           required
           #countrySelect
           [(ngModel)]="selections.selectedCountry"
-          (selectionChange)="updateCountry()"
+          (selectionChange)="updateSideBar()"
         >
           <mat-option>
             <ngx-mat-select-search

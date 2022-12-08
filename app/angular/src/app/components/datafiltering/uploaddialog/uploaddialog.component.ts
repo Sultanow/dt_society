@@ -1,5 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 
@@ -9,10 +8,7 @@ import { Selections } from 'src/app/types/Datasets';
   styleUrls: ['./uploaddialog.component.css'],
 })
 export class UploaddialogComponent implements OnInit {
-  constructor(
-    private dataService: DataService,
-    @Inject(MAT_DIALOG_DATA) public data: Selections
-  ) {}
+  constructor(private dataService: DataService) {}
 
   fileName: string = '';
 

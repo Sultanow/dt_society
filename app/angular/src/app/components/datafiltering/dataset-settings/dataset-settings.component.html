@@ -17,7 +17,7 @@
   <ng-template #filenameLabel>
     <div>
       <mat-label style="font-size: 10px">File name</mat-label>
-      <div (dblclick)="doubleclick()" class="filename-label">
+      <div (dblclick)="renameFile()" class="filename-label">
         {{ currentDataset!.name }}
       </div>
     </div></ng-template
@@ -26,7 +26,7 @@
     mat-icon-button
     color="primary"
     class="edit-button"
-    (click)="toggleEditMode()"
+    (click)="renameFile()"
   >
     <mat-icon *ngIf="editMode === true; else EditIcon" color="primary"
       >check</mat-icon
@@ -36,11 +36,11 @@
     </ng-template>
   </button>
 </div>
-<div>
+<div *ngIf="selections.datasets[currentDatasetIdx!] !== undefined">
   <mat-form-field>
     <mat-label>Geo column</mat-label>
     <mat-select
-      [(ngModel)]="currentDataset!.geoSelected"
+      [(ngModel)]="selections.datasets[currentDatasetIdx!]!.geoSelected"
       matTooltip="If the dataset has no geographical reference, unselect the geo column"
       matTooltipPosition="left"
       (selectionChange)="updateGeo()"
@@ -73,7 +73,7 @@
 <button
   mat-raised-button
   mat-dialog-close
-  color="primary"
+  color="warn"
   class="delete-button"
   (click)="onDeleteFile()"
 >

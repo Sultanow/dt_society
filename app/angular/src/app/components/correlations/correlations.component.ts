@@ -6,7 +6,7 @@ import { Selections } from 'src/app/types/Datasets';
 @Component({
   selector: 'app-correlations',
   templateUrl: './correlations.component.html',
-  styleUrls: ['./correlations.component.css']
+  styleUrls: ['./correlations.component.css'],
 })
 export class CorrelationsComponent implements OnInit {
   constructor(private dataService: DataService, public dialog: MatDialog) {}
@@ -21,9 +21,15 @@ export class CorrelationsComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
-      if(this.selections.datasets.some((dataset) => dataset.timeSelected !== undefined && dataset.featureSelected !== undefined)){
+      if (
+        this.selections.datasets.some(
+          (dataset) =>
+            dataset.timeSelected !== undefined &&
+            dataset.featureSelected !== undefined
+        )
+      ) {
         this.validDatasetAvailable = true;
-      } else{
+      } else {
         this.validDatasetAvailable = false;
       }
     });

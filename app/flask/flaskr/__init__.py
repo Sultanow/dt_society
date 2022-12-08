@@ -129,7 +129,6 @@ def create_app():
         datasets = collection.find({})
 
         for dataset in datasets:
-            print(dataset["filename"])
             df, _ = parse_dataset(
                 geo_column=None,
                 dataset_id=dataset["id"],
@@ -182,8 +181,6 @@ def create_app():
 
         dataset = collection.find_one({"id": file_id})
 
-        print(request.path)
-
         if "name" in request.path:
 
             collection.update_one(
@@ -197,7 +194,6 @@ def create_app():
         df, _ = parse_dataset(
             geo_column=geo_column,
             dataset_id=dataset["id"],
-            # reshape_column=reshape_column,
             session_id=session,
             use_preprocessed=False,
         )
