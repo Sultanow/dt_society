@@ -32,5 +32,35 @@
 .section-label {
   font-size: 18px;
   font-weight: lighter;
-  margin-bottom: 10px;
+  padding: 10px;
+  margin-top: 1em;
+}
+
+.dataset{
+  margin-top: 2em;
+  padding-left: 1em;
+  width: 250px;
+}
+
+.dataset-header{
+  width: 220px;
+  display: flex;
+  align-items: center;
+}
+
+.dataset-name{
+  display: inline-block;
+  width: 190px;
+  overflow-x: hidden;
+  text-overflow: ellipsis;         
+}
+
+.active{
+  border-left: 10px solid green;
+  border-radius: 10px;
+}
+
+.inactive{
+  border-left: 10px solid #c2185b;
+  border-radius: 10px;
 }

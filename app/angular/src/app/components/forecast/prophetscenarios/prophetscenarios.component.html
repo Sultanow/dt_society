@@ -1,7 +1,7 @@
 <div *ngIf="selections.datasets.length > 1; then prophet; else dialog"></div>
 <ng-template #prophet>
   <div class="prophet-wrapper">
-    <mat-card>
+    <mat-card class="content-wrapper">
       <div class="forecast-controls">
         <div style="width: 50%">
           <div class="data-selector">
@@ -155,23 +155,29 @@
         </button>
       </div>
 
-      <div class="plot-container" *ngIf="dataScenarios.data.length > 0">
-        <p class="section-label">Scenarios</p>
-        <plotly-plot
-          [data]="dataScenarios.data"
-          [layout]="dataScenarios.layout"
-          [config]="dataScenarios.config"
+      <div *ngIf="validDatasets > 1; else inValidSelections">
+        <div class="plot-container" *ngIf="dataScenarios.data.length > 0">
+          <p class="section-label">Scenarios</p>
+          <plotly-plot
+            [data]="dataScenarios.data"
+            [layout]="dataScenarios.layout"
+            [config]="dataScenarios.config"
+          >
+          </plotly-plot>
+        </div>
+        <div
+          class="plot-container"
+          *ngIf="data.data.length > 0; else elseBlock"
         >
-        </plotly-plot>
+          <p class="section-label">Forecast</p>
+          <plotly-plot
+            [data]="data.data"
+            [layout]="data.layout"
+            [config]="data.config"
+          ></plotly-plot>
+        </div>
       </div>
-      <div class="plot-container" *ngIf="data.data.length > 0; else elseBlock">
-        <p class="section-label">Forecast</p>
-        <plotly-plot
-          [data]="data.data"
-          [layout]="data.layout"
-          [config]="data.config"
-        ></plotly-plot>
-      </div>
+
       <ng-template #elseBlock>
         <div class="loading-spinner">
           <mat-spinner *ngIf="showSpinner === true"></mat-spinner>
@@ -180,6 +186,30 @@
     </mat-card>
   </div>
 </ng-template>
+
+<ng-template #inValidSelections>
+  <div class="dialog-wrapper">
+    <mat-card class="dialog">
+      <mat-card-title>
+        <mat-icon style="font-size: xx-large; padding: 7px"
+          >info_outline</mat-icon
+        >
+        <div>
+          The forecast cannot be computed for the selected country
+        </div></mat-card-title
+      >
+      <br />
+      <mat-card-content>
+        <p>
+          Please select a country which has a feature in at least two of the
+          data sets.
+        </p>
+        <p>The data sets can be managed through the sidebar.</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</ng-template>
+
 <ng-template #dialog>
   <app-fileupload></app-fileupload>
 </ng-template>

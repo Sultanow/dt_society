@@ -73,6 +73,8 @@ export class ProphetscenariosComponent implements OnInit {
 
   public maxScenarios = 5;
 
+  public validDatasets: number = 0;
+
   public activeScenarios: ActiveScenarios = {};
 
   public selectableScenarios: ActiveScenarios = {};
@@ -296,6 +298,8 @@ export class ProphetscenariosComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
+      this.validDatasets = 0;
+
       if (this.selections.datasets.length > 0) {
         if (this.dependentDataset === undefined) {
           this.dependentDataset = this.selections.datasets[0].id;
@@ -307,6 +311,14 @@ export class ProphetscenariosComponent implements OnInit {
           let selectedDataset = this.selections.datasets.filter(
             (dataset) => dataset.id === dataset_id
           )[0];
+
+          if (
+            selectedDataset.countryOptions?.includes(
+              this.selections.selectedCountry!
+            )
+          ) {
+            this.validDatasets++;
+          }
 
           this.selectableScenarios[dataset_id] =
             selectedDataset.countryOptions?.includes(

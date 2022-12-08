@@ -1,77 +1,79 @@
 <div
-  *ngIf="selections.datasets.length > 0; then datasetsavailable; else dialog"
+  *ngIf="selections.datasets.length > 1; then vectorautoregression; else dialog"
 ></div>
 
-<ng-template #datasetsavailable>
-  <div
-    *ngIf="validDatasets > 1; then vectorautoregression; else inValidSelections"
-  ></div>
-</ng-template>
 <ng-template #vectorautoregression>
   <div class="var-wrapper">
-    <mat-card>
-      <div *ngIf="countries.length > 0">
-        <div class="toggle-container">
-          <div class="model-selector">
-            <p
-              style="font-size: 18px; font-weight: lighter; margin-bottom: 10px"
+    <mat-card class="content-wrapper">
+      <div class="toggle-container">
+        <div class="model-selector">
+          <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+            Model
+          </p>
+          <mat-radio-group
+            aria-label="Select a model"
+            [(ngModel)]="selectedModel"
+            (change)="updateParameterSlider($event.value); updateVarForecast()"
+          >
+            <mat-radio-button value="var"
+              >Vector Auto Regression</mat-radio-button
             >
-              Model
-            </p>
-            <mat-radio-group
-              aria-label="Select a model"
-              [(ngModel)]="selectedModel"
-              (change)="
-                updateParameterSlider($event.value); updateVarForecast()
-              "
-            >
-              <mat-radio-button value="var"
-                >Vector Auto Regression</mat-radio-button
+            <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
+          </mat-radio-group>
+        </div>
+        <div class="data-selector">
+          <div>
+            <p class="section-label">Forecasted data</p>
+            <ng-container *ngFor="let dataset of selections.datasets">
+              <mat-checkbox
+                *ngIf="
+                  dataset.id !== undefined &&
+                  dataset.featureSelected !== undefined
+                "
+                [(ngModel)]="activeDatasets[dataset.id]"
+                [disabled]="selectableDatasets[dataset.id] === false"
+                (change)="updateVarForecast()"
               >
-              <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
-            </mat-radio-group>
-          </div>
-          <div class="data-selector">
-            <div>
-              <p class="section-label">Forecasted data</p>
-              <ng-container *ngFor="let dataset of selections.datasets">
-                <mat-checkbox
-                  *ngIf="
-                    dataset.id !== undefined &&
-                    dataset.featureSelected !== undefined
-                  "
-                  [(ngModel)]="activeDatasets[dataset.id]"
-                  [disabled]="selectableDatasets[dataset.id] === false"
-                  (change)="updateVarForecast()"
-                >
-                  {{ dataset.name }}
-                </mat-checkbox>
-              </ng-container>
-            </div>
+                {{ dataset.name }}
+              </mat-checkbox>
+            </ng-container>
           </div>
         </div>
-
-        <div class="toggle-container">
-          <section class="slider-section">
+      </div>
+      <div class="toggle-container">
+        <section class="slider-section">
+          <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+            Number of forecasts
+          </p>
+          <mat-slider
+            thumbLabel
+            [(ngModel)]="predictionPeriods"
+            (change)="updateVarForecast()"
+            aria-label="unit(s)"
+            [min]="0"
+            [max]="40"
+          ></mat-slider>
+        </section>
+        <section *ngIf="selectedModel == 'var'; else elseBlock">
+          <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+            Max Lags
+          </p>
+          <mat-slider
+            class="lags-slider"
+            thumbLabel
+            [(ngModel)]="maxLags"
+            (change)="updateVarForecast()"
+            aria-label="unit(s)"
+            [min]="1"
+            [max]="8"
+          ></mat-slider>
+        </section>
+        <ng-template #elseBlock>
+          <section>
             <p
               style="font-size: 18px; font-weight: lighter; margin-bottom: 10px"
             >
-              Number of forecasts
-            </p>
-            <mat-slider
-              thumbLabel
-              [(ngModel)]="predictionPeriods"
-              (change)="updateVarForecast()"
-              aria-label="unit(s)"
-              [min]="0"
-              [max]="40"
-            ></mat-slider>
-          </section>
-          <section *ngIf="selectedModel == 'var'; else elseBlock">
-            <p
-              style="font-size: 18px; font-weight: lighter; margin-bottom: 10px"
-            >
-              Max Lags
+              &#945;-Parameter
             </p>
             <mat-slider
               class="lags-slider"
@@ -79,35 +81,17 @@
               [(ngModel)]="maxLags"
               (change)="updateVarForecast()"
               aria-label="unit(s)"
-              [min]="1"
-              [max]="8"
+              [step]="0.01"
+              [min]="0.01"
+              [max]="0.99"
             ></mat-slider>
           </section>
-          <ng-template #elseBlock>
-            <section>
-              <p
-                style="
-                  font-size: 18px;
-                  font-weight: lighter;
-                  margin-bottom: 10px;
-                "
-              >
-                &#945;-Parameter
-              </p>
-              <mat-slider
-                class="lags-slider"
-                thumbLabel
-                [(ngModel)]="maxLags"
-                (change)="updateVarForecast()"
-                aria-label="unit(s)"
-                [step]="0.01"
-                [min]="0.01"
-                [max]="0.99"
-              ></mat-slider>
-            </section>
-          </ng-template>
-        </div>
+        </ng-template>
+      </div>
+
+      <div *ngIf="validDatasets > 1; else inValidSelections">
         <plotly-plot
+          #plot
           *ngIf="
             data.data.length > 0 && showSpinner === false;
             else LoadingSpinner
@@ -141,8 +125,8 @@
       <br />
       <mat-card-content>
         <p>
-          Please select a country which is available in at least two of the data
-          sets.
+          Please select a country which has a feature in at least two of the
+          data sets.
         </p>
         <p>The data sets can be managed through the sidebar.</p>
       </mat-card-content>

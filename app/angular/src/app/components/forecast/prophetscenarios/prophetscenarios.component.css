@@ -100,9 +100,27 @@ mat-radio-button {
   color: #2596be;
 }
 
+.dialog {
+  max-width: 500px;
+  display: inline-block;
+}
+
+.dialog-wrapper {
+  padding: 10px;
+  text-align: center;
+}
+
+mat-card-title {
+  line-height: 1.5;
+}
+
 .loading-spinner {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
+}
+
+.content-wrapper{
+  min-height: 500px;
 }

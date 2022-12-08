@@ -212,7 +212,6 @@ export class VectorautoregressionComponent implements OnInit {
                 dataset.countryOptions?.includes(
                   this.selections.selectedCountry as string
                 ) as boolean;
-
               this.activeDatasets[dataset.id as string] =
                 dataset.countryOptions?.includes(
                   this.selections.selectedCountry as string

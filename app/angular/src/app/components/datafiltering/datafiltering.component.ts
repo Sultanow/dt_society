@@ -3,9 +3,7 @@ import { Selections } from '../../types/Datasets';
 import { DataService } from 'src/app/services/data.service';
 import { MatDialog } from '@angular/material/dialog';
 import { UploaddialogComponent } from './uploaddialog/uploaddialog.component';
-import {
-  faGear
-} from '@fortawesome/free-solid-svg-icons';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { DatasetSettingsComponent } from './dataset-settings/dataset-settings.component';
 import { ReplaySubject } from 'rxjs';
 
@@ -58,7 +56,7 @@ export class DatafilteringComponent implements OnInit {
     this.dialog.open(UploaddialogComponent, { data: this.selections });
   }
 
-   onDeleteFile(datasedId: string | undefined) {
+  onDeleteFile(datasedId: string | undefined) {
     this.dataService.deleteDataset(datasedId, this.selections);
   }
 
@@ -70,9 +68,25 @@ export class DatafilteringComponent implements OnInit {
     this.dataService.updateDatasetsSelection(this.selections);
   }
 
-  onSettings(datasedId: string | undefined){
-    let dialogRef = this.dialog.open(DatasetSettingsComponent)
+  onSettings(datasedId: string | undefined) {
+    let dialogRef = this.dialog.open(DatasetSettingsComponent);
     dialogRef.componentInstance.datasetId = datasedId;
+  }
+
+  getDatasetStatus(dataset_id: string | undefined): string {
+    if (
+      this.selections.selectedCountry === undefined ||
+      dataset_id === undefined
+    ) {
+      return 'inactive';
+    }
+    let dataset = this.selections.datasets.filter(
+      (dataset) => dataset.id == dataset_id
+    )[0];
+    if (dataset.countryOptions?.includes(this.selections.selectedCountry)) {
+      return 'active';
+    }
+    return 'inactive';
   }
 
   ngOnInit(): void {
@@ -83,7 +97,7 @@ export class DatafilteringComponent implements OnInit {
     this.dataService.getAvailableDatasets(this.selections);
   }
 
-  protected filterCountries(event: any){
+  protected filterCountries(event: any) {
     if (!this.selections.totalCountries) {
       return;
     }

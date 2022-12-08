@@ -55,3 +55,7 @@ mat-card-title {
   justify-content: center;
   align-items: center;
 }
+
+.content-wrapper{
+  min-height: 500px;
+}
