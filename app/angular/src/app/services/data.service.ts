@@ -17,6 +17,10 @@ import {
 import { Dataset, Options, Selections } from '../types/Datasets';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
+interface DataLoadingIndicators {
+  [datasetId: string]: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -28,6 +32,8 @@ export class DataService {
       datasets: [],
     });
   currentSelections = this.selections.asObservable();
+
+  public showLoadingSpinner: DataLoadingIndicators = {};
 
   constructor(private http: HttpClient, private _snackBar: MatSnackBar) {}
 
@@ -236,6 +242,8 @@ export class DataService {
 
     selections.datasets[targetDatasetIdx].featureSelected = featureSelected;
 
+    this.showLoadingSpinner[datasetId!] = true;
+
     this.http
       .post(this.apiUrl + 'data/reshape', {
         datasetId: datasetId,
@@ -270,6 +278,7 @@ export class DataService {
         if (selections.datasets[targetDatasetIdx].timeSelected !== undefined) {
           this.updateTotalCountries(selections);
         }
+        this.showLoadingSpinner[datasetId!] = false;
       });
   }
 

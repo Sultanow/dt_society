@@ -3,9 +3,13 @@ import { Selections } from '../../types/Datasets';
 import { DataService } from 'src/app/services/data.service';
 import { MatDialog } from '@angular/material/dialog';
 import { UploaddialogComponent } from './uploaddialog/uploaddialog.component';
-import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { faGear, faL } from '@fortawesome/free-solid-svg-icons';
 import { DatasetSettingsComponent } from './dataset-settings/dataset-settings.component';
 import { ReplaySubject } from 'rxjs';
+
+interface DataLoadingIndicators {
+  [datasetId: string]: boolean;
+}
 
 @Component({
   selector: 'app-datafiltering',
@@ -13,7 +17,7 @@ import { ReplaySubject } from 'rxjs';
   styleUrls: ['./datafiltering.component.css'],
 })
 export class DatafilteringComponent implements OnInit {
-  constructor(private dataService: DataService, public dialog: MatDialog) {}
+  constructor(public dataService: DataService, public dialog: MatDialog) {}
 
   selections: Selections = {
     datasets: [],
@@ -25,6 +29,8 @@ export class DatafilteringComponent implements OnInit {
     new ReplaySubject<string[] | undefined>(1);
 
   settingsIcon = faGear;
+
+  public showLoadingSpinner: DataLoadingIndicators = {};
 
   updateSelectedColumns(
     filename: string | undefined,
@@ -87,6 +93,14 @@ export class DatafilteringComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
+
+      this.selections.datasets.map((dataset) => {
+        if (dataset.id !== undefined) {
+          this.dataService.showLoadingSpinner[dataset.id] = false;
+        }
+      });
+
+      console.log(this.dataService.showLoadingSpinner);
       this.filteredCountries.next(this.selections.totalCountries);
     });
     this.dataService.getAvailableDatasets(this.selections);

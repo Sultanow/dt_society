@@ -46,6 +46,11 @@
                 >
               </mat-select>
             </mat-form-field>
+            <mat-spinner
+              *ngIf="dataService.showLoadingSpinner[dataset.id!] === true"
+              class="data-loading-spinner"
+              [diameter]="20"
+            ></mat-spinner>
           </div>
           <div class="column-inputs-row">
             <mat-form-field *ngIf="dataset.reshapeSelected === null">
