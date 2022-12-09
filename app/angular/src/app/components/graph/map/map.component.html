@@ -12,12 +12,12 @@
 
 <ng-template #map>
   <button
-    mat-raised-button
-    class="zoom-button"
-    color="primary"
+    mat-icon-button
+    color="secondary"
     (click)="zoom()"
+    class="zoom-button"
   >
-    Zoom
+    <mat-icon color="secondary">zoom_out_map</mat-icon>
   </button>
   <div [formGroup]="selectionControl">
     <div>
