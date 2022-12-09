@@ -62,7 +62,7 @@
 }
 
 .active {
-  border-left: 10px solid green;
+  border-left: 10px solid #4caf51;
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
 }
