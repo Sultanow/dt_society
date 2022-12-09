@@ -63,12 +63,14 @@
 
 .active {
   border-left: 10px solid green;
-  border-radius: 10px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
 }
 
 .inactive {
   border-left: 10px solid #f44336;
-  border-radius: 10px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
 }
 
 .data-loading-spinner {
