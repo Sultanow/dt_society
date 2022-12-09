@@ -1,6 +1,7 @@
 import { Options } from '@angular-slider/ngx-slider';
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Frame, GraphData } from 'src/app/types/GraphData';
 
 @Component({
@@ -9,15 +10,9 @@ import { Frame, GraphData } from 'src/app/types/GraphData';
   styleUrls: ['./map-zoom.component.css'],
 })
 export class MapZoomComponent implements OnInit {
-  constructor() {}
+  constructor(@Inject(MAT_DIALOG_DATA) public plotData: GraphData) {}
 
   public data: GraphData = {
-    data: [],
-    layout: {},
-    config: { responsive: true },
-  };
-
-  public plotData: GraphData = {
     data: [],
     layout: {},
     config: { responsive: true },
@@ -27,7 +22,6 @@ export class MapZoomComponent implements OnInit {
     this.data = structuredClone(this.plotData);
     this.data.layout.width = 1400;
     this.data.layout.height = 1000;
-    console.log(Object.keys(this.data.data[0]));
-    console.log(this.data.data[0]['zoom' as keyof Object]);
+    this.data.layout.mapbox.zoom = 3;
   }
 }

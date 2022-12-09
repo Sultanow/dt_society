@@ -1,7 +1,11 @@
 export interface GraphData {
-  data: Object[];
+  data: Trace[];
   layout: any;
   config?: {};
+}
+
+interface Trace {
+  [property: string]: any;
 }
 
 export interface TableData {

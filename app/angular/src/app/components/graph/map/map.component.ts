@@ -203,6 +203,7 @@ export class MapComponent implements OnInit {
         mapbox: {
           style: 'carto-darkmatter',
           center: this.geojsons[this.scope as keyof object]['center'],
+          zoom: this.geojsons[this.scope as keyof object]['zoom'],
         },
       },
       config: { responsive: true },
@@ -220,7 +221,6 @@ export class MapComponent implements OnInit {
         zmax: this.z_max,
         geojson: this.geojsons[this.scope as keyof object]['url'],
         featureidkey: this.geojsons[this.scope as keyof object]['featureidkey'],
-        zoom: this.geojsons[this.scope as keyof object]['zoom'],
         marker: { opacity: 0.7 },
         colorscale: 'Jet',
         colorbar: {
@@ -233,13 +233,9 @@ export class MapComponent implements OnInit {
   }
 
   zoom() {
-    console.log('HALLO');
-    let dialogRef = this.dialog.open(MapZoomComponent, {
-      data: {},
-      //width: '1000px',
-      //height: '1000px',
+    this.dialog.open(MapZoomComponent, {
+      data: this.data,
     });
-    dialogRef.componentInstance.plotData = this.data;
   }
 
   ngOnInit(): void {
