@@ -28,7 +28,8 @@
               <mat-checkbox
                 *ngIf="
                   dataset.id !== undefined &&
-                  dataset.featureSelected !== undefined
+                  dataset.featureSelected !== undefined &&
+                  scenarios[dataset.id] !== undefined
                 "
                 [(ngModel)]="scenarios[dataset.id].active"
                 [disabled]="scenarios[dataset.id].selectable === false"

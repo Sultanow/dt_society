@@ -10,6 +10,7 @@ from .forecasting.models import (
     var_fit_and_predict_multi,
     hw_es_fit_and_predict_multi,
     prophet_fit_and_predict_n,
+    prophet_fit_and_predict,
 )
 from .preprocessing.parse import parse_dataset
 
@@ -119,6 +120,7 @@ def forecastVAR(model):
 def forecastProphet():
     data = request.get_json()
 
+    predictions = data["predictions"] if "predictions" in data else None
     datasets = data["datasets"]
     selected_country = pycountry.countries.get(name=data["country"]).alpha_3
     dependent_df = data["dependentDataset"]
@@ -177,11 +179,29 @@ def forecastProphet():
             if dataset_id == dependent_df:
                 y_feature_index = i
 
-    scenarios_data = [
-        [float(x) for x in scenarios[dataset]["data"] if x is not None and len(x) != 0]
-        for dataset in data["scenarios"]
-        if dataset != dependent_df
-    ]
+    if predictions is None:
+        scenarios_data = [
+            [
+                float(x)
+                for x in scenarios[dataset]["data"]
+                if x is not None and len(x) != 0
+            ]
+            for dataset in data["scenarios"]
+            if dataset != dependent_df
+        ]
+    else:
+
+        scenarios_data = []
+        for i, dataset in enumerate(datasets):
+            if datasets[i]["id"] != dependent_df:
+                forecast, _ = prophet_fit_and_predict(
+                    filtered_dfs[i],
+                    time_columns[i],
+                    feature_columns[i],
+                    predictions,
+                    frequencies[i],
+                )
+                scenarios_data.append(forecast["yhat"])
 
     if len(set(frequencies)) != 1:
         print("Frequencies of datasets do not match.")
@@ -199,6 +219,7 @@ def forecastProphet():
         frequency=set(frequencies).pop(),
         y_feature_index=y_feature_index,
     )
+    time_range = []
 
     for df_key, df in zip(response_data, (future_df, merged_df, forecast)):
         for column in df.columns.tolist():
@@ -206,10 +227,20 @@ def forecastProphet():
                 response_data[df_key]["x"] = (
                     df[column].dt.strftime("%Y-%m-%d").to_list()
                 )
+
+                if len(df[column].dt.strftime("%Y-%m-%d").to_list()) > 2:
+                    freq = pd.infer_freq(df[column].dt.strftime("%Y-%m-%d").to_list())
+
+                    time_range = pd.date_range(
+                        start=df[column].dt.strftime("%Y-%m-%d").to_list()[-1],
+                        freq=freq,
+                        periods=40,
+                    ).strftime("%Y-%m-%d")
             elif column == "y":
 
                 response_data[df_key][y_feature] = df[column].to_list()
             else:
                 response_data[df_key][column] = df[column].to_list()
 
+    response_data["slidervalues"] = time_range.to_list()
     return response_data

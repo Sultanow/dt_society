@@ -94,6 +94,7 @@ export class DataService {
       maxLags,
       scenarios,
       dependentDataset,
+      predictions,
     }: GraphControls
   ): Observable<
     HttpEvent<CorrelationMatrix | CountryData | ColumnValues[] | unknown>
@@ -109,6 +110,7 @@ export class DataService {
       maxLags: maxLags,
       scenarios: scenarios,
       dependentDataset: dependentDataset,
+      predictions: predictions,
     };
 
     const request = new HttpRequest('POST', this.apiUrl + endpoint, body, {

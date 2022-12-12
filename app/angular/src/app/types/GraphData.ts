@@ -64,12 +64,14 @@ export interface GraphControls {
   maxLags?: number;
   scenarios?: ScenarioData;
   dependentDataset?: string;
+  predictions?: number;
 }
 
 export interface ProphetForecast {
   merge: ColumnValues;
   future: ColumnValues;
   forecast: { [id: string]: number[] };
+  slidervalues?: string[];
 }
 
 export interface Scenario {

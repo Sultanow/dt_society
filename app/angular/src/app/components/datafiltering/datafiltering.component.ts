@@ -100,7 +100,6 @@ export class DatafilteringComponent implements OnInit {
         }
       });
 
-      console.log(this.dataService.showLoadingSpinner);
       this.filteredCountries.next(this.selections.totalCountries);
     });
     this.dataService.getAvailableDatasets(this.selections);

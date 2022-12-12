@@ -36,10 +36,8 @@ def prophet_fit_and_predict(
 
     time = np.sort(df["ds"].unique())
 
-    frequencies = {"Yearly": "AS", "Monthly": "MS", "Weekly": "W", "Daily": "D"}
-
     time_range = pd.date_range(
-        start=str(time[0]), end=str(time[-1]), freq=frequencies[frequency]
+        start=str(time[0]), end=str(time[-1]), freq=frequency
     )
 
     df["ds"] = df["ds"].replace(to_replace=time, value=time_range)
@@ -48,7 +46,7 @@ def prophet_fit_and_predict(
 
     model.fit(df)
 
-    future = model.make_future_dataframe(periods=periods, freq=frequencies[frequency])
+    future = model.make_future_dataframe(periods=periods, freq=frequency)
 
     predictions = model.predict(future)[["ds", "yhat", "yhat_upper", "yhat_lower"]]
 

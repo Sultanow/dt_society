@@ -9,6 +9,7 @@ import {
   ScenarioData,
 } from 'src/app/types/GraphData';
 import { faChartLine } from '@fortawesome/free-solid-svg-icons';
+import { Options } from '@angular-slider/ngx-slider';
 
 @Component({
   selector: 'app-prophetscenarios',
@@ -65,16 +66,43 @@ export class ProphetscenariosComponent implements OnInit {
   };
 
   // Bindings
+  public selectedMode: string = 'auto';
   public predictionPeriods: number = 5;
   public dependentDataset?: string;
   public faChartLine = faChartLine;
   public maxScenarios = 5;
   public validDatasets: number = 0;
   public showSpinner: boolean = false;
+  public currentSliderValue = 0;
+
+  options: Options = {
+    floor: 0,
+    ceil: 0,
+  };
 
   updateMaxScenarios() {
     this.predictionPeriods += 5;
     this.updateScenarios();
+  }
+
+  updateSlider(slidervalues?: string[]) {
+    if (slidervalues !== undefined) {
+      const newOptions: Options = Object.assign({}, this.options);
+      newOptions.floor = 0;
+      newOptions.ceil = slidervalues.length - 1;
+      newOptions.translate = (value: number) => {
+        return String(slidervalues[value]);
+      };
+      this.options = newOptions;
+    } else {
+      const newOptions: Options = Object.assign({}, this.options);
+      newOptions.floor = 0;
+      newOptions.ceil = 40;
+      newOptions.translate = (value: number) => {
+        return String(value);
+      };
+      this.options = newOptions;
+    }
   }
 
   updateScenarios() {
@@ -110,6 +138,12 @@ export class ProphetscenariosComponent implements OnInit {
     if (this.data.data.length > 0) {
       this.data.data = [];
       this.dataScenarios.data = [];
+    }
+
+    if (data.slidervalues !== undefined) {
+      this.updateSlider(data.slidervalues);
+    } else {
+      this.updateSlider();
     }
 
     const dependentDatasetIdx = this.selections.datasets.findIndex(
@@ -269,21 +303,40 @@ export class ProphetscenariosComponent implements OnInit {
         this.data.data = [];
         this.dataScenarios.data = [];
         this.showSpinner = true;
-        this.dataService
-          .getData(activeSelections, '/forecast/prophet', {
-            country: this.selections.selectedCountry,
-            periods: this.predictionPeriods,
-            scenarios: activeScenarios,
-            dependentDataset: this.dependentDataset,
-          })
-          .subscribe((event) => {
-            if (event.type === HttpEventType.Response) {
-              if (event.body) {
-                this.createProphetForecast(event.body as ProphetForecast);
-                this.showSpinner = false;
+
+        if (this.selectedMode == 'custom') {
+          this.dataService
+            .getData(activeSelections, '/forecast/prophet', {
+              country: this.selections.selectedCountry,
+              periods: this.predictionPeriods,
+              scenarios: activeScenarios,
+              dependentDataset: this.dependentDataset,
+            })
+            .subscribe((event) => {
+              if (event.type === HttpEventType.Response) {
+                if (event.body) {
+                  this.createProphetForecast(event.body as ProphetForecast);
+                  this.showSpinner = false;
+                }
               }
-            }
-          });
+            });
+        } else {
+          this.dataService
+            .getData(activeSelections, '/forecast/prophet', {
+              country: this.selections.selectedCountry,
+              predictions: this.currentSliderValue,
+              scenarios: activeScenarios,
+              dependentDataset: this.dependentDataset,
+            })
+            .subscribe((event) => {
+              if (event.type === HttpEventType.Response) {
+                if (event.body) {
+                  this.createProphetForecast(event.body as ProphetForecast);
+                  this.showSpinner = false;
+                }
+              }
+            });
+        }
       }
     }
   }
