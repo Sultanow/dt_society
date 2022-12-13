@@ -1,3 +1,4 @@
+import datetime
 import numpy as np
 import pandas as pd
 from prophet import Prophet
@@ -10,7 +11,7 @@ from statsmodels.tsa.stattools import adfuller
 from typing import Tuple, List
 
 from .smoothing import multivariate_ES
-from ..preprocessing.parse import merge_dataframes_multi
+from preprocessing.parse import merge_dataframes_multi
 
 
 def prophet_fit_and_predict(
@@ -160,6 +161,7 @@ def var_fit_and_predict_multi(
         Tuple[pd.DataFrame, dict]: forecast data, marks dict for slider
     """
 
+    timedeltas = {"AS-JAN": {"days": 365}, "MS": {"days": 30}}
     if len(dataframes) == 1:
         merged_df, time = dataframes[0], time_columns[0]
     else:
@@ -178,11 +180,10 @@ def var_fit_and_predict_multi(
 
     forecast_df = pd.DataFrame()
 
-    # forecast_df[time] = pd.date_range(
-    #     start=merged_df[time].iloc[-1], periods=periods, freq=frequencies[frequency][0]
-    # )
     forecast_df[time] = pd.date_range(
-        start=merged_df[time].iloc[-1], periods=periods, freq=frequency
+        start=merged_df[time].iloc[-1] + datetime.timedelta(**timedeltas[frequency]),
+        periods=periods,
+        freq=frequency,
     )
 
     forecast_df[feature_columns] = forecast
@@ -192,6 +193,8 @@ def var_fit_and_predict_multi(
     df_final.loc[len(merged_df) - 1 :, feature_columns] = df_final[feature_columns][
         len(merged_df) - 1 :
     ].cumsum()
+
+    df_final.fillna(0, inplace=True)
 
     return df_final
 

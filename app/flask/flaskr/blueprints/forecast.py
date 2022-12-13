@@ -1,18 +1,22 @@
+from typing import List
 import pandas as pd
 import pycountry
+
+from itertools import repeat
+from multiprocessing import Pool
 
 from flask import (
     Blueprint,
     request,
 )
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from .forecasting.models import (
+from forecasting.models import (
     var_fit_and_predict_multi,
     hw_es_fit_and_predict_multi,
     prophet_fit_and_predict_n,
     prophet_fit_and_predict,
 )
-from .preprocessing.parse import parse_dataset
+from preprocessing.parse import parse_dataset
 
 
 bp = Blueprint("forecast", __name__, url_prefix="/forecast")
@@ -98,6 +102,7 @@ def forecastVAR(model):
             periods=data["periods"],
             frequency=freq,
         )
+
     elif model == "hwes":
         forecast = hw_es_fit_and_predict_multi(
             filtered_dfs,
@@ -243,4 +248,112 @@ def forecastProphet():
                 response_data[df_key][column] = df[column].to_list()
 
     response_data["slidervalues"] = time_range.to_list()
+    return response_data
+
+
+@bp.route("map", methods=["POST"])
+@jwt_required()
+def var_forecast_map():
+
+    data = request.get_json()
+
+    datasets = data["datasets"]
+
+    if datasets is None:
+        return ("Empty request", 400)
+
+    time_columns = []
+    feature_columns = []
+    filtered_dfs = []
+    frequencies = []
+    countries = []
+
+    session = get_jwt_identity()
+
+    response_data = {}
+    for dataset in datasets:
+
+        reshape_selected = (
+            dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
+        )
+        geo_selected = dataset["geoSelected"]
+        dataset_id = dataset["id"] if dataset["geoSelected"] != "None" else None
+        time_selected = dataset["timeSelected"]
+        feature_selected = dataset["featureSelected"]
+
+        df, _ = parse_dataset(
+            geo_column=geo_selected,
+            dataset_id=dataset_id,
+            reshape_column=reshape_selected,
+            session_id=session,
+        )
+
+        filtered_df = df
+        filtered_df[time_selected] = pd.to_datetime(
+            filtered_df[time_selected].astype("str")
+        )
+
+        filtered_dfs.append(filtered_df)
+
+        countries += filtered_df[geo_selected].unique().tolist()
+
+    filtered_dfs_by_country = []
+
+    for country in countries:
+        dfs = []
+        features = []
+        time = []
+        for i, df in enumerate(datasets):
+            geo_col = df["geoSelected"]
+            time_selected = df["timeSelected"]
+            feature_selected = df["featureSelected"]
+
+            if country not in filtered_dfs[i][geo_col].unique():
+                break
+
+            dfs.append(
+                filtered_dfs[i][filtered_dfs[i][geo_col] == country][
+                    [time_selected, feature_selected]
+                ]
+            )
+
+            freq = pd.infer_freq(dfs[i][time_selected])
+            frequencies.append(freq)
+
+            time.append(time_selected)
+            features.append(feature_selected)
+        if len(dfs) > 1:
+            filtered_dfs_by_country.append(dfs)
+            feature_columns.append(features)
+            time_columns.append(time)
+
+    n_countries = len(countries)
+
+    pool = Pool(6)
+
+    result: List[pd.DataFrame] = pool.starmap(
+        var_fit_and_predict_multi,
+        zip(
+            filtered_dfs_by_country,
+            time_columns,
+            feature_columns,
+            repeat(data["maxLags"], n_countries),
+            repeat(data["periods"], n_countries),
+            repeat(freq, n_countries),
+        ),
+    )
+
+    pool.close()
+    pool.join()
+
+    response_data["x"] = (
+        result[0][time_columns[-1][-1]].dt.strftime("%Y-%m-%d").tolist()
+    )
+
+    for i, (country, features) in enumerate(zip(countries, feature_columns)):
+        response_data[country] = {}
+
+        for feature in features:
+            response_data[country][feature] = result[i][feature].tolist()
+
     return response_data

@@ -59,6 +59,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MapZoomComponent } from './components/zoom/map-zoom/map-zoom.component';
+import { VarMapComponent } from './components/forecast/var-map/var-map.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -80,6 +81,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     CorrelationsComponent,
     DatasetSettingsComponent,
     MapZoomComponent,
+    VarMapComponent,
   ],
   imports: [
     BrowserModule,
@@ -140,6 +142,12 @@ PlotlyModule.plotlyjs = PlotlyJS;
       {
         path: 'forecasts/prophet',
         component: ProphetscenariosComponent,
+        pathMatch: 'full',
+        data: { reuse: true },
+      },
+      {
+        path: 'forecasts/map',
+        component: VarMapComponent,
         pathMatch: 'full',
         data: { reuse: true },
       },

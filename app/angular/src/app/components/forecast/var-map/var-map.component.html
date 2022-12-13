@@ -1,0 +1,53 @@
+<div class="map-wrapper">
+  <mat-card *ngIf="data.data.length > 1 || showSpinner">
+    <p class="section-label">Forecast Map</p>
+    <div class="slider-container">
+      <p class="section-label">Max Lags</p>
+      <mat-slider
+        class="lags-slider"
+        thumbLabel
+        [(ngModel)]="maxLags"
+        (change)="updateForecastData()"
+        aria-label="unit(s)"
+        [min]="1"
+        [max]="timestamps.length - predictionPeriods - 4"
+      ></mat-slider>
+    </div>
+
+    <div *ngIf="showSpinner; then spinner; else map"></div>
+  </mat-card>
+</div>
+
+<ng-template #spinner>
+  <div class="loading-spinner">
+    <mat-spinner></mat-spinner>
+  </div>
+</ng-template>
+
+<ng-template #map>
+  <div [formGroup]="selectionControl">
+    <div class="map-container" *ngFor="let feature of features; index as i">
+      <plotly-plot
+        *ngIf="data.data[i + 1].length > 0"
+        [data]="data.data[i + 1]"
+        [layout]="data.layout"
+        [config]="data.config"
+      >
+      </plotly-plot>
+    </div>
+    <div class="slider-container">
+      <mat-radio-group
+        aria-label="Select an option"
+        formControlName="geojsonControl"
+      >
+        <mat-radio-button value="global">Global</mat-radio-button>
+        <mat-radio-button value="germany">Germany</mat-radio-button>
+      </mat-radio-group>
+      <ngx-slider
+        formControlName="sliderControl"
+        [(value)]="currentSliderValue"
+        [options]="options"
+      ></ngx-slider>
+    </div>
+  </div>
+</ng-template>

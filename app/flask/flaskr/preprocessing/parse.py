@@ -4,7 +4,7 @@ import gridfs
 import pandas as pd
 
 from .dataset import DigitalTwinTimeSeries
-from ..extensions import cache, mongo
+from extensions import cache, mongo
 
 
 @cache.memoize(timeout=90)

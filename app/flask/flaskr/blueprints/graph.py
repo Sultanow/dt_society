@@ -8,9 +8,9 @@ from flask import (
     request,
 )
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from .preprocessing.parse import parse_dataset, merge_dataframes_multi
+from preprocessing.parse import parse_dataset, merge_dataframes_multi
 
-from .extensions import mongo
+from extensions import mongo
 
 bp = Blueprint("graph", __name__, url_prefix="/graph")
 
