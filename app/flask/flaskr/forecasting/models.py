@@ -37,9 +37,7 @@ def prophet_fit_and_predict(
 
     time = np.sort(df["ds"].unique())
 
-    time_range = pd.date_range(
-        start=str(time[0]), end=str(time[-1]), freq=frequency
-    )
+    time_range = pd.date_range(start=str(time[0]), end=str(time[-1]), freq=frequency)
 
     df["ds"] = df["ds"].replace(to_replace=time, value=time_range)
 

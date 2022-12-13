@@ -288,16 +288,18 @@ def var_forecast_map():
             session_id=session,
         )
 
-        filtered_df = df
+        filtered_df = df.dropna()
         filtered_df[time_selected] = pd.to_datetime(
             filtered_df[time_selected].astype("str")
         )
 
         filtered_dfs.append(filtered_df)
 
-        countries += filtered_df[geo_selected].unique().tolist()
+        countries.append(set(filtered_df[geo_selected].unique()))
 
     filtered_dfs_by_country = []
+
+    countries = list(set.intersection(*countries))
 
     for country in countries:
         dfs = []
@@ -328,9 +330,12 @@ def var_forecast_map():
             time_columns.append(time)
 
     n_countries = len(countries)
+    
+    frequencies = [
+        frequency for frequency in list(set(frequencies)) if frequency is not None
+    ]
 
     pool = Pool(6)
-
     result: List[pd.DataFrame] = pool.starmap(
         var_fit_and_predict_multi,
         zip(
@@ -339,10 +344,9 @@ def var_forecast_map():
             feature_columns,
             repeat(data["maxLags"], n_countries),
             repeat(data["periods"], n_countries),
-            repeat(freq, n_countries),
+            repeat(frequencies[0], n_countries),
         ),
     )
-
     pool.close()
     pool.join()
 
