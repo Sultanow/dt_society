@@ -6,7 +6,7 @@ import uuid
 import time
 from typing import Tuple
 
-from ..extensions import mongo
+from extensions import mongo
 
 
 def get_session() -> Tuple[str, str]:
@@ -51,8 +51,8 @@ def get_session() -> Tuple[str, str]:
         print("No valid token found. \n")
 
         if session is not None:
-            mongo.db.drop_collection(session+".chunks")
-            mongo.db.drop_collection(session+".files")
+            mongo.db.drop_collection(session + ".chunks")
+            mongo.db.drop_collection(session + ".files")
 
         expiration = datetime.timedelta(days=7)
         session = str(uuid.uuid1())

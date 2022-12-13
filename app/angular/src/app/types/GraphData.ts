@@ -4,7 +4,13 @@ export interface GraphData {
   config?: {};
 }
 
-interface Trace {
+export interface MapForecastGraph {
+  data: [Trace[]];
+  layout: any;
+  config?: {};
+}
+
+export interface Trace {
   [property: string]: any;
 }
 
