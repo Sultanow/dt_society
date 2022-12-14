@@ -55,20 +55,7 @@
             [max]="40"
           ></mat-slider>
         </section>
-        <section *ngIf="selectedModel == 'var'; else elseBlock">
-          <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
-            Max Lags
-          </p>
-          <mat-slider
-            class="lags-slider"
-            thumbLabel
-            [(ngModel)]="maxLags"
-            (change)="updateVarForecast()"
-            aria-label="unit(s)"
-            [min]="1"
-            [max]="8"
-          ></mat-slider>
-        </section>
+        <section *ngIf="selectedModel == 'var'; else elseBlock"></section>
         <ng-template #elseBlock>
           <section>
             <p

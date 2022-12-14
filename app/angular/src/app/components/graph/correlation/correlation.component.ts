@@ -3,7 +3,16 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
-import { ColumnValues, Plot } from 'src/app/types/GraphData';
+import {
+  ColumnValues,
+  Plot,
+  Scenario,
+  ScenarioData,
+} from 'src/app/types/GraphData';
+
+interface CheckBoxToggle {
+  [datasetId: string]: boolean;
+}
 
 @Component({
   selector: 'app-correlation',
@@ -30,6 +39,7 @@ export class CorrelationComponent implements OnInit {
   };
 
   public matchingFrequencies?: boolean;
+  public activeDatasets: ScenarioData = {};
 
   selectionControl = new FormGroup({
     selectedCountryControl: new FormControl(),
@@ -123,15 +133,41 @@ export class CorrelationComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
+      for (const dataset of this.selections.datasets) {
+        if (!Object.keys(this.activeDatasets).includes(dataset.id as string)) {
+          this.activeDatasets[dataset.id!] = {} as Scenario;
+          this.activeDatasets[dataset.id as string].active = true;
+        } else {
+          this.activeDatasets[dataset.id as string].selectable =
+            dataset.countryOptions?.includes(
+              this.selections.selectedCountry as string
+            ) as boolean;
+
+          this.activeDatasets[dataset.id as string].active =
+            dataset.countryOptions?.includes(
+              this.selections.selectedCountry as string
+            ) as boolean;
+        }
+      }
+
       this.updateCorrelationPlot();
     });
   }
 
-  private updateCorrelationPlot() {
+  public updateCorrelationPlot() {
     if (this.selections.datasets.length > 0) {
       this.showSpinner = true;
+      const filteredSelections = this.selections.datasets.filter(
+        (dataset) =>
+          dataset.featureSelected !== undefined &&
+          dataset.timeSelected !== undefined &&
+          dataset.countryOptions?.includes(
+            this.selections.selectedCountry as string
+          ) &&
+          this.activeDatasets[dataset.id as string].active === true
+      );
       this.dataService
-        .getData(this.selections.datasets, '/graph/corr', {
+        .getData(filteredSelections, '/graph/corr', {
           country: this.selections.selectedCountry,
         })
         .subscribe((event) => {

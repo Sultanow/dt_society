@@ -18,6 +18,16 @@
   height: 100%;
 }
 
-mat-card{
+mat-card {
   height: 500px;
+}
+
+.data-selector {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+mat-checkbox {
+  margin-right: 10px;
 }

@@ -9,6 +9,25 @@
     <mat-icon>info_outline</mat-icon>
     <p class="disclaimer-text">Time frequencies should match to correlate</p>
   </div>
+  <div class="data-selector">
+    <div>
+      <p class="section-label">Selected data</p>
+      <ng-container *ngFor="let dataset of selections.datasets">
+        <mat-checkbox
+          *ngIf="
+            dataset.id !== undefined &&
+            dataset.featureSelected !== undefined &&
+            activeDatasets[dataset.id] !== undefined
+          "
+          [(ngModel)]="activeDatasets[dataset.id].active"
+          [disabled]="activeDatasets[dataset.id].selectable === false"
+          (change)="updateCorrelationPlot()"
+        >
+          {{ dataset.name }}
+        </mat-checkbox>
+      </ng-container>
+    </div>
+  </div>
   <plotly-plot
     *ngIf="data.data.length > 0"
     [data]="data.data"
