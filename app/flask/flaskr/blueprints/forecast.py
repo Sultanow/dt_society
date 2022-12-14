@@ -330,12 +330,12 @@ def var_forecast_map():
             time_columns.append(time)
 
     n_countries = len(countries)
-    
+
     frequencies = [
         frequency for frequency in list(set(frequencies)) if frequency is not None
     ]
 
-    pool = Pool(6)
+    pool = Pool(4)
     result: List[pd.DataFrame] = pool.starmap(
         var_fit_and_predict_multi,
         zip(
