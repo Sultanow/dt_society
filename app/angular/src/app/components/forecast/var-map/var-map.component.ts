@@ -272,8 +272,15 @@ export class VarMapComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
-
-      this.updateForecastData();
+      if (
+        this.selections.datasets.some(
+          (dataset, i) =>
+            dataset.featureSelected !==
+            this.oldSelections?.datasets[i].featureSelected
+        )
+      ) {
+        this.updateForecastData();
+      }
     });
 
     this.selectionControl

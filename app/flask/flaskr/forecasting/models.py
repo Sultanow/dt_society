@@ -160,21 +160,54 @@ def var_fit_and_predict_multi(
     """
 
     timedeltas = {"AS-JAN": {"days": 365}, "MS": {"days": 30}}
+
     if len(dataframes) == 1:
         merged_df, time = dataframes[0], time_columns[0]
     else:
-
         merged_df, time = merge_dataframes_multi(dataframes, time_columns)
 
     merged_df[time] = pd.to_datetime(merged_df[time].astype(str))
 
+    # induce stationarity in time series
+    # normalize
+    mean = merged_df.mean(numeric_only=True)
+    std = merged_df.std(numeric_only=True)
+
+    for feature in feature_columns:
+        merged_df[feature] = (merged_df[feature] - mean[feature]) / std[feature]
+
+    # first order difference
     merged_df_diff = merged_df[feature_columns].diff().astype("float32").dropna()
+
+    merged_df_diff[time] = merged_df[time]
+
+    merged_df_diff.set_index(time, inplace=True)
+
+    # take second order difference if needed
+    for feature in feature_columns:
+        p_stationary = adfuller(merged_df_diff[feature])[1]
+
+        print(f"{feature} p: ", p_stationary)
+        if p_stationary > 0.05:
+            second_diff = merged_df_diff[feature].diff().dropna()
+
+            if adfuller(second_diff)[1] < p_stationary:
+                merged_df_diff[feature] = second_diff
+                print("second p:", p_stationary)
+
+    # remove volatility across given frequency
+    volatility = merged_df_diff.std()
+    merged_df_diff[feature_columns] = merged_df_diff[feature_columns] / volatility
+
+    merged_df_diff.dropna(inplace=True)
 
     model = VAR(merged_df_diff)
 
-    result = model.fit(maxlags=max_lags)
+    model.select_order()
 
-    forecast = result.forecast(merged_df_diff[-max_lags:].values, periods)
+    result = model.fit()
+
+    forecast = result.forecast(merged_df_diff[-result.k_ar :].values, periods)
 
     forecast_df = pd.DataFrame()
 
@@ -191,6 +224,10 @@ def var_fit_and_predict_multi(
     df_final.loc[len(merged_df) - 1 :, feature_columns] = df_final[feature_columns][
         len(merged_df) - 1 :
     ].cumsum()
+
+    # denormalize
+    for feature in feature_columns:
+        df_final[feature] = (df_final[feature] * std[feature]) + mean[feature]
 
     df_final.fillna(0, inplace=True)
 
