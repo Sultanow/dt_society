@@ -7,11 +7,32 @@
   >
     <label class="section-label-1">Datasets</label>
     <ng-container *ngFor="let dataset of selections.datasets; let i = index">
-      <div class="dataset" [ngClass]="getDatasetStatus(dataset.id)">
+      <div class="dataset">
         <mat-radio-button [value]="dataset.id">
           <div class="dataset-header">
             <span class="dataset-name">
-              {{ dataset.name }}
+              <div style="display: flex; align-items: center">
+                <mat-icon
+                  *ngIf="
+                    getDatasetStatus(dataset.id) === 'inactive';
+                    else activeDataset
+                  "
+                  class="status-icon"
+                  color="warn"
+                  >block</mat-icon
+                >
+                <ng-template #activeDataset>
+                  <mat-icon
+                    *ngIf="
+                      getDatasetStatus(dataset.id) === 'active' &&
+                      dataset.featureSelected !== undefined
+                    "
+                    class="status-icon-active status-icon"
+                    >check_circle_outline</mat-icon
+                  >
+                </ng-template>
+                <div>{{ dataset.name }}</div>
+              </div>
             </span>
             <button
               mat-icon-button
@@ -23,6 +44,16 @@
             </button>
           </div>
         </mat-radio-button>
+        <div
+          *ngIf="
+            getDatasetStatus(dataset.id) === 'inactive' &&
+            dataset.featureSelected !== undefined
+          "
+          class="country-data-info"
+        >
+          <div>No data for selected country</div>
+        </div>
+
         <div class="selected-columns-container">
           <div class="column-inputs-row">
             <mat-form-field>
@@ -77,7 +108,7 @@
   </mat-radio-group>
   <mat-divider></mat-divider>
   <div
-    class="selected-columns-container active"
+    class="selected-columns-container"
     *ngIf="selections.datasets.length > 0"
   >
     <p class="section-label-2">Country</p>
