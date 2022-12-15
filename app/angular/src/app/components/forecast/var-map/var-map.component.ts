@@ -52,6 +52,7 @@ export class VarMapComponent implements OnInit {
   public features?: (string | undefined)[];
   public maxLags: number = 1;
   public predictionPeriods: number = 15;
+  public selectedModel = 'var';
 
   private geojsons = {
     global: {
@@ -256,7 +257,7 @@ export class VarMapComponent implements OnInit {
     if (filteredSelections.length > 1) {
       this.showSpinner = true;
       this.dataService
-        .getData(filteredSelections, '/forecast/map', {
+        .getData(filteredSelections, '/forecast/map/' + this.selectedModel, {
           periods: 15,
           maxLags: this.maxLags,
         })

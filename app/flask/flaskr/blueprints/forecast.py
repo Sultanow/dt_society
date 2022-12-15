@@ -251,9 +251,9 @@ def forecastProphet():
     return response_data
 
 
-@bp.route("map", methods=["POST"])
+@bp.route("map/<model>", methods=["POST"])
 @jwt_required()
-def var_forecast_map():
+def var_forecast_map(model):
 
     data = request.get_json()
 
@@ -336,17 +336,30 @@ def var_forecast_map():
     ]
 
     pool = Pool(4)
-    result: List[pd.DataFrame] = pool.starmap(
-        var_fit_and_predict_multi,
-        zip(
-            filtered_dfs_by_country,
-            time_columns,
-            feature_columns,
-            repeat(data["maxLags"], n_countries),
-            repeat(data["periods"], n_countries),
-            repeat(frequencies[0], n_countries),
-        ),
-    )
+    if model == "var":
+        result: List[pd.DataFrame] = pool.starmap(
+            var_fit_and_predict_multi,
+            zip(
+                filtered_dfs_by_country,
+                time_columns,
+                feature_columns,
+                repeat(data["maxLags"], n_countries),
+                repeat(data["periods"], n_countries),
+                repeat(frequencies[0], n_countries),
+            ),
+        )
+    elif model == "hwes":
+        result: List[pd.DataFrame] = pool.starmap(
+            hw_es_fit_and_predict_multi,
+            zip(
+                filtered_dfs_by_country,
+                time_columns,
+                feature_columns,
+                repeat(frequencies[0], n_countries),
+                repeat(data["periods"], n_countries),
+                repeat(data["maxLags"], n_countries),
+            ),
+        )
     pool.close()
     pool.join()
 

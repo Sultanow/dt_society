@@ -1,7 +1,18 @@
 <div class="map-wrapper">
   <mat-card *ngIf="data.data.length > 1 || showSpinner">
-    <p class="section-label">Forecast</p>
-
+    <div class="model-selector">
+      <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+        Model
+      </p>
+      <mat-radio-group
+        aria-label="Select a model"
+        [(ngModel)]="selectedModel"
+        (change)="updateForecastData()"
+      >
+        <mat-radio-button value="var">Vector Auto Regression</mat-radio-button>
+        <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
+      </mat-radio-group>
+    </div>
     <div *ngIf="showSpinner; then spinner; else map"></div>
   </mat-card>
 </div>
@@ -15,6 +26,9 @@
 <ng-template #map>
   <div [formGroup]="selectionControl">
     <div class="slider-container">
+      <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+        Scope
+      </p>
       <mat-radio-group
         aria-label="Select an option"
         formControlName="geojsonControl"

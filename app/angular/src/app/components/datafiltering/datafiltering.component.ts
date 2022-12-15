@@ -4,6 +4,7 @@ import { DataService } from 'src/app/services/data.service';
 import { MatDialog } from '@angular/material/dialog';
 import { UploaddialogComponent } from './uploaddialog/uploaddialog.component';
 import { faGear, faL } from '@fortawesome/free-solid-svg-icons';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DatasetSettingsComponent } from './dataset-settings/dataset-settings.component';
 import { ReplaySubject } from 'rxjs';
 
@@ -51,6 +52,10 @@ export class DatafilteringComponent implements OnInit {
           this.dataService.getFeatureColumns(this.selections, filename, value);
       }
     }
+  }
+
+  drop(event: any) {
+    console.log(event);
   }
 
   updateSelectedCountry(selectedCountry: string) {
