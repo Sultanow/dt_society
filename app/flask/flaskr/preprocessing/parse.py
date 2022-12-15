@@ -66,7 +66,7 @@ def parse_dataset(
 
 @cache.memoize(timeout=90)
 def merge_dataframes_multi(
-    dataframes: List[pd.DataFrame], time_columns: List[str]
+    dataframes: List[pd.DataFrame], time_columns: List[str], freq: str = None
 ) -> Tuple[pd.DataFrame, str]:
     """Merges all dataframes along timestamp intersection
 
@@ -87,6 +87,7 @@ def merge_dataframes_multi(
                 dataframes[i + 1],
                 left_on=[time_columns[i]],
                 right_on=[time_columns[i + 1]],
+                how="outer",
             )
 
         else:
@@ -95,11 +96,15 @@ def merge_dataframes_multi(
                 dataframes[i + 1],
                 left_on=[time_columns[i]],
                 right_on=[time_columns[i + 1]],
+                how="outer",
             )
 
         if time_columns[i] != time_columns[i + 1]:
             merged_df = merged_df.drop(columns=[time_columns[i]])
 
         time_col = time_columns[i + 1]
+
+    merged_df = merged_df[merged_df[time_col].notna()]
+    merged_df = merged_df.sort_values(by=[time_col]).fillna(0)
 
     return merged_df, time_col
