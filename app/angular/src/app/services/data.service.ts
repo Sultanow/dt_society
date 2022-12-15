@@ -121,11 +121,17 @@ export class DataService {
       .pipe(catchError(this.handleError('get data')));
   }
 
-  uploadDataset(file: File | undefined, selections: Selections): void {
+  uploadDataset(
+    file: File | undefined,
+    selections: Selections,
+    updatedFileName: string
+  ): void {
     if (file) {
       const formData = new FormData();
 
       formData.append('upload', file);
+
+      formData.append('updatedFileName', updatedFileName);
 
       const request = new HttpRequest(
         'POST',

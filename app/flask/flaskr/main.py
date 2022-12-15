@@ -82,6 +82,12 @@ def upload_dataset():
 
     uploaded_file = request.files["upload"]
 
+    file_name = (
+        request.form["updatedFileName"]
+        if request.form["updatedFileName"] != ""
+        else uploaded_file.filename
+    )
+
     if uploaded_file.filename != "":
 
         try:
@@ -103,7 +109,7 @@ def upload_dataset():
 
                 bucket.put(
                     buffer,
-                    filename=uploaded_file.filename,
+                    filename=file_name,
                     id=str(file_id),
                     state="original",
                 )

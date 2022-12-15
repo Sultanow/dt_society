@@ -12,6 +12,8 @@ export class UploaddialogComponent implements OnInit {
 
   fileName: string = '';
 
+  updatedFileName: string = '';
+
   fileContent?: File = undefined;
 
   selections: Selections = {
@@ -32,7 +34,11 @@ export class UploaddialogComponent implements OnInit {
   }
 
   onFileUpload() {
-    this.dataService.uploadDataset(this.fileContent, this.selections);
+    this.dataService.uploadDataset(
+      this.fileContent,
+      this.selections,
+      this.updatedFileName
+    );
   }
 
   ngOnInit(): void {

@@ -20,10 +20,21 @@
         Browse
       </button>
     </div>
+    <div class="sub-title">Set filename</div>
+    <mat-form-field>
+      <mat-label>File name</mat-label>
+      <input matInput [(ngModel)]="updatedFileName" />
+    </mat-form-field>
   </div>
 </div>
 <div mat-dialog-actions>
-  <button mat-button mat-dialog-close cdkFocusInitial (click)="onFileUpload()">
+  <button
+    mat-button
+    mat-dialog-close
+    cdkFocusInitial
+    (click)="onFileUpload()"
+    color="primary"
+  >
     Upload
   </button>
   <button mat-button mat-dialog-close>Close</button>
