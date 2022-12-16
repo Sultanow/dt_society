@@ -8,6 +8,7 @@ import {
   Scenario,
   ScenarioData,
 } from 'src/app/types/GraphData';
+import { Options } from '@angular-slider/ngx-slider';
 
 @Component({
   selector: 'app-vectorautoregression',
@@ -46,11 +47,45 @@ export class VectorautoregressionComponent implements OnInit {
     config: { responsive: true },
   };
 
+  options: Options = {
+    floor: 0,
+    ceil: 0,
+    showTicks: true,
+  };
+
+  updateSlider(slidervalues?: string[]) {
+    if (slidervalues !== undefined) {
+      const newOptions: Options = Object.assign({}, this.options);
+      newOptions.floor = 0;
+      newOptions.ceil = slidervalues.length - 1;
+      newOptions.translate = (value: number) => {
+        return String(slidervalues[value]);
+      };
+      this.options = newOptions;
+    } else {
+      const newOptions: Options = Object.assign({}, this.options);
+      newOptions.floor = 0;
+      newOptions.ceil = 40;
+      newOptions.translate = (value: number) => {
+        return String(value);
+      };
+      this.options = newOptions;
+    }
+  }
+
   createVarForecast(data: ColumnValues): void {
     // Renders plot from received data
     if (this.data.data.length > 0) {
       this.data.data = [];
     }
+
+    if (data['future'] !== undefined) {
+      this.updateSlider(data['future'] as string[]);
+      delete data['future'];
+    } else {
+      this.updateSlider();
+    }
+
     this.data.layout.title =
       'Forecast' + ' (' + this.selections.selectedCountry + ')';
     this.data.layout.grid = {

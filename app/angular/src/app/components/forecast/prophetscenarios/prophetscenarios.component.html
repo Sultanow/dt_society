@@ -169,10 +169,11 @@
             </div>
           </ng-template>
           <ng-template #autoscenarios>
-            <div *ngIf="validDatasets > 1">
+            <div class="custom-slider" *ngIf="validDatasets > 1">
               <ngx-slider
                 [(value)]="currentSliderValue"
                 [options]="options"
+                (userChangeEnd)="updateProphetForecast()"
               ></ngx-slider>
             </div>
           </ng-template>

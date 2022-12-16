@@ -36,6 +36,7 @@ export class VarMapComponent implements OnInit {
   });
 
   options: Options = {
+    showTicks: true,
     showTicksValues: false,
     stepsArray: [],
     translate: (value: number): string => {

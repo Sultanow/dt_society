@@ -40,3 +40,41 @@ mat-card-title {
 .map-container {
   margin-bottom: 10px;
 }
+
+::ng-deep .custom-slider .ngx-slider .ngx-slider-bar {
+  background: #ffffff;
+  height: 2px;
+}
+::ng-deep .custom-slider .ngx-slider .ngx-slider-selection {
+  background: red;
+}
+::ng-deep .custom-slider .ngx-slider .ngx-slider-pointer {
+  width: 8px;
+  height: 16px;
+  top: auto;
+  /* to remove the default positioning */
+  bottom: 0;
+  background-color: #c2175a;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+::ng-deep .custom-slider .ngx-slider .ngx-slider-pointer:after {
+  display: none;
+}
+::ng-deep .custom-slider .ngx-slider .ngx-slider-bubble {
+  bottom: 14px;
+}
+::ng-deep .custom-slider .ngx-slider .ngx-slider-limit {
+  color: #ffffff;
+}
+::ng-deep .custom-slider .ngx-slider .ngx-slider-tick {
+  width: 1px;
+  height: 10px;
+  margin-left: 4px;
+  border-radius: 0;
+  background: #ffffff;
+  top: -1px;
+}
+::ng-deep .custom-slider .ngx-slider .ngx-slider-tick.ngx-slider-selected {
+  background: #c2175a;
+}

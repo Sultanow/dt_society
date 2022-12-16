@@ -21,6 +21,22 @@
             <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
           </mat-radio-group>
         </div>
+        <div class="alpha-slider-container" *ngIf="selectedModel == 'hwes'">
+          <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+            &#945;-Parameter
+          </p>
+          <mat-slider
+            class="lags-slider"
+            thumbLabel
+            [(ngModel)]="maxLags"
+            (change)="updateVarForecast()"
+            aria-label="unit(s)"
+            [step]="0.01"
+            [min]="0.01"
+            [max]="0.99"
+          ></mat-slider>
+        </div>
+
         <div class="data-selector">
           <div>
             <p class="section-label">Forecasted data</p>
@@ -41,40 +57,13 @@
           </div>
         </div>
       </div>
-      <div class="toggle-container">
-        <section class="slider-section">
-          <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
-            Number of forecasts
-          </p>
-          <mat-slider
-            thumbLabel
-            [(ngModel)]="predictionPeriods"
-            (change)="updateVarForecast()"
-            aria-label="unit(s)"
-            [min]="0"
-            [max]="40"
-          ></mat-slider>
-        </section>
-        <section *ngIf="selectedModel == 'var'; else elseBlock"></section>
-        <ng-template #elseBlock>
-          <section>
-            <p
-              style="font-size: 18px; font-weight: lighter; margin-bottom: 10px"
-            >
-              &#945;-Parameter
-            </p>
-            <mat-slider
-              class="lags-slider"
-              thumbLabel
-              [(ngModel)]="maxLags"
-              (change)="updateVarForecast()"
-              aria-label="unit(s)"
-              [step]="0.01"
-              [min]="0.01"
-              [max]="0.99"
-            ></mat-slider>
-          </section>
-        </ng-template>
+
+      <div class="custom-slider">
+        <ngx-slider
+          [(value)]="predictionPeriods"
+          [options]="options"
+          (userChangeEnd)="updateVarForecast()"
+        ></ngx-slider>
       </div>
 
       <div *ngIf="validDatasets > 1; else inValidSelections">

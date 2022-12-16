@@ -37,6 +37,7 @@ export class StatisticsComponent implements OnInit {
   options: Options = {
     floor: 0,
     ceil: 0,
+    showTicks: true,
   };
 
   selectionControl = new FormGroup({

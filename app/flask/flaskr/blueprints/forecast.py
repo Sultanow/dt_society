@@ -117,6 +117,16 @@ def forecastVAR(model):
     for feature in feature_columns:
         response_data[feature] = forecast[feature].tolist()
 
+    print(response_data["x"][-data["periods"] - 1])
+
+    future = pd.date_range(
+        start=response_data["x"][-data["periods"] - 1],
+        freq=freq,
+        periods=40,
+    )
+
+    response_data["future"] = future.strftime("%Y-%m-%d").tolist()
+
     return response_data
 
 
