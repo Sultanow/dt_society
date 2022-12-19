@@ -35,8 +35,8 @@ After installing Anaconda you can setup the Python environment for the backend w
 `$ conda env create -f app/environment.yml`
 
 Once the environment has been configured successfully, you can start the backend.  
-`$ cd app/flask `  
-`$ flask --app flaskr --debug run`
+`$ cd app/flask/flaskr `  
+`$ python3 main.py`
 
 ### Database connection
 
@@ -54,7 +54,7 @@ If all requirements have been successfully installed you can start the frontend 
 
 ### File upload
 
-Currently the application supports `.tsv` and `.csv` datasets, which contain a column with country codes.
+Currently the application supports `.tsv` and `.csv` datasets, which may contain a column with country codes. Currently the amount of functionality is limited for datasets without country data.
 
 ### Data filtering
 
@@ -64,9 +64,12 @@ There is one dropdown which must be selected to provide visualisations and forec
 
 Depending on the format of your dataset, you might optionally have to provide the name of column that contains timestamps.
 
+If your data does not seem to be processed correctly, you can explicitly set certain columns through the options dialog in the side navigation.
+
 ### Forecasting
 
 You can choose between multivariate and scenario-based forecasting.  
 Multivariate forecasting performs a forecast for each selected feature simultaneously while taking correlations into account.  
-Scenario-based forecasting allows you to perform a forecast for a selected feature based on artificial scenarios for each other feature, which you can specify.  
-Both of these methods can forecast up to 40 future timesteps. However, all features provided in the datasets must have the same underlying time frequency. (i.e. all timestamps must be yearly)
+Scenario-based forecasting allows you to perform a forecast for a selected feature based on artificial scenarios for each other feature, which can be generated automatically using univariate forecasts or specified individually.  
+Both of these methods can forecast up to 40 future timesteps. However, all features provided in the datasets must have the same underlying time frequency. (i.e. all timestamps must be yearly)  
+Visualizations for multivariate forecasts are provided as graph and/or map.
