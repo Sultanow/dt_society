@@ -4,7 +4,7 @@ This repository provides an implementation of a prototype web-based Digital Twin
 
 ## Overview
 
-![](./dtsociety_a.svg?sanitize=true)
+![](./dtsociety_a_w.svg)
 
 ### Frontend
 
