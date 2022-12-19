@@ -3,6 +3,8 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DataService } from 'src/app/services/data.service';
 import { Dataset, Selections } from 'src/app/types/Datasets';
 
+// settings dialog for advanced column selection
+
 @Component({
   selector: 'app-dataset-settings',
   templateUrl: './dataset-settings.component.html',

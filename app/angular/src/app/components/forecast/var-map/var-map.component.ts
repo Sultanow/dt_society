@@ -6,6 +6,9 @@ import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 import { CountryData, Frame, MapForecastGraph } from 'src/app/types/GraphData';
 
+// multivariate map based forecasting component
+// (VAR, HW exponential smoothing)
+
 @Component({
   selector: 'app-var-map',
   templateUrl: './var-map.component.html',
@@ -117,6 +120,8 @@ export class VarMapComponent implements OnInit {
       this.frames = [];
     }
 
+    // frame collections are created for each feature-dataset combination
+    // to render maps seperately instead of rendering subplots
     for (let feature in this.features) {
       this.frames.push([]);
       let z_min_val = 0;

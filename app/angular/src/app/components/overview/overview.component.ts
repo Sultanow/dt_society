@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 
+// wrapper component for table, stats, history and map
 @Component({
   selector: 'app-overview',
   templateUrl: './overview.component.html',

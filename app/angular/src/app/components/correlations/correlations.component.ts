@@ -3,6 +3,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 
+// wrapper component for correlation component
+
 @Component({
   selector: 'app-correlations',
   templateUrl: './correlations.component.html',

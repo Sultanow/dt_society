@@ -11,6 +11,8 @@ import {
 import { faChartLine } from '@fortawesome/free-solid-svg-icons';
 import { Options } from '@angular-slider/ngx-slider';
 
+// Prophe forecasting component
+
 @Component({
   selector: 'app-prophetscenarios',
   templateUrl: './prophetscenarios.component.html',

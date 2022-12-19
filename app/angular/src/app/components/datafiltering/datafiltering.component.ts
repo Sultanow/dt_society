@@ -12,6 +12,8 @@ interface DataLoadingIndicators {
   [datasetId: string]: boolean;
 }
 
+// sidebar navigation component for filtering and selection of data
+
 @Component({
   selector: 'app-datafiltering',
   templateUrl: './datafiltering.component.html',

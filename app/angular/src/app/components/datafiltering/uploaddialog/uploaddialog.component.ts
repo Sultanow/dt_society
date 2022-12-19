@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 
+// upload component
+
 @Component({
   selector: 'app-uploaddialog',
   templateUrl: './uploaddialog.component.html',

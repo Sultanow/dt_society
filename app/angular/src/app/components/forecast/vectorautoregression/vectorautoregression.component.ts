@@ -10,6 +10,9 @@ import {
 } from 'src/app/types/GraphData';
 import { Options } from '@angular-slider/ngx-slider';
 
+// multivariate graph based forecasting component
+// (VAR, HW exponential smoothing)
+
 @Component({
   selector: 'app-vectorautoregression',
   templateUrl: './vectorautoregression.component.html',
