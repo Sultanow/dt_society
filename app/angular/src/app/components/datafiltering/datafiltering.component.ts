@@ -52,6 +52,7 @@ export class DatafilteringComponent implements OnInit {
           break;
         case 'feature':
           this.selections.datasets[datasetIndex].reshapeSelected = undefined;
+          this.selections.datasets[datasetIndex].timeSelected = undefined;
           this.dataService.getFeatureColumns(this.selections, filename, value);
       }
     }
