@@ -1,6 +1,6 @@
 <div class="heatmap-wrapper">
   <mat-card>
-    <div [formGroup]="selectionControl">
+    <div [formGroup]="selectionControl" class="feature-selector">
       <mat-form-field>
         <mat-label>Features</mat-label>
         <mat-select formControlName="selectedFeaturesControl" multiple>
@@ -9,6 +9,12 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
+      <div class="frequency-disclaimer" *ngIf="matchingFrequencies === false">
+        <mat-icon>info_outline</mat-icon>
+        <p class="disclaimer-text">
+          Time frequencies should match to correlate
+        </p>
+      </div>
     </div>
     <div *ngIf="showSpinner; then spinner; else heatmap"></div>
   </mat-card>

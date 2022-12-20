@@ -52,6 +52,7 @@ export interface MapPlot {
 export interface CorrelationMatrix {
   columns: string[];
   matrix: [number[] | null[]];
+  matchingFrequencies: boolean;
 }
 
 export interface Frame {

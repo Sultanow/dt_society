@@ -43,6 +43,7 @@ export class HeatmapComponent implements OnInit {
   countries: (undefined | string[] | string)[] = [];
 
   public selectedFeatures?: string | null;
+  public matchingFrequencies?: boolean;
 
   createHeatmapPlot(data: CorrelationMatrix) {
     if (this.data.data.length > 0) {
@@ -50,6 +51,8 @@ export class HeatmapComponent implements OnInit {
     }
 
     let heatmap: any = {};
+
+    this.matchingFrequencies = data.matchingFrequencies;
 
     let replacedZeroes = data.matrix.map((row) =>
       row.map((value) => {

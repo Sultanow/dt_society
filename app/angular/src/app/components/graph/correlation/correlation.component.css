@@ -4,6 +4,8 @@
 
 .frequency-disclaimer {
   display: flex;
+  float: right;
+  margin-left: auto;
 }
 
 .disclaimer-text {

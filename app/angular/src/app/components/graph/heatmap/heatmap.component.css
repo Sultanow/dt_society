@@ -1,15 +1,29 @@
-.heatmap-wrapper{
-    padding: 10px
+.heatmap-wrapper {
+  padding: 10px;
 }
 
 .loading-spinner {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-  }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
 
-mat-card{
-    height: 500px;
+mat-card {
+  height: 500px;
+}
+
+.feature-selector {
+  display: flex;
+}
+
+.frequency-disclaimer {
+  display: flex;
+  float: right;
+  margin-left: auto;
+}
+
+.disclaimer-text {
+  margin-left: 10px;
 }

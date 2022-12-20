@@ -126,6 +126,8 @@ def get_heatmap():
 
     dfs = []
     time_columns = []
+    frequencies = []
+
     response_data = {}
 
     session = get_jwt_identity()
@@ -157,6 +159,10 @@ def get_heatmap():
                 dfs.append(df)
                 time_columns.append(time_selected)
 
+                if df[time_selected].size > 2:
+                    freq = pd.infer_freq(df[time_selected])
+                    frequencies.append(freq)
+
             elif (
                 geo_selected is not None
                 and selected_country in df[geo_selected].unique()
@@ -168,6 +174,11 @@ def get_heatmap():
                 df_by_country[time_selected] = pd.to_datetime(
                     df_by_country[time_selected].astype("str")
                 )
+
+                if df_by_country[time_selected].size > 2:
+                    freq = pd.infer_freq(df_by_country[time_selected])
+                    frequencies.append(freq)
+
                 dfs.append(df_by_country)
                 time_columns.append(time_selected)
 
@@ -192,6 +203,13 @@ def get_heatmap():
     response_data["columns"] = correlation_matrix.columns.to_list()
 
     response_data["matrix"] = correlation_matrix.values.tolist()
+
+    if len(set(frequencies)) != 1:
+        matching_frequencies = False
+    else:
+        matching_frequencies = True
+
+    response_data["matchingFrequencies"] = matching_frequencies
 
     return jsonify(response_data)
 
@@ -299,17 +317,11 @@ def get_correlation_lines():
             max_timestamp.strftime("%Y-%m-%d"),
         ]
 
-    print(len(set(frequencies)))
-
     if len(set(frequencies)) != 1:
         matching_frequencies = False
     else:
         matching_frequencies = True
 
-    print(matching_frequencies)
-
     response_data.append({"matchingFrequencies": matching_frequencies})
-
-    print(response_data)
 
     return response_data

@@ -66,7 +66,10 @@ def parse_dataset(
 
 @cache.memoize(timeout=90)
 def merge_dataframes_multi(
-    dataframes: List[pd.DataFrame], time_columns: List[str], freq: str = None
+    dataframes: List[pd.DataFrame],
+    time_columns: List[str],
+    freq: str = None,
+    padding=True,
 ) -> Tuple[pd.DataFrame, str]:
     """Merges all dataframes along timestamp intersection
 
@@ -78,7 +81,9 @@ def merge_dataframes_multi(
         Tuple[pd.DataFrame, str]: merged dataframe, name of time column in merged dataframe
     """
 
+    how = "outer" if padding else "inner"
     merged_df = None
+
     for i in range(len(dataframes) - 1):
 
         if merged_df is None:
@@ -87,7 +92,7 @@ def merge_dataframes_multi(
                 dataframes[i + 1],
                 left_on=[time_columns[i]],
                 right_on=[time_columns[i + 1]],
-                how="outer",
+                how=how,
             )
 
         else:
@@ -96,7 +101,7 @@ def merge_dataframes_multi(
                 dataframes[i + 1],
                 left_on=[time_columns[i]],
                 right_on=[time_columns[i + 1]],
-                how="outer",
+                how=how,
             )
 
         if time_columns[i] != time_columns[i + 1]:
@@ -105,6 +110,8 @@ def merge_dataframes_multi(
         time_col = time_columns[i + 1]
 
     merged_df = merged_df[merged_df[time_col].notna()]
-    merged_df = merged_df.sort_values(by=[time_col]).fillna(0)
+
+    if padding is True:
+        merged_df = merged_df.sort_values(by=[time_col]).fillna(0)
 
     return merged_df, time_col

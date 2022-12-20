@@ -161,9 +161,6 @@ export class CorrelationComponent implements OnInit {
         (dataset) =>
           dataset.featureSelected !== undefined &&
           dataset.timeSelected !== undefined &&
-          dataset.countryOptions?.includes(
-            this.selections.selectedCountry as string
-          ) &&
           this.activeDatasets[dataset.id as string].active === true
       );
       this.dataService
