@@ -51,6 +51,7 @@ export class DatafilteringComponent implements OnInit {
           this.dataService.updateTotalCountries(this.selections);
           break;
         case 'feature':
+          this.selections.datasets[datasetIndex].reshapeSelected = undefined;
           this.dataService.getFeatureColumns(this.selections, filename, value);
       }
     }
