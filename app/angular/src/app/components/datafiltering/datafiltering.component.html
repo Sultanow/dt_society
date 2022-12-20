@@ -89,6 +89,7 @@
               <mat-select
                 required
                 #timeSelect
+                [(ngModel)]="dataset.timeSelected"
                 (selectionChange)="
                   updateSelectedColumns(dataset.id, timeSelect.value, 'time')
                 "

@@ -254,6 +254,10 @@ export class DataService {
 
     this.showLoadingSpinner[datasetId!] = true;
 
+    let timeColumn = selections.datasets[targetDatasetIdx].timeSelected;
+
+    selections.datasets[targetDatasetIdx].timeSelected = undefined;
+
     this.http
       .post(this.apiUrl + 'data/reshape', {
         datasetId: datasetId,
@@ -279,12 +283,14 @@ export class DataService {
 
         if (selections.datasets[targetDatasetIdx].reshapeSelected !== null) {
           selections.datasets[targetDatasetIdx].timeSelected = 'Time';
-          this.updateDatasetsSelection(selections);
         } else {
           selections.datasets[targetDatasetIdx].timeOptions = (
             featureColumns as Options
           ).features;
+
+          selections.datasets[targetDatasetIdx].timeSelected = timeColumn;
         }
+        this.updateDatasetsSelection(selections);
         if (selections.datasets[targetDatasetIdx].timeSelected !== undefined) {
           this.updateTotalCountries(selections);
         }
@@ -296,7 +302,6 @@ export class DataService {
     const targetDatasetIdx = selections.datasets.findIndex(
       (dataset) => dataset.id == datasetId
     );
-    console.log(selections.datasets[targetDatasetIdx].geoSelected);
 
     this.http
       .post(this.apiUrl + 'data/update', {
@@ -308,7 +313,6 @@ export class DataService {
       })
       .subscribe((data) => {
         if (Object.keys(data).length > 0) {
-          console.log(data);
           selections.datasets[targetDatasetIdx] = data as Dataset;
         }
 
