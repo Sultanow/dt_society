@@ -72,8 +72,9 @@ mat-card-title {
 }
 ::ng-deep .custom-slider .ngx-slider .ngx-slider-bubble {
   bottom: 14px;
+  color: #ffffff;
 }
-::ng-deep .custom-slider .ngx-slider .ngx-slider-limit {
+::ng-deep .custom-slider .ngx-slider .ngx-slider-bubble.ngx-slider-limit {
   color: #ffffff;
 }
 ::ng-deep .custom-slider .ngx-slider .ngx-slider-tick {

@@ -24,3 +24,8 @@ body {
   font-weight: lighter;
   margin-bottom: 10px;
 }
+
+.mat-tooltip.tooltip {
+  font-size: 18px;
+  line-height: 1.2;
+}

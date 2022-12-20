@@ -43,6 +43,7 @@
       [(ngModel)]="selections.datasets[currentDatasetIdx!]!.geoSelected"
       matTooltip="If the dataset has no geographical reference, unselect the geo column"
       matTooltipPosition="left"
+      matTooltipClass="tooltip"
       (selectionChange)="updateGeo()"
     >
       <mat-option></mat-option>
