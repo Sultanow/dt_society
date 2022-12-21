@@ -80,8 +80,13 @@ export class HeatmapComponent implements OnInit {
       this.selectedFeatures!.length > 1
     ) {
       this.showSpinner = true;
+      const filteredSelections = this.selections.datasets.filter(
+        (dataset) =>
+          dataset.featureSelected !== undefined &&
+          dataset.timeSelected !== undefined
+      );
       this.dataService
-        .getData(this.selections.datasets, '/graph/heatmap', {
+        .getData(filteredSelections, '/graph/heatmap', {
           features: this.selectedFeatures,
           country: this.selections.selectedCountry,
         })
@@ -133,7 +138,9 @@ export class HeatmapComponent implements OnInit {
           dataset.countryOptions?.includes(
             this.selections.selectedCountry?.toString()
           )) ||
-          dataset.countryOptions === undefined)
+          dataset.countryOptions === undefined) &&
+        dataset.featureSelected !== undefined &&
+        dataset.timeSelected !== undefined
       ) {
         this.featureOptions.push(
           ...dataset.featureOptions.filter(
