@@ -3,8 +3,7 @@ import { Selections } from '../../types/Datasets';
 import { DataService } from 'src/app/services/data.service';
 import { MatDialog } from '@angular/material/dialog';
 import { UploaddialogComponent } from './uploaddialog/uploaddialog.component';
-import { faGear, faL } from '@fortawesome/free-solid-svg-icons';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { DatasetSettingsComponent } from './dataset-settings/dataset-settings.component';
 import { ReplaySubject } from 'rxjs';
 

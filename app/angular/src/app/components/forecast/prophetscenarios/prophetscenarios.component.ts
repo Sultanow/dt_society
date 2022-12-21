@@ -298,8 +298,10 @@ export class ProphetscenariosComponent implements OnInit {
         )
       );
 
-      const activeSelections = this.selections.datasets.filter((dataset) =>
-        Object.keys(activeScenarios).includes(dataset.id as string)
+      const activeSelections = this.selections.datasets.filter(
+        (dataset) =>
+          Object.keys(activeScenarios).includes(dataset.id as string) &&
+          dataset.timeSelected !== undefined
       );
 
       if (Object.keys(activeScenarios).length > 1) {
@@ -307,39 +309,33 @@ export class ProphetscenariosComponent implements OnInit {
         this.dataScenarios.data = [];
         this.showSpinner = true;
 
+        let prophetSettings = null;
+
         if (this.selectedMode == 'custom') {
-          this.dataService
-            .getData(activeSelections, '/forecast/prophet', {
-              country: this.selections.selectedCountry,
-              periods: this.predictionPeriods,
-              scenarios: activeScenarios,
-              dependentDataset: this.dependentDataset,
-            })
-            .subscribe((event) => {
-              if (event.type === HttpEventType.Response) {
-                if (event.body) {
-                  this.createProphetForecast(event.body as ProphetForecast);
-                  this.showSpinner = false;
-                }
-              }
-            });
+          prophetSettings = {
+            country: this.selections.selectedCountry,
+            periods: this.predictionPeriods,
+            scenarios: activeScenarios,
+            dependentDataset: this.dependentDataset,
+          };
         } else {
-          this.dataService
-            .getData(activeSelections, '/forecast/prophet', {
-              country: this.selections.selectedCountry,
-              predictions: this.currentSliderValue,
-              scenarios: activeScenarios,
-              dependentDataset: this.dependentDataset,
-            })
-            .subscribe((event) => {
-              if (event.type === HttpEventType.Response) {
-                if (event.body) {
-                  this.createProphetForecast(event.body as ProphetForecast);
-                  this.showSpinner = false;
-                }
-              }
-            });
+          prophetSettings = {
+            country: this.selections.selectedCountry,
+            predictions: this.currentSliderValue,
+            scenarios: activeScenarios,
+            dependentDataset: this.dependentDataset,
+          };
         }
+        this.dataService
+          .getData(activeSelections, '/forecast/prophet', prophetSettings)
+          .subscribe((event) => {
+            if (event.type === HttpEventType.Response) {
+              if (event.body) {
+                this.createProphetForecast(event.body as ProphetForecast);
+                this.showSpinner = false;
+              }
+            }
+          });
       }
     }
   }
@@ -356,29 +352,23 @@ export class ProphetscenariosComponent implements OnInit {
 
         this.updateScenarios();
 
-        for (const dataset_id of Object.keys(this.scenarioData)) {
-          let selectedDataset = this.selections.datasets.filter(
-            (dataset) => dataset.id === dataset_id
-          )[0];
-
+        this.selections.datasets.forEach((dataset) => {
           if (
-            selectedDataset.countryOptions?.includes(
-              this.selections.selectedCountry!
-            )
+            dataset.countryOptions?.includes(this.selections.selectedCountry!)
           ) {
             this.validDatasets++;
           }
 
-          this.scenarioData[dataset_id].selectable =
-            selectedDataset.countryOptions?.includes(
+          this.scenarioData[dataset.id as string].selectable =
+            dataset.countryOptions?.includes(
               this.selections.selectedCountry as string
             ) as boolean;
 
-          this.scenarioData[dataset_id].active =
-            selectedDataset.countryOptions?.includes(
+          this.scenarioData[dataset.id as string].active =
+            dataset.countryOptions?.includes(
               this.selections.selectedCountry as string
             ) as boolean;
-        }
+        });
 
         const selectabelDependentDatasets = Object.keys(
           this.scenarioData
