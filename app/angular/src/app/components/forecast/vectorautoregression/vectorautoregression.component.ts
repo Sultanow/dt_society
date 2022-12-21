@@ -29,7 +29,7 @@ export class VectorautoregressionComponent implements OnInit {
   // Binded properties
   public countries: string[] = [];
   public predictionPeriods: number = 0;
-  public maxLags: number = 1;
+  public alphaParameter: number = 0.49;
   public frequency: string = 'Yearly';
   public selectedModel: string = 'var';
   public showSpinner: boolean = false;
@@ -193,7 +193,7 @@ export class VectorautoregressionComponent implements OnInit {
             {
               country: this.selections.selectedCountry,
               periods: this.predictionPeriods,
-              maxLags: this.maxLags,
+              maxLags: this.alphaParameter,
               frequency: this.frequency,
             }
           )
@@ -209,50 +209,33 @@ export class VectorautoregressionComponent implements OnInit {
     }
   }
 
-  updateParameterSlider(event: any): void {
-    switch (event) {
-      case 'hwes':
-        this.maxLags = 0.49;
-        break;
-      case 'var':
-        this.maxLags = 1;
-        break;
-    }
-  }
-
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((updatedSelections) => {
       this.selections = updatedSelections;
       this.validDatasets = 0;
 
       if (this.selections.datasets.length > 0) {
-        let countries = this.selections.datasets.reduce<string[]>(
-          (countries, dataset) => {
-            if (
-              dataset.countryOptions?.includes(this.selections.selectedCountry!)
-            ) {
-              this.validDatasets++;
-            }
-            if (!Object.keys(this.scenarios).includes(dataset.id as string)) {
-              this.scenarios[dataset.id!] = {} as Scenario;
-              this.scenarios[dataset.id as string].active = true;
-            } else {
-              this.scenarios[dataset.id as string].selectable =
-                dataset.countryOptions?.includes(
-                  this.selections.selectedCountry as string
-                ) as boolean;
+        this.selections.datasets.forEach((dataset) => {
+          if (
+            dataset.countryOptions?.includes(this.selections.selectedCountry!)
+          ) {
+            this.validDatasets++;
+          }
+          if (!Object.keys(this.scenarios).includes(dataset.id as string)) {
+            this.scenarios[dataset.id!] = {} as Scenario;
+            this.scenarios[dataset.id as string].active = true;
+          } else {
+            this.scenarios[dataset.id as string].selectable =
+              dataset.countryOptions?.includes(
+                this.selections.selectedCountry as string
+              ) as boolean;
 
-              this.scenarios[dataset.id as string].active =
-                dataset.countryOptions?.includes(
-                  this.selections.selectedCountry as string
-                ) as boolean;
-            }
-            return [...countries, ...(dataset.countryOptions || [])];
-          },
-          []
-        );
-
-        this.countries = [...new Set(countries)];
+            this.scenarios[dataset.id as string].active =
+              dataset.countryOptions?.includes(
+                this.selections.selectedCountry as string
+              ) as boolean;
+          }
+        });
       }
       this.updateVarForecast();
     });

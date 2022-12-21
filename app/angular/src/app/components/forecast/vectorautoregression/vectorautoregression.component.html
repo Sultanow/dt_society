@@ -13,7 +13,7 @@
           <mat-radio-group
             aria-label="Select a model"
             [(ngModel)]="selectedModel"
-            (change)="updateParameterSlider($event.value); updateVarForecast()"
+            (change)="updateVarForecast()"
           >
             <mat-radio-button value="var"
               >Vector Auto Regression</mat-radio-button
@@ -28,7 +28,7 @@
           <mat-slider
             class="lags-slider"
             thumbLabel
-            [(ngModel)]="maxLags"
+            [(ngModel)]="alphaParameter"
             (change)="updateVarForecast()"
             aria-label="unit(s)"
             [step]="0.01"
