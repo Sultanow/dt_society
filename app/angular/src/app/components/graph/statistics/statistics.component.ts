@@ -213,6 +213,9 @@ export class StatisticsComponent implements OnInit {
     newOptions.translate = (value: number) => {
       return String(timearray[value]);
     };
+    timearray.length > 50
+      ? (newOptions.showTicks = false)
+      : (newOptions.showTicks = true);
     this.options = newOptions;
     this.value = newOptions.floor;
     this.highValue = newOptions.ceil;
