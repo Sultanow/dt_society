@@ -3,6 +3,8 @@ import { DataService } from 'src/app/services/data.service';
 import { Plot, CountryData } from 'src/app/types/GraphData';
 import { Selections } from 'src/app/types/Datasets';
 import { HttpEventType } from '@angular/common/http';
+import { MatDialog } from '@angular/material/dialog';
+import { HistoryZoomComponent } from '../../zoom/history-zoom/history-zoom.component';
 
 @Component({
   selector: 'app-history',
@@ -10,7 +12,7 @@ import { HttpEventType } from '@angular/common/http';
   styleUrls: ['./history.component.css'],
 })
 export class HistoryComponent implements OnInit {
-  constructor(private dataService: DataService) {}
+  constructor(private dataService: DataService, public dialog: MatDialog) {}
 
   public showSpinner: boolean = false;
 
@@ -122,6 +124,12 @@ export class HistoryComponent implements OnInit {
       this.historyPlot.layout.xaxis.title = timeSelected;
       this.historyPlot.data.push(trace);
     }
+  }
+
+  zoom() {
+    this.dialog.open(HistoryZoomComponent, {
+      data: this.historyPlot,
+    });
   }
 
   ngOnInit(): void {

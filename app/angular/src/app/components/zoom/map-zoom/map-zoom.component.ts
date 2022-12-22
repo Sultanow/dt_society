@@ -1,8 +1,6 @@
-import { Options } from '@angular-slider/ngx-slider';
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Frame, GraphData } from 'src/app/types/GraphData';
+import { GraphData } from 'src/app/types/GraphData';
 
 @Component({
   selector: 'app-map-zoom',

@@ -1,5 +1,5 @@
 .history-wrapper{
-    padding: 10px
+    padding: 10px;
 }
 
 mat-card{
@@ -13,3 +13,8 @@ mat-card{
     width: 100%;
     height: 100%;
   }
+
+.zoom-button {
+  margin-bottom: -80px;
+  z-index: 1;
+ }

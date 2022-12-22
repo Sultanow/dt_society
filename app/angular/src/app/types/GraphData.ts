@@ -28,6 +28,8 @@ export interface CountryData {
 
 export interface Plot {
   data: any[];
+  layout: any;
+  /*
   layout: {
     [property: string]: any;
     legend?: { title: { text: string }; groupclick?: string };
@@ -41,6 +43,7 @@ export interface Plot {
     title?: string;
     autosize?: boolean;
   };
+  */
   config?: {};
 }
 

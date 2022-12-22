@@ -5,7 +5,14 @@
 </div>
 
 <ng-template #history>
-  <p class="section-label">History</p>
+  <button
+    mat-icon-button
+    color="secondary"
+    (click)="zoom()"
+    class="zoom-button"
+  >
+    <mat-icon color="secondary">zoom_out_map</mat-icon>
+  </button>
   <plotly-plot
     *ngIf="historyPlot.data.length > 0"
     [data]="historyPlot.data"

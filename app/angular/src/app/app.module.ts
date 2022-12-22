@@ -31,6 +31,7 @@ import { StatisticsComponent } from './components/graph/statistics/statistics.co
 import { OverviewComponent } from './components/overview/overview.component';
 import { CorrelationsComponent } from './components/correlations/correlations.component';
 import { DatasetSettingsComponent } from './components/datafiltering/dataset-settings/dataset-settings.component';
+import { HistoryZoomComponent } from './components/zoom/history-zoom/history-zoom.component';
 
 // Services
 import { AuthService } from './services/auth.service';
@@ -82,6 +83,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     DatasetSettingsComponent,
     MapZoomComponent,
     VarMapComponent,
+    HistoryZoomComponent,
   ],
   imports: [
     BrowserModule,
