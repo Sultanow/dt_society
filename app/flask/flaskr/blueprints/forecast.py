@@ -16,7 +16,7 @@ from forecasting.models import (
     prophet_fit_and_predict_n,
     prophet_fit_and_predict,
 )
-from preprocessing.parse import parse_dataset
+from preprocessing.parse import parse_dataset, make_unique_features
 
 
 bp = Blueprint("forecast", __name__, url_prefix="/forecast")
@@ -92,6 +92,8 @@ def forecastVAR(model):
     if len(set(frequencies)) != 1:
         print("Frequencies of datasets do not match.")
         return ("Frequencies do not match.", 400)
+
+    filtered_dfs, feature_columns = make_unique_features(filtered_dfs, feature_columns)
 
     if model == "var":
         forecast = var_fit_and_predict_multi(
