@@ -115,3 +115,32 @@ def merge_dataframes_multi(
         merged_df = merged_df.sort_values(by=[time_col]).fillna(0)
 
     return merged_df, time_col
+
+
+def make_unique_features(
+    dataframes: List[pd.DataFrame], feature_columns: List[str]
+) -> Tuple[List[pd.DataFrame], List[str]]:
+
+    feature_duplicates = {}
+    uniq_feature_columns = []
+    updated_dataframes = []
+
+    for i, feature in enumerate(feature_columns):
+
+        if feature in feature_duplicates.keys():
+            renamed_feature = (
+                feature_columns[i] + "_" + str(feature_duplicates[feature])
+            )
+            feature_duplicates[feature] += 1
+
+            updated_dataframes.append(
+                dataframes[i].rename(columns={feature: renamed_feature})
+            )
+
+            uniq_feature_columns.append(renamed_feature)
+        else:
+            feature_duplicates[feature] = 1
+            uniq_feature_columns.append(feature)
+            updated_dataframes.append(dataframes[i])
+
+    return updated_dataframes, uniq_feature_columns
