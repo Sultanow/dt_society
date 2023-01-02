@@ -78,13 +78,14 @@
           [config]="data.config"
         >
         </plotly-plot>
-        <ng-template #LoadingSpinner>
-          <div class="loading-spinner">
-            <mat-spinner *ngIf="showSpinner === true"></mat-spinner>
-          </div>
-        </ng-template>
       </div>
     </mat-card>
+  </div>
+</ng-template>
+
+<ng-template #LoadingSpinner>
+  <div class="loading-spinner">
+    <mat-spinner *ngIf="showSpinner === true"></mat-spinner>
   </div>
 </ng-template>
 

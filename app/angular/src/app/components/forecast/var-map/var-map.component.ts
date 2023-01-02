@@ -23,11 +23,12 @@ export class VarMapComponent implements OnInit {
     config: { responsive: false },
   };
 
+  public validDatasets: number = 0;
   public showSpinner: boolean = false;
 
   public frames: Frame[][] = [];
 
-  private selections: Selections = {
+  public selections: Selections = {
     datasets: [],
     selectedDataset: undefined,
   };
@@ -274,21 +275,23 @@ export class VarMapComponent implements OnInit {
             }
           }
         });
-      this.oldSelections = structuredClone(this.selections);
     }
   }
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
-      if (
-        this.selections.datasets.some(
-          (dataset, i) =>
-            dataset.featureSelected !==
-            this.oldSelections?.datasets[i].featureSelected
-        )
-      ) {
-        this.updateForecastData();
+      this.validDatasets = 0;
+      if (this.selections.datasets.length > 0) {
+        this.selections.datasets.forEach((dataset) => {
+          if (
+            dataset.featureSelected !== undefined &&
+            dataset.timeSelected !== undefined
+          ) {
+            this.validDatasets++;
+          }
+        });
       }
+      this.updateForecastData();
     });
 
     this.selectionControl

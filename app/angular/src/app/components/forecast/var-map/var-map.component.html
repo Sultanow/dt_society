@@ -1,21 +1,31 @@
-<div class="map-wrapper">
-  <mat-card *ngIf="data.data.length > 1 || showSpinner">
-    <div class="model-selector">
-      <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
-        Model
-      </p>
-      <mat-radio-group
-        aria-label="Select a model"
-        [(ngModel)]="selectedModel"
-        (change)="updateForecastData()"
-      >
-        <mat-radio-button value="var">Vector Auto Regression</mat-radio-button>
-        <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
-      </mat-radio-group>
-    </div>
-    <div *ngIf="showSpinner; then spinner; else map"></div>
-  </mat-card>
-</div>
+<div
+  *ngIf="selections.datasets.length > 1; then mapforecast; else dialog"
+></div>
+
+<ng-template #mapforecast>
+  <div class="map-wrapper">
+    <mat-card class="content-wrapper">
+      <div class="model-selector">
+        <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+          Model
+        </p>
+        <mat-radio-group
+          aria-label="Select a model"
+          [(ngModel)]="selectedModel"
+          (change)="updateForecastData()"
+        >
+          <mat-radio-button value="var"
+            >Vector Auto Regression</mat-radio-button
+          >
+          <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <div *ngIf="validDatasets > 1; else inValidSelections">
+        <div *ngIf="showSpinner; then spinner; else map"></div>
+      </div>
+    </mat-card>
+  </div>
+</ng-template>
 
 <ng-template #spinner>
   <div class="loading-spinner">
@@ -52,4 +62,28 @@
       </plotly-plot>
     </div>
   </div>
+</ng-template>
+
+<ng-template #inValidSelections>
+  <div class="dialog-wrapper">
+    <mat-card class="dialog">
+      <mat-card-title>
+        <mat-icon style="font-size: xx-large; padding: 7px"
+          >info_outline</mat-icon
+        >
+        <div>
+          The forecast cannot be computed for the current selections
+        </div></mat-card-title
+      >
+      <br />
+      <mat-card-content>
+        <p>Please select a feature for at least two of the data sets.</p>
+        <p>The data sets can be managed through the sidebar.</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</ng-template>
+
+<ng-template #dialog>
+  <app-fileupload></app-fileupload>
 </ng-template>

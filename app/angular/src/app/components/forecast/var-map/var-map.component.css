@@ -10,8 +10,23 @@ mat-card-title {
   line-height: 1.5;
 }
 
+.dialog {
+  max-width: 500px;
+  display: inline-block;
+}
+
 .dialog-wrapper {
   padding: 10px;
+  text-align: center;
+}
+
+.content-wrapper {
+  min-height: 500px;
+}
+
+.model-selector {
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .content-container {
