@@ -53,13 +53,18 @@
       ></ngx-slider>
     </div>
     <div class="map-container" *ngFor="let feature of features; index as i">
-      <plotly-plot
-        *ngIf="data.data[i + 1].length > 0"
-        [data]="data.data[i + 1]"
-        [layout]="data.layout"
-        [config]="data.config"
-      >
-      </plotly-plot>
+      <mat-card>
+        <mat-card-subtitle
+          >{{ names![i][1] }} - {{ names![i][0] }}</mat-card-subtitle
+        >
+        <plotly-plot
+          *ngIf="data.data[i + 1].length > 0"
+          [data]="data.data[i + 1]"
+          [layout]="data.layout"
+          [config]="data.config"
+        >
+        </plotly-plot>
+      </mat-card>
     </div>
   </div>
 </ng-template>

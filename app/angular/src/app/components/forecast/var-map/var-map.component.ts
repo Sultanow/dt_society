@@ -3,7 +3,7 @@ import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { DataService } from 'src/app/services/data.service';
-import { Selections } from 'src/app/types/Datasets';
+import { Dataset, Selections } from 'src/app/types/Datasets';
 import { CountryData, Frame, MapForecastGraph } from 'src/app/types/GraphData';
 
 // multivariate map based forecasting component
@@ -33,6 +33,7 @@ export class VarMapComponent implements OnInit {
     selectedDataset: undefined,
   };
   private oldSelections?: Selections;
+  private oldDatasetSelections?: Dataset[];
 
   selectionControl = new FormGroup({
     sliderControl: new FormControl(),
@@ -55,6 +56,7 @@ export class VarMapComponent implements OnInit {
   public timestamps: any[] = [];
   private countries: string[] = [];
   public features?: (string | undefined)[];
+  public names?: (string | undefined)[][];
   public maxLags: number = 1;
   public predictionPeriods: number = 15;
   public selectedModel = 'var';
@@ -102,9 +104,20 @@ export class VarMapComponent implements OnInit {
     delete data['x'];
 
     this.features = this.selections.datasets
-      .map((dataset) => dataset.featureSelected)
-      .filter((feature) => feature !== undefined);
+      .filter(
+        (dataset) =>
+          dataset.featureSelected !== undefined &&
+          dataset.timeSelected !== undefined
+      )
+      .map((dataset) => dataset.featureSelected);
 
+    this.names = this.selections.datasets
+      .filter(
+        (dataset) =>
+          dataset.featureSelected !== undefined &&
+          dataset.timeSelected !== undefined
+      )
+      .map((dataset) => [dataset.name, dataset.featureSelected]);
     this.countries = Object.keys(data);
 
     const newOptions: Options = Object.assign({}, this.options);
@@ -202,7 +215,6 @@ export class VarMapComponent implements OnInit {
         marker: { opacity: 0.7 },
         colorscale: 'Jet',
         colorbar: {
-          title: { text: this.features![i], side: 'right' },
           orientation: 'v',
         },
       };
@@ -246,7 +258,6 @@ export class VarMapComponent implements OnInit {
           marker: { opacity: 0.7 },
           colorscale: 'Jet',
           colorbar: {
-            title: { text: this.features![i], side: 'right' },
             orientation: 'v',
           },
         },
