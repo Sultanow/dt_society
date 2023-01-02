@@ -290,8 +290,9 @@ export class DataService {
 
           selections.datasets[targetDatasetIdx].timeSelected = timeColumn;
         }
-        this.updateDatasetsSelection(selections);
+
         if (selections.datasets[targetDatasetIdx].timeSelected !== undefined) {
+          this.updateDatasetsSelection(selections);
           this.updateTotalCountries(selections);
         }
         this.showLoadingSpinner[datasetId!] = false;
