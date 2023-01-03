@@ -35,7 +35,6 @@ export class ProphetscenariosComponent implements OnInit {
     data: [],
     layout: {
       legend: { title: { text: '' }, valign: 'top' },
-      valign: 'top',
       paper_bgcolor: '#424242',
       plot_bgcolor: '#424242',
       xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
