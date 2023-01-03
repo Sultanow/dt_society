@@ -36,7 +36,11 @@
                     scenarioData[dataset.id] !== undefined
                   "
                   [value]="dataset.id"
-                  [disabled]="scenarioData[dataset.id].selectable === false"
+                  [disabled]="
+                    scenarioData[dataset.id].selectable === false ||
+                    dataset.countryOptions === undefined
+                  "
+                  style="padding-top: 15px; padding-bottom: 15px"
                 >
                   {{ dataset.name }}
                   <div *ngIf="dataset.featureSelected !== undefined">
@@ -179,7 +183,10 @@
           </ng-template>
         </div>
       </div>
-      <div *ngIf="validDatasets > 1" style="display: flex; margin-top: 10px">
+      <div
+        *ngIf="validDatasets > 1 && selectedMode === 'custom'"
+        style="display: flex; margin-top: 10px"
+      >
         <button
           mat-raised-button
           color="primary"
@@ -192,29 +199,36 @@
       </div>
 
       <div *ngIf="validDatasets > 1; else inValidSelections">
-        <div class="plot-container" *ngIf="dataScenarios.data.length > 0">
-          <p class="section-label">Scenarios</p>
-          <plotly-plot
-            [data]="dataScenarios.data"
-            [layout]="dataScenarios.layout"
-            [config]="dataScenarios.config"
+        <mat-card>
+          <div
+            class="plot-container"
+            *ngIf="data.data.length > 0; else spinner"
           >
-          </plotly-plot>
-        </div>
-        <div
-          class="plot-container"
-          *ngIf="data.data.length > 0; else elseBlock"
-        >
-          <p class="section-label">Forecast</p>
-          <plotly-plot
-            [data]="data.data"
-            [layout]="data.layout"
-            [config]="data.config"
-          ></plotly-plot>
-        </div>
+            <mat-card-title class="container-label">Forecast</mat-card-title>
+            <plotly-plot
+              [data]="data.data"
+              [layout]="data.layout"
+              [config]="data.config"
+            ></plotly-plot>
+          </div>
+        </mat-card>
+        <mat-card style="margin-top: 1em">
+          <div
+            class="plot-container"
+            *ngIf="dataScenarios.data.length > 0; else spinner"
+          >
+            <mat-card-title class="container-label">Scenarios</mat-card-title>
+            <plotly-plot
+              [data]="dataScenarios.data"
+              [layout]="dataScenarios.layout"
+              [config]="dataScenarios.config"
+            >
+            </plotly-plot>
+          </div>
+        </mat-card>
       </div>
 
-      <ng-template #elseBlock>
+      <ng-template #spinner>
         <div class="loading-spinner">
           <mat-spinner *ngIf="showSpinner === true"></mat-spinner>
         </div>

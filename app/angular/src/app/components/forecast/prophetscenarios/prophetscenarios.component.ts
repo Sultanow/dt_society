@@ -11,7 +11,7 @@ import {
 import { faChartLine } from '@fortawesome/free-solid-svg-icons';
 import { Options } from '@angular-slider/ngx-slider';
 
-// Prophe forecasting component
+// Prophet forecasting component
 
 @Component({
   selector: 'app-prophetscenarios',
@@ -34,7 +34,8 @@ export class ProphetscenariosComponent implements OnInit {
   public data: Plot = {
     data: [],
     layout: {
-      legend: { title: { text: '' } },
+      legend: { title: { text: '' }, valign: 'top' },
+      valign: 'top',
       paper_bgcolor: '#424242',
       plot_bgcolor: '#424242',
       xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
@@ -51,7 +52,7 @@ export class ProphetscenariosComponent implements OnInit {
   public dataScenarios: Plot = {
     data: [],
     layout: {
-      legend: { title: { text: '' } },
+      legend: { title: { text: '' }, valign: 'top' },
       paper_bgcolor: '#424242',
       plot_bgcolor: '#424242',
       xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
@@ -89,23 +90,20 @@ export class ProphetscenariosComponent implements OnInit {
   }
 
   updateSlider(slidervalues?: string[]) {
+    const newOptions: Options = Object.assign({}, this.options);
+    newOptions.floor = 0;
     if (slidervalues !== undefined) {
-      const newOptions: Options = Object.assign({}, this.options);
-      newOptions.floor = 0;
       newOptions.ceil = slidervalues.length - 1;
       newOptions.translate = (value: number) => {
         return String(slidervalues[value]);
       };
-      this.options = newOptions;
     } else {
-      const newOptions: Options = Object.assign({}, this.options);
-      newOptions.floor = 0;
       newOptions.ceil = 40;
       newOptions.translate = (value: number) => {
         return String(value);
       };
-      this.options = newOptions;
     }
+    this.options = newOptions;
   }
 
   updateScenarios() {
@@ -223,13 +221,32 @@ export class ProphetscenariosComponent implements OnInit {
 
     var indexFeatures = 0;
 
+    let scenariosCount =
+      Object.keys(this.scenarioData).filter(
+        (id) => this.scenarioData[id].active === true
+      ).length - 1;
+    let colCount = scenariosCount === 1 ? 1 : 2;
+    let rowCount = Math.ceil(scenariosCount / 2);
+
     this.dataScenarios.layout.grid = {
-      rows: 1,
-      columns:
-        Object.keys(this.scenarioData).filter(
-          (id) => this.scenarioData[id].active === true
-        ).length - 1,
+      rows: rowCount,
+      columns: colCount,
       pattern: 'independent',
+    };
+    this.dataScenarios.layout.height = rowCount * 300;
+
+    const breakString = (str: string, maxChars: number): string => {
+      if (str.length > maxChars && str.includes(' ')) {
+        let index = str.lastIndexOf(' ', maxChars);
+        if (index === -1) index = str.indexOf(' ', maxChars + 1);
+        return (
+          str.substring(0, index) +
+          '</br>' +
+          breakString(str.substring(index + 1), maxChars)
+        );
+      } else {
+        return str;
+      }
     };
 
     for (const [key, value] of Object.entries(data['future'])) {
@@ -240,14 +257,14 @@ export class ProphetscenariosComponent implements OnInit {
         type: 'scatter',
         mode: 'lines',
         line: { color: colors[indexFeatures] },
-        name: key,
+        name: '</br>' + breakString(key, 20),
       };
 
       let trace_dashed: any = {
         type: 'scatter',
         mode: 'lines',
         line: { dash: 'dash', color: colors[indexFeatures] },
-        name: 'Scenario',
+        name: '</br>' + breakString('Scenario ' + key, 20),
       };
 
       trace_solid.x = data['merge']['x'];
@@ -290,7 +307,7 @@ export class ProphetscenariosComponent implements OnInit {
   updateProphetForecast() {
     if (
       this.selections.datasets.length > 0 &&
-      this.selections.selectedCountry != undefined
+      this.selections.selectedCountry !== undefined
     ) {
       const activeScenarios = Object.fromEntries(
         Object.entries(this.scenarioData).filter(
@@ -354,7 +371,11 @@ export class ProphetscenariosComponent implements OnInit {
 
         this.selections.datasets.forEach((dataset) => {
           if (
-            dataset.countryOptions?.includes(this.selections.selectedCountry!)
+            dataset.countryOptions?.includes(
+              this.selections.selectedCountry!
+            ) &&
+            dataset.featureSelected !== undefined &&
+            dataset.timeSelected !== undefined
           ) {
             this.validDatasets++;
           }

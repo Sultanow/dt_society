@@ -3,7 +3,7 @@ import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { DataService } from 'src/app/services/data.service';
-import { Dataset, Selections } from 'src/app/types/Datasets';
+import { Selections } from 'src/app/types/Datasets';
 import { CountryData, Frame, MapForecastGraph } from 'src/app/types/GraphData';
 
 // multivariate map based forecasting component
@@ -32,8 +32,6 @@ export class VarMapComponent implements OnInit {
     datasets: [],
     selectedDataset: undefined,
   };
-  private oldSelections?: Selections;
-  private oldDatasetSelections?: Dataset[];
 
   selectionControl = new FormGroup({
     sliderControl: new FormControl(),

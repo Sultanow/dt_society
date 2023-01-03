@@ -65,9 +65,7 @@ mat-radio-button {
   text-align: center;
 }
 
-.section-label {
-  font-size: 18px;
-  font-weight: lighter;
+.container-label {
   margin-bottom: 10px;
 }
 
