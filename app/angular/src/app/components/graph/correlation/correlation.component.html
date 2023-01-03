@@ -28,13 +28,15 @@
       </ng-container>
     </div>
   </div>
-  <plotly-plot
-    *ngIf="data.data.length > 0"
-    [data]="data.data"
-    [layout]="data.layout"
-    [config]="data.config"
-  >
-  </plotly-plot>
+  <mat-card>
+    <plotly-plot
+      *ngIf="data.data.length > 0"
+      [data]="data.data"
+      [layout]="data.layout"
+      [config]="data.config"
+    >
+    </plotly-plot>
+  </mat-card>
 </ng-template>
 
 <ng-template #spinner>

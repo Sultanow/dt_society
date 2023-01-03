@@ -39,7 +39,7 @@ export class VectorautoregressionComponent implements OnInit {
   public data: Plot = {
     data: [],
     layout: {
-      legend: { title: { text: '' } },
+      legend: { title: { text: '' }, valign: 'top' },
       paper_bgcolor: '#424242',
       plot_bgcolor: '#424242',
       xaxis: { gridcolor: 'rgba(80, 103, 132, 0.3)', title: '' },
@@ -91,11 +91,16 @@ export class VectorautoregressionComponent implements OnInit {
 
     this.data.layout.title =
       'Forecast' + ' (' + this.selections.selectedCountry + ')';
+
+    let plotCount = Object.keys(data).length - 1;
+    let colCount = plotCount === 1 ? 1 : 2;
+    let rowCount = Math.ceil(plotCount / 2);
     this.data.layout.grid = {
-      rows: 1,
-      columns: Object.keys(data).length - 1,
+      rows: rowCount,
+      columns: colCount,
       pattern: 'independent',
     };
+    this.data.layout.height = rowCount * 350;
 
     const colors = [
       'mediumpurple',
@@ -104,6 +109,21 @@ export class VectorautoregressionComponent implements OnInit {
       'mediumblue',
       'goldenrod',
     ];
+
+    const breakString = (str: string, maxChars: number): string => {
+      if (str.length > maxChars && str.includes(' ')) {
+        let index = str.lastIndexOf(' ', maxChars);
+        if (index === -1) index = str.indexOf(' ', maxChars + 1);
+        return (
+          str.substring(0, index) +
+          '</br>' +
+          breakString(str.substring(index + 1), maxChars)
+        );
+      } else {
+        return str;
+      }
+    };
+
     var i = 0;
     for (const [key, value] of Object.entries(data)) {
       if (key === 'x') {
@@ -124,11 +144,11 @@ export class VectorautoregressionComponent implements OnInit {
       if (this.predictionPeriods > 0) {
         trace_solid.y = value.slice(0, -this.predictionPeriods);
         trace_solid.x = data['x'].slice(0, -this.predictionPeriods);
-        trace_solid.name = key;
+        trace_solid.name = '</br>' + breakString(key, 20);
 
         trace_dashed.y = value.slice(-this.predictionPeriods - 1);
         trace_dashed.x = data['x'].slice(-this.predictionPeriods - 1);
-        trace_dashed.name = key + ' Prediction';
+        trace_dashed.name = '</br>' + breakString(key + ' Prediction', 20);
       } else {
         trace_solid.y = value;
         trace_solid.x = data['x'];

@@ -67,17 +67,19 @@
       </div>
 
       <div *ngIf="validDatasets > 1; else inValidSelections">
-        <plotly-plot
-          #plot
-          *ngIf="
-            data.data.length > 0 && showSpinner === false;
-            else LoadingSpinner
-          "
-          [data]="data.data"
-          [layout]="data.layout"
-          [config]="data.config"
-        >
-        </plotly-plot>
+        <mat-card>
+          <plotly-plot
+            #plot
+            *ngIf="
+              data.data.length > 0 && showSpinner === false;
+              else LoadingSpinner
+            "
+            [data]="data.data"
+            [layout]="data.layout"
+            [config]="data.config"
+          >
+          </plotly-plot>
+        </mat-card>
       </div>
     </mat-card>
   </div>

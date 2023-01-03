@@ -1,5 +1,5 @@
 <div class="heatmap-wrapper">
-  <mat-card>
+  <mat-card class="outer">
     <div [formGroup]="selectionControl" class="feature-selector">
       <mat-form-field>
         <mat-label>Features</mat-label>
@@ -28,11 +28,13 @@
 
 <ng-template #heatmap>
   <div>
-    <plotly-plot
-      *ngIf="data.data.length > 0"
-      [data]="data.data"
-      [layout]="data.layout"
-      [config]="data.config"
-    ></plotly-plot>
+    <mat-card>
+      <plotly-plot
+        *ngIf="data.data.length > 0"
+        [data]="data.data"
+        [layout]="data.layout"
+        [config]="data.config"
+      ></plotly-plot>
+    </mat-card>
   </div>
 </ng-template>

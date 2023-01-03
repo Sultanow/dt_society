@@ -21,7 +21,7 @@
 }
 
 mat-card {
-  height: 500px;
+  min-height: 500px;
 }
 
 .data-selector {

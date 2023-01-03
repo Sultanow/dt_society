@@ -35,7 +35,7 @@ export class CorrelationComponent implements OnInit {
       font: { color: '#f2f2f2' },
       margin: { t: 15, b: 50, l: 35 },
     },
-    config: { responsive: false },
+    config: { responsive: true },
   };
 
   public matchingFrequencies?: boolean;
@@ -70,10 +70,12 @@ export class CorrelationComponent implements OnInit {
     );
 
     this.data.layout.grid = {
-      rows: 1,
-      columns: data.length,
+      rows: Math.ceil(data.length / 2),
+      columns: data.length === 1 ? 1 : 2,
       pattern: 'independent',
     };
+
+    this.data.layout.height = Math.ceil(data.length / 2) * 400;
 
     let group = 0;
     for (let i = 0; i < data.length; i++) {
