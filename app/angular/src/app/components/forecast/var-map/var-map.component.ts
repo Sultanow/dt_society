@@ -294,7 +294,8 @@ export class VarMapComponent implements OnInit {
         this.selections.datasets.forEach((dataset) => {
           if (
             dataset.featureSelected !== undefined &&
-            dataset.timeSelected !== undefined
+            dataset.timeSelected !== undefined &&
+            dataset.countryOptions?.includes(this.selections?.selectedCountry!)
           ) {
             this.validDatasets++;
           }
