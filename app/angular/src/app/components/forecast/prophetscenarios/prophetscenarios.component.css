@@ -67,6 +67,10 @@ mat-radio-button {
 
 .container-label {
   margin-bottom: 10px;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  white-space: pre;
 }
 
 .example-headers-align .mat-expansion-panel-header-description {

@@ -73,6 +73,10 @@ mat-card-title {
   display: flex;
 }
 
+mat-tooltip{
+  white-space: pre-line;
+}
+
 ::ng-deep .custom-slider .ngx-slider .ngx-slider-bar {
   background: #ffffff;
   height: 2px;

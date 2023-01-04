@@ -69,6 +69,13 @@
 
       <div *ngIf="validDatasets > 1; else inValidSelections">
         <mat-card>
+          <span
+            matTooltip="Data from data sets: Solid line&#13;Forecasted Data: Dashed line"
+            matTooltipClass="tooltip"
+            matTooltipPosition="right"
+          >
+            <mat-icon>info_outline</mat-icon>
+          </span>
           <plotly-plot
             #plot
             *ngIf="

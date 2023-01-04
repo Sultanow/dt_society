@@ -39,6 +39,7 @@ export class VectorautoregressionComponent implements OnInit {
   public data: Plot = {
     data: [],
     layout: {
+      showlegend: false,
       legend: { title: { text: '' }, valign: 'top' },
       paper_bgcolor: '#424242',
       plot_bgcolor: '#424242',

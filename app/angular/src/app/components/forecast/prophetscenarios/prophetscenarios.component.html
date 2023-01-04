@@ -204,7 +204,16 @@
             class="plot-container"
             *ngIf="data.data.length > 0; else spinner"
           >
-            <mat-card-title class="container-label">Forecast</mat-card-title>
+            <mat-card-title class="container-label"
+              >Forecast
+              <mat-icon
+                matTooltip="Data from data sets: Solid line&#13;Forecasted Data: Dashed line"
+                matTooltipClass="tooltip"
+                matTooltipPosition="right"
+                >info_outline</mat-icon
+              >
+            </mat-card-title>
+
             <plotly-plot
               [data]="data.data"
               [layout]="data.layout"
@@ -217,7 +226,16 @@
             class="plot-container"
             *ngIf="dataScenarios.data.length > 0; else spinner"
           >
-            <mat-card-title class="container-label">Scenarios</mat-card-title>
+            <mat-card-title class="container-label"
+              >Scenarios
+              <mat-icon
+                matTooltip="Data from data sets: Solid line&#13;Scenario Data: Dashed line"
+                matTooltipClass="tooltip"
+                matTooltipPosition="right"
+                >info_outline</mat-icon
+              >
+            </mat-card-title>
+
             <plotly-plot
               [data]="dataScenarios.data"
               [layout]="dataScenarios.layout"
