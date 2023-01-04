@@ -60,6 +60,7 @@
 
       <div class="custom-slider">
         <ngx-slider
+          *ngIf="validDatasets > 1"
           [(value)]="predictionPeriods"
           [options]="options"
           (userChangeEnd)="updateVarForecast()"

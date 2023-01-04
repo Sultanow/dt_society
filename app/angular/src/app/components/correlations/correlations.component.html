@@ -18,9 +18,9 @@
 </ng-template>
 
 <ng-template #inValidSelections>
-  <div class="dialog-wrapper">
-    <mat-card>
-      <div class="content-container">
+  <mat-card class="outer">
+    <div class="content-container">
+      <mat-card>
         <mat-card-title>
           <mat-icon style="font-size: xx-large; padding: 7px"
             >info_outline</mat-icon
@@ -32,12 +32,12 @@
         <br />
         <mat-card-content>
           <p>
-            Please select a feature (and time if necessary) for at least one of
-            the data sets.
+            Please select a feature (and time) for at least one of the data
+            sets.
           </p>
           <p>The data sets can be managed through the sidebar.</p>
         </mat-card-content>
-      </div>
-    </mat-card>
-  </div>
+      </mat-card>
+    </div>
+  </mat-card>
 </ng-template>

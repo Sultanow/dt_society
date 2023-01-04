@@ -1,15 +1,8 @@
-.dialog-wrapper{
-    padding: 10px;
-    text-align: center;
-    justify-content: center;
-    display: flex;
-}
-
 mat-card-title{
     line-height: 1.5;
 }
 
-mat-card{
+.outer{
     height: 500px;
     width: 100%;
 }
@@ -20,4 +13,9 @@ mat-card{
     left: 50%;
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
+    text-align: center;
+    justify-content: center;
+    display: flex;
+    padding: 10px;
+    max-width: 500px;
 }
