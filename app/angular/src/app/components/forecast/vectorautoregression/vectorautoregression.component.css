@@ -20,7 +20,7 @@ mat-slider {
 }
 
 mat-radio-button {
-  margin-left: 5px;
+  padding: 5px;
 }
 
 mat-checkbox {

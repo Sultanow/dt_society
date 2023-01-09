@@ -3,7 +3,7 @@
 }
 
 mat-radio-button {
-  padding: 0.5em;
+  padding: 5px;
 }
 
 mat-card-title {
@@ -54,6 +54,10 @@ mat-card-title {
 
 .map-container {
   margin-bottom: 10px;
+}
+
+.toggle-container {
+  display: flex;
 }
 
 ::ng-deep .custom-slider .ngx-slider .ngx-slider-bar {

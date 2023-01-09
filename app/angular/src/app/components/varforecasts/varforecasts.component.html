@@ -1,0 +1,21 @@
+<div class="wrapper">
+  <mat-card>
+    <mat-button-toggle-group #group="matButtonToggleGroup" value="graph">
+      <mat-button-toggle value="graph">
+        <mat-icon>timeline</mat-icon>
+      </mat-button-toggle>
+      <mat-button-toggle value="map">
+        <mat-icon>room</mat-icon>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+    <div *ngIf="group.value == 'map'; then map; else graph"></div>
+  </mat-card>
+</div>
+
+<ng-template #map>
+  <app-var-map></app-var-map>
+</ng-template>
+
+<ng-template #graph>
+  <app-vectorautoregression></app-vectorautoregression>
+</ng-template>

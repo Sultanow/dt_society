@@ -4,7 +4,7 @@
 
 <ng-template #mapforecast>
   <div class="map-wrapper">
-    <mat-card class="content-wrapper">
+    <div class="toggle-container">
       <div class="model-selector">
         <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
           Model
@@ -20,10 +20,10 @@
           <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
         </mat-radio-group>
       </div>
-      <div *ngIf="validDatasets > 1; else inValidSelections">
-        <div *ngIf="showSpinner; then spinner; else map"></div>
-      </div>
-    </mat-card>
+    </div>
+    <div *ngIf="validDatasets > 1; else inValidSelections">
+      <div *ngIf="showSpinner; then spinner; else map"></div>
+    </div>
   </div>
 </ng-template>
 

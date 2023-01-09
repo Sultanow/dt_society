@@ -4,92 +4,90 @@
 
 <ng-template #vectorautoregression>
   <div class="var-wrapper">
-    <mat-card class="content-wrapper">
-      <div class="toggle-container">
-        <div class="model-selector">
-          <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
-            Model
-          </p>
-          <mat-radio-group
-            aria-label="Select a model"
-            [(ngModel)]="selectedModel"
-            (change)="updateVarForecast()"
+    <div class="toggle-container">
+      <div class="model-selector">
+        <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+          Model
+        </p>
+        <mat-radio-group
+          aria-label="Select a model"
+          [(ngModel)]="selectedModel"
+          (change)="updateVarForecast()"
+        >
+          <mat-radio-button value="var"
+            >Vector Auto Regression</mat-radio-button
           >
-            <mat-radio-button value="var"
-              >Vector Auto Regression</mat-radio-button
+          <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <div class="alpha-slider-container" *ngIf="selectedModel == 'hwes'">
+        <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
+          &#945;-Parameter
+        </p>
+        <mat-slider
+          class="lags-slider"
+          thumbLabel
+          [(ngModel)]="alphaParameter"
+          (change)="updateVarForecast()"
+          aria-label="unit(s)"
+          [step]="0.01"
+          [min]="0.01"
+          [max]="0.99"
+        ></mat-slider>
+      </div>
+
+      <div class="data-selector">
+        <div>
+          <p class="section-label">Forecasted data</p>
+          <ng-container *ngFor="let dataset of selections.datasets">
+            <mat-checkbox
+              *ngIf="
+                dataset.id !== undefined &&
+                dataset.featureSelected !== undefined &&
+                scenarios[dataset.id] !== undefined
+              "
+              [(ngModel)]="scenarios[dataset.id].active"
+              [disabled]="scenarios[dataset.id].selectable === false"
+              (change)="updateVarForecast()"
             >
-            <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
-          </mat-radio-group>
-        </div>
-        <div class="alpha-slider-container" *ngIf="selectedModel == 'hwes'">
-          <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
-            &#945;-Parameter
-          </p>
-          <mat-slider
-            class="lags-slider"
-            thumbLabel
-            [(ngModel)]="alphaParameter"
-            (change)="updateVarForecast()"
-            aria-label="unit(s)"
-            [step]="0.01"
-            [min]="0.01"
-            [max]="0.99"
-          ></mat-slider>
-        </div>
-
-        <div class="data-selector">
-          <div>
-            <p class="section-label">Forecasted data</p>
-            <ng-container *ngFor="let dataset of selections.datasets">
-              <mat-checkbox
-                *ngIf="
-                  dataset.id !== undefined &&
-                  dataset.featureSelected !== undefined &&
-                  scenarios[dataset.id] !== undefined
-                "
-                [(ngModel)]="scenarios[dataset.id].active"
-                [disabled]="scenarios[dataset.id].selectable === false"
-                (change)="updateVarForecast()"
-              >
-                {{ dataset.name }}
-              </mat-checkbox>
-            </ng-container>
-          </div>
+              {{ dataset.name }}
+            </mat-checkbox>
+          </ng-container>
         </div>
       </div>
+    </div>
 
-      <div class="custom-slider">
-        <ngx-slider
-          *ngIf="validDatasets > 1"
-          [(value)]="predictionPeriods"
-          [options]="options"
-          (userChangeEnd)="updateVarForecast()"
-        ></ngx-slider>
-      </div>
+    <div class="custom-slider">
+      <ngx-slider
+        *ngIf="validDatasets > 1"
+        [(value)]="predictionPeriods"
+        [options]="options"
+        (userChangeEnd)="updateVarForecast()"
+      ></ngx-slider>
+    </div>
 
-      <div *ngIf="validDatasets > 1; else inValidSelections">
-        <mat-card>
-          <span
-            matTooltip="Data from data sets: Solid line&#13;Forecasted Data: Dashed line"
-            matTooltipClass="tooltip"
-            matTooltipPosition="right"
-          >
-            <mat-icon>info_outline</mat-icon>
-          </span>
-          <plotly-plot
-            #plot
-            *ngIf="
-              data.data.length > 0 && showSpinner === false;
-              else LoadingSpinner
-            "
-            [data]="data.data"
-            [layout]="data.layout"
-            [config]="data.config"
-          >
-          </plotly-plot>
-        </mat-card>
-      </div>
-    </mat-card>
+    <div *ngIf="validDatasets > 1; else inValidSelections">
+      <mat-card>
+        <span
+          matTooltip="Data from data sets: Solid line&#13;Forecasted Data: Dashed line"
+          matTooltipClass="tooltip"
+          matTooltipPosition="right"
+        >
+          <mat-icon>info_outline</mat-icon>
+        </span>
+        <plotly-plot
+          #plot
+          *ngIf="
+            data.data.length > 0 && showSpinner === false;
+            else LoadingSpinner
+          "
+          [data]="data.data"
+          [layout]="data.layout"
+          [config]="data.config"
+        >
+        </plotly-plot>
+      </mat-card>
+    </div>
   </div>
 </ng-template>
 
@@ -107,7 +105,7 @@
           >info_outline</mat-icon
         >
         <div>
-          The forecast cannot be computed for the selected country
+          The forecast cannot be computed for the current selections
         </div></mat-card-title
       >
       <br />

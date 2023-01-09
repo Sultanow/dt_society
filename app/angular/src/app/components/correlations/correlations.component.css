@@ -6,6 +6,9 @@ mat-card-title{
     height: 500px;
     width: 100%;
 }
+.wrapper{
+    padding: 10px;
+}
 
 .content-container{
     position: absolute;

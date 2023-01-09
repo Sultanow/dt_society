@@ -16,12 +16,11 @@ mat-slider {
 }
 
 .model-selector {
-  margin-top: 10px;
   margin-bottom: 10px;
 }
 
 mat-radio-button {
-  margin-left: 5px;
+  padding: 5px;
 }
 
 .freq-selector {
