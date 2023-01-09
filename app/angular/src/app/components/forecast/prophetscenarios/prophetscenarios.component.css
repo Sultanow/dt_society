@@ -126,6 +126,21 @@ mat-card-title {
   min-height: 500px;
 }
 
+.solidLine{
+  width: 40px;
+  margin:5px 0;
+  height:3px;
+  background:white;
+}
+
+.dashedLine{
+  width: 40px;
+  margin:5px 0;
+  height:3px;
+  background:
+    repeating-linear-gradient(90deg,white 0 5px,transparent 0 8px)
+}
+
 ::ng-deep .custom-slider .ngx-slider .ngx-slider-bar {
   background: #ffffff;
   height: 2px;
