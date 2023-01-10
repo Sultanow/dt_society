@@ -1,34 +1,28 @@
-<div
-  *ngIf="selections.datasets.length > 1; then mapforecast; else dialog"
-></div>
-
-<ng-template #mapforecast>
-  <div class="toggle-container">
-    <div class="model-selector">
-      <p
-        style="
-          font-size: 18px;
-          font-weight: lighter;
-          margin-bottom: 10px;
-          margin-top: 10px;
-        "
-      >
-        Model
-      </p>
-      <mat-radio-group
-        aria-label="Select a model"
-        [(ngModel)]="selectedModel"
-        (change)="updateForecastData()"
-      >
-        <mat-radio-button value="var">Vector Auto Regression</mat-radio-button>
-        <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
-      </mat-radio-group>
-    </div>
+<div class="toggle-container">
+  <div class="model-selector">
+    <p
+      style="
+        font-size: 18px;
+        font-weight: lighter;
+        margin-bottom: 10px;
+        margin-top: 10px;
+      "
+    >
+      Model
+    </p>
+    <mat-radio-group
+      aria-label="Select a model"
+      [(ngModel)]="selectedModel"
+      (change)="updateForecastData()"
+    >
+      <mat-radio-button value="var">Vector Auto Regression</mat-radio-button>
+      <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
+    </mat-radio-group>
   </div>
-  <div *ngIf="validDatasets > 1; else inValidSelections">
-    <div *ngIf="showSpinner; then spinner; else map"></div>
-  </div>
-</ng-template>
+</div>
+<div *ngIf="validDatasets > 1; else inValidSelections">
+  <div *ngIf="showSpinner; then spinner; else map"></div>
+</div>
 
 <ng-template #spinner>
   <div class="loading-spinner">

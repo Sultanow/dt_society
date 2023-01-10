@@ -1,16 +1,26 @@
-<div class="outer-wrapper">
-  <mat-card class="outer">
-    <mat-button-toggle-group #group="matButtonToggleGroup" value="graph">
-      <mat-button-toggle value="graph">
-        <mat-icon>timeline</mat-icon>
-      </mat-button-toggle>
-      <mat-button-toggle value="map">
-        <mat-icon>room</mat-icon>
-      </mat-button-toggle>
-    </mat-button-toggle-group>
-    <div *ngIf="group.value == 'map'; then map; else graph"></div>
-  </mat-card>
-</div>
+<div
+  *ngIf="selections.datasets.length > 1; then varforecasts; else uploadDialog"
+></div>
+
+<ng-template #varforecasts>
+  <div class="outer-wrapper">
+    <mat-card class="outer">
+      <mat-button-toggle-group #group="matButtonToggleGroup" value="graph">
+        <mat-button-toggle value="graph">
+          <mat-icon>timeline</mat-icon>
+        </mat-button-toggle>
+        <mat-button-toggle value="map">
+          <mat-icon>room</mat-icon>
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+      <div *ngIf="group.value == 'map'; then map; else graph"></div>
+    </mat-card>
+  </div>
+</ng-template>
+
+<ng-template #uploadDialog>
+  <app-fileupload></app-fileupload>
+</ng-template>
 
 <ng-template #map>
   <app-var-map></app-var-map>
