@@ -12,4 +12,9 @@
 .dialog{
     height: 250px;
     width: 500px;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    position: absolute;
+    bottom: 60px;
 }

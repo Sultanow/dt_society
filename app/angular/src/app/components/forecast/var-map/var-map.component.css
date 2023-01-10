@@ -11,6 +11,11 @@ mat-radio-button {
 .dialog-wrapper {
   padding: 10px;
   text-align: center;
+  margin: 0 auto;
+  left: 0;
+  right: 0;
+  position: absolute;
+  bottom: 50px
 }
 
 .content-wrapper {

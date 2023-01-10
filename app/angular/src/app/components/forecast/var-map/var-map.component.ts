@@ -272,7 +272,6 @@ export class VarMapComponent implements OnInit {
         dataset.timeSelected !== undefined &&
         dataset.countryOptions !== undefined
     );
-    console.log(filteredSelections);
     if (filteredSelections.length > 1) {
       this.showSpinner = true;
       this.dataService
