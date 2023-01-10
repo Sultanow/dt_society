@@ -5,7 +5,7 @@
 </ng-template>
 
 <ng-template #geo>
-  <div class="statistics-wrapper" [formGroup]="selectionControl">
+  <div class="outer-wrapper" [formGroup]="selectionControl">
     <mat-card class="outer">
       <p class="section-label">Statistics</p>
       <div class="stats-container">
@@ -83,7 +83,7 @@
 
 <ng-template #selectFeatureDialog>
   <div class="dialog-wrapper">
-    <mat-card class="dialog">
+    <mat-card class="dialog outer">
       <div class="content-container">
         <mat-card-title>
           <mat-icon style="font-size: xx-large; padding: 7px"

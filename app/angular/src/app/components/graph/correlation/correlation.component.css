@@ -1,7 +1,3 @@
-.correlation-wrapper {
-  padding: 10px;
-}
-
 .frequency-disclaimer {
   display: flex;
   float: right;
@@ -10,18 +6,6 @@
 
 .disclaimer-text {
   margin-left: 10px;
-}
-
-.loading-spinner {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-}
-
-mat-card {
-  min-height: 500px;
 }
 
 .data-selector {

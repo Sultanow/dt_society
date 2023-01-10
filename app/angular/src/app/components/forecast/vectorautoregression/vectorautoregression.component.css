@@ -32,10 +32,6 @@ mat-checkbox {
   margin-right: 10px;
 }
 
-.var-wrapper {
-  padding: 10px;
-}
-
 .alpha-slider-container {
   margin-top: 10px;
   margin-left: 15px;
@@ -52,9 +48,6 @@ mat-checkbox {
   text-align: center;
 }
 
-mat-card-title {
-  line-height: 1.5;
-}
 .data-selector {
   float: right;
   display: flex;
@@ -74,20 +67,6 @@ mat-card-title {
   display: flex;
 }
 
-.solidLine{
-  width: 40px;
-  margin:5px 0;
-  height:3px;
-  background:white;
-}
-
-.dashedLine{
-  width: 40px;
-  margin:5px 0;
-  height:3px;
-  background:
-    repeating-linear-gradient(90deg,white 0 5px,transparent 0 8px)
-}
 mat-tooltip{
   white-space: pre-line;
 }

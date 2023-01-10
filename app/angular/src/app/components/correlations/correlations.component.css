@@ -1,13 +1,8 @@
-mat-card-title{
-    line-height: 1.5;
-}
-
 .outer-wrapper{
     padding: 10px;
 }
 
-.outer{
-    min-height: 500px;
+.outer-dialog{
     display: flex;
     justify-content: center;
     align-items: center;

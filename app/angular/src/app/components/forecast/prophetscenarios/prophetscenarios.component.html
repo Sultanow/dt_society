@@ -1,7 +1,7 @@
 <div *ngIf="selections.datasets.length > 1; then prophet; else dialog"></div>
 <ng-template #prophet>
-  <div class="prophet-wrapper">
-    <mat-card class="content-wrapper">
+  <div class="outer-wrapper">
+    <mat-card class="outer">
       <div class="model-selector">
         <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
           Mode

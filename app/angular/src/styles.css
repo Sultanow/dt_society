@@ -17,6 +17,7 @@ body {
   justify-content: center;
   align-items: center;
   width: 100%;
+  height: 100%;
 }
 
 .section-label {
@@ -25,8 +26,79 @@ body {
   margin-bottom: 10px;
 }
 
+mat-card-title{
+  line-height: 1.5;
+}
+
+/* layout of cards*/
+.outer-wrapper{
+  padding: 10px;
+}
+
+.outer{
+  min-height: 500px;
+}
+
+/* formatting of tooltips */
 .mat-tooltip.tooltip {
   font-size: 18px;
   line-height: 1.2;
   white-space: pre-line;
+}
+
+/* lines for legend of plots */
+.solidLine{
+  width: 40px;
+  margin:5px 0;
+  height:3px;
+  background:white;
+}
+
+.dashedLine{
+  width: 40px;
+  margin:5px 0;
+  height:3px;
+  background:
+    repeating-linear-gradient(90deg,white 0 5px,transparent 0 8px)
+}
+
+/* Layout of ngx-slider*/
+
+::ng-deep .custom-slider .ngx-slider .ngx-slider-bar {
+  background: #ffffff;
+  height: 2px;
+}
+::ng-deep .custom-slider .ngx-slider .ngx-slider-selection {
+  background: red;
+}
+::ng-deep .custom-slider .ngx-slider .ngx-slider-pointer {
+  width: 8px;
+  height: 16px;
+  top: auto;
+  /* to remove the default positioning */
+  bottom: 0;
+  background-color: #c2175a;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+::ng-deep .custom-slider .ngx-slider .ngx-slider-pointer:after {
+  display: none;
+}
+::ng-deep .custom-slider .ngx-slider .ngx-slider-bubble {
+  bottom: 14px;
+  color: #ffffff;
+}
+::ng-deep .custom-slider .ngx-slider .ngx-slider-bubble.ngx-slider-limit {
+  color: #ffffff;
+}
+::ng-deep .custom-slider .ngx-slider .ngx-slider-tick {
+  width: 1px;
+  height: 10px;
+  margin-left: 4px;
+  border-radius: 0;
+  background: #ffffff;
+  top: -1px;
+}
+::ng-deep .custom-slider .ngx-slider .ngx-slider-tick.ngx-slider-selected {
+  background: #c2175a;
 }
