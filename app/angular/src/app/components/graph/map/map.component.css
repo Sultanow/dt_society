@@ -34,6 +34,8 @@ mat-card {
   z-index: 1;
 }
 
+/*ngx-slider style*/
+
 ::ng-deep .custom-slider .ngx-slider .ngx-slider-bar {
   background: #ffffff;
   height: 2px;
