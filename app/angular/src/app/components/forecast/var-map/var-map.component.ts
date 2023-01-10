@@ -105,7 +105,8 @@ export class VarMapComponent implements OnInit {
       .filter(
         (dataset) =>
           dataset.featureSelected !== undefined &&
-          dataset.timeSelected !== undefined
+          dataset.timeSelected !== undefined &&
+          dataset.countryOptions !== undefined
       )
       .map((dataset) => dataset.featureSelected);
 
@@ -113,7 +114,8 @@ export class VarMapComponent implements OnInit {
       .filter(
         (dataset) =>
           dataset.featureSelected !== undefined &&
-          dataset.timeSelected !== undefined
+          dataset.timeSelected !== undefined &&
+          dataset.countryOptions !== undefined
       )
       .map((dataset) => [dataset.name, dataset.featureSelected]);
     this.countries = Object.keys(data);
@@ -267,9 +269,10 @@ export class VarMapComponent implements OnInit {
     const filteredSelections = this.selections.datasets.filter(
       (dataset) =>
         dataset.featureSelected !== undefined &&
-        dataset.timeSelected !== undefined
+        dataset.timeSelected !== undefined &&
+        dataset.countryOptions !== undefined
     );
-
+    console.log(filteredSelections);
     if (filteredSelections.length > 1) {
       this.showSpinner = true;
       this.dataService
