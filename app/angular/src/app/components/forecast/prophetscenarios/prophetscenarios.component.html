@@ -272,23 +272,25 @@
 <ng-template #inValidSelections>
   <div class="dialog-wrapper">
     <mat-card class="dialog">
-      <mat-card-title>
-        <mat-icon style="font-size: xx-large; padding: 7px"
-          >info_outline</mat-icon
+      <div>
+        <mat-card-title>
+          <mat-icon style="font-size: xx-large; padding: 7px"
+            >info_outline</mat-icon
+          >
+          <div>
+            The forecast cannot be computed for the current selections
+          </div></mat-card-title
         >
-        <div>
-          The forecast cannot be computed for the current selections
-        </div></mat-card-title
-      >
-      <br />
-      <mat-card-content>
-        <p>Please select features and a country.</p>
-        <p>
-          At least two features must be available and selected for the specified
-          country.
-        </p>
-        <p>The data sets can be managed through the sidebar.</p>
-      </mat-card-content>
+        <br />
+        <mat-card-content>
+          <p>Please select features and a country.</p>
+          <p>
+            At least two features must be available and selected for the
+            specified country.
+          </p>
+          <p>The data sets can be managed through the sidebar.</p>
+        </mat-card-content>
+      </div>
     </mat-card>
   </div>
 </ng-template>

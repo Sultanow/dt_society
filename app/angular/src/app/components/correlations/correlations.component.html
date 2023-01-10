@@ -18,28 +18,26 @@
 </ng-template>
 
 <ng-template #inValidSelections>
-  <div class="wrapper">
+  <div class="outer-wrapper">
     <mat-card class="outer">
-      <div class="content-container">
-        <mat-card>
-          <mat-card-title>
-            <mat-icon style="font-size: xx-large; padding: 7px"
-              >info_outline</mat-icon
-            >
-            <div>
-              Correlations cannot be computed for the current selections
-            </div></mat-card-title
+      <mat-card class="dialog">
+        <mat-card-title>
+          <mat-icon style="font-size: xx-large; padding: 7px"
+            >info_outline</mat-icon
           >
-          <br />
-          <mat-card-content>
-            <p>
-              Please select a feature (and time) for at least one of the data
-              sets.
-            </p>
-            <p>The data sets can be managed through the sidebar.</p>
-          </mat-card-content>
-        </mat-card>
-      </div>
+          <div>
+            Correlations cannot be computed for the current selections
+          </div></mat-card-title
+        >
+        <br />
+        <mat-card-content>
+          <p>
+            Please select a feature (and time) for at least one of the data
+            sets.
+          </p>
+          <p>The data sets can be managed through the sidebar.</p>
+        </mat-card-content>
+      </mat-card>
     </mat-card>
   </div>
 </ng-template>
