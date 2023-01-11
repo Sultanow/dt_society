@@ -1,29 +1,31 @@
 <div class="outer-wrapper">
   <mat-card>
     <p class="section-label">Data</p>
-    <div class="data-table" *ngIf="showSpinner === false; else elseBlock">
-      <ng-scrollbar track="all" appearance="standard">
-        <table mat-table [dataSource]="data">
-          <ng-container *ngFor="let column of columns" [matColumnDef]="column">
-            <th mat-header-cell *matHeaderCellDef>
-              {{ column }}
-            </th>
-
-            <td mat-cell *matCellDef="let record">
-              {{ record[column] }}
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
-
-          <tr mat-row *matRowDef="let row; columns: columns"></tr>
-        </table>
-      </ng-scrollbar>
-    </div>
-    <ng-template #elseBlock>
-      <div class="loading-spinner">
-        <mat-spinner></mat-spinner>
-      </div>
-    </ng-template>
+    <div *ngIf="showSpinner === false; then dataTable; else spinner"></div>
   </mat-card>
 </div>
+
+<ng-template #dataTable>
+  <div class="data-table">
+    <ng-scrollbar track="all" appearance="standard">
+      <table mat-table [dataSource]="data">
+        <ng-container *ngFor="let column of columns" [matColumnDef]="column">
+          <th mat-header-cell *matHeaderCellDef>
+            {{ column }}
+          </th>
+          <td mat-cell *matCellDef="let record">
+            {{ record[column] }}
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+      </table>
+    </ng-scrollbar>
+  </div>
+</ng-template>
+
+<ng-template #spinner>
+  <div class="loading-spinner">
+    <mat-spinner></mat-spinner>
+  </div>
+</ng-template>

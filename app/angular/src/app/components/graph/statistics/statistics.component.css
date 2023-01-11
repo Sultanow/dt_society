@@ -17,15 +17,19 @@
 }
 
 .single-stat {
-  width: 6em;
-  min-height: 3em;
-  margin-right: 2em;
+  width: 25%;
+  max-width: 150px;
+  padding: 10px;
+  margin: 0 15px 0 15px;
+  overflow-wrap: break-word;
 }
 
 .single-stat-growth {
-  width: 16em;
-  min-height: 3em;
-  margin: 1em;
+  width: 33%;
+  max-width: 250px;
+  padding: 10px;
+  margin: 0 15px 0 15px;
+  overflow-wrap: break-word;
 }
 
 .stats-container {
@@ -34,11 +38,24 @@
   justify-content: flex-start;
   margin-top: 1em;
   margin-bottom: 1em;
+  max-width: 700px;
+}
+
+.stats{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.stat-content{
+  font-size: x-large;
 }
 
 .growth-container {
   margin-top: 2em;
   margin-bottom: 2em;
+  max-width: 700px;
 }
 
 .growth-selections {
@@ -50,7 +67,7 @@
 ngx-slider {
   margin-left: 1em;
   margin-right: 1em;
-  max-width: 26em;
+  max-width: 500px;
 }
 
 mat-form-field {

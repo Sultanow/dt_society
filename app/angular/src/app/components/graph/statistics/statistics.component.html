@@ -7,35 +7,46 @@
 <ng-template #geo>
   <div class="outer-wrapper" [formGroup]="selectionControl">
     <mat-card class="outer">
-      <p class="section-label">Statistics</p>
+      <p class="section-label" style="margin-bottom: 30px">Statistics</p>
       <div class="stats-container">
-        <mat-form-field>
-          <mat-label>Time</mat-label>
-          <mat-select formControlName="selectedYearControl">
-            <mat-option
-              *ngFor="let timestamp of timestamps"
-              [value]="timestamp"
-            >
-              {{ timestamp }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-card class="single-stat">
-          <mat-card-title>Min</mat-card-title>
-          <mat-card-content>{{ min }}</mat-card-content>
-          <mat-card-content>{{ min_key }}</mat-card-content>
-        </mat-card>
-        <mat-card class="single-stat">
-          <mat-card-title>Max</mat-card-title>
-          <mat-card-content>{{ max }}</mat-card-content>
-          <mat-card-content>{{ max_key }}</mat-card-content>
-        </mat-card>
-        <mat-card class="single-stat">
-          <mat-card-title>Mean</mat-card-title>
-          <mat-card-content>{{ mean }}</mat-card-content>
-        </mat-card>
+        <div class="statsDropdown">
+          <mat-form-field>
+            <mat-label>Time</mat-label>
+            <mat-select formControlName="selectedYearControl">
+              <mat-option
+                *ngFor="let timestamp of timestamps"
+                [value]="timestamp"
+              >
+                {{ timestamp }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="stats">
+          <mat-card class="single-stat">
+            <mat-card-title>Min</mat-card-title>
+            <mat-card-content class="stat-content">{{ min }}</mat-card-content>
+            <mat-card-content class="stat-content">{{
+              min_key
+            }}</mat-card-content>
+          </mat-card>
+          <mat-card class="single-stat">
+            <mat-card-title>Max</mat-card-title>
+            <mat-card-content class="stat-content">{{ max }}</mat-card-content>
+            <mat-card-content class="stat-content">{{
+              max_key
+            }}</mat-card-content>
+          </mat-card>
+          <mat-card class="single-stat">
+            <mat-card-title>Mean</mat-card-title>
+            <mat-card-content class="stat-content">{{ mean }}</mat-card-content>
+          </mat-card>
+        </div>
       </div>
-      <mat-divider inset></mat-divider>
+      <mat-divider
+        inset
+        style="margin-top: 30px; margin-bottom: 30px"
+      ></mat-divider>
       <div>
         <div class="growth-container">
           <div class="growth-selections custom-slider">
@@ -65,14 +76,18 @@
             >
             </ngx-slider>
           </div>
-          <div class="stats-container">
+          <div class="stats">
             <mat-card class="single-stat-growth">
               <mat-card-title>Growth Rate</mat-card-title>
-              <mat-card-content>{{ growthrate }}</mat-card-content>
+              <mat-card-content class="stat-content">{{
+                growthrate
+              }}</mat-card-content>
             </mat-card>
             <mat-card class="single-stat-growth">
               <mat-card-title> Average Growth Rate</mat-card-title>
-              <mat-card-content>{{ growthrate_per_time }}</mat-card-content>
+              <mat-card-content class="stat-content">{{
+                growthrate_per_time
+              }}</mat-card-content>
             </mat-card>
           </div>
         </div>
