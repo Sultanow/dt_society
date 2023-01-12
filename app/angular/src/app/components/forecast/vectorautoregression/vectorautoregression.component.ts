@@ -186,10 +186,6 @@ export class VectorautoregressionComponent implements OnInit {
     }
   }
 
-  toggleSpinner(): void {
-    this.showSpinner = !this.showSpinner;
-  }
-
   updateVarForecast(): void {
     // Handles updates updates of VAR forecast
     if (
@@ -206,7 +202,7 @@ export class VectorautoregressionComponent implements OnInit {
           this.scenarios[dataset.id as string].active === true
       );
       if (filteredSelections.length > 1) {
-        this.toggleSpinner();
+        this.showSpinner = true;
         this.dataService
           .getData(
             filteredSelections,
@@ -221,8 +217,8 @@ export class VectorautoregressionComponent implements OnInit {
           .subscribe((event) => {
             if (event.type === HttpEventType.Response) {
               if (event.body) {
-                this.toggleSpinner();
                 this.createVarForecast(event.body as ColumnValues);
+                this.showSpinner = false;
               }
             }
           });

@@ -103,7 +103,7 @@ def multivariate_ES(
 
     S = []
     for i in range(inits[2].shape[0]):
-        ser = pd.Series()
+        ser = pd.Series(dtype="float64")
         ser = ser.append(inits[2].iloc[i, :])
         ser = ser.fillna(0)
         S.append(ser)
@@ -111,7 +111,7 @@ def multivariate_ES(
     #     all of seasonal effects- it's just used for plotting the seasonal effects later:
     s = []
     for i in range(inits[2].shape[0]):
-        ser = pd.Series()
+        ser = pd.Series(dtype="float64")
         ser = ser.append(inits[2].iloc[i, :])
         s.append(ser)
 
