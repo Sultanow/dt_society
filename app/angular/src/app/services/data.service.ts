@@ -237,7 +237,12 @@ export class DataService {
     }
 
     selections.totalCountries = [...new Set(countries)].sort();
-    selections.selectedCountry = selections.totalCountries[0];
+    if (
+      selections.selectedCountry === undefined ||
+      !selections.totalCountries.includes(selections.selectedCountry)
+    ) {
+      selections.selectedCountry = selections.totalCountries[0];
+    }
     this.updateDatasetsSelection(selections);
   }
 
