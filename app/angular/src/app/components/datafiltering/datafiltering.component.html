@@ -1,4 +1,38 @@
 <div class="data-selector">
+  <div
+    class="selected-columns-container"
+    *ngIf="selections.datasets.length > 0"
+  >
+    <p class="section-label-2">Country</p>
+    <div class="column-inputs-row">
+      <mat-form-field>
+        <mat-label>Country</mat-label>
+        <mat-select
+          required
+          #countrySelect
+          [(ngModel)]="selections.selectedCountry"
+          (selectionChange)="updateSideBar()"
+        >
+          <mat-option>
+            <ngx-mat-select-search
+              ngModel
+              (ngModelChange)="filterCountries($event)"
+              placeholderLabel="Search..."
+              noEntriesFoundLabel="No matches"
+            ></ngx-mat-select-search>
+          </mat-option>
+          <mat-option
+            *ngFor="let country of filteredCountries | async"
+            [value]="country"
+          >
+            {{ country }}</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
   <mat-radio-group
     class="data-selector-radio-group"
     aria-label="Select an option"
@@ -107,38 +141,5 @@
       </div>
     </ng-container>
   </mat-radio-group>
-  <mat-divider></mat-divider>
-  <div
-    class="selected-columns-container"
-    *ngIf="selections.datasets.length > 0"
-  >
-    <p class="section-label-2">Country</p>
-    <div class="column-inputs-row">
-      <mat-form-field>
-        <mat-label>Country</mat-label>
-        <mat-select
-          required
-          #countrySelect
-          [(ngModel)]="selections.selectedCountry"
-          (selectionChange)="updateSideBar()"
-        >
-          <mat-option>
-            <ngx-mat-select-search
-              ngModel
-              (ngModelChange)="filterCountries($event)"
-              placeholderLabel="Search..."
-              noEntriesFoundLabel="No matches"
-            ></ngx-mat-select-search>
-          </mat-option>
-          <mat-option
-            *ngFor="let country of filteredCountries | async"
-            [value]="country"
-          >
-            {{ country }}</mat-option
-          >
-        </mat-select>
-      </mat-form-field>
-    </div>
-  </div>
   <div style="clear: both"></div>
 </div>
