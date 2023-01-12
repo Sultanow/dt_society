@@ -10,7 +10,7 @@ import { VarforecastsComponent } from './components/tabs/varforecasts/varforecas
 const appRoutes: Routes = [
   {
     path: '',
-    redirectTo: '/overview',
+    redirectTo: 'overview',
     pathMatch: 'full',
     data: { reuse: true },
   },
@@ -45,6 +45,11 @@ const appRoutes: Routes = [
         component: VarMapComponent,
         data: { reuse: true },
       },
+      {
+        path: '**',
+        redirectTo: 'graph',
+        pathMatch: 'full',
+      },
     ],
   },
   {
@@ -52,6 +57,11 @@ const appRoutes: Routes = [
     component: ProphetscenariosComponent,
     pathMatch: 'full',
     data: { reuse: true },
+  },
+  {
+    path: '**',
+    redirectTo: 'overview',
+    pathMatch: 'full',
   },
 ];
 
