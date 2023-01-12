@@ -52,6 +52,13 @@ nav{
   margin-left: 10em;
 }
 
+.topnav{
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0;
+  z-index: 1000;
+}
+
 .nav-button {
   background: #c2185b;
   border-radius: 6px;
