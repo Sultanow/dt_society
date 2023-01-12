@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { CorrelationsComponent } from './components/correlations/correlations.component';
+import { CorrelationsComponent } from './components/tabs/correlations/correlations.component';
 import { ProphetscenariosComponent } from './components/forecast/prophetscenarios/prophetscenarios.component';
 import { VarMapComponent } from './components/forecast/var-map/var-map.component';
 import { VectorautoregressionComponent } from './components/forecast/vectorautoregression/vectorautoregression.component';
-import { OverviewComponent } from './components/overview/overview.component';
-import { VarforecastsComponent } from './components/varforecasts/varforecasts.component';
+import { OverviewComponent } from './components/tabs/overview/overview.component';
+import { VarforecastsComponent } from './components/tabs/varforecasts/varforecasts.component';
 
 const appRoutes: Routes = [
   {

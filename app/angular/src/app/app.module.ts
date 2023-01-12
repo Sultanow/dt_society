@@ -17,22 +17,24 @@ import { NgScrollbarModule } from 'ngx-scrollbar';
 
 // Components
 import { AppComponent } from './app.component';
-import { HistoryComponent } from './components/graph/history/history.component';
-import { MapComponent } from './components/graph/map/map.component';
-import { HeatmapComponent } from './components/graph/heatmap/heatmap.component';
-import { CorrelationComponent } from './components/graph/correlation/correlation.component';
-import { VectorautoregressionComponent } from './components/forecast/vectorautoregression/vectorautoregression.component';
-import { ProphetscenariosComponent } from './components/forecast/prophetscenarios/prophetscenarios.component';
-import { FileuploadComponent } from './components/fileupload/fileupload.component';
 import { DatafilteringComponent } from './components/datafiltering/datafiltering.component';
-import { UploaddialogComponent } from './components/datafiltering/uploaddialog/uploaddialog.component';
-import { DatatableComponent } from './components/graph/datatable/datatable.component';
-import { StatisticsComponent } from './components/graph/statistics/statistics.component';
-import { OverviewComponent } from './components/overview/overview.component';
-import { CorrelationsComponent } from './components/correlations/correlations.component';
 import { DatasetSettingsComponent } from './components/datafiltering/dataset-settings/dataset-settings.component';
-import { HistoryZoomComponent } from './components/zoom/history-zoom/history-zoom.component';
-import { VarforecastsComponent } from './components/varforecasts/varforecasts.component';
+import { UploaddialogComponent } from './components/datafiltering/uploaddialog/uploaddialog.component';
+import { FileuploadComponent } from './components/datafiltering/fileupload/fileupload.component';
+import { ProphetscenariosComponent } from './components/forecast/prophetscenarios/prophetscenarios.component';
+import { VarMapComponent } from './components/forecast/var-map/var-map.component';
+import { VectorautoregressionComponent } from './components/forecast/vectorautoregression/vectorautoregression.component';
+import { CorrelationComponent } from './components/graph/correlation/correlation.component';
+import { DatatableComponent } from './components/graph/datatable/datatable.component';
+import { HeatmapComponent } from './components/graph/heatmap/heatmap.component';
+import { HistoryZoomComponent } from './components/graph/history/history-zoom/history-zoom.component';
+import { HistoryComponent } from './components/graph/history/history/history.component';
+import { MapZoomComponent } from './components/graph/map/map-zoom/map-zoom.component';
+import { MapComponent } from './components/graph/map/map/map.component';
+import { StatisticsComponent } from './components/graph/statistics/statistics.component';
+import { OverviewComponent } from './components/tabs/overview/overview.component';
+import { CorrelationsComponent } from './components/tabs/correlations/correlations.component';
+import { VarforecastsComponent } from './components/tabs/varforecasts/varforecasts.component';
 
 // Services
 import { AuthService } from './services/auth.service';
@@ -60,8 +62,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MapZoomComponent } from './components/zoom/map-zoom/map-zoom.component';
-import { VarMapComponent } from './components/forecast/var-map/var-map.component';
 
 PlotlyModule.plotlyjs = PlotlyJS;
 

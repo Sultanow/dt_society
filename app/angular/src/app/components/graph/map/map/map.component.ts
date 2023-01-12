@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 import { GraphData, Frame, CountryData } from 'src/app/types/GraphData';
-import { MapZoomComponent } from '../../zoom/map-zoom/map-zoom.component';
+import { MapZoomComponent } from 'src/app/components/graph/map/map-zoom/map-zoom.component';
 
 @Component({
   selector: 'app-map',

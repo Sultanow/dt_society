@@ -4,7 +4,7 @@ import { Plot, CountryData } from 'src/app/types/GraphData';
 import { Selections } from 'src/app/types/Datasets';
 import { HttpEventType } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
-import { HistoryZoomComponent } from '../../zoom/history-zoom/history-zoom.component';
+import { HistoryZoomComponent } from 'src/app/components/graph/history/history-zoom/history-zoom.component';
 
 @Component({
   selector: 'app-history',

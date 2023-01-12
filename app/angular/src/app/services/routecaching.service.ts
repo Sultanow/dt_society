@@ -3,7 +3,6 @@ import {
   ActivatedRouteSnapshot,
   DetachedRouteHandle,
   RouteReuseStrategy,
-  UrlSegment,
 } from '@angular/router';
 
 @Injectable({
