@@ -189,10 +189,11 @@ def var_fit_and_predict_multi(
 
         print(f"{feature} p: ", p_stationary)
         if p_stationary > 0.05:
-            second_diff = merged_df_diff[feature].diff().dropna()
+            second_diff = merged_df_diff[feature].diff().fillna(0)
 
             if adfuller(second_diff)[1] < p_stationary:
                 merged_df_diff[feature] = second_diff
+                merged_df_diff[feature].fillna(0, inplace=True)
                 print("second p:", p_stationary)
 
     # remove volatility across given frequency
