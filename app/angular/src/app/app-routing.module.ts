@@ -32,11 +32,6 @@ const appRoutes: Routes = [
     children: [
       {
         path: '',
-        pathMatch: 'full',
-        redirectTo: 'graph',
-      },
-      {
-        path: 'graph',
         component: VectorautoregressionComponent,
         data: { reuse: true },
       },
@@ -47,7 +42,7 @@ const appRoutes: Routes = [
       },
       {
         path: '**',
-        redirectTo: 'graph',
+        redirectTo: '',
         pathMatch: 'full',
       },
     ],

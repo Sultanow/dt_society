@@ -24,7 +24,8 @@ export class VarforecastsComponent implements OnInit {
     });
 
     this.activeRouteName = this.router.url.slice(
-      this.router.url.lastIndexOf('/') + 1
+      this.router.url.lastIndexOf('var') + 4
     );
+    console.log(this.activeRouteName);
   }
 }
