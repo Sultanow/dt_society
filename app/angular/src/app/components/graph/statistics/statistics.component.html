@@ -1,7 +1,7 @@
 <div *ngIf="dataAvailable; then featureValid; else selectFeatureDialog"></div>
 
 <ng-template #featureValid>
-  <div class="outer-wrapper" [formGroup]="selectionControl">
+  <div class="outer-wrapper">
     <mat-card class="outer" style="height: 350px">
       <div *ngIf="geodata; then geo; else noGeo"></div>
     </mat-card>
@@ -9,7 +9,7 @@
 </ng-template>
 
 <ng-template #geo>
-  <div *ngIf="!showSpinner; else spinner">
+  <div *ngIf="!showSpinner; else spinner" [formGroup]="selectionControl">
     <p class="section-label" style="margin-bottom: 10px">Statistics</p>
     <div class="stats-container">
       <div class="statsDropdown">
@@ -126,7 +126,7 @@
 </ng-template>
 
 <ng-template #noGeo>
-  <div *ngIf="!showSpinner; else spinner">
+  <div *ngIf="!showSpinner; else spinner" [formGroup]="selectionControl">
     <p class="section-label">Statistics</p>
     <div class="stats">
       <mat-card class="single-stat">
