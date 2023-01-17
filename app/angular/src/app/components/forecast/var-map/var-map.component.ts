@@ -33,11 +33,6 @@ export class VarMapComponent implements OnInit {
     selectedDataset: undefined,
   };
 
-  selectionControl = new FormGroup({
-    sliderControl: new FormControl(),
-    geojsonControl: new FormControl(),
-  });
-
   options: Options = {
     showTicks: true,
     showTicksValues: false,
@@ -58,6 +53,12 @@ export class VarMapComponent implements OnInit {
   public maxLags: number = 1;
   public predictionPeriods: number = 15;
   public selectedModel = 'var';
+
+  selectionControl = new FormGroup({
+    sliderControl: new FormControl(),
+    geojsonControl: new FormControl(this.scope),
+    modelControl: new FormControl(this.selectedModel),
+  });
 
   private geojsons = {
     global: {
@@ -317,6 +318,13 @@ export class VarMapComponent implements OnInit {
       .valueChanges.subscribe((value) => {
         this.scope = String(value);
         this.createInitialData();
+      });
+
+    this.selectionControl
+      .get('modelControl')!
+      .valueChanges.subscribe((value) => {
+        this.selectedModel = String(value);
+        this.updateForecastData();
       });
   }
 }

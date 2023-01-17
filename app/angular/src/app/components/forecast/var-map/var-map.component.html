@@ -1,5 +1,5 @@
-<div class="toggle-container">
-  <div class="model-selector">
+<div [formGroup]="selectionControl" class="control-container">
+  <div class="control">
     <p
       style="
         font-size: 18px;
@@ -10,13 +10,28 @@
     >
       Model
     </p>
-    <mat-radio-group
-      aria-label="Select a model"
-      [(ngModel)]="selectedModel"
-      (change)="updateForecastData()"
-    >
+    <mat-radio-group aria-label="Select a model" formControlName="modelControl">
       <mat-radio-button value="var">Vector Auto Regression</mat-radio-button>
       <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
+    </mat-radio-group>
+  </div>
+  <div class="control" style="margin-left: 30px">
+    <p
+      style="
+        font-size: 18px;
+        font-weight: lighter;
+        margin-bottom: 10px;
+        margin-top: 10px;
+      "
+    >
+      Scope
+    </p>
+    <mat-radio-group
+      aria-label="Select an option"
+      formControlName="geojsonControl"
+    >
+      <mat-radio-button value="global">Global</mat-radio-button>
+      <mat-radio-button value="germany">Germany</mat-radio-button>
     </mat-radio-group>
   </div>
 </div>
@@ -33,35 +48,27 @@
 <ng-template #map>
   <div [formGroup]="selectionControl">
     <div class="slider-container custom-slider">
-      <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
-        Scope
-      </p>
-      <mat-radio-group
-        aria-label="Select an option"
-        formControlName="geojsonControl"
-      >
-        <mat-radio-button value="global">Global</mat-radio-button>
-        <mat-radio-button value="germany">Germany</mat-radio-button>
-      </mat-radio-group>
       <ngx-slider
         formControlName="sliderControl"
         [(value)]="currentSliderValue"
         [options]="options"
       ></ngx-slider>
     </div>
-    <div class="map-container" *ngFor="let feature of features; index as i">
-      <mat-card>
-        <mat-card-subtitle
-          >{{ names![i][1] }} - {{ names![i][0] }}</mat-card-subtitle
-        >
-        <plotly-plot
-          *ngIf="data.data[i + 1].length > 0"
-          [data]="data.data[i + 1]"
-          [layout]="data.layout"
-          [config]="data.config"
-        >
-        </plotly-plot>
-      </mat-card>
+    <div class="map-container">
+      <div class="map" *ngFor="let feature of features; index as i">
+        <mat-card>
+          <mat-card-subtitle
+            >{{ names![i][1] }} - {{ names![i][0] }}</mat-card-subtitle
+          >
+          <plotly-plot
+            *ngIf="data.data[i + 1].length > 0"
+            [data]="data.data[i + 1]"
+            [layout]="data.layout"
+            [config]="data.config"
+          >
+          </plotly-plot>
+        </mat-card>
+      </div>
     </div>
   </div>
 </ng-template>

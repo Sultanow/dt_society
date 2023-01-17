@@ -22,7 +22,7 @@ mat-radio-button {
   min-height: 500px;
 }
 
-.model-selector {
+.control-selector {
   margin-top: 10px;
   margin-bottom: 10px;
 }
@@ -42,11 +42,15 @@ mat-radio-button {
   margin-bottom: 5px;
 }
 
-.map-container {
-  margin-bottom: 10px;
+.map-container{
+  display: grid;
+  grid-template-columns: 50% 50%;
+}
+.map {
+  margin: 10px;
 }
 
-.toggle-container {
+.control-container {
   display: flex;
 }
 
