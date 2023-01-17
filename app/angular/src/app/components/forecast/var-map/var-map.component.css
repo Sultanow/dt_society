@@ -22,9 +22,8 @@ mat-radio-button {
   min-height: 500px;
 }
 
-.control-selector {
-  margin-top: 10px;
-  margin-bottom: 10px;
+.control {
+  margin: 10px 50px 10px 0;
 }
 
 .content-container {
@@ -52,6 +51,13 @@ mat-radio-button {
 
 .control-container {
   display: flex;
+}
+
+#control-title{
+  font-size: 18px;
+  font-weight: lighter;
+  margin-bottom: 10px;
+  margin-top: 10px;
 }
 
 /*ngx-slider style*/
