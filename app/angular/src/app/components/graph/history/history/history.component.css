@@ -1,8 +1,9 @@
 mat-card{
-    height: 550px;
+    height: 450px;
 }
 
 .zoom-button {
-  margin-bottom: -80px;
-  z-index: 1;
- }
+  position: absolute;
+  z-index: 100;
+  margin-bottom: -60px;
+}

@@ -198,6 +198,7 @@ export class MapComponent implements OnInit {
       ],
       layout: {
         margin: { r: 0, t: 0, l: 0, b: 0 },
+        height: 380,
         paper_bgcolor: '#424242',
         plot_bgcolor: '#424242',
         font: { color: '#f2f2f2' },

@@ -20,7 +20,7 @@ mat-slider {
 }
 
 mat-radio-button {
-  padding: 5px;
+  padding: 5px 10px 5px 0;
 }
 
 mat-checkbox {
@@ -50,7 +50,7 @@ mat-checkbox {
   left: 0;
   right: 0;
   position: absolute;
-  bottom: 50px
+  bottom: 5px;
 }
 
 .data-selector {

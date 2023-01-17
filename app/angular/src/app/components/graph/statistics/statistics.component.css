@@ -1,9 +1,9 @@
 .dialog-wrapper {
-  padding: 10px;
+  padding: 5px;
 }
 
 .dialog {
-  height: 450px;
+  height: 350px;
 }
 
 .content-container {
@@ -20,7 +20,6 @@
   width: 25%;
   max-width: 150px;
   padding: 10px;
-  margin: 0 15px 0 15px;
   overflow-wrap: break-word;
 }
 
@@ -45,23 +44,22 @@
   width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: center;
-}
-
-.stat-content{
-  font-size: x-large;
+  justify-content: space-evenly;
 }
 
 .growth-container {
-  margin-top: 2em;
-  margin-bottom: 2em;
   max-width: 700px;
 }
 
-.growth-selections {
+#growth-selections-geo {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
+}
+#growth-selections-nogeo {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 
 ngx-slider {

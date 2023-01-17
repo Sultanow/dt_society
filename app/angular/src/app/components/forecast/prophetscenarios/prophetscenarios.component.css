@@ -20,7 +20,7 @@ mat-slider {
 }
 
 mat-radio-button {
-  padding: 5px;
+  padding: 5px 10px 5px 0;
 }
 
 .freq-selector {
@@ -109,7 +109,7 @@ mat-radio-button {
   left: 0;
   right: 0;
   position: absolute;
-  bottom: 50px
+  bottom: 5px;
 }
 
 mat-card-title {

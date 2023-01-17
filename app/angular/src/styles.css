@@ -32,11 +32,11 @@ mat-card-title{
 
 /* layout of cards*/
 .outer-wrapper{
-  padding: 10px;
+  padding: 5px;
 }
 
 .outer{
-  min-height: 500px;
+  min-height: 350px;
 }
 
 /* formatting of tooltips */

@@ -1,98 +1,104 @@
 <div *ngIf="dataAvailable; then featureValid; else selectFeatureDialog"></div>
 
 <ng-template #featureValid>
-  <div *ngIf="geodata; then geo; else noGeo"></div>
+  <div class="outer-wrapper" [formGroup]="selectionControl">
+    <mat-card class="outer" style="height: 350px">
+      <div *ngIf="geodata; then geo; else noGeo"></div>
+    </mat-card>
+  </div>
 </ng-template>
 
 <ng-template #geo>
-  <div class="outer-wrapper" [formGroup]="selectionControl">
-    <mat-card class="outer">
-      <p class="section-label" style="margin-bottom: 30px">Statistics</p>
-      <div class="stats-container">
-        <div class="statsDropdown">
+  <div *ngIf="!showSpinner; else spinner">
+    <p class="section-label" style="margin-bottom: 10px">Statistics</p>
+    <div class="stats-container">
+      <div class="statsDropdown">
+        <mat-form-field>
+          <mat-label>Time</mat-label>
+          <mat-select formControlName="selectedYearControl">
+            <mat-option
+              *ngFor="let timestamp of timestamps"
+              [value]="timestamp"
+            >
+              {{ timestamp }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="stats">
+        <mat-card class="single-stat">
+          <mat-card-title>Min</mat-card-title>
+          <mat-card-content class="stat-content">{{ min }}</mat-card-content>
+          <mat-card-content class="stat-content">{{
+            min_key
+          }}</mat-card-content>
+        </mat-card>
+        <mat-card class="single-stat">
+          <mat-card-title>Max</mat-card-title>
+          <mat-card-content class="stat-content">{{ max }}</mat-card-content>
+          <mat-card-content class="stat-content">{{
+            max_key
+          }}</mat-card-content>
+        </mat-card>
+        <mat-card class="single-stat">
+          <mat-card-title>Mean</mat-card-title>
+          <mat-card-content class="stat-content">{{ mean }}</mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+    <mat-divider
+      inset
+      style="margin-top: 10px; margin-bottom: 10px"
+    ></mat-divider>
+    <div>
+      <div class="growth-container">
+        <div id="growth-selections-geo" class="custom-slider">
           <mat-form-field>
-            <mat-label>Time</mat-label>
-            <mat-select formControlName="selectedYearControl">
+            <mat-label>Country</mat-label>
+            <mat-select formControlName="selectedCountryControl">
+              <mat-option>
+                <ngx-mat-select-search
+                  formControlName="countryFilterControl"
+                  placeholderLabel="Search..."
+                  noEntriesFoundLabel="No matches"
+                ></ngx-mat-select-search>
+              </mat-option>
               <mat-option
-                *ngFor="let timestamp of timestamps"
-                [value]="timestamp"
+                *ngFor="let country of filteredCountries | async"
+                [value]="country"
               >
-                {{ timestamp }}
+                {{ country }}
               </mat-option>
             </mat-select>
           </mat-form-field>
+          <ngx-slider
+            formControlName="sliderControl"
+            [(value)]="value"
+            [(highValue)]="highValue"
+            [options]="options"
+          >
+          </ngx-slider>
         </div>
         <div class="stats">
-          <mat-card class="single-stat">
-            <mat-card-title>Min</mat-card-title>
-            <mat-card-content class="stat-content">{{ min }}</mat-card-content>
-            <mat-card-content class="stat-content">{{
-              min_key
-            }}</mat-card-content>
-          </mat-card>
-          <mat-card class="single-stat">
-            <mat-card-title>Max</mat-card-title>
-            <mat-card-content class="stat-content">{{ max }}</mat-card-content>
-            <mat-card-content class="stat-content">{{
-              max_key
-            }}</mat-card-content>
-          </mat-card>
-          <mat-card class="single-stat">
-            <mat-card-title>Mean</mat-card-title>
-            <mat-card-content class="stat-content">{{ mean }}</mat-card-content>
-          </mat-card>
-        </div>
-      </div>
-      <mat-divider
-        inset
-        style="margin-top: 30px; margin-bottom: 30px"
-      ></mat-divider>
-      <div>
-        <div class="growth-container">
-          <div class="growth-selections custom-slider">
-            <mat-form-field>
-              <mat-label>Country</mat-label>
-              <mat-select formControlName="selectedCountryControl">
-                <mat-option>
-                  <ngx-mat-select-search
-                    formControlName="countryFilterControl"
-                    placeholderLabel="Search..."
-                    noEntriesFoundLabel="No matches"
-                  ></ngx-mat-select-search>
-                </mat-option>
-                <mat-option
-                  *ngFor="let country of filteredCountries | async"
-                  [value]="country"
-                >
-                  {{ country }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-            <ngx-slider
-              formControlName="sliderControl"
-              [(value)]="value"
-              [(highValue)]="highValue"
-              [options]="options"
+          <mat-card class="single-stat-growth">
+            <mat-card-title style="font-size: large"
+              >Growth Rate</mat-card-title
             >
-            </ngx-slider>
-          </div>
-          <div class="stats">
-            <mat-card class="single-stat-growth">
-              <mat-card-title>Growth Rate</mat-card-title>
-              <mat-card-content class="stat-content">{{
-                growthrate
-              }}</mat-card-content>
-            </mat-card>
-            <mat-card class="single-stat-growth">
-              <mat-card-title> Average Growth Rate</mat-card-title>
-              <mat-card-content class="stat-content">{{
-                growthrate_per_time
-              }}</mat-card-content>
-            </mat-card>
-          </div>
+            <mat-card-content class="stat-content">{{
+              growthrate
+            }}</mat-card-content>
+          </mat-card>
+          <mat-card class="single-stat-growth">
+            <mat-card-title style="font-size: large">
+              Average Growth Rate</mat-card-title
+            >
+            <mat-card-content class="stat-content">{{
+              growthrate_per_time
+            }}</mat-card-content>
+          </mat-card>
         </div>
       </div>
-    </mat-card>
+    </div>
   </div>
 </ng-template>
 
@@ -120,49 +126,56 @@
 </ng-template>
 
 <ng-template #noGeo>
-  <div class="statistics-wrapper" [formGroup]="selectionControl">
-    <mat-card class="outer">
-      <p class="section-label">Statistics</p>
-      <div class="stats-container">
-        <mat-card class="single-stat">
-          <mat-card-title>Min</mat-card-title>
-          <mat-card-content>{{ min }}</mat-card-content>
-          <mat-card-content>{{ min_key }}</mat-card-content>
-        </mat-card>
-        <mat-card class="single-stat">
-          <mat-card-title>Max</mat-card-title>
-          <mat-card-content>{{ max }}</mat-card-content>
-          <mat-card-content>{{ max_key }}</mat-card-content>
-        </mat-card>
-        <mat-card class="single-stat">
-          <mat-card-title>Mean</mat-card-title>
-          <mat-card-content>{{ mean }}</mat-card-content>
-        </mat-card>
-      </div>
-      <mat-divider inset></mat-divider>
-      <div>
-        <div class="growth-container">
-          <div class="growth-selections custom-slider">
-            <ngx-slider
-              formControlName="sliderControl"
-              [(value)]="value"
-              [(highValue)]="highValue"
-              [options]="options"
-            >
-            </ngx-slider>
-          </div>
-          <div class="stats-container">
-            <mat-card class="single-stat-growth">
-              <mat-card-title>Growth Rate</mat-card-title>
-              <mat-card-content>{{ growthrate }}</mat-card-content>
-            </mat-card>
-            <mat-card class="single-stat-growth">
-              <mat-card-title> Average Growth Rate</mat-card-title>
-              <mat-card-content>{{ growthrate_per_time }}</mat-card-content>
-            </mat-card>
-          </div>
+  <div *ngIf="!showSpinner; else spinner">
+    <p class="section-label">Statistics</p>
+    <div class="stats">
+      <mat-card class="single-stat">
+        <mat-card-title>Min</mat-card-title>
+        <mat-card-content>{{ min }}</mat-card-content>
+        <mat-card-content>{{ min_key }}</mat-card-content>
+      </mat-card>
+      <mat-card class="single-stat">
+        <mat-card-title>Max</mat-card-title>
+        <mat-card-content>{{ max }}</mat-card-content>
+        <mat-card-content>{{ max_key }}</mat-card-content>
+      </mat-card>
+      <mat-card class="single-stat">
+        <mat-card-title>Mean</mat-card-title>
+        <mat-card-content>{{ mean }}</mat-card-content>
+      </mat-card>
+    </div>
+    <mat-divider
+      inset
+      style="margin-top: 10px; margin-bottom: 10px"
+    ></mat-divider>
+    <div>
+      <div class="growth-container">
+        <div id="growth-selections-nogeo" class="custom-slider">
+          <ngx-slider
+            formControlName="sliderControl"
+            [(value)]="value"
+            [(highValue)]="highValue"
+            [options]="options"
+          >
+          </ngx-slider>
+        </div>
+        <div class="stats">
+          <mat-card class="single-stat-growth">
+            <mat-card-title>Growth Rate</mat-card-title>
+            <mat-card-content>{{ growthrate }}</mat-card-content>
+          </mat-card>
+          <mat-card class="single-stat-growth">
+            <mat-card-title> Average Growth Rate</mat-card-title>
+            <mat-card-content>{{ growthrate_per_time }}</mat-card-content>
+          </mat-card>
         </div>
       </div>
-    </mat-card>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #spinner>
+  <div class="loading-spinner">
+    <mat-spinner></mat-spinner>
   </div>
 </ng-template>

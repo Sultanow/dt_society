@@ -18,8 +18,8 @@ export class MapZoomComponent implements OnInit {
 
   ngOnInit(): void {
     this.data = structuredClone(this.plotData);
-    this.data.layout.width = 1400;
-    this.data.layout.height = 1000;
+    this.data.layout.width = 1200;
+    this.data.layout.height = 800;
     this.data.layout.mapbox.zoom = 3;
   }
 }

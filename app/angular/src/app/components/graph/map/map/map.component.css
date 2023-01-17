@@ -1,7 +1,7 @@
 .slider-container {
   display: flex;
   position: absolute;
-  bottom: 1em;
+  bottom: 5px;
   left: 50%;
   transform: translateX(-50%);
   width: 95%;
@@ -12,26 +12,17 @@ mat-radio-button {
 }
 
 mat-card {
-  height: 550px;
+  min-height: 450px;
 }
 
 .dialog-wrapper {
   padding: 10px;
 }
 
-.content-container {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  -ms-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-  text-align: center;
-  justify-content: center;
-}
-
 .zoom-button {
-  margin-bottom: -80px;
-  z-index: 1;
+  position: absolute;
+  z-index: 100;
+  margin-bottom: -60px;
 }
 
 /*ngx-slider style*/

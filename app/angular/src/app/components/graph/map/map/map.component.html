@@ -11,16 +11,13 @@
 </ng-template>
 
 <ng-template #map>
-  <button
-    mat-icon-button
-    color="secondary"
-    (click)="zoom()"
-    class="zoom-button"
-  >
-    <mat-icon color="secondary">zoom_out_map</mat-icon>
-  </button>
+  <div class="zoom-button">
+    <button mat-icon-button color="secondary" (click)="zoom()">
+      <mat-icon color="secondary">zoom_out_map</mat-icon>
+    </button>
+  </div>
   <div [formGroup]="selectionControl">
-    <div>
+    <div style="height: 300px">
       <plotly-plot
         *ngIf="data.data.length > 0"
         [data]="data.data"
