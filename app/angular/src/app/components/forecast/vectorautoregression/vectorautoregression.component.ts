@@ -9,6 +9,9 @@ import {
   ScenarioData,
 } from 'src/app/types/GraphData';
 import { Options } from '@angular-slider/ngx-slider';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { VarDatasetSettingsComponent } from '../vardatasetsettings/vardatasetsettings.component';
+import { MatDialog } from '@angular/material/dialog';
 
 // multivariate graph based forecasting component
 // (VAR, HW exponential smoothing)
@@ -19,12 +22,14 @@ import { Options } from '@angular-slider/ngx-slider';
   styleUrls: ['./vectorautoregression.component.css'],
 })
 export class VectorautoregressionComponent implements OnInit {
-  constructor(private dataService: DataService) {}
+  constructor(private dataService: DataService, public dialog: MatDialog) {}
 
   public selections: Selections = {
     datasets: [],
     selectedDataset: undefined,
   };
+
+  settingsIcon = faGear;
 
   // Binded properties
   public countries: string[] = [];
@@ -34,6 +39,7 @@ export class VectorautoregressionComponent implements OnInit {
   public selectedModel: string = 'var';
   public showSpinner: boolean = false;
   public validDatasets: number = 0;
+  public validData: boolean = false;
   public scenarios: ScenarioData = {};
 
   public data: Plot = {
@@ -109,6 +115,16 @@ export class VectorautoregressionComponent implements OnInit {
       'hotpink',
       'mediumblue',
       'goldenrod',
+      '#1f77b4',
+      '#ff7f0e',
+      '#2ca02c',
+      '#d62728',
+      '#9467bd',
+      '#8c564b',
+      '#e377c2',
+      '#7f7f7f',
+      '#bcbd22',
+      '#17becf',
     ];
 
     const breakString = (str: string, maxChars: number): string => {
@@ -201,7 +217,12 @@ export class VectorautoregressionComponent implements OnInit {
           ) &&
           this.scenarios[dataset.id as string].active === true
       );
-      if (filteredSelections.length > 1) {
+      if (
+        filteredSelections.length > 1 ||
+        (filteredSelections.length === 1 &&
+          filteredSelections[0].varFeaturesSelected !== undefined &&
+          filteredSelections[0].varFeaturesSelected.length > 1)
+      ) {
         this.showSpinner = true;
         this.dataService
           .getData(
@@ -226,9 +247,14 @@ export class VectorautoregressionComponent implements OnInit {
     }
   }
 
+  datasetSettings(datasetId: string | undefined) {
+    this.dialog.open(VarDatasetSettingsComponent, { data: datasetId });
+  }
+
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((updatedSelections) => {
       this.selections = updatedSelections;
+      this.validData = false;
       this.validDatasets = 0;
 
       if (this.selections.datasets.length > 0) {
@@ -253,6 +279,16 @@ export class VectorautoregressionComponent implements OnInit {
               ) as boolean;
           }
         });
+        if (
+          this.validDatasets > 1 ||
+          this.selections.datasets.some(
+            (dataset) =>
+              dataset.varFeaturesSelected !== undefined &&
+              dataset.varFeaturesSelected.length > 1
+          )
+        ) {
+          this.validData = true;
+        }
       }
       this.updateVarForecast();
     });

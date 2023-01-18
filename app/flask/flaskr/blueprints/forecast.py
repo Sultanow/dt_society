@@ -45,49 +45,62 @@ def forecastVAR(model):
 
     response_data = {}
     for dataset in datasets:
-
-        reshape_selected = (
-            dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
+        varFeatures_selected = (
+            dataset["varFeaturesSelected"]
+            if "varFeaturesSelected" in dataset
+            else [dataset["featureSelected"]]
         )
+
         geo_selected = dataset["geoSelected"]
         dataset_id = dataset["id"] if dataset["geoSelected"] != "None" else None
         time_selected = dataset["timeSelected"]
-        feature_selected = dataset["featureSelected"]
 
-        df, _ = parse_dataset(
-            geo_column=geo_selected,
-            dataset_id=dataset_id,
-            reshape_column=reshape_selected,
-            session_id=session,
-        )
-        if geo_selected is None:
-            filtered_df = df
-            filtered_df[time_selected] = pd.to_datetime(
-                filtered_df[time_selected].astype("str")
+        for feature in varFeatures_selected:
+
+            reshape_selected = (
+                dataset["reshapeSelected"]
+                if dataset["reshapeSelected"] != "N/A"
+                else None
             )
+            feature_selected = feature
 
-            freq = pd.infer_freq(filtered_df[time_selected])
-
-            filtered_dfs.append(filtered_df)
-            frequencies.append(freq)
-            time_columns.append(time_selected)
-            feature_columns.append(feature_selected)
-
-        elif geo_selected is not None and selected_country in df[geo_selected].unique():
-            filtered_df = df[df[geo_selected] == selected_country][
-                [time_selected, feature_selected]
-            ]
-
-            filtered_df[time_selected] = pd.to_datetime(
-                filtered_df[time_selected].astype("str")
+            df, _ = parse_dataset(
+                geo_column=geo_selected,
+                dataset_id=dataset_id,
+                reshape_column=reshape_selected,
+                session_id=session,
             )
+            if geo_selected is None:
+                filtered_df = df
+                filtered_df[time_selected] = pd.to_datetime(
+                    filtered_df[time_selected].astype("str")
+                )
 
-            freq = pd.infer_freq(filtered_df[time_selected])
+                freq = pd.infer_freq(filtered_df[time_selected])
 
-            filtered_dfs.append(filtered_df)
-            frequencies.append(freq)
-            time_columns.append(time_selected)
-            feature_columns.append(feature_selected)
+                filtered_dfs.append(filtered_df)
+                frequencies.append(freq)
+                time_columns.append(time_selected)
+                feature_columns.append(feature_selected)
+
+            elif (
+                geo_selected is not None
+                and selected_country in df[geo_selected].unique()
+            ):
+                filtered_df = df[df[geo_selected] == selected_country][
+                    [time_selected, feature_selected]
+                ]
+
+                filtered_df[time_selected] = pd.to_datetime(
+                    filtered_df[time_selected].astype("str")
+                )
+
+                freq = pd.infer_freq(filtered_df[time_selected])
+
+                filtered_dfs.append(filtered_df)
+                frequencies.append(freq)
+                time_columns.append(time_selected)
+                feature_columns.append(feature_selected)
 
     if len(set(frequencies)) != 1:
         print("Frequencies of datasets do not match.")

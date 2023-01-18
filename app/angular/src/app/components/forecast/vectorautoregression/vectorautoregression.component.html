@@ -38,35 +38,60 @@
   <div class="data-selector">
     <div>
       <p class="section-label">Forecasted data</p>
-      <ng-container *ngFor="let dataset of selections.datasets">
-        <mat-checkbox
-          *ngIf="
-            dataset.id !== undefined &&
-            dataset.featureSelected !== undefined &&
-            scenarios[dataset.id] !== undefined
-          "
-          [(ngModel)]="scenarios[dataset.id].active"
-          [disabled]="scenarios[dataset.id].selectable === false"
-          (change)="updateVarForecast()"
-        >
-          {{ dataset.name }}
-        </mat-checkbox>
-      </ng-container>
+      <div style="display: flex; flex-direction: row">
+        <ng-container *ngFor="let dataset of selections.datasets">
+          <div
+            *ngIf="
+              dataset.id !== undefined &&
+              dataset.featureSelected !== undefined &&
+              scenarios[dataset.id] !== undefined
+            "
+            style="display: flex; flex-direction: row; justify-items: start"
+          >
+            <mat-checkbox
+              [(ngModel)]="scenarios[dataset.id].active"
+              [disabled]="scenarios[dataset.id].selectable === false"
+              (change)="updateVarForecast()"
+            >
+              {{ dataset.name }}
+              <div
+                *ngIf="
+                  dataset.featureSelected !== undefined &&
+                  dataset.varFeaturesSelected === undefined
+                "
+              >
+                ({{ dataset.featureSelected }})
+              </div>
+              <div *ngIf="dataset.varFeaturesSelected !== undefined">
+                ({{ dataset.varFeaturesSelected }})
+              </div>
+            </mat-checkbox>
+            <button
+              mat-icon-button
+              color="primary"
+              class="settings-button"
+              (click)="datasetSettings(dataset.id)"
+            >
+              <fa-icon [icon]="settingsIcon"></fa-icon>
+            </button>
+          </div>
+        </ng-container>
+      </div>
     </div>
   </div>
 </div>
 
 <div class="custom-slider">
   <ngx-slider
-    *ngIf="validDatasets > 1"
+    *ngIf="validData"
     [(value)]="predictionPeriods"
     [options]="options"
     (userChangeEnd)="updateVarForecast()"
   ></ngx-slider>
 </div>
 
-<div *ngIf="validDatasets > 1; else inValidSelections">
-  <mat-card>
+<div *ngIf="validDatasets > 0; else inValidSelections">
+  <mat-card *ngIf="validData; else selectFeaturesDialog">
     <div
       style="display: flex; flex-direction: row; justify-content: flex-start"
     >
@@ -115,6 +140,21 @@
           country.
         </p>
         <p>The data sets can be managed through the sidebar.</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</ng-template>
+
+<ng-template #selectFeaturesDialog>
+  <div class="dialog-wrapper">
+    <mat-card class="dialog" style="height: 100px">
+      <mat-card-content>
+        <p>
+          Please select another feature using the
+          <fa-icon [icon]="settingsIcon"></fa-icon> next to the data set under
+          "Forecasted data"
+        </p>
+        <p>Or select a feature for another data set in the sidebar.</p>
       </mat-card-content>
     </mat-card>
   </div>
