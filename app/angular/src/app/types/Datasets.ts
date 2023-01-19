@@ -9,6 +9,7 @@ export interface Dataset {
   timeSelected?: string;
   featureSelected?: string;
   varFeaturesSelected?: string[];
+  varmapFeaturesSelected?: string[];
   possibleFeatures?: string[];
   token?: string;
   name?: string;

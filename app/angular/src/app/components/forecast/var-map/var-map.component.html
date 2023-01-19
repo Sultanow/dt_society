@@ -1,23 +1,67 @@
 <div [formGroup]="selectionControl" class="control-container">
-  <div class="control">
-    <p id="control-title">Model</p>
-    <mat-radio-group aria-label="Select a model" formControlName="modelControl">
-      <mat-radio-button value="var">Vector Auto Regression</mat-radio-button>
-      <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
-    </mat-radio-group>
+  <div style="display: flex; flex-direction: row">
+    <div class="control">
+      <p id="control-title">Model</p>
+      <mat-radio-group
+        aria-label="Select a model"
+        formControlName="modelControl"
+      >
+        <mat-radio-button value="var">Vector Auto Regression</mat-radio-button>
+        <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
+      </mat-radio-group>
+    </div>
+    <div class="control">
+      <p id="control-title">Scope</p>
+      <mat-radio-group
+        aria-label="Select an option"
+        formControlName="geojsonControl"
+      >
+        <mat-radio-button value="global">Global</mat-radio-button>
+        <mat-radio-button value="germany">Germany</mat-radio-button>
+      </mat-radio-group>
+    </div>
   </div>
-  <div class="control">
-    <p id="control-title">Scope</p>
-    <mat-radio-group
-      aria-label="Select an option"
-      formControlName="geojsonControl"
-    >
-      <mat-radio-button value="global">Global</mat-radio-button>
-      <mat-radio-button value="germany">Germany</mat-radio-button>
-    </mat-radio-group>
+  <div class="data-selector">
+    <div>
+      <p class="section-label">Forecasted data</p>
+      <div style="display: flex; flex-direction: row">
+        <ng-container *ngFor="let dataset of selections.datasets">
+          <div
+            *ngIf="
+              dataset.id !== undefined && dataset.featureSelected !== undefined
+            "
+            style="display: flex; flex-direction: row; justify-items: start"
+          >
+            <div>
+              {{ dataset.name }}
+              <div
+                *ngIf="
+                  dataset.featureSelected !== undefined &&
+                  dataset.varmapFeaturesSelected === undefined
+                "
+              >
+                ({{ dataset.featureSelected }})
+              </div>
+              <div *ngIf="dataset.varmapFeaturesSelected !== undefined">
+                ({{ dataset.varmapFeaturesSelected }})
+              </div>
+            </div>
+            <button
+              mat-icon-button
+              color="primary"
+              class="settings-button"
+              (click)="datasetSettings(dataset.id)"
+            >
+              <fa-icon [icon]="settingsIcon"></fa-icon>
+            </button>
+          </div>
+        </ng-container>
+      </div>
+    </div>
   </div>
 </div>
-<div *ngIf="validDatasets > 1; else inValidSelections">
+
+<div *ngIf="validDatasets > 0; else inValidSelections">
   <div *ngIf="showSpinner; then spinner; else map"></div>
 </div>
 
@@ -31,12 +75,13 @@
   <div [formGroup]="selectionControl">
     <div class="slider-container custom-slider">
       <ngx-slider
+        *ngIf="validData"
         formControlName="sliderControl"
         [(value)]="currentSliderValue"
         [options]="options"
       ></ngx-slider>
     </div>
-    <div class="map-container">
+    <div class="map-container" *ngIf="validData">
       <div class="map" *ngFor="let feature of features; index as i">
         <mat-card>
           <mat-card-subtitle

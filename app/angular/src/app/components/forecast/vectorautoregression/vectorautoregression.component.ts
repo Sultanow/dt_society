@@ -9,7 +9,7 @@ import {
   ScenarioData,
 } from 'src/app/types/GraphData';
 import { Options } from '@angular-slider/ngx-slider';
-import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
 import { VarDatasetSettingsComponent } from '../vardatasetsettings/vardatasetsettings.component';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -29,7 +29,7 @@ export class VectorautoregressionComponent implements OnInit {
     selectedDataset: undefined,
   };
 
-  settingsIcon = faGear;
+  settingsIcon = faCaretDown;
 
   // Binded properties
   public countries: string[] = [];
@@ -248,7 +248,9 @@ export class VectorautoregressionComponent implements OnInit {
   }
 
   datasetSettings(datasetId: string | undefined) {
-    this.dialog.open(VarDatasetSettingsComponent, { data: datasetId });
+    this.dialog.open(VarDatasetSettingsComponent, {
+      data: { datasetId: datasetId, type: 'graph' },
+    });
   }
 
   ngOnInit(): void {

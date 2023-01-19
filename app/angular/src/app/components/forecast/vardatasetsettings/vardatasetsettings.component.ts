@@ -11,7 +11,7 @@ import { Dataset, Selections } from 'src/app/types/Datasets';
 export class VarDatasetSettingsComponent implements OnInit {
   constructor(
     private dataService: DataService,
-    @Inject(MAT_DIALOG_DATA) public datasetId: string
+    @Inject(MAT_DIALOG_DATA) public data: { datasetId: string; type: string }
   ) {}
 
   selections: Selections = {
@@ -32,9 +32,17 @@ export class VarDatasetSettingsComponent implements OnInit {
     ) {
       this.featuresSelected = [];
       this.featuresSelected.push(this.currentDataset!.featureSelected!);
-      this.currentDataset!.varFeaturesSelected = undefined;
+      if (this.data.type === 'graph') {
+        this.currentDataset!.varFeaturesSelected = undefined;
+      } else if (this.data.type === 'map') {
+        this.currentDataset!.varmapFeaturesSelected = undefined;
+      }
     } else {
-      this.currentDataset!.varFeaturesSelected = this.featuresSelected;
+      if (this.data.type === 'graph') {
+        this.currentDataset!.varFeaturesSelected = this.featuresSelected;
+      } else if (this.data.type === 'map') {
+        this.currentDataset!.varmapFeaturesSelected = this.featuresSelected;
+      }
     }
     this.dataService.updateDatasetsSelection(this.selections);
   }
@@ -44,17 +52,26 @@ export class VarDatasetSettingsComponent implements OnInit {
       this.selections = value;
     });
     this.currentDataset = this.selections.datasets.filter(
-      (dataset) => dataset.id == this.datasetId
+      (dataset) => dataset.id == this.data.datasetId
     )[0];
     this.featureList = this.currentDataset.featureOptions!.filter(
       (feature) => feature !== this.currentDataset!.timeSelected
     );
 
     this.featuresSelected = [];
-    if (this.currentDataset.varFeaturesSelected !== undefined) {
-      this.featuresSelected = this.currentDataset.varFeaturesSelected;
-    } else {
-      this.featuresSelected.push(this.currentDataset.featureSelected!);
+
+    if (this.data.type === 'graph') {
+      if (this.currentDataset.varFeaturesSelected !== undefined) {
+        this.featuresSelected = this.currentDataset.varFeaturesSelected;
+      } else {
+        this.featuresSelected.push(this.currentDataset.featureSelected!);
+      }
+    } else if (this.data.type === 'map') {
+      if (this.currentDataset.varmapFeaturesSelected !== undefined) {
+        this.featuresSelected = this.currentDataset.varmapFeaturesSelected;
+      } else {
+        this.featuresSelected.push(this.currentDataset.featureSelected!);
+      }
     }
   }
 }

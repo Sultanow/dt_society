@@ -54,14 +54,12 @@ def forecastVAR(model):
         geo_selected = dataset["geoSelected"]
         dataset_id = dataset["id"] if dataset["geoSelected"] != "None" else None
         time_selected = dataset["timeSelected"]
+        reshape_selected = (
+            dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
+        )
 
         for feature in varFeatures_selected:
 
-            reshape_selected = (
-                dataset["reshapeSelected"]
-                if dataset["reshapeSelected"] != "N/A"
-                else None
-            )
             feature_selected = feature
 
             df, _ = parse_dataset(
@@ -296,13 +294,19 @@ def var_forecast_map(model):
     response_data = {}
     for dataset in datasets:
 
-        reshape_selected = (
-            dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
+        varmapFeatures_selected = (
+            dataset["varmapFeaturesSelected"]
+            if "varmapFeaturesSelected" in dataset
+            else [dataset["featureSelected"]]
         )
+
         geo_selected = dataset["geoSelected"]
         dataset_id = dataset["id"] if dataset["geoSelected"] != "None" else None
         time_selected = dataset["timeSelected"]
-        feature_selected = dataset["featureSelected"]
+
+        reshape_selected = (
+            dataset["reshapeSelected"] if dataset["reshapeSelected"] != "N/A" else None
+        )
 
         df, _ = parse_dataset(
             geo_column=geo_selected,
@@ -312,6 +316,7 @@ def var_forecast_map(model):
         )
 
         filtered_df = df.dropna()
+
         filtered_df[time_selected] = pd.to_datetime(
             filtered_df[time_selected].astype("str")
         )
@@ -328,25 +333,34 @@ def var_forecast_map(model):
         dfs = []
         features = []
         time = []
+        k = 0
         for i, df in enumerate(datasets):
             geo_col = df["geoSelected"]
             time_selected = df["timeSelected"]
-            feature_selected = df["featureSelected"]
 
-            if country not in filtered_dfs[i][geo_col].unique():
-                break
-
-            dfs.append(
-                filtered_dfs[i][filtered_dfs[i][geo_col] == country][
-                    [time_selected, feature_selected]
-                ]
+            varmapFeatures_selected = (
+                df["varmapFeaturesSelected"]
+                if "varmapFeaturesSelected" in df
+                else [df["featureSelected"]]
             )
+            for feature in varmapFeatures_selected:
+                feature_selected = feature
 
-            freq = pd.infer_freq(dfs[i][time_selected])
-            frequencies.append(freq)
+                if country not in filtered_dfs[i][geo_col].unique():
+                    break
 
-            time.append(time_selected)
-            features.append(feature_selected)
+                dfs.append(
+                    filtered_dfs[i][filtered_dfs[i][geo_col] == country][
+                        [time_selected, feature_selected]
+                    ]
+                )
+
+                freq = pd.infer_freq(dfs[k][time_selected])
+                frequencies.append(freq)
+
+                time.append(time_selected)
+                features.append(feature_selected)
+                k = k + 1
         if len(dfs) > 1:
             filtered_dfs_by_country.append(dfs)
             feature_columns.append(features)

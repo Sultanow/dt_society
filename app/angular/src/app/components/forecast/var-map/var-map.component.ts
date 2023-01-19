@@ -2,9 +2,12 @@ import { Options } from '@angular-slider/ngx-slider';
 import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
 import { CountryData, Frame, MapForecastGraph } from 'src/app/types/GraphData';
+import { VarDatasetSettingsComponent } from '../vardatasetsettings/vardatasetsettings.component';
 
 // multivariate map based forecasting component
 // (VAR, HW exponential smoothing)
@@ -15,7 +18,7 @@ import { CountryData, Frame, MapForecastGraph } from 'src/app/types/GraphData';
   styleUrls: ['./var-map.component.css'],
 })
 export class VarMapComponent implements OnInit {
-  constructor(private dataService: DataService) {}
+  constructor(private dataService: DataService, public dialog: MatDialog) {}
 
   public data: MapForecastGraph = {
     data: [[]],
@@ -23,7 +26,10 @@ export class VarMapComponent implements OnInit {
     config: { responsive: false },
   };
 
+  settingsIcon = faCaretDown;
+
   public validDatasets: number = 0;
+  public validData: boolean = false;
   public showSpinner: boolean = false;
 
   public frames: Frame[][] = [];
@@ -102,23 +108,27 @@ export class VarMapComponent implements OnInit {
     this.timestamps = data['x'] as unknown as string[];
     delete data['x'];
 
-    this.features = this.selections.datasets
-      .filter(
-        (dataset) =>
-          dataset.featureSelected !== undefined &&
-          dataset.timeSelected !== undefined &&
-          dataset.countryOptions !== undefined
-      )
-      .map((dataset) => dataset.featureSelected);
+    this.features = [];
+    this.names = [];
 
-    this.names = this.selections.datasets
-      .filter(
-        (dataset) =>
-          dataset.featureSelected !== undefined &&
-          dataset.timeSelected !== undefined &&
-          dataset.countryOptions !== undefined
-      )
-      .map((dataset) => [dataset.name, dataset.featureSelected]);
+    for (let dataset of this.selections.datasets) {
+      if (
+        dataset.featureSelected !== undefined &&
+        dataset.timeSelected !== undefined &&
+        dataset.countryOptions !== undefined
+      ) {
+        if (dataset.varmapFeaturesSelected !== undefined) {
+          for (let feature of dataset.varmapFeaturesSelected) {
+            this.features.push(feature);
+            this.names.push([dataset.name, feature]);
+          }
+        } else {
+          this.features.push(dataset.featureSelected);
+          this.names.push([dataset.name, dataset.featureSelected]);
+        }
+      }
+    }
+
     this.countries = Object.keys(data);
 
     const newOptions: Options = Object.assign({}, this.options);
@@ -198,6 +208,9 @@ export class VarMapComponent implements OnInit {
     }
 
     this.selectionControl.get('geojsonControl')!.setValue(this.scope);
+    this.selectionControl
+      .get('sliderControl')!
+      .setValue(0, { emitEvent: false });
 
     this.showSpinner = false;
   }
@@ -273,7 +286,12 @@ export class VarMapComponent implements OnInit {
         dataset.timeSelected !== undefined &&
         dataset.countryOptions !== undefined
     );
-    if (filteredSelections.length > 1) {
+    if (
+      filteredSelections.length > 1 ||
+      (filteredSelections.length === 1 &&
+        filteredSelections[0].varmapFeaturesSelected !== undefined &&
+        filteredSelections[0].varmapFeaturesSelected.length > 1)
+    ) {
       this.showSpinner = true;
       this.dataService
         .getData(filteredSelections, '/forecast/map/' + this.selectedModel, {
@@ -289,10 +307,19 @@ export class VarMapComponent implements OnInit {
         });
     }
   }
+
+  datasetSettings(datasetId: string | undefined) {
+    this.dialog.open(VarDatasetSettingsComponent, {
+      data: { datasetId: datasetId, type: 'map' },
+    });
+  }
+
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
+      this.validData = false;
       this.validDatasets = 0;
+
       if (this.selections.datasets.length > 0) {
         this.selections.datasets.forEach((dataset) => {
           if (
@@ -303,6 +330,16 @@ export class VarMapComponent implements OnInit {
             this.validDatasets++;
           }
         });
+      }
+      if (
+        this.validDatasets > 1 ||
+        this.selections.datasets.some(
+          (dataset) =>
+            dataset.varmapFeaturesSelected !== undefined &&
+            dataset.varmapFeaturesSelected.length > 1
+        )
+      ) {
+        this.validData = true;
       }
       this.updateForecastData();
     });
