@@ -216,6 +216,7 @@ export class VarMapComponent implements OnInit {
   }
 
   private createInitialData() {
+    this.data.data = [[]];
     for (let i = 0; i < this.features?.length!; i++) {
       let choropleth: any = {
         type: 'choroplethmapbox',
