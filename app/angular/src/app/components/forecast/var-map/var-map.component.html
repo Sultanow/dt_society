@@ -28,7 +28,9 @@
         <ng-container *ngFor="let dataset of selections.datasets">
           <div
             *ngIf="
-              dataset.id !== undefined && dataset.featureSelected !== undefined
+              dataset.id !== undefined &&
+              dataset.featureSelected !== undefined &&
+              dataset.timeSelected !== undefined
             "
             style="display: flex; flex-direction: row; justify-items: start"
           >
@@ -52,7 +54,7 @@
               class="settings-button"
               (click)="datasetSettings(dataset.id)"
             >
-              <fa-icon [icon]="settingsIcon"></fa-icon>
+              <fa-icon [icon]="settingsIcon" size="2x"></fa-icon>
             </button>
           </div>
         </ng-container>
@@ -72,29 +74,30 @@
 </ng-template>
 
 <ng-template #map>
-  <div [formGroup]="selectionControl">
-    <div class="slider-container custom-slider">
-      <ngx-slider
-        *ngIf="validData"
-        formControlName="sliderControl"
-        [(value)]="currentSliderValue"
-        [options]="options"
-      ></ngx-slider>
-    </div>
-    <div class="map-container" *ngIf="validData">
-      <div class="map" *ngFor="let feature of features; index as i">
-        <mat-card>
-          <mat-card-subtitle
-            >{{ names![i][1] }} - {{ names![i][0] }}</mat-card-subtitle
-          >
-          <plotly-plot
-            *ngIf="data.data[i + 1].length > 0"
-            [data]="data.data[i + 1]"
-            [layout]="data.layout"
-            [config]="data.config"
-          >
-          </plotly-plot>
-        </mat-card>
+  <div *ngIf="validData; else selectFeaturesDialog">
+    <div [formGroup]="selectionControl">
+      <div class="slider-container custom-slider">
+        <ngx-slider
+          formControlName="sliderControl"
+          [(value)]="currentSliderValue"
+          [options]="options"
+        ></ngx-slider>
+      </div>
+      <div class="map-container" *ngIf="validData">
+        <div class="map" *ngFor="let feature of features; index as i">
+          <mat-card>
+            <mat-card-subtitle
+              >{{ names![i][1] }} - {{ names![i][0] }}</mat-card-subtitle
+            >
+            <plotly-plot
+              *ngIf="data.data[i + 1].length > 0"
+              [data]="data.data[i + 1]"
+              [layout]="data.layout"
+              [config]="data.config"
+            >
+            </plotly-plot>
+          </mat-card>
+        </div>
       </div>
     </div>
   </div>
@@ -119,6 +122,25 @@
           country.
         </p>
         <p>The data sets can be managed through the sidebar.</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</ng-template>
+
+<ng-template #selectFeaturesDialog>
+  <div class="dialog-wrapper">
+    <mat-card class="dialog" style="height: 100px">
+      <mat-card-content>
+        <p>
+          Please select another feature using the
+          <fa-icon
+            style="color: #c2185b; margin: 0 5px 0 5px"
+            [icon]="settingsIcon"
+            size="2x"
+          ></fa-icon>
+          next to the data set under "Forecasted data"
+        </p>
+        <p>Or select a feature for another data set in the sidebar.</p>
       </mat-card-content>
     </mat-card>
   </div>

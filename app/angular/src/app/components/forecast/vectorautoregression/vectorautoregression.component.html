@@ -44,7 +44,8 @@
             *ngIf="
               dataset.id !== undefined &&
               dataset.featureSelected !== undefined &&
-              scenarios[dataset.id] !== undefined
+              scenarios[dataset.id] !== undefined &&
+              dataset.timeSelected !== undefined
             "
             style="display: flex; flex-direction: row; justify-items: start"
           >
@@ -72,7 +73,7 @@
               class="settings-button"
               (click)="datasetSettings(dataset.id)"
             >
-              <fa-icon [icon]="settingsIcon"></fa-icon>
+              <fa-icon [icon]="settingsIcon" size="2x"></fa-icon>
             </button>
           </div>
         </ng-container>
@@ -151,8 +152,12 @@
       <mat-card-content>
         <p>
           Please select another feature using the
-          <fa-icon [icon]="settingsIcon"></fa-icon> next to the data set under
-          "Forecasted data"
+          <fa-icon
+            style="color: #c2185b; margin: 0 5px 0 5px"
+            [icon]="settingsIcon"
+            size="2x"
+          ></fa-icon>
+          next to the data set under "Forecasted data"
         </p>
         <p>Or select a feature for another data set in the sidebar.</p>
       </mat-card-content>
