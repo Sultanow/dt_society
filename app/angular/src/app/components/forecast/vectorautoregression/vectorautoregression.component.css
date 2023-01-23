@@ -43,7 +43,7 @@ mat-checkbox {
   display: inline-block;
 }
 
-.dialog-wrapper {
+.dialog-wrapper, .feature-dialog-wrapper {
   padding: 10px;
   text-align: center;
   align-items: center;
@@ -53,6 +53,9 @@ mat-checkbox {
   bottom: 10px;
   left: 0;
   right: 0;
+}
+
+.dialog-wrapper {
   background: rgba(66,66,66,0.7)
 }
 
