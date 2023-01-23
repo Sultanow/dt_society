@@ -1,5 +1,7 @@
 name: dt_society_app
 channels:
+  - anaconda
+  - conda-forge
   - defaults
 dependencies:
   - python=3.10
@@ -14,3 +16,4 @@ dependencies:
   - flask-pymongo
   - scikit-learn
   - flask-cors
+  - flask-jwt-extended
