@@ -95,6 +95,7 @@
   height: 12px;
   width: 12px;
   margin-right: 5px;
+  overflow:visible;
 }
 
 .status-icon-active {

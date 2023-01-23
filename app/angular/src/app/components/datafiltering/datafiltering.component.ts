@@ -65,7 +65,9 @@ export class DatafilteringComponent implements OnInit {
   }
 
   onFileUpload(event: any) {
-    this.dialog.open(UploaddialogComponent, { data: this.selections });
+    this.dialog.open(UploaddialogComponent, {
+      data: this.selections,
+    });
   }
 
   onDeleteFile(datasedId: string | undefined) {
@@ -77,7 +79,11 @@ export class DatafilteringComponent implements OnInit {
   }
 
   onSettings(datasetId: string | undefined) {
-    this.dialog.open(DatasetSettingsComponent, { data: datasetId });
+    this.dialog.open(DatasetSettingsComponent, {
+      data: datasetId,
+      height: '350px',
+      width: '400px',
+    });
   }
 
   getDatasetStatus(dataset_id: string | undefined): string {
