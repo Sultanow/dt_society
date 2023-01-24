@@ -23,6 +23,7 @@ This repository provides an implementation of a prototype web-based Digital Twin
 
 ### Requirements
 
+- NodeJS
 - Angular 14.2.5
 - Anaconda
 - Python 3.10
@@ -68,8 +69,12 @@ If your data does not seem to be processed correctly, you can explicitly set cer
 
 ### Forecasting
 
-You can choose between multivariate and scenario-based forecasting.  
-Multivariate forecasting performs a forecast for each selected feature simultaneously while taking correlations into account.  
-Scenario-based forecasting allows you to perform a forecast for a selected feature based on artificial scenarios for each other feature, which can be generated automatically using univariate forecasts or specified individually.  
-Both of these methods can forecast up to 40 future timesteps. However, all features provided in the datasets must have the same underlying time frequency. (i.e. all timestamps must be yearly)  
-Visualizations for multivariate forecasts are provided as graph and/or map.
+You can choose between multivariate and scenario-based forecasting.
+
+Multivariate forecasting performs a forecast for each selected feature simultaneously while taking correlations into account.
+Multiple features of a single data set can be considered. For this, the respective features must be selected under "Forecasted Data".
+Multivariate forecasts can be visualized as graph (only one country at a time) or as map (all countries at the same time).
+
+Scenario-based forecasting allows you to perform a forecast for a selected feature based on artificial scenarios for each feature, which can be generated automatically using univariate forecasts or specified manually.
+
+Both of these methods can forecast up to 40 future timesteps. However, all features provided in the datasets must have the same underlying time frequency. (i.e. all timestamps must be yearly)
