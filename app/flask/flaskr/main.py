@@ -11,6 +11,7 @@ from extensions import mongo, cache, cors, session, jwt
 from preprocessing.parse import parse_dataset
 from preprocessing.dataset import DigitalTwinTimeSeries
 from preprocessing.filter import infer_feature_options
+from preprocessing.states import germany_federal
 
 # create and configure the app
 app = Flask(__name__, instance_relative_config=True)
@@ -288,10 +289,13 @@ def reshape_dataset():
     response_data["features"] = feature_columns
     if geo_column is not None:
         countries = df[geo_column].unique().tolist()
-        countries = map(
-            lambda country: pycountry.countries.get(alpha_3=country).name, countries
-        )
-        response_data["countries"] = list(countries)
+        if set(countries).isdisjoint(germany_federal.values()):
+            countries = map(
+                lambda country: pycountry.countries.get(alpha_3=country).name, countries
+            )
+            response_data["countries"] = list(countries)
+        else:
+            response_data["countries"] = countries
     response_data["reshape_column"] = reshape_column
 
     return response_data
