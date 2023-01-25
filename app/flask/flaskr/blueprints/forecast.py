@@ -17,7 +17,7 @@ from forecasting.models import (
     prophet_fit_and_predict,
 )
 from preprocessing.parse import parse_dataset, make_unique_features
-from preprocessing.states import germany_federal2
+from preprocessing.states import germany_federal
 
 
 bp = Blueprint("forecast", __name__, url_prefix="/forecast")
@@ -33,8 +33,8 @@ def forecastVAR(model):
 
     datasets = data["datasets"]
 
-    if data["country"] in germany_federal2.keys():
-        selected_country = data["country"]
+    if data["country"] in germany_federal.keys():
+        selected_country = germany_federal.get(data["country"])
     else:
         selected_country = pycountry.countries.get(name=data["country"]).alpha_3
 
@@ -153,8 +153,8 @@ def forecastProphet():
 
     predictions = data["predictions"] if "predictions" in data else None
     datasets = data["datasets"]
-    if data["country"] in germany_federal2.keys():
-        selected_country = data["country"]
+    if data["country"] in germany_federal.keys():
+        selected_country = germany_federal.get(data["country"])
     else:
         selected_country = pycountry.countries.get(name=data["country"]).alpha_3
     dependent_df = data["dependentDataset"]
