@@ -9,7 +9,7 @@ from flask import (
 )
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from preprocessing.parse import parse_dataset, merge_dataframes_multi
-from preprocessing.states import germany_federal2
+from preprocessing.states import germany_federal
 
 from extensions import mongo
 
@@ -95,11 +95,11 @@ def get_selected_feature_data():
             ].to_list()
 
             if "statistics" in request.path:
-                if set(countries).isdisjoint(germany_federal2.keys()):
+                if set(countries).isdisjoint(germany_federal.values()):
                     country_full = pycountry.countries.get(alpha_3=country).name
                     response_data[country_full] = response_data.pop(country)
                 else:
-                    country_full = germany_federal2.get(country)
+                    country_full = pycountry.subdivisions.get(code=country).name
                     response_data[country_full] = response_data.pop(country)
 
     else:
@@ -122,8 +122,8 @@ def get_heatmap():
     datasets = data["datasets"]
 
     if "country" in data:
-        if data["country"] in germany_federal2.keys():
-            selected_country = data["country"]
+        if data["country"] in germany_federal.keys():
+            selected_country = germany_federal.get(data["country"])
         else:
             selected_country = pycountry.countries.get(name=data["country"]).alpha_3
     else:
@@ -232,8 +232,8 @@ def get_correlation_lines():
     datasets = data["datasets"]
 
     if "country" in data:
-        if data["country"] in germany_federal2.keys():
-            selected_country = data["country"]
+        if data["country"] in germany_federal.keys():
+            selected_country = germany_federal.get(data["country"])
         else:
             selected_country = pycountry.countries.get(name=data["country"]).alpha_3
     else:
