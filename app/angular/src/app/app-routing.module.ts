@@ -2,8 +2,6 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { CorrelationsComponent } from './components/tabs/correlations/correlations.component';
 import { ProphetscenariosComponent } from './components/forecast/prophetscenarios/prophetscenarios.component';
-import { VarMapComponent } from './components/forecast/var-map/var-map.component';
-import { VectorautoregressionComponent } from './components/forecast/vectorautoregression/vectorautoregression.component';
 import { OverviewComponent } from './components/tabs/overview/overview.component';
 import { VarforecastsComponent } from './components/tabs/varforecasts/varforecasts.component';
 
@@ -29,23 +27,10 @@ const appRoutes: Routes = [
   {
     path: 'forecasts/var',
     component: VarforecastsComponent,
-    children: [
-      {
-        path: '',
-        component: VectorautoregressionComponent,
-        data: { reuse: true },
-      },
-      {
-        path: 'map',
-        component: VarMapComponent,
-        data: { reuse: true },
-      },
-      {
-        path: '**',
-        redirectTo: '',
-        pathMatch: 'full',
-      },
-    ],
+    loadChildren: () =>
+      import('./components/tabs/varforecasts/var-routing.module').then(
+        (m) => m.VarRoutingModule
+      ),
   },
   {
     path: 'forecasts/prophet',
