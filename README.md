@@ -55,9 +55,9 @@ If all requirements have been successfully installed you can start the frontend 
 
 ### File upload
 
-Currently the application supports `.tsv` and `.csv` datasets, which may contain a column with country codes.
-The current version supports datasets with a country reference or German federal states.
-Currently the amount of functionality is limited for datasets without country data.
+Currently the application supports `.tsv` and `.csv` datasets that may contain a column with country codes. The current version supports datasets with country references or German federal state references.
+
+For datasets without a country reference, the functionality is currently limited.
 
 ### Data filtering
 
