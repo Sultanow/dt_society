@@ -32,6 +32,10 @@
               dataset.featureSelected !== undefined &&
               dataset.timeSelected !== undefined
             "
+            [ngClass]="{
+              active: dataset.scope === scope,
+              inactive: dataset.scope !== scope
+            }"
             style="display: flex; flex-direction: row; justify-items: start"
           >
             <div>
@@ -52,6 +56,7 @@
               mat-icon-button
               color="primary"
               class="settings-button"
+              [disabled]="dataset.scope !== scope"
               (click)="datasetSettings(dataset.id)"
             >
               <fa-icon [icon]="settingsIcon" size="2x"></fa-icon>
@@ -138,7 +143,8 @@
             [icon]="settingsIcon"
             size="2x"
           ></fa-icon>
-          next to the data set under "Forecasted data"
+          next to the data set under "Forecasted data". If all data sets are
+          disabled you may need to adjust the scope-setting
         </p>
         <p>Or select a feature for another data set in the sidebar.</p>
       </mat-card-content>

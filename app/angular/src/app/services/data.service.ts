@@ -285,6 +285,9 @@ export class DataService {
         selections.datasets[targetDatasetIdx].countryOptions = (
           featureColumns as Options
         ).countries;
+        selections.datasets[targetDatasetIdx].scope = (
+          featureColumns as Options
+        ).scope;
 
         if (selections.datasets[targetDatasetIdx].reshapeSelected !== null) {
           selections.datasets[targetDatasetIdx].timeSelected = 'Time';

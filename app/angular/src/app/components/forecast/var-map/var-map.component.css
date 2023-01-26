@@ -72,6 +72,10 @@ mat-radio-button {
   margin-right: 20px;
 }
 
+.inactive {
+  color: grey;
+}
+
 /*ngx-slider style*/
 
 ::ng-deep .custom-slider .ngx-slider .ngx-slider-bar {

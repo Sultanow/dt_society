@@ -49,7 +49,7 @@ export class VarMapComponent implements OnInit {
   };
   currentSliderValue: number = 0;
 
-  private scope: string = 'global';
+  public scope: string = 'global';
   private z_min: number[] = [];
   private z_max: number[] = [];
   public timestamps: any[] = [];
@@ -81,25 +81,6 @@ export class VarMapComponent implements OnInit {
     },
   };
 
-  private federal_states_germany = [
-    'DE-BB',
-    'DE-BE',
-    'DE-BW',
-    'DE-BY',
-    'DE-HB',
-    'DE-HE',
-    'DE-HH',
-    'DE-MV',
-    'DE-NI',
-    'DE-NW',
-    'DE-RP',
-    'DE-SH',
-    'DE-SL',
-    'DE-SN',
-    'DE-ST',
-    'DE-TH',
-  ];
-
   createChoroplethMap(data: CountryData) {
     if (this.data.data.length > 0) {
       this.data.data = [[]];
@@ -115,7 +96,8 @@ export class VarMapComponent implements OnInit {
       if (
         dataset.featureSelected !== undefined &&
         dataset.timeSelected !== undefined &&
-        dataset.countryOptions !== undefined
+        dataset.countryOptions !== undefined &&
+        dataset.scope === this.scope
       ) {
         if (dataset.varmapFeaturesSelected !== undefined) {
           for (let feature of dataset.varmapFeaturesSelected) {
@@ -197,20 +179,11 @@ export class VarMapComponent implements OnInit {
       this.z_min[feature] = z_min_val;
     }
 
-    this.scope = 'global';
-
-    if (
-      this.federal_states_germany.some((state) =>
-        this.countries.includes(state)
-      )
-    ) {
-      this.scope = 'germany';
-    }
-
-    this.selectionControl.get('geojsonControl')!.setValue(this.scope);
     this.selectionControl
       .get('sliderControl')!
       .setValue(0, { emitEvent: false });
+
+    this.createInitialData();
 
     this.showSpinner = false;
   }
@@ -285,7 +258,8 @@ export class VarMapComponent implements OnInit {
       (dataset) =>
         dataset.featureSelected !== undefined &&
         dataset.timeSelected !== undefined &&
-        dataset.countryOptions !== undefined
+        dataset.countryOptions !== undefined &&
+        dataset.scope === this.scope
     );
     if (
       filteredSelections.length > 1 ||
@@ -318,31 +292,10 @@ export class VarMapComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
-      this.validData = false;
-      this.validDatasets = 0;
-
-      if (this.selections.datasets.length > 0) {
-        this.selections.datasets.forEach((dataset) => {
-          if (
-            dataset.featureSelected !== undefined &&
-            dataset.timeSelected !== undefined &&
-            dataset.countryOptions?.includes(this.selections?.selectedCountry!)
-          ) {
-            this.validDatasets++;
-          }
-        });
+      this.validCheck();
+      if (this.validData) {
+        this.updateForecastData();
       }
-      if (
-        this.validDatasets > 1 ||
-        this.selections.datasets.some(
-          (dataset) =>
-            dataset.varmapFeaturesSelected !== undefined &&
-            dataset.varmapFeaturesSelected.length > 1
-        )
-      ) {
-        this.validData = true;
-      }
-      this.updateForecastData();
     });
 
     this.selectionControl
@@ -355,7 +308,10 @@ export class VarMapComponent implements OnInit {
       .get('geojsonControl')!
       .valueChanges.subscribe((value) => {
         this.scope = String(value);
-        this.createInitialData();
+        this.validCheck();
+        if (this.validData) {
+          this.updateForecastData();
+        }
       });
 
     this.selectionControl
@@ -364,5 +320,40 @@ export class VarMapComponent implements OnInit {
         this.selectedModel = String(value);
         this.updateForecastData();
       });
+  }
+
+  private validCheck() {
+    this.validData = false;
+    this.validDatasets = 0;
+    let scopeGermany = 0;
+    let scopeGlobal = 0;
+
+    if (this.selections.datasets.length > 0) {
+      this.selections.datasets.forEach((dataset) => {
+        if (
+          dataset.featureSelected !== undefined &&
+          dataset.timeSelected !== undefined
+        ) {
+          if (dataset.scope === 'germany' && this.scope === 'germany') {
+            scopeGermany++;
+          }
+          if (dataset.scope === 'global' && this.scope === 'global') {
+            scopeGlobal++;
+          }
+          this.validDatasets++;
+        }
+      });
+    }
+    if (
+      (this.validDatasets > 1 && (scopeGermany > 1 || scopeGlobal > 1)) ||
+      this.selections.datasets.some(
+        (dataset) =>
+          dataset.varmapFeaturesSelected !== undefined &&
+          dataset.varmapFeaturesSelected.length > 1 &&
+          dataset.scope === this.scope
+      )
+    ) {
+      this.validData = true;
+    }
   }
 }

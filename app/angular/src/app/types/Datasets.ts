@@ -14,6 +14,7 @@ export interface Dataset {
   token?: string;
   name?: string;
   initialColumns?: string[];
+  scope?: string;
 }
 
 export interface Selections {
@@ -27,4 +28,5 @@ export interface Options {
   features?: string[];
   countries?: string[];
   reshape_column?: string;
+  scope?: string;
 }

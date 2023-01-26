@@ -35,7 +35,7 @@ export class MapComponent implements OnInit {
 
   selectionControl = new FormGroup({
     sliderControl: new FormControl(),
-    geojsonControl: new FormControl(),
+    //geojsonControl: new FormControl(),
   });
 
   options: Options = {
@@ -48,7 +48,7 @@ export class MapComponent implements OnInit {
   };
   currentSliderValue: number = 0;
 
-  private scope: string = 'global';
+  private scope?: string;
   private z_min?: number;
   private z_max?: number;
   private all_timestamps: any[] = [];
@@ -70,25 +70,6 @@ export class MapComponent implements OnInit {
     },
   };
 
-  private federal_states_germany = [
-    'DE-BB',
-    'DE-BE',
-    'DE-BW',
-    'DE-BY',
-    'DE-HB',
-    'DE-HE',
-    'DE-HH',
-    'DE-MV',
-    'DE-NI',
-    'DE-NW',
-    'DE-RP',
-    'DE-SH',
-    'DE-SL',
-    'DE-SN',
-    'DE-ST',
-    'DE-TH',
-  ];
-
   createChoroplethMap(data: CountryData, selectedIdx: number) {
     if (this.data.data.length > 0) {
       this.data.data = [];
@@ -104,6 +85,8 @@ export class MapComponent implements OnInit {
       this.featureSelected =
         this.selections.datasets[selectedIdx].featureSelected;
       let timeSelected = this.selections.datasets[selectedIdx].timeSelected;
+      this.scope = this.selections.datasets[selectedIdx].scope;
+      console.log(this.scope);
 
       if (this.featureSelected !== undefined && timeSelected !== undefined) {
         this.all_timestamps = (Object.values(data) as any)[0][timeSelected];
@@ -159,19 +142,10 @@ export class MapComponent implements OnInit {
 
         this.z_min = z_min_val;
         this.z_max = z_max_val;
-        this.scope = 'global';
-
-        for (let state of this.federal_states_germany) {
-          if (this.all_keys.includes(state)) {
-            this.scope = 'germany';
-            break;
-          }
-        }
-
-        this.selectionControl.get('geojsonControl')!.setValue(this.scope);
       }
       this.geoData = true;
     }
+    this.createInitialData();
     this.showSpinner = false;
   }
 
@@ -253,6 +227,7 @@ export class MapComponent implements OnInit {
 
         if (this.selections.datasets[selectedDatasetIdx] !== undefined) {
           let selectedDataset = this.selections.datasets[selectedDatasetIdx];
+          this.scope = selectedDataset.scope!;
           if (
             selectedDataset.geoSelected !== undefined &&
             selectedDataset.reshapeSelected !== undefined &&
@@ -298,13 +273,6 @@ export class MapComponent implements OnInit {
       .get('sliderControl')!
       .valueChanges.subscribe((sliderValue) => {
         this.updateData(sliderValue);
-      });
-
-    this.selectionControl
-      .get('geojsonControl')!
-      .valueChanges.subscribe((value) => {
-        this.scope = String(value);
-        this.createInitialData();
       });
   }
 }

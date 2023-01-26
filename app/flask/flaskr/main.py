@@ -293,12 +293,15 @@ def reshape_dataset():
             countries = map(
                 lambda country: pycountry.countries.get(alpha_3=country).name, countries
             )
+            scope = "global"
         else:
             countries = map(
                 lambda country: pycountry.subdivisions.get(code=country).name,
                 countries,
             )
+            scope = "germany"
         response_data["countries"] = list(countries)
+        response_data["scope"] = scope
     response_data["reshape_column"] = reshape_column
 
     return response_data
