@@ -55,7 +55,9 @@ If all requirements have been successfully installed you can start the frontend 
 
 ### File upload
 
-Currently the application supports `.tsv` and `.csv` datasets, which may contain a column with country codes. Currently the amount of functionality is limited for datasets without country data.
+Currently the application supports `.tsv` and `.csv` datasets, which may contain a column with country codes.
+The current version supports datasets with a country reference or German federal states.
+Currently the amount of functionality is limited for datasets without country data.
 
 ### Data filtering
 
@@ -72,7 +74,7 @@ If your data does not seem to be processed correctly, you can explicitly set cer
 You can choose between multivariate and scenario-based forecasting.
 
 Multivariate forecasting performs a forecast for each selected feature simultaneously while taking correlations into account.
-Multiple features of a single data set can be considered. For this, the respective features must be selected under "Forecasted Data".
+Multiple features of a single dataset can be considered. For this, the respective features must be selected under "Forecasted Data".
 Multivariate forecasts can be visualized as graph (only one country at a time) or as map (all countries at the same time).
 
 Scenario-based forecasting allows you to perform a forecast for a selected feature based on artificial scenarios for each feature, which can be generated automatically using univariate forecasts or specified manually.
