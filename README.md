@@ -36,6 +36,7 @@ After installing Anaconda you can setup the Python environment for the backend w
 `$ conda env create -f app/environment.yml`
 
 Once the environment has been configured successfully, you can start the backend.  
+`conda activate dt_society_app`
 `$ cd app/flask/flaskr `  
 `$ python3 main.py`
 
