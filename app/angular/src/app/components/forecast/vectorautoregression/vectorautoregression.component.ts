@@ -29,8 +29,6 @@ export class VectorautoregressionComponent implements OnInit {
     selectedDataset: undefined,
   };
 
-  private oldSelecions?: Selections;
-
   settingsIcon = faCaretDown;
 
   // Binded properties
