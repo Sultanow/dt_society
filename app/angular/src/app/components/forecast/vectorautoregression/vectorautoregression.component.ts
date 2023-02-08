@@ -29,6 +29,8 @@ export class VectorautoregressionComponent implements OnInit {
     selectedDataset: undefined,
   };
 
+  private oldSelecions?: Selections;
+
   settingsIcon = faCaretDown;
 
   // Binded properties
@@ -275,10 +277,12 @@ export class VectorautoregressionComponent implements OnInit {
                 this.selections.selectedCountry as string
               ) as boolean;
 
-            this.scenarios[dataset.id as string].active =
-              dataset.countryOptions?.includes(
-                this.selections.selectedCountry as string
-              ) as boolean;
+            if (this.scenarios[dataset.id as string].active === undefined) {
+              this.scenarios[dataset.id as string].active =
+                dataset.countryOptions?.includes(
+                  this.selections.selectedCountry as string
+                ) as boolean;
+            }
           }
         });
         if (
