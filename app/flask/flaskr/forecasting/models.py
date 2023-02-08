@@ -204,7 +204,7 @@ def var_fit_and_predict_multi(
 
     model = VAR(merged_df_diff)
 
-    model.select_order()
+    # model.select_order()
 
     result = model.fit()
 
