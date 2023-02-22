@@ -86,7 +86,6 @@ export class MapComponent implements OnInit {
         this.selections.datasets[selectedIdx].featureSelected;
       let timeSelected = this.selections.datasets[selectedIdx].timeSelected;
       this.scope = this.selections.datasets[selectedIdx].scope;
-      console.log(this.scope);
 
       if (this.featureSelected !== undefined && timeSelected !== undefined) {
         this.all_timestamps = (Object.values(data) as any)[0][timeSelected];
@@ -232,7 +231,8 @@ export class MapComponent implements OnInit {
             selectedDataset.geoSelected !== undefined &&
             selectedDataset.reshapeSelected !== undefined &&
             selectedDataset.featureSelected !== undefined &&
-            selectedDataset.timeSelected !== undefined
+            selectedDataset.timeSelected !== undefined &&
+            selectedDataset.scope !== undefined
           ) {
             if (
               selectedDataset.featureSelected !==
