@@ -258,6 +258,7 @@ export class VectorautoregressionComponent implements OnInit {
       this.selections = updatedSelections;
       this.validData = false;
       this.validDatasets = 0;
+      this.scenarios = {};
 
       if (this.selections.datasets.length > 0) {
         this.selections.datasets.forEach((dataset) => {
@@ -266,23 +267,19 @@ export class VectorautoregressionComponent implements OnInit {
           ) {
             this.validDatasets++;
           }
-          if (!Object.keys(this.scenarios).includes(dataset.id as string)) {
-            this.scenarios[dataset.id!] = {} as Scenario;
-            this.scenarios[dataset.id as string].active = true;
-          } else {
-            this.scenarios[dataset.id as string].selectable =
-              dataset.countryOptions?.includes(
-                this.selections.selectedCountry as string
-              ) as boolean;
 
-            if (this.scenarios[dataset.id as string].active === undefined) {
-              this.scenarios[dataset.id as string].active =
-                dataset.countryOptions?.includes(
-                  this.selections.selectedCountry as string
-                ) as boolean;
-            }
-          }
+          this.scenarios[dataset.id!] = {} as Scenario;
+
+          this.scenarios[dataset.id as string].selectable =
+            dataset.countryOptions?.includes(
+              this.selections.selectedCountry as string
+            ) as boolean;
+          this.scenarios[dataset.id as string].active =
+            dataset.countryOptions?.includes(
+              this.selections.selectedCountry as string
+            ) as boolean;
         });
+
         if (
           this.validDatasets > 1 ||
           this.selections.datasets.some(

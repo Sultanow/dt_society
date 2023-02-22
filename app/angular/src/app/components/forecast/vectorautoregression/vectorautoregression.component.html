@@ -51,7 +51,7 @@
           >
             <mat-checkbox
               [(ngModel)]="scenarios[dataset.id].active"
-              [disabled]="scenarios[dataset.id].selectable === false"
+              [disabled]="!scenarios[dataset.id].selectable"
               (change)="updateVarForecast()"
             >
               {{ dataset.name }}
@@ -71,6 +71,7 @@
               mat-icon-button
               color="primary"
               class="settings-button"
+              [disabled]="!scenarios[dataset.id].selectable"
               (click)="datasetSettings(dataset.id)"
             >
               <fa-icon [icon]="settingsIcon" size="2x"></fa-icon>
