@@ -72,10 +72,10 @@
             </mat-select>
           </mat-form-field>
           <ngx-slider
-            formControlName="sliderControl"
             [(value)]="value"
             [(highValue)]="highValue"
             [options]="options"
+            (valueChange)="updateGrowth()"
           >
           </ngx-slider>
         </div>
@@ -152,10 +152,10 @@
       <div class="growth-container">
         <div id="growth-selections-nogeo" class="custom-slider">
           <ngx-slider
-            formControlName="sliderControl"
             [(value)]="value"
             [(highValue)]="highValue"
             [options]="options"
+            (valueChange)="updateGrowth()"
           >
           </ngx-slider>
         </div>

@@ -43,7 +43,6 @@ export class StatisticsComponent implements OnInit {
   selectionControl = new FormGroup({
     selectedYearControl: new FormControl(),
     selectedCountryControl: new FormControl(),
-    sliderControl: new FormControl(),
     countryFilterControl: new UntypedFormControl(),
   });
 
@@ -299,26 +298,6 @@ export class StatisticsComponent implements OnInit {
       .valueChanges.subscribe(() => {
         if (
           this.selectionControl.get('selectedCountryControl')!.value !== null
-        ) {
-          this.updateGrowth();
-        }
-      });
-
-    this.selectionControl
-      .get('sliderControl')!
-      .valueChanges.subscribe((sliderValues) => {
-        this.value = sliderValues[0];
-        this.highValue = sliderValues[1];
-
-        if (
-          this.geodata &&
-          this.selectionControl.get('selectedCountryControl')!.value !== null
-        ) {
-          this.updateGrowth();
-        }
-        if (
-          !this.geodata &&
-          this.selectionControl.get('selectedCountryControl')!.value === null
         ) {
           this.updateGrowth();
         }
