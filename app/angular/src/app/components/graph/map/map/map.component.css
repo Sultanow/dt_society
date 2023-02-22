@@ -7,16 +7,8 @@
   width: 95%;
 }
 
-mat-radio-button {
-  padding: 0.5em;
-}
-
 mat-card {
-  min-height: 450px;
-}
-
-.dialog-wrapper {
-  padding: 10px;
+  height: 450px;
 }
 
 .zoom-button {
