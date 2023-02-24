@@ -75,6 +75,21 @@ export class DatafilteringComponent implements OnInit {
   }
 
   updateSideBar() {
+    let selectedDataset =
+      this.selections.datasets[
+        this.selections.datasets.findIndex(
+          (dataset) => dataset.id === this.selections.selectedDataset
+        )
+      ];
+
+    if (
+      !selectedDataset.countryOptions?.includes(
+        this.selections.selectedCountry!
+      ) &&
+      selectedDataset.countryOptions !== undefined
+    ) {
+      this.selections.selectedCountry = selectedDataset.countryOptions[0];
+    }
     this.dataService.updateDatasetsSelection(this.selections);
   }
 
