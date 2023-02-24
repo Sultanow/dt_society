@@ -11,7 +11,7 @@
           required
           #countrySelect
           [(ngModel)]="selections.selectedCountry"
-          (selectionChange)="updateSideBar()"
+          (selectionChange)="updateSelectedCountry()"
         >
           <mat-option>
             <ngx-mat-select-search

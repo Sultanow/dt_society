@@ -148,7 +148,6 @@ export class CorrelationComponent implements OnInit {
             this.selections.selectedCountry as string
           ) as boolean;
       }
-
       this.updateCorrelationPlot();
     });
   }

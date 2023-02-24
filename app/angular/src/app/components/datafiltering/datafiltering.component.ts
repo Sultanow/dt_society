@@ -59,8 +59,7 @@ export class DatafilteringComponent implements OnInit {
     console.log(event);
   }
 
-  updateSelectedCountry(selectedCountry: string) {
-    this.selections.selectedCountry = selectedCountry;
+  updateSelectedCountry() {
     this.dataService.updateDatasetsSelection(this.selections);
   }
 
