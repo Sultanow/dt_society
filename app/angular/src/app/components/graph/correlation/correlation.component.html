@@ -17,7 +17,8 @@
           *ngIf="
             dataset.id !== undefined &&
             dataset.featureSelected !== undefined &&
-            activeDatasets[dataset.id] !== undefined
+            activeDatasets[dataset.id] !== undefined &&
+            dataset.timeSelected !== undefined
           "
           [(ngModel)]="activeDatasets[dataset.id].active"
           [disabled]="activeDatasets[dataset.id].selectable === false"

@@ -135,21 +135,18 @@ export class CorrelationComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
+      this.activeDatasets = {};
       for (const dataset of this.selections.datasets) {
-        if (!Object.keys(this.activeDatasets).includes(dataset.id as string)) {
-          this.activeDatasets[dataset.id!] = {} as Scenario;
-          this.activeDatasets[dataset.id as string].active = true;
-        } else {
-          this.activeDatasets[dataset.id as string].selectable =
-            dataset.countryOptions?.includes(
-              this.selections.selectedCountry as string
-            ) as boolean;
+        this.activeDatasets[dataset.id!] = {} as Scenario;
+        this.activeDatasets[dataset.id as string].active =
+          dataset.countryOptions?.includes(
+            this.selections.selectedCountry as string
+          ) as boolean;
 
-          this.activeDatasets[dataset.id as string].active =
-            dataset.countryOptions?.includes(
-              this.selections.selectedCountry as string
-            ) as boolean;
-        }
+        this.activeDatasets[dataset.id as string].selectable =
+          dataset.countryOptions?.includes(
+            this.selections.selectedCountry as string
+          ) as boolean;
       }
 
       this.updateCorrelationPlot();
