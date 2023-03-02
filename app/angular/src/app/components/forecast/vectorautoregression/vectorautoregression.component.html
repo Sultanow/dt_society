@@ -106,6 +106,7 @@
         <div class="dashedLine"></div>
       </div>
     </div>
+    <mat-card-title class="container-label">Forecast</mat-card-title>
     <plotly-plot
       #plot
       *ngIf="data.data.length > 0 && showSpinner === false; else LoadingSpinner"

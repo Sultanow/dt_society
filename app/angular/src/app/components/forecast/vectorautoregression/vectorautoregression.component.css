@@ -87,6 +87,14 @@ mat-tooltip{
   margin-right: 20px;
 }
 
+.container-label {
+  margin-bottom: 10px;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  white-space: pre;
+}
+
 /*ngx-slider style*/
 
 ::ng-deep .custom-slider .ngx-slider .ngx-slider-bar {

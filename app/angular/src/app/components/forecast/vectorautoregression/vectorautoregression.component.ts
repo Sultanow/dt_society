@@ -96,9 +96,6 @@ export class VectorautoregressionComponent implements OnInit {
       this.updateSlider();
     }
 
-    this.data.layout.title =
-      'Forecast' + ' (' + this.selections.selectedCountry + ')';
-
     let plotCount = Object.keys(data).length - 1;
     let colCount = plotCount === 1 ? 1 : 2;
     let rowCount = Math.ceil(plotCount / 2);
