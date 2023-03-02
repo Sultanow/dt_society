@@ -1,5 +1,5 @@
 <div
-  *ngIf="selections.datasets.length > 1; then varforecasts; else uploadDialog"
+  *ngIf="selections.datasets.length > 0; then varforecasts; else uploadDialog"
 ></div>
 
 <ng-template #varforecasts>
