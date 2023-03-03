@@ -102,7 +102,8 @@ export class VarMapComponent implements OnInit {
         dataset.featureSelected !== undefined &&
         dataset.timeSelected !== undefined &&
         dataset.countryOptions !== undefined &&
-        dataset.scope === this.scope
+        dataset.scope === this.scope &&
+        this.scenarios[dataset.id as string].active === true
       ) {
         if (dataset.varmapFeaturesSelected !== undefined) {
           for (let feature of dataset.varmapFeaturesSelected) {
@@ -126,7 +127,6 @@ export class VarMapComponent implements OnInit {
     };
     newOptions['stepsArray'] = [];
     this.options = newOptions;
-    this.currentSliderValue = 0;
 
     if (this.frames.length > 0) {
       this.frames = [];
@@ -234,15 +234,16 @@ export class VarMapComponent implements OnInit {
     };
   }
 
-  private updateData(sliderValue: number) {
-    this.currentSliderValue = sliderValue;
+  public updateData() {
     this.data.data = [[]];
     for (let i = 0; i < this.features?.length!; i++) {
       this.data.data.push([
         {
           type: 'choroplethmapbox',
           locations: this.countries,
-          z: this.frames[i][sliderValue].data[0]['z' as keyof object],
+          z: this.frames[i][this.currentSliderValue].data[0][
+            'z' as keyof object
+          ],
           zmin: this.z_min[i],
           zmax: this.z_max[i],
           geojson: this.geojsons[this.scope as keyof object]['url'],
@@ -290,6 +291,8 @@ export class VarMapComponent implements OnInit {
               }
             }
           });
+      } else {
+        this.validData = false;
       }
     }
   }
@@ -312,12 +315,6 @@ export class VarMapComponent implements OnInit {
       });
       this.updateForecastData();
     });
-
-    this.selectionControl
-      .get('sliderControl')!
-      .valueChanges.subscribe((sliderValue) => {
-        this.updateData(sliderValue);
-      });
   }
 
   private validCheck() {
