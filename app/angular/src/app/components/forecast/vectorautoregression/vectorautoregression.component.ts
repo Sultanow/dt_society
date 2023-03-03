@@ -240,6 +240,8 @@ export class VectorautoregressionComponent implements OnInit {
               }
             }
           });
+      } else {
+        this.validData = false;
       }
     }
   }
