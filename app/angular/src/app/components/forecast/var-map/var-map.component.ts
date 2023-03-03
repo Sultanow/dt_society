@@ -6,7 +6,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
-import { CountryData, Frame, MapForecastGraph } from 'src/app/types/GraphData';
+import {
+  CountryData,
+  Frame,
+  MapForecastGraph,
+  Scenario,
+  ScenarioData,
+} from 'src/app/types/GraphData';
 import { VarDatasetSettingsComponent } from '../vardatasetsettings/vardatasetsettings.component';
 
 // multivariate map based forecasting component
@@ -31,6 +37,7 @@ export class VarMapComponent implements OnInit {
   public validDatasets: number = 0;
   public validData: boolean = false;
   public showSpinner: boolean = false;
+  public scenarios: ScenarioData = {};
 
   public frames: Frame[][] = [];
 
@@ -62,8 +69,6 @@ export class VarMapComponent implements OnInit {
 
   selectionControl = new FormGroup({
     sliderControl: new FormControl(),
-    geojsonControl: new FormControl(this.scope),
-    modelControl: new FormControl(this.selectedModel),
   });
 
   private geojsons = {
@@ -254,32 +259,38 @@ export class VarMapComponent implements OnInit {
   }
 
   updateForecastData() {
-    const filteredSelections = this.selections.datasets.filter(
-      (dataset) =>
-        dataset.featureSelected !== undefined &&
-        dataset.timeSelected !== undefined &&
-        dataset.countryOptions !== undefined &&
-        dataset.scope === this.scope
-    );
-    if (
-      filteredSelections.length > 1 ||
-      (filteredSelections.length === 1 &&
-        filteredSelections[0].varmapFeaturesSelected !== undefined &&
-        filteredSelections[0].varmapFeaturesSelected.length > 1)
-    ) {
-      this.showSpinner = true;
-      this.dataService
-        .getData(filteredSelections, '/forecast/map/' + this.selectedModel, {
-          periods: 15,
-          maxLags: this.maxLags,
-        })
-        .subscribe((data) => {
-          if (data.type === HttpEventType.Response) {
-            if (data.body) {
-              this.createChoroplethMap(data.body as CountryData);
+    this.validCheck();
+    if (this.validData) {
+      console.log(this.scenarios);
+      const filteredSelections = this.selections.datasets.filter(
+        (dataset) =>
+          dataset.featureSelected !== undefined &&
+          dataset.timeSelected !== undefined &&
+          dataset.countryOptions !== undefined &&
+          dataset.scope === this.scope &&
+          this.scenarios[dataset.id as string].active === true
+      );
+      console.log(filteredSelections);
+      if (
+        filteredSelections.length > 1 ||
+        (filteredSelections.length === 1 &&
+          filteredSelections[0].varmapFeaturesSelected !== undefined &&
+          filteredSelections[0].varmapFeaturesSelected.length > 1)
+      ) {
+        this.showSpinner = true;
+        this.dataService
+          .getData(filteredSelections, '/forecast/map/' + this.selectedModel, {
+            periods: 15,
+            maxLags: this.maxLags,
+          })
+          .subscribe((data) => {
+            if (data.type === HttpEventType.Response) {
+              if (data.body) {
+                this.createChoroplethMap(data.body as CountryData);
+              }
             }
-          }
-        });
+          });
+      }
     }
   }
 
@@ -292,33 +303,20 @@ export class VarMapComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
-      this.validCheck();
-      if (this.validData) {
-        this.updateForecastData();
-      }
+      this.selections.datasets.forEach((dataset) => {
+        this.scenarios[dataset.id!] = {} as Scenario;
+        this.scenarios[dataset.id as string].selectable = (dataset.scope ===
+          this.scope) as boolean;
+        this.scenarios[dataset.id as string].active = (dataset.scope ===
+          this.scope) as boolean;
+      });
+      this.updateForecastData();
     });
 
     this.selectionControl
       .get('sliderControl')!
       .valueChanges.subscribe((sliderValue) => {
         this.updateData(sliderValue);
-      });
-
-    this.selectionControl
-      .get('geojsonControl')!
-      .valueChanges.subscribe((value) => {
-        this.scope = String(value);
-        this.validCheck();
-        if (this.validData) {
-          this.updateForecastData();
-        }
-      });
-
-    this.selectionControl
-      .get('modelControl')!
-      .valueChanges.subscribe((value) => {
-        this.selectedModel = String(value);
-        this.updateForecastData();
       });
   }
 

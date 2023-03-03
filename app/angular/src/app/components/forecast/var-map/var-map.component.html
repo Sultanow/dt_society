@@ -1,10 +1,11 @@
-<div [formGroup]="selectionControl" class="control-container">
+<div class="control-container">
   <div style="display: flex; flex-direction: row">
     <div class="control">
       <p id="control-title">Model</p>
       <mat-radio-group
         aria-label="Select a model"
-        formControlName="modelControl"
+        [(ngModel)]="selectedModel"
+        (change)="updateForecastData()"
       >
         <mat-radio-button value="var">Vector Auto Regression</mat-radio-button>
         <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
@@ -14,7 +15,8 @@
       <p id="control-title">Scope</p>
       <mat-radio-group
         aria-label="Select an option"
-        formControlName="geojsonControl"
+        [(ngModel)]="this.scope"
+        (change)="updateForecastData()"
       >
         <mat-radio-button value="global">Global</mat-radio-button>
         <mat-radio-button value="germany">Germany</mat-radio-button>
@@ -30,15 +32,16 @@
             *ngIf="
               dataset.id !== undefined &&
               dataset.featureSelected !== undefined &&
+              scenarios[dataset.id] !== undefined &&
               dataset.timeSelected !== undefined
             "
-            [ngClass]="{
-              active: dataset.scope === scope,
-              inactive: dataset.scope !== scope
-            }"
             style="display: flex; flex-direction: row; justify-items: start"
           >
-            <div>
+            <mat-checkbox
+              [(ngModel)]="scenarios[dataset.id].active"
+              [disabled]="!scenarios[dataset.id].selectable"
+              (change)="updateForecastData()"
+            >
               {{ dataset.name }}
               <div
                 *ngIf="
@@ -51,12 +54,12 @@
               <div *ngIf="dataset.varmapFeaturesSelected !== undefined">
                 ({{ dataset.varmapFeaturesSelected }})
               </div>
-            </div>
+            </mat-checkbox>
             <button
               mat-icon-button
               color="primary"
               class="settings-button"
-              [disabled]="dataset.scope !== scope"
+              [disabled]="!scenarios[dataset.id].selectable"
               (click)="datasetSettings(dataset.id)"
             >
               <fa-icon [icon]="settingsIcon" size="2x"></fa-icon>
@@ -80,12 +83,12 @@
 
 <ng-template #map>
   <div *ngIf="validData; else selectFeaturesDialog">
-    <div [formGroup]="selectionControl">
+    <div>
       <div class="slider-container custom-slider">
         <ngx-slider
-          formControlName="sliderControl"
           [(value)]="currentSliderValue"
           [options]="options"
+          (userChangeEnd)="updateForecastData()"
         ></ngx-slider>
       </div>
       <div class="map-container" *ngIf="validData">
