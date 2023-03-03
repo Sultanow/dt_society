@@ -262,7 +262,6 @@ export class VarMapComponent implements OnInit {
   updateForecastData() {
     this.validCheck();
     if (this.validData) {
-      console.log(this.scenarios);
       const filteredSelections = this.selections.datasets.filter(
         (dataset) =>
           dataset.featureSelected !== undefined &&
@@ -271,7 +270,6 @@ export class VarMapComponent implements OnInit {
           dataset.scope === this.scope &&
           this.scenarios[dataset.id as string].active === true
       );
-      console.log(filteredSelections);
       if (
         filteredSelections.length > 1 ||
         (filteredSelections.length === 1 &&
@@ -295,6 +293,14 @@ export class VarMapComponent implements OnInit {
         this.validData = false;
       }
     }
+  }
+
+  updateForecastDataScope() {
+    this.selections.datasets.forEach((dataset) => {
+      this.scenarios[dataset.id as string].selectable = (dataset.scope ===
+        this.scope) as boolean;
+    });
+    this.updateForecastData();
   }
 
   datasetSettings(datasetId: string | undefined) {
