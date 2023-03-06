@@ -60,13 +60,6 @@ mat-radio-button {
   flex-direction: column;
 }
 
-#control-title{
-  font-size: 18px;
-  font-weight: lighter;
-  margin-bottom: 10px;
-  margin-top: 10px;
-}
-
 .settings-button{
   margin-left: -5px;
   margin-right: 20px;
@@ -74,6 +67,27 @@ mat-radio-button {
 
 .inactive {
   color: grey;
+}
+
+.model-selector {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 200px
+}
+
+.toggle-container {
+  display: flex;
+  justify-content: left;
+}
+
+.data-selector {
+  max-width: 800px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  margin-right: 0;
+  flex-direction: column;
+  align-items: center;
 }
 
 /*ngx-slider style*/

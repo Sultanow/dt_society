@@ -1,71 +1,83 @@
-<div class="control-container">
-  <div style="display: flex; flex-direction: row">
-    <div class="control">
-      <p id="control-title">Model</p>
-      <mat-radio-group
-        aria-label="Select a model"
-        [(ngModel)]="selectedModel"
-        (change)="updateForecastData()"
-      >
-        <mat-radio-button value="var">Vector Auto Regression</mat-radio-button>
-        <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
-      </mat-radio-group>
-    </div>
-    <div class="control">
-      <p id="control-title">Scope</p>
-      <mat-radio-group
-        aria-label="Select an option"
-        [(ngModel)]="this.scope"
-        (change)="updateForecastDataScope()"
-      >
-        <mat-radio-button value="global">Global</mat-radio-button>
-        <mat-radio-button value="germany">Germany</mat-radio-button>
-      </mat-radio-group>
-    </div>
-  </div>
-  <div class="data-selector">
-    <div>
-      <p class="section-label">Forecasted data</p>
-      <div style="display: flex; flex-direction: row">
-        <ng-container *ngFor="let dataset of selections.datasets">
-          <div
-            *ngIf="
-              dataset.id !== undefined &&
-              dataset.featureSelected !== undefined &&
-              scenarios[dataset.id] !== undefined &&
-              dataset.timeSelected !== undefined
-            "
-            style="display: flex; flex-direction: row; justify-items: start"
+<div class="toggle-container">
+  <div class="control-container">
+    <div style="display: flex; flex-direction: row">
+      <div class="model-selector">
+        <p class="section-label" style="margin-top: 10px">Model</p>
+        <mat-radio-group
+          aria-label="Select a model"
+          [(ngModel)]="selectedModel"
+          (change)="updateForecastData()"
+        >
+          <mat-radio-button value="var"
+            >Vector Auto Regression</mat-radio-button
           >
-            <mat-checkbox
-              [(ngModel)]="scenarios[dataset.id].active"
-              [disabled]="!scenarios[dataset.id].selectable"
-              (change)="updateForecastData()"
-            >
-              {{ dataset.name }}
+          <mat-radio-button value="hwes">HW Smoothing</mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <div class="model-selector" style="width: 150px">
+        <p class="section-label" style="margin-top: 10px">Scope</p>
+        <mat-radio-group
+          aria-label="Select an option"
+          [(ngModel)]="this.scope"
+          (change)="updateForecastDataScope()"
+        >
+          <mat-radio-button value="global">Global</mat-radio-button>
+          <mat-radio-button value="germany">Germany</mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <div class="data-selector">
+        <div>
+          <p class="section-label" style="margin-top: 10px">Forecasted data</p>
+          <div style="display: flex; flex-direction: row; flex-wrap: wrap">
+            <ng-container *ngFor="let dataset of selections.datasets">
               <div
                 *ngIf="
+                  dataset.id !== undefined &&
                   dataset.featureSelected !== undefined &&
-                  dataset.varmapFeaturesSelected === undefined
+                  scenarios[dataset.id] !== undefined &&
+                  dataset.timeSelected !== undefined
                 "
+                style="display: flex; flex-direction: row; justify-items: start"
               >
-                ({{ dataset.featureSelected }})
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    width: 200px;
+                    margin-right: 20px;
+                    overflow-x: hidden;
+                  "
+                >
+                  <mat-checkbox
+                    [(ngModel)]="scenarios[dataset.id].active"
+                    [disabled]="!scenarios[dataset.id].selectable"
+                    (change)="updateForecastData()"
+                    style="margin-bottom: 5px"
+                  >
+                    {{ dataset.name }}
+                  </mat-checkbox>
+
+                  <mat-form-field style="width: 200px">
+                    <mat-label>Features</mat-label>
+                    <mat-select
+                      multiple
+                      [(ngModel)]="dataset.varmapFeaturesSelected"
+                      [disabled]="!scenarios[dataset.id].selectable"
+                      (selectionChange)="updateForecastData()"
+                    >
+                      <mat-option
+                        *ngFor="let feature of dataset.featureOptions"
+                        [value]="feature"
+                      >
+                        {{ feature }}</mat-option
+                      >
+                    </mat-select>
+                  </mat-form-field>
+                </div>
               </div>
-              <div *ngIf="dataset.varmapFeaturesSelected !== undefined">
-                ({{ dataset.varmapFeaturesSelected }})
-              </div>
-            </mat-checkbox>
-            <button
-              mat-icon-button
-              color="primary"
-              class="settings-button"
-              [disabled]="!scenarios[dataset.id].selectable"
-              (click)="datasetSettings(dataset.id)"
-            >
-              <fa-icon [icon]="settingsIcon" size="2x"></fa-icon>
-            </button>
+            </ng-container>
           </div>
-        </ng-container>
+        </div>
       </div>
     </div>
   </div>
@@ -140,14 +152,11 @@
     <mat-card class="dialog" style="height: 100px">
       <mat-card-content>
         <p>
-          Please select another feature using the
-          <fa-icon
-            style="color: #c2185b; margin: 0 5px 0 5px"
-            [icon]="settingsIcon"
-            size="2x"
-          ></fa-icon>
-          next to the dataset under "Forecasted data". If all datasets are
-          disabled you may need to adjust the scope-setting
+          Please select another feature using the Feature-Dropdown next to the
+          dataset under "Forecasted data".
+        </p>
+        <p>
+          If all datasets are disabled you may need to adjust the scope-setting
         </p>
         <p>Or select a feature for another dataset in the sidebar.</p>
       </mat-card-content>

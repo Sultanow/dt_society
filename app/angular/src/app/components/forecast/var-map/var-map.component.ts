@@ -313,6 +313,7 @@ export class VarMapComponent implements OnInit {
     this.dataService.currentSelections.subscribe((value) => {
       this.selections = value;
       this.selections.datasets.forEach((dataset) => {
+        dataset.varmapFeaturesSelected = [dataset.featureSelected!];
         this.scenarios[dataset.id!] = {} as Scenario;
         this.scenarios[dataset.id as string].selectable = (dataset.scope ===
           this.scope) as boolean;
