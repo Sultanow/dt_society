@@ -35,7 +35,6 @@ import { StatisticsComponent } from './components/graph/statistics/statistics.co
 import { OverviewComponent } from './components/tabs/overview/overview.component';
 import { CorrelationsComponent } from './components/tabs/correlations/correlations.component';
 import { VarforecastsComponent } from './components/tabs/varforecasts/varforecasts.component';
-import { VarDatasetSettingsComponent } from './components/forecast/vardatasetsettings/vardatasetsettings.component';
 
 // Services
 import { AuthService } from './services/auth.service';
@@ -87,7 +86,6 @@ PlotlyModule.plotlyjs = PlotlyJS;
     VarMapComponent,
     HistoryZoomComponent,
     VarforecastsComponent,
-    VarDatasetSettingsComponent,
   ],
   imports: [
     BrowserModule,

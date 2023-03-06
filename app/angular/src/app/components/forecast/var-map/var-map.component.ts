@@ -2,7 +2,6 @@ import { Options } from '@angular-slider/ngx-slider';
 import { HttpEventType } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
 import { DataService } from 'src/app/services/data.service';
 import { Selections } from 'src/app/types/Datasets';
@@ -13,8 +12,6 @@ import {
   Scenario,
   ScenarioData,
 } from 'src/app/types/GraphData';
-import { VarDatasetSettingsComponent } from '../vardatasetsettings/vardatasetsettings.component';
-
 // multivariate map based forecasting component
 // (VAR, HW exponential smoothing)
 
@@ -24,7 +21,7 @@ import { VarDatasetSettingsComponent } from '../vardatasetsettings/vardatasetset
   styleUrls: ['./var-map.component.css'],
 })
 export class VarMapComponent implements OnInit {
-  constructor(private dataService: DataService, public dialog: MatDialog) {}
+  constructor(private dataService: DataService) {}
 
   public data: MapForecastGraph = {
     data: [[]],
@@ -301,12 +298,6 @@ export class VarMapComponent implements OnInit {
         this.scope) as boolean;
     });
     this.updateForecastData();
-  }
-
-  datasetSettings(datasetId: string | undefined) {
-    this.dialog.open(VarDatasetSettingsComponent, {
-      data: { datasetId: datasetId, type: 'map' },
-    });
   }
 
   ngOnInit(): void {

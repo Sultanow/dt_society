@@ -10,8 +10,6 @@ import {
 } from 'src/app/types/GraphData';
 import { Options } from '@angular-slider/ngx-slider';
 import { faCaretDown } from '@fortawesome/free-solid-svg-icons';
-import { VarDatasetSettingsComponent } from '../vardatasetsettings/vardatasetsettings.component';
-import { MatDialog } from '@angular/material/dialog';
 
 // multivariate graph based forecasting component
 // (VAR, HW exponential smoothing)
@@ -22,7 +20,7 @@ import { MatDialog } from '@angular/material/dialog';
   styleUrls: ['./vectorautoregression.component.css'],
 })
 export class VectorautoregressionComponent implements OnInit {
-  constructor(private dataService: DataService, public dialog: MatDialog) {}
+  constructor(private dataService: DataService) {}
 
   public selections: Selections = {
     datasets: [],
@@ -246,12 +244,6 @@ export class VectorautoregressionComponent implements OnInit {
         this.validData = false;
       }
     }
-  }
-
-  datasetSettings(datasetId: string | undefined) {
-    this.dialog.open(VarDatasetSettingsComponent, {
-      data: { datasetId: datasetId, type: 'graph' },
-    });
   }
 
   ngOnInit(): void {
