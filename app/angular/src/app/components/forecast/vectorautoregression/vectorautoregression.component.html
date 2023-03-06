@@ -1,15 +1,6 @@
 <div class="toggle-container">
   <div class="model-selector">
-    <p
-      style="
-        font-size: 18px;
-        font-weight: lighter;
-        margin-bottom: 10px;
-        margin-top: 10px;
-      "
-    >
-      Model
-    </p>
+    <p class="section-label" style="margin-top: 10px">Model</p>
     <mat-radio-group
       aria-label="Select a model"
       [(ngModel)]="selectedModel"
@@ -20,9 +11,7 @@
     </mat-radio-group>
   </div>
   <div class="alpha-slider-container" *ngIf="selectedModel == 'hwes'">
-    <p style="font-size: 18px; font-weight: lighter; margin-bottom: 10px">
-      &#945;-Parameter
-    </p>
+    <p class="section-label" style="margin-top: 10px">&#945;-Parameter</p>
     <mat-slider
       class="lags-slider"
       thumbLabel
@@ -37,8 +26,8 @@
 
   <div class="data-selector">
     <div>
-      <p class="section-label">Forecasted data</p>
-      <div style="display: flex; flex-direction: row">
+      <p class="section-label" style="margin-top: 10px">Forecasted data</p>
+      <div style="display: flex; flex-direction: row; flex-wrap: wrap">
         <ng-container *ngFor="let dataset of selections.datasets">
           <div
             *ngIf="
@@ -49,33 +38,40 @@
             "
             style="display: flex; flex-direction: row; justify-items: start"
           >
-            <mat-checkbox
-              [(ngModel)]="scenarios[dataset.id].active"
-              [disabled]="!scenarios[dataset.id].selectable"
-              (change)="updateVarForecast()"
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                width: 200px;
+                margin-right: 20px;
+                overflow-x: hidden;
+              "
             >
-              {{ dataset.name }}
-              <div
-                *ngIf="
-                  dataset.featureSelected !== undefined &&
-                  dataset.varFeaturesSelected === undefined
-                "
+              <mat-checkbox
+                [(ngModel)]="scenarios[dataset.id].active"
+                [disabled]="!scenarios[dataset.id].selectable"
+                (change)="updateVarForecast()"
+                style="margin-bottom: 5px"
               >
-                ({{ dataset.featureSelected }})
-              </div>
-              <div *ngIf="dataset.varFeaturesSelected !== undefined">
-                ({{ dataset.varFeaturesSelected }})
-              </div>
-            </mat-checkbox>
-            <button
-              mat-icon-button
-              color="primary"
-              class="settings-button"
-              [disabled]="!scenarios[dataset.id].selectable"
-              (click)="datasetSettings(dataset.id)"
-            >
-              <fa-icon [icon]="settingsIcon" size="2x"></fa-icon>
-            </button>
+                {{ dataset.name }}
+              </mat-checkbox>
+
+              <mat-form-field style="width: 200px">
+                <mat-label>Features</mat-label>
+                <mat-select
+                  multiple
+                  [(ngModel)]="dataset.varFeaturesSelected"
+                  (selectionChange)="updateVarForecast()"
+                >
+                  <mat-option
+                    *ngFor="let feature of dataset.featureOptions"
+                    [value]="feature"
+                  >
+                    {{ feature }}</mat-option
+                  >
+                </mat-select>
+              </mat-form-field>
+            </div>
           </div>
         </ng-container>
       </div>
@@ -153,13 +149,8 @@
     <mat-card class="dialog" style="height: 100px">
       <mat-card-content>
         <p>
-          Please select another feature using the
-          <fa-icon
-            style="color: #c2185b; margin: 0 5px 0 5px"
-            [icon]="settingsIcon"
-            size="2x"
-          ></fa-icon>
-          next to the dataset under "Forecasted data"
+          Please select another feature using the Feature-Dropdown next to the
+          dataset under "Forecasted data"
         </p>
         <p>Or select a feature for another dataset in the sidebar.</p>
       </mat-card-content>

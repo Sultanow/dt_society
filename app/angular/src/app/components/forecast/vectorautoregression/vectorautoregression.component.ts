@@ -88,6 +88,7 @@ export class VectorautoregressionComponent implements OnInit {
     if (this.data.data.length > 0) {
       this.data.data = [];
     }
+    console.log(data);
 
     if (data['future'] !== undefined) {
       this.updateSlider(data['future'] as string[]);
@@ -220,6 +221,7 @@ export class VectorautoregressionComponent implements OnInit {
           filteredSelections[0].varFeaturesSelected !== undefined &&
           filteredSelections[0].varFeaturesSelected.length > 1)
       ) {
+        this.checkValidData();
         this.showSpinner = true;
         this.dataService
           .getData(
@@ -261,6 +263,7 @@ export class VectorautoregressionComponent implements OnInit {
 
       if (this.selections.datasets.length > 0) {
         this.selections.datasets.forEach((dataset) => {
+          dataset.varFeaturesSelected = [dataset.featureSelected!];
           if (
             dataset.countryOptions?.includes(this.selections.selectedCountry!)
           ) {
@@ -279,18 +282,22 @@ export class VectorautoregressionComponent implements OnInit {
             ) as boolean;
         });
 
-        if (
-          this.validDatasets > 1 ||
-          this.selections.datasets.some(
-            (dataset) =>
-              dataset.varFeaturesSelected !== undefined &&
-              dataset.varFeaturesSelected.length > 1
-          )
-        ) {
-          this.validData = true;
-        }
+        this.checkValidData();
       }
       this.updateVarForecast();
     });
+  }
+
+  private checkValidData() {
+    if (
+      this.validDatasets > 1 ||
+      this.selections.datasets.some(
+        (dataset) =>
+          dataset.varFeaturesSelected !== undefined &&
+          dataset.varFeaturesSelected.length > 1
+      )
+    ) {
+      this.validData = true;
+    }
   }
 }
