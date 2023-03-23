@@ -86,7 +86,6 @@ export class VectorautoregressionComponent implements OnInit {
     if (this.data.data.length > 0) {
       this.data.data = [];
     }
-    console.log(data);
 
     if (data['future'] !== undefined) {
       this.updateSlider(data['future'] as string[]);
